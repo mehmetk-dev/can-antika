@@ -1,0 +1,320 @@
+@import "tailwindcss";
+/* Removed problematic tw-animate-css import that was causing loading issues */
+
+/* Removed problematic @custom-variant directive */
+
+:root {
+  /* Can Antika Theme - Elegant Antique Shop */
+  /* Cream background */
+  --background: oklch(0.97 0.01 90);
+  --foreground: oklch(0.25 0.02 150);
+
+  /* Cards with slightly warmer cream */
+  --card: oklch(0.98 0.008 85);
+  --card-foreground: oklch(0.25 0.02 150);
+
+  --popover: oklch(0.98 0.008 85);
+  --popover-foreground: oklch(0.25 0.02 150);
+
+  /* Vintage Forest Green as primary */
+  --primary: oklch(0.32 0.08 145);
+  --primary-foreground: oklch(0.98 0.01 145);
+
+  /* Warm Gold as secondary */
+  --secondary: oklch(0.75 0.12 85);
+  --secondary-foreground: oklch(0.25 0.02 150);
+
+  /* Muted tones */
+  --muted: oklch(0.92 0.01 145);
+  --muted-foreground: oklch(0.45 0.04 145);
+
+  /* Gold accent */
+  --accent: oklch(0.72 0.14 75);
+  --accent-foreground: oklch(0.2 0.02 150);
+
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Subtle borders */
+  --border: oklch(0.88 0.02 145);
+  --input: oklch(0.92 0.01 145);
+  --ring: oklch(0.32 0.08 145);
+
+  --chart-1: oklch(0.32 0.08 145);
+  --chart-2: oklch(0.72 0.14 75);
+  --chart-3: oklch(0.45 0.08 145);
+  --chart-4: oklch(0.65 0.1 85);
+  --chart-5: oklch(0.45 0.06 160);
+
+  --radius: 0.5rem;
+
+  --sidebar: oklch(0.3 0.08 145);
+  --sidebar-foreground: oklch(0.95 0.01 90);
+  --sidebar-primary: oklch(0.72 0.14 75);
+  --sidebar-primary-foreground: oklch(0.2 0.02 150);
+  --sidebar-accent: oklch(0.35 0.08 145);
+  --sidebar-accent-foreground: oklch(0.95 0.01 90);
+  --sidebar-border: oklch(0.35 0.06 145);
+  --sidebar-ring: oklch(0.72 0.14 75);
+}
+
+.dark {
+  --background: oklch(0.18 0.02 145);
+  --foreground: oklch(0.95 0.01 90);
+  --card: oklch(0.22 0.02 145);
+  --card-foreground: oklch(0.95 0.01 90);
+  --popover: oklch(0.22 0.02 145);
+  --popover-foreground: oklch(0.95 0.01 90);
+  --primary: oklch(0.55 0.12 145);
+  --primary-foreground: oklch(0.98 0.01 90);
+  --secondary: oklch(0.65 0.12 85);
+  --secondary-foreground: oklch(0.18 0.02 160);
+  --muted: oklch(0.28 0.02 145);
+  --muted-foreground: oklch(0.7 0.02 90);
+  --accent: oklch(0.72 0.14 75);
+  --accent-foreground: oklch(0.18 0.02 160);
+  --destructive: oklch(0.45 0.18 25);
+  --destructive-foreground: oklch(0.95 0 0);
+  --border: oklch(0.32 0.02 145);
+  --input: oklch(0.28 0.02 145);
+  --ring: oklch(0.55 0.12 145);
+  --chart-1: oklch(0.55 0.12 145);
+  --chart-2: oklch(0.72 0.14 75);
+  --chart-3: oklch(0.65 0.1 150);
+  --chart-4: oklch(0.7 0.1 85);
+  --chart-5: oklch(0.5 0.08 160);
+  --sidebar: oklch(0.15 0.02 145);
+  --sidebar-foreground: oklch(0.95 0.01 90);
+  --sidebar-primary: oklch(0.72 0.14 75);
+  --sidebar-primary-foreground: oklch(0.15 0.02 160);
+  --sidebar-accent: oklch(0.25 0.02 145);
+  --sidebar-accent-foreground: oklch(0.95 0.01 90);
+  --sidebar-border: oklch(0.28 0.02 145);
+  --sidebar-ring: oklch(0.72 0.14 75);
+}
+
+@theme inline {
+  --font-sans: "Inter", "Inter Fallback", sans-serif;
+  --font-serif: "Playfair Display", "Georgia", serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* 🏺 Anti-Translucent Antique Toaster 🏺 */
+/* Targeting the root container to kill any default transparency */
+[data-sonner-toaster] {
+  --normal-bg: #fdf8f1 !important;
+  --success-bg: #f7faf7 !important;
+  --error-bg: #fff5f5 !important;
+}
+
+.antique-toast {
+  background-color: #fdf8f1 !important;
+  /* Solid fallback */
+  background: linear-gradient(145deg, #fdf8f1 0%, #f4e9d5 100%) !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #c9b896 !important;
+  border-radius: 0 !important;
+  font-family: var(--font-playfair), serif !important;
+  color: #3d2b1f !important;
+  box-shadow: 12px 12px 40px rgba(0, 0, 0, 0.4) !important;
+  position: relative;
+  overflow: visible !important;
+  padding: 1.5rem 1.75rem !important;
+  outline: 4px double #b29e71 !important;
+  outline-offset: -8px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)' opacity='0.2'/%3E%3C/svg%3E") !important;
+}
+
+/* Ornate Corner Elements - Stabilized */
+.antique-toast::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 12px solid transparent;
+  background-image:
+    linear-gradient(to right, #8b734b 3px, transparent 3px),
+    linear-gradient(to bottom, #8b734b 3px, transparent 3px),
+    linear-gradient(to left, #8b734b 3px, transparent 3px),
+    linear-gradient(to top, #8b734b 3px, transparent 3px);
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: top left, top left, bottom right, bottom right;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.antique-toast-success {
+  outline-color: #1a3a16 !important;
+  /* Deeper Green */
+  border-left: 10px solid #1a3a16 !important;
+  background: linear-gradient(145deg, #f7faf7 0%, #d8e5d8 100%) !important;
+}
+
+/* Hata Durumu - Ultra Red & Non-Transparent */
+.antique-toast-error {
+  outline-color: #8b0000 !important;
+  /* Blood Red Overlay */
+  border-left: 10px solid #8b0000 !important;
+  background-color: #fff0f0 !important;
+  background: linear-gradient(145deg, #fff0f0 0%, #f9d8d8 100%) !important;
+  color: #600000 !important;
+  box-shadow: 12px 12px 40px rgba(139, 0, 0, 0.2) !important;
+}
+
+.antique-toast-description {
+  color: #4a3a2a !important;
+  font-size: 0.95rem !important;
+  font-weight: 500;
+  font-style: italic;
+  margin-top: 8px;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .antique-toast {
+    margin: 12px !important;
+    width: calc(100vw - 40px) !important;
+    outline: 3px double #b29e71 !important;
+    outline-offset: -6px;
+  }
+}
+
+/* Ticker Animation for Exchange Rates */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+
+/* ═══════════════════════════════════════════ */
+/* 🏺 Custom Scrollbar — Antique Theme 🏺    */
+/* ═══════════════════════════════════════════ */
+
+/* Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: oklch(0.94 0.01 90);
+  border-left: 1px solid oklch(0.88 0.02 145 / 0.4);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, oklch(0.45 0.06 145) 0%, oklch(0.35 0.07 145) 100%);
+  border-radius: 4px;
+  border: 1px solid oklch(0.88 0.02 145 / 0.3);
+  transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, oklch(0.55 0.08 145) 0%, oklch(0.40 0.08 145) 100%);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, oklch(0.72 0.14 75) 0%, oklch(0.60 0.12 80) 100%);
+}
+
+::-webkit-scrollbar-corner {
+  background: oklch(0.94 0.01 90);
+}
+
+/* Admin Sidebar — koyu arka plan için */
+[data-sidebar="sidebar"] ::-webkit-scrollbar-track,
+.dark ::-webkit-scrollbar-track {
+  background: oklch(0.22 0.03 145);
+  border-left: 1px solid oklch(0.28 0.03 145 / 0.5);
+}
+
+[data-sidebar="sidebar"] ::-webkit-scrollbar-thumb,
+.dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, oklch(0.38 0.06 145) 0%, oklch(0.30 0.05 145) 100%);
+  border: 1px solid oklch(0.35 0.04 145 / 0.3);
+}
+
+[data-sidebar="sidebar"] ::-webkit-scrollbar-thumb:hover,
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, oklch(0.48 0.07 145) 0%, oklch(0.38 0.06 145) 100%);
+}
+
+[data-sidebar="sidebar"] ::-webkit-scrollbar-thumb:active,
+.dark ::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, oklch(0.72 0.14 75) 0%, oklch(0.55 0.10 80) 100%);
+}
+
+[data-sidebar="sidebar"] ::-webkit-scrollbar-corner,
+.dark ::-webkit-scrollbar-corner {
+  background: oklch(0.22 0.03 145);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.40 0.06 145) oklch(0.94 0.01 90);
+}
+
+[data-sidebar="sidebar"] *,
+.dark * {
+  scrollbar-color: oklch(0.35 0.05 145) oklch(0.22 0.03 145);
+}

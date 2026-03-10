@@ -1,0 +1,43 @@
+package com.mehmetkerem.dto.response;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.mehmetkerem.enums.OrderStatus;
+import com.mehmetkerem.enums.PaymentStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class OrderResponse {
+
+    private Long id;
+
+    private UserResponse user;
+
+    private LocalDateTime orderDate;
+
+    private OrderStatus orderStatus;
+
+    private List<OrderItemResponse> orderItems;
+
+    private AddressResponse shippingAddress;
+
+    private BigDecimal totalAmount;
+
+    private PaymentStatus paymentStatus;
+
+    private String trackingNumber;
+
+    private String carrierName;
+
+    private String note;
+}

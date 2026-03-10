@@ -1,0 +1,61 @@
+package com.mehmetkerem.model;
+
+import com.mehmetkerem.enums.PaymentMethod;
+import com.mehmetkerem.enums.PaymentStatus;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "payments", indexes = {
+        @Index(name = "idx_payment_order_id", columnList = "order_id"),
+        @Index(name = "idx_payment_user_id", columnList = "user_id")
+})
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Payment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "order_id")
+    private Long orderId;
+
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Column(precision = 12, scale = 2)
+    private BigDecimal amount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status")
+    private PaymentStatus paymentStatus;
+
+    @Column(name = "transaction_id")
+    private String transactionId;
+
+    @Column(name = "idempotency_key", unique = true)
+    private String idempotencyKey;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+}

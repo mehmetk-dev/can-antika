@@ -1,0 +1,120 @@
+package com.mehmetkerem.service.impl;
+
+import com.mehmetkerem.dto.response.StatsResponse;
+import com.mehmetkerem.enums.Role;
+import com.mehmetkerem.repository.OrderRepository;
+import com.mehmetkerem.repository.ProductRepository;
+import com.mehmetkerem.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class StatsServiceImplTest {
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private StatsServiceImpl statsService;
+
+    @BeforeEach
+    void setUp() {
+    }
+
+    private void stubCommonMocks() {
+        lenient().when(orderRepository.getTopSellingProducts(anyInt())).thenReturn(List.of());
+        lenient().when(orderRepository.getTopCustomers(anyInt())).thenReturn(List.of());
+        lenient().when(orderRepository.getOrderStatusCounts()).thenReturn(List.of());
+        lenient().when(orderRepository.getMonthlyRevenue(any(LocalDateTime.class))).thenReturn(List.of());
+        lenient().when(orderRepository.countPendingOrders()).thenReturn(0L);
+        lenient().when(orderRepository.findAllByOrderByOrderDateDesc(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+        lenient().when(userRepository.countByRole(any(Role.class))).thenReturn(0L);
+        lenient().when(userRepository.countByRoleAndCreatedAtAfter(any(Role.class), any(LocalDateTime.class)))
+                .thenReturn(0L);
+    }
+
+    @Test
+    @DisplayName("getAdminStats - tüm istatistikler doğru toplanır")
+    void getAdminStats_ShouldReturnAggregatedStats() {
+        when(orderRepository.calculateTotalRevenue()).thenReturn(new BigDecimal("15000.50"));
+        when(orderRepository.countTotalOrders()).thenReturn(42L);
+        when(orderRepository.getDailyStats(any(LocalDateTime.class)))
+                .thenReturn(List.<Object[]>of(
+                        new Object[] { "2025-02-10", new BigDecimal("1000"), 5L },
+                        new Object[] { "2025-02-11", new BigDecimal("2000"), 8L }));
+        when(productRepository.countByStockLessThan(5)).thenReturn(3L);
+        when(productRepository.count()).thenReturn(100L);
+        when(productRepository.countByStockLessThan(1)).thenReturn(2L);
+        stubCommonMocks();
+
+        StatsResponse result = statsService.getAdminStats();
+
+        assertNotNull(result);
+        assertEquals(new BigDecimal("15000.50"), result.getTotalRevenue());
+        assertEquals(42L, result.getTotalOrders());
+        assertEquals(3L, result.getLowStockProducts());
+        assertEquals(100L, result.getTotalProducts());
+        assertNotNull(result.getDailyStats());
+        assertEquals(2, result.getDailyStats().size());
+        assertEquals("2025-02-10", result.getDailyStats().get(0).getDate());
+        assertEquals(new BigDecimal("1000"), result.getDailyStats().get(0).getRevenue());
+        assertEquals(5L, result.getDailyStats().get(0).getOrderCount());
+    }
+
+    @Test
+    @DisplayName("getAdminStats - revenue null ise ZERO kullanılır")
+    void getAdminStats_WhenRevenueNull_ShouldUseZero() {
+        when(orderRepository.calculateTotalRevenue()).thenReturn(null);
+        when(orderRepository.countTotalOrders()).thenReturn(0L);
+        when(orderRepository.getDailyStats(any(LocalDateTime.class))).thenReturn(List.of());
+        when(productRepository.countByStockLessThan(5)).thenReturn(0L);
+        when(productRepository.countByStockLessThan(1)).thenReturn(0L);
+        when(productRepository.count()).thenReturn(0L);
+        stubCommonMocks();
+
+        StatsResponse result = statsService.getAdminStats();
+
+        assertEquals(BigDecimal.ZERO, result.getTotalRevenue());
+    }
+
+    @Test
+    @DisplayName("getAdminStats - günlük satırda revenue null ise ZERO")
+    void getAdminStats_WhenDailyRevenueNull_ShouldUseZero() {
+        when(orderRepository.calculateTotalRevenue()).thenReturn(BigDecimal.ZERO);
+        when(orderRepository.countTotalOrders()).thenReturn(0L);
+        Object[] row = new Object[] { "2025-02-10", null, 2L };
+        when(orderRepository.getDailyStats(any(LocalDateTime.class)))
+                .thenReturn(List.<Object[]>of(row));
+        when(productRepository.countByStockLessThan(5)).thenReturn(0L);
+        when(productRepository.countByStockLessThan(1)).thenReturn(0L);
+        when(productRepository.count()).thenReturn(0L);
+        stubCommonMocks();
+
+        StatsResponse result = statsService.getAdminStats();
+
+        assertEquals(1, result.getDailyStats().size());
+        assertEquals(BigDecimal.ZERO, result.getDailyStats().get(0).getRevenue());
+        assertEquals(2L, result.getDailyStats().get(0).getOrderCount());
+    }
+}
