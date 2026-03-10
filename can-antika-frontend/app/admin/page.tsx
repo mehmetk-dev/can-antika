@@ -152,7 +152,7 @@ export default function AdminDashboard() {
                 ))}
               </div>
               <div className="h-[250px] w-full">
-                <RevenueChart data={chartData} />}
+                <RevenueChart data={chartData} />
               </div>
             </CardContent>
           </Card>

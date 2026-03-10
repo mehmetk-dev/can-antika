@@ -38,7 +38,7 @@ export function RelatedProducts({ products, currentProductId }: RelatedProductsP
               href={`/urun/${product.slug ?? product.id}`}
               className="group relative overflow-hidden rounded-lg bg-card"
             >
-              <div className="aspect-[3/4] overflow-hidden">
+              <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
                   src={product.imageUrls?.[0] || "/placeholder.svg"}
                   alt={product.title}

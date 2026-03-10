@@ -5,7 +5,6 @@ import Image from "next/image"
 import { ZoomIn, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
 interface ImageGalleryProps {
   images: string[]
@@ -72,9 +71,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
           </div>
         </DialogTrigger>
         <DialogContent className="max-w-4xl bg-background p-0">
-          <VisuallyHidden>
-            <DialogTitle>{productName}</DialogTitle>
-          </VisuallyHidden>
+          <DialogTitle className="sr-only">{productName}</DialogTitle>
           <div className="relative aspect-square w-full">
             <Image
               src={images[selectedIndex] || "/placeholder.svg"}
