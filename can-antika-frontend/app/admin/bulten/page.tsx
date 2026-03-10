@@ -7,9 +7,20 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { newsletterApi } from "@/lib/api"
+import type { NewsletterSubscriber } from "@/lib/types"
 
 interface Subscriber {
     id: number; email: string; name?: string; active: boolean; subscribedAt: string
+}
+
+function toSubscriber(item: NewsletterSubscriber): Subscriber {
+    return {
+        id: item.id,
+        email: item.email,
+        name: item.name,
+        active: true,
+        subscribedAt: item.subscribedAt,
+    }
 }
 
 export default function NewsletterPage() {
@@ -22,7 +33,7 @@ export default function NewsletterPage() {
     const load = async () => {
         try {
             const [data, c] = await Promise.all([newsletterApi.getAll(0, 100), newsletterApi.getCount()])
-            setSubs(data.items || [])
+            setSubs((data.items || []).map(toSubscriber))
             setCount(c.count)
         } catch { toast.error("Yüklenemedi") }
         finally { setLoading(false) }

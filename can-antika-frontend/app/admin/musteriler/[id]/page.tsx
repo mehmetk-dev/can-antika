@@ -45,7 +45,7 @@ function CustomerDetailContent({ customerId }: { customerId: number }) {
             }
             setIsLoading(false)
         })
-    }, [fetchCustomer])
+    }, [customerId, fetchCustomer])
 
     if (isLoading) {
         return (
