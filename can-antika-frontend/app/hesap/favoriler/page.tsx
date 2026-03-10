@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Trash2, ShoppingBag, Loader2, Heart } from "lucide-react"
@@ -91,10 +92,13 @@ function WishlistContent() {
           >
             <Link href={`/urun/${product.slug ?? product.id}`}>
               <div className="aspect-[3/4] overflow-hidden relative">
-                <img
+                <Image
                   src={imageUrl}
                   alt={product.title}
-                  className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${outOfStock ? "grayscale opacity-60" : ""}`}
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className={`object-cover transition-transform duration-500 group-hover:scale-105 ${outOfStock ? "grayscale opacity-60" : ""}`}
+                  unoptimized
                 />
                 {outOfStock && (
                   <div className="absolute inset-0 flex items-center justify-center bg-foreground/20">

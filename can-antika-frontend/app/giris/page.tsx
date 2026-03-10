@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import Image from "next/image"
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Sparkles, Loader2, ArrowLeft } from "lucide-react"
@@ -94,10 +95,12 @@ export default function AuthPage() {
       <main className="flex-1 flex overflow-hidden">
         {/* Left Side - Decorative */}
         <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-          <img
+          <Image
             src="/elegant-antique-shop-interior-with-chandeliers-and.jpg"
             alt="Antika mağaza"
-            className="absolute inset-0 h-full w-full object-cover"
+            fill
+            sizes="50vw"
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/80 to-primary/90" />
 
@@ -153,8 +156,8 @@ export default function AuthPage() {
               {/* ═══════ LOGIN FORM ═══════ */}
               <div
                 className={`transition-all duration-500 ease-in-out ${mode === "login"
-                    ? "opacity-100 translate-x-0 pointer-events-auto"
-                    : "opacity-0 -translate-x-8 pointer-events-none absolute inset-0"
+                  ? "opacity-100 translate-x-0 pointer-events-auto"
+                  : "opacity-0 -translate-x-8 pointer-events-none absolute inset-0"
                   }`}
               >
                 <div className="mb-8">
@@ -268,8 +271,8 @@ export default function AuthPage() {
               {/* ═══════ REGISTER FORM ═══════ */}
               <div
                 className={`transition-all duration-500 ease-in-out ${mode === "register"
-                    ? "opacity-100 translate-x-0 pointer-events-auto"
-                    : "opacity-0 translate-x-8 pointer-events-none absolute inset-0"
+                  ? "opacity-100 translate-x-0 pointer-events-auto"
+                  : "opacity-0 translate-x-8 pointer-events-none absolute inset-0"
                   }`}
               >
                 <div className="mb-6">

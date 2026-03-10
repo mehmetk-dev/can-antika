@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import { ShoppingBasket, Loader2, ChevronDown, ChevronUp, Package } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -85,7 +86,7 @@ export default function AbandonedCartsPage() {
                                         {cart.items.map((item, i) => (
                                             <div key={i} className="flex items-center gap-3">
                                                 {item.productImage ? (
-                                                    <img src={item.productImage} alt="" className="h-8 w-8 rounded object-cover" />
+                                                    <Image src={item.productImage} alt="" width={32} height={32} className="h-8 w-8 rounded object-cover" unoptimized />
                                                 ) : (
                                                     <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
                                                         <Package className="h-3 w-3 text-muted-foreground" />

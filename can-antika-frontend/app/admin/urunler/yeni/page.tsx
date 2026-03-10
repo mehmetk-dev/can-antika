@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react"
@@ -139,7 +140,7 @@ export default function NewProductPage() {
               <div className="grid gap-4 sm:grid-cols-3">
                 {images.map((image, index) => (
                   <div key={index} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                    <img src={image} alt={`Ürün ${index + 1}`} className="h-full w-full object-cover" />
+                    <Image src={image} alt={`Ürün ${index + 1}`} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" unoptimized />
                     <button
                       type="button"
                       onClick={() => removeImage(index)}

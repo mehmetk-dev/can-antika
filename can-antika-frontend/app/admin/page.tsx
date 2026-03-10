@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import dynamic from "next/dynamic"
@@ -14,6 +15,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { statsApi, orderApi, activityLogApi, contactApi, bankTransferApi } from "@/lib/api"
 import type { StatsResponse, OrderResponse } from "@/lib/types"
+
+const RANGE_DAYS: Record<string, number> = { "7D": 7, "30D": 30, "90D": 90, "6M": 180, "1Y": 365 }
 
 const RevenueChart = dynamic(() => import("@/components/dashboard/revenue-chart"), {
   ssr: false,
@@ -41,8 +44,6 @@ export default function AdminDashboard() {
   const [activityLogs, setActivityLogs] = useState<any[]>([])
 
   const [pendingTasks, setPendingTasks] = useState({ contactRequests: 0, bankTransfers: 0 })
-
-  const RANGE_DAYS: Record<string, number> = { "7D": 7, "30D": 30, "90D": 90, "6M": 180, "1Y": 365 }
 
   // Fetch stats when chartRange changes
   useEffect(() => {
@@ -251,7 +252,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-3 p-3 border rounded-md">
                       <div className="h-10 w-10 bg-muted/50 rounded flex items-center justify-center overflow-hidden">
                         {recentOrders[0].orderItems?.[0]?.product?.imageUrls?.[0] ? (
-                          <img src={recentOrders[0].orderItems[0].product.imageUrls[0]} alt="ürün resmi" className="h-full w-full object-cover" />
+                          <Image src={recentOrders[0].orderItems[0].product.imageUrls[0]} alt="ürün resmi" width={40} height={40} className="h-full w-full object-cover" unoptimized />
                         ) : (
                           <Package className="h-5 w-5 text-muted-foreground" />
                         )}

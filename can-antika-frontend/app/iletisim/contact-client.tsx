@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import Image from "next/image"
 import { useState } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -127,10 +128,12 @@ export function ContactClient() {
           </div>
 
           <div className="absolute inset-0 opacity-15">
-            <img
+            <Image
               src="/vintage-antique-shop-storefront-istanbul-sepia-ton.jpg"
               alt=""
-              className="w-full h-full object-cover"
+              fill
+              sizes="100vw"
+              className="object-cover"
             />
           </div>
 
@@ -188,10 +191,12 @@ export function ContactClient() {
               <div className="lg:col-span-3 relative">
                 {/* Background image */}
                 <div className="absolute inset-0 -z-10 opacity-[0.06]">
-                  <img
+                  <Image
                     src="/vintage-antique-shop-storefront-istanbul-sepia-ton.jpg"
                     alt=""
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="75vw"
+                    className="object-cover"
                   />
                 </div>
 
@@ -264,10 +269,12 @@ export function ContactClient() {
 
         {/* Map */}
         <section className="relative h-[350px]">
-          <img
+          <Image
             src="/istanbul-cukurcuma-beyoglu-antique-district-aerial.jpg"
             alt="Konum"
-            className="h-full w-full object-cover"
+            fill
+            sizes="100vw"
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-primary/30" />
 

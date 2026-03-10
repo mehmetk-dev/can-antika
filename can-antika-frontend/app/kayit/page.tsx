@@ -2,6 +2,7 @@
 
 import type React from "react"
 
+import Image from "next/image"
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -54,10 +55,12 @@ export default function RegisterPage() {
     <div className="h-screen bg-background flex overflow-hidden">
       {/* Left Side - Image */}
       <div className="hidden lg:flex lg:w-1/2 relative">
-        <img
+        <Image
           src="/antique-dealer-examining-vintage-clock-with-magnif.jpg"
           alt="Antika değerlendirme"
-          className="absolute inset-0 h-full w-full object-cover"
+          fill
+          sizes="50vw"
+          className="object-cover"
         />
         <div className="absolute inset-0 bg-primary/80" />
         <div className="relative z-10 flex flex-col justify-end p-12">

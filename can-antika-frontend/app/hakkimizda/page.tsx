@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Shield, Award, Heart, Clock, Quote } from "lucide-react"
@@ -25,7 +26,7 @@ export default function AboutPage() {
         <section className="relative py-32 overflow-hidden">
           {/* Background */}
           <div className="absolute inset-0">
-            <img src="/vintage-sepia-antique-collection-old-photographs-o.jpg" alt="" className="w-full h-full object-cover" />
+            <Image src="/vintage-sepia-antique-collection-old-photographs-o.jpg" alt="" fill sizes="100vw" className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-b from-primary/95 via-primary/90 to-primary/95" />
           </div>
 
@@ -73,11 +74,13 @@ export default function AboutPage() {
                 <div className="absolute -inset-3 border border-accent/10 rounded-lg" />
 
                 <div className="relative">
-                  <div className="aspect-[4/5] overflow-hidden rounded-lg shadow-2xl">
-                    <img
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-lg shadow-2xl">
+                    <Image
                       src="/distinguished-turkish-gentleman-antique-dealer-60s.jpg"
                       alt="Mehmet Can - Can Antika kurucusu"
-                      className="h-full w-full object-cover"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 40vw"
+                      className="object-cover"
                     />
                   </div>
 

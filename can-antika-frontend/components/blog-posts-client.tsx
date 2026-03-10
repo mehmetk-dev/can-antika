@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState } from "react"
 import { Calendar, User, ArrowRight, Search, Tag } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -121,10 +122,13 @@ export function BlogPostsClient({ posts, categories }: BlogPostsClientProps) {
                                 {/* Image */}
                                 <div className="aspect-[16/10] overflow-hidden bg-muted">
                                     {post.imageUrl ? (
-                                        <img
+                                        <Image
                                             src={post.imageUrl}
                                             alt={post.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            fill
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                            unoptimized
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-primary/5">

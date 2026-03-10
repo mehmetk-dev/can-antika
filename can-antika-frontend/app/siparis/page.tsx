@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -59,10 +60,16 @@ function CheckoutContent() {
 
     // Seçili yöntem kapatılırsa ilk mevcut yönteme geç
     useEffect(() => {
-        if (paymentOptions.length > 0 && !paymentOptions.find((o) => o.value === paymentMethod)) {
-            setPaymentMethod(paymentOptions[0].value)
+        const availableMethods = [
+            ...(settings.creditCardEnabled ? ["CREDIT_CARD" as const] : []),
+            ...(settings.bankTransferEnabled ? ["EFT" as const] : []),
+            ...(settings.cashOnDeliveryEnabled ? ["CASH_ON_DELIVERY" as const] : []),
+        ]
+
+        if (availableMethods.length > 0 && !availableMethods.includes(paymentMethod)) {
+            setPaymentMethod(availableMethods[0])
         }
-    }, [settings.creditCardEnabled, settings.bankTransferEnabled, settings.cashOnDeliveryEnabled])
+    }, [paymentMethod, settings.creditCardEnabled, settings.bankTransferEnabled, settings.cashOnDeliveryEnabled])
 
     const handleApplyCoupon = async () => {
         if (!couponCode.trim()) return
@@ -269,10 +276,13 @@ function CheckoutContent() {
                     <div className="space-y-3 max-h-64 overflow-y-auto">
                         {cart.items.map((item) => (
                             <div key={item.id} className="flex items-center gap-3">
-                                <img
+                                <Image
                                     src={item.product.imageUrls?.[0] || "/placeholder.svg"}
                                     alt={item.product.title}
+                                    width={48}
+                                    height={48}
                                     className="h-12 w-12 rounded-md object-cover"
+                                    unoptimized
                                 />
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-foreground truncate">{item.product.title}</p>

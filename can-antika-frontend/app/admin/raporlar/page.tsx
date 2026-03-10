@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import { BarChart3, Package, Users, TrendingUp, Loader2, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -146,7 +147,7 @@ export default function ReportsPage() {
                                     {(data as any[]).map((p: any, i: number) => (
                                         <div key={`${p.productId}-${i}`} className="flex items-center gap-3 p-3 rounded-lg border border-border/50">
                                             {p.imageUrl ? (
-                                                <img src={p.imageUrl} alt={p.productTitle} className="h-10 w-10 rounded-lg object-cover" />
+                                                <Image src={p.imageUrl} alt={p.productTitle} width={40} height={40} className="h-10 w-10 rounded-lg object-cover" unoptimized />
                                             ) : (
                                                 <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                                                     <Package className="h-4 w-4 text-muted-foreground" />

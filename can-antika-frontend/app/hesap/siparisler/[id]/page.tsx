@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect, use } from "react"
 import Link from "next/link"
 import { ArrowLeft, Loader2, Package, Truck, MapPin, FileText, XCircle, RotateCcw } from "lucide-react"
@@ -96,9 +97,9 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
                         <CardContent className="space-y-4">
                             {order.orderItems.map((item, i) => (
                                 <div key={`${item.id}-${i}`} className="flex gap-4">
-                                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
+                                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
                                         {item.product?.imageUrls?.[0] ? (
-                                            <img src={item.product.imageUrls[0]} alt={item.title} className="h-full w-full object-cover" />
+                                            <Image src={item.product.imageUrls[0]} alt={item.title} fill sizes="80px" className="object-cover" unoptimized />
                                         ) : (
                                             <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                                                 <Package className="h-6 w-6" />

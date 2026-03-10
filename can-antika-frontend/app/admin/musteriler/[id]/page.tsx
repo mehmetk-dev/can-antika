@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
+import { useState, useEffect, use, useCallback } from "react"
 import Link from "next/link"
 import { ArrowLeft, Mail, Calendar, MapPin, ShoppingBag, Loader2, Ban, CheckCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -26,14 +26,14 @@ function CustomerDetailContent({ customerId }: { customerId: number }) {
     const [isLoading, setIsLoading] = useState(true)
     const [isUpdating, setIsUpdating] = useState(false)
 
-    const fetchCustomer = async () => {
+    const fetchCustomer = useCallback(async () => {
         try {
             const user = await userApi.getById(customerId)
             setCustomer(user)
         } catch {
             setCustomer(null)
         }
-    }
+    }, [customerId])
 
     useEffect(() => {
         Promise.all([
@@ -45,7 +45,7 @@ function CustomerDetailContent({ customerId }: { customerId: number }) {
             }
             setIsLoading(false)
         })
-    }, [customerId])
+    }, [fetchCustomer])
 
     if (isLoading) {
         return (

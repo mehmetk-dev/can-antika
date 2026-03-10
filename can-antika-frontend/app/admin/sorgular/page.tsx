@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,11 +24,7 @@ export default function AdminInquiriesPage() {
   const [totalPages, setTotalPages] = useState(0)
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("ALL")
 
-  useEffect(() => {
-    fetchTickets()
-  }, [currentPage, statusFilter])
-
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     setLoading(true)
     try {
       const response = await supportTicketApi.getAllPaged(
@@ -43,7 +39,11 @@ export default function AdminInquiriesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentPage, statusFilter])
+
+  useEffect(() => {
+    fetchTickets()
+  }, [fetchTickets])
 
   const selectedTicket = tickets.find((t) => t.id === selectedTicketId)
 
@@ -136,8 +136,8 @@ export default function AdminInquiriesPage() {
                     key={ticket.id}
                     onClick={() => setSelectedTicketId(ticket.id)}
                     className={`cursor-pointer transition-all border-l-4 ${selectedTicketId === ticket.id
-                        ? "border-l-primary bg-muted/30 shadow-sm"
-                        : isPending ? "border-l-destructive/40" : "border-l-emerald-500/40"
+                      ? "border-l-primary bg-muted/30 shadow-sm"
+                      : isPending ? "border-l-destructive/40" : "border-l-emerald-500/40"
                       } hover:bg-muted/10`}
                   >
                     <CardContent className="p-4">

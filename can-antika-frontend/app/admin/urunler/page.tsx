@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -117,11 +118,14 @@ export default function AdminProductsPage() {
                 {products.map((product) => (
                   <TableRow key={product.id} className="border-border">
                     <TableCell>
-                      <div className="h-12 w-12 overflow-hidden rounded-md bg-muted">
-                        <img
+                      <div className="relative h-12 w-12 overflow-hidden rounded-md bg-muted">
+                        <Image
                           src={product.imageUrls?.[0] || "/placeholder.svg"}
                           alt={product.title}
-                          className="h-full w-full object-cover"
+                          fill
+                          sizes="48px"
+                          className="object-cover"
+                          unoptimized
                         />
                       </div>
                     </TableCell>

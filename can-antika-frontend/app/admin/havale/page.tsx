@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { CreditCard, Loader2, Check, X } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -23,9 +23,7 @@ export default function BankTransfersPage() {
     const [pending, setPending] = useState(0)
     const [filter, setFilter] = useState("")
 
-    useEffect(() => { load() }, [filter])
-
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true)
         try {
             const [data, cnt] = await Promise.all([bankTransferApi.getAll(0, 100, filter || undefined), bankTransferApi.getPendingCount()])
@@ -33,7 +31,9 @@ export default function BankTransfersPage() {
             setPending(cnt.count)
         } catch { toast.error("Yüklenemedi") }
         finally { setLoading(false) }
-    }
+    }, [filter])
+
+    useEffect(() => { load() }, [load])
 
     const handleAction = async (id: number, status: string) => {
         const note = status === "REJECTED" ? prompt("Red nedeni (opsiyonel):") || "" : ""

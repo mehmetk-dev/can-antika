@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Loader2, Package } from "lucide-react"
@@ -127,11 +128,14 @@ function OrdersContent() {
                     const imageUrl = item.product?.imageUrls?.[0] || "/placeholder.svg"
                     return (
                       <div key={`${item.id}-${i}`} className="flex items-center gap-4 mb-3 last:mb-0">
-                        <div className="h-16 w-16 overflow-hidden rounded-md bg-muted shrink-0">
-                          <img
+                        <div className="relative h-16 w-16 overflow-hidden rounded-md bg-muted shrink-0">
+                          <Image
                             src={imageUrl}
                             alt={item.title}
-                            className="h-full w-full object-cover"
+                            fill
+                            sizes="64px"
+                            className="object-cover"
+                            unoptimized
                           />
                         </div>
                         <div className="flex-1 min-w-0">

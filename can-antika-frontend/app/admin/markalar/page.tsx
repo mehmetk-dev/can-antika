@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import { Tag, Plus, Pencil, Trash2, Loader2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,9 +9,20 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { brandApi } from "@/lib/api"
+import type { BrandResponse } from "@/lib/types"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
 
 interface Brand { id: number; name: string; slug: string; logoUrl: string; active: boolean }
+
+function toBrandItem(brand: BrandResponse): Brand {
+    return {
+        id: brand.id,
+        name: brand.name,
+        slug: brand.slug,
+        logoUrl: brand.logoUrl || "",
+        active: brand.active,
+    }
+}
 
 export default function BrandsPage() {
     const [brands, setBrands] = useState<Brand[]>([])
@@ -22,7 +34,10 @@ export default function BrandsPage() {
     useEffect(() => { load() }, [])
 
     const load = async () => {
-        try { setBrands(await brandApi.getAll()) }
+        try {
+            const data = await brandApi.getAll()
+            setBrands(data.map(toBrandItem))
+        }
         catch { toast.error("Yüklenemedi") }
         finally { setLoading(false) }
     }
@@ -66,7 +81,7 @@ export default function BrandsPage() {
                             <CardContent className="p-4">
                                 <div className="flex items-center gap-3">
                                     {b.logoUrl ? (
-                                        <img src={b.logoUrl} alt={b.name} className="h-12 w-12 rounded-lg object-contain border bg-white" />
+                                        <Image src={b.logoUrl} alt={b.name} width={48} height={48} className="h-12 w-12 rounded-lg object-contain border bg-white" unoptimized />
                                     ) : (
                                         <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                                             <Tag className="h-5 w-5 text-primary" />
