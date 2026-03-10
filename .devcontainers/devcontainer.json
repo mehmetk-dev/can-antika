@@ -1,0 +1,6 @@
+{
+  "name": "Can Antika Workspace",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "backend",
+  "workspaceFolder": "/app"
+}
