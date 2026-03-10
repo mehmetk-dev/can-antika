@@ -28,7 +28,7 @@ function OrdersContent() {
   const [totalPages, setTotalPages] = useState(0)
 
   useEffect(() => {
-    setIsLoading(true)
+    const loadingTimer = setTimeout(() => setIsLoading(true), 0)
     orderApi
       .getMyOrders(page, 10)
       .then((data) => {
@@ -37,6 +37,8 @@ function OrdersContent() {
       })
       .catch(() => setOrders([]))
       .finally(() => setIsLoading(false))
+
+    return () => clearTimeout(loadingTimer)
   }, [page])
 
   if (isLoading) {

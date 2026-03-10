@@ -107,13 +107,13 @@ export default function AboutPage() {
 
                 <div className="mt-8 space-y-6 text-muted-foreground leading-relaxed">
                   <p>
-                    1990 yılında, babamın bana aktardığı antika sevgisiyle bu yolculuğa başladım. İstanbul'un tarihi
-                    Beyoğlu semtinde açtığım küçük dükkân, bugün Türkiye'nin en saygın antika galerilerinden biri
+                    1990 yılında, babamın bana aktardığı antika sevgisiyle bu yolculuğa başladım. İstanbul’un tarihi
+                    Beyoğlu semtinde açtığım küçük dükkân, bugün Türkiye’nin en saygın antika galerilerinden biri
                     haline geldi.
                   </p>
 
                   <p>
-                    35 yılı aşkın deneyimimle, Osmanlı döneminden Art Deco'ya, Viktoryen'den 19. yüzyıl klasiklerine
+                    35 yılı aşkın deneyimimle, Osmanlı döneminden Art Deco’ya, Viktoryen’den 19. yüzyıl klasiklerine
                     kadar geniş bir yelpazede eşsiz antika eserler sunuyorum. Her parça, titizlikle incelenir ve
                     orijinalliği kişisel garantim altındadır.
                   </p>
@@ -128,7 +128,7 @@ export default function AboutPage() {
                 <div className="mt-10 relative pl-6 border-l-2 border-accent/30">
                   <Quote className="absolute -left-3 -top-1 w-6 h-6 text-accent/50 bg-background" />
                   <p className="font-serif text-xl italic text-foreground">
-                    "Her antika parça, geçmişten gelen bir mektuptur. Ben sadece postacıyım."
+                    “Her antika parça, geçmişten gelen bir mektuptur. Ben sadece postacıyım.”
                   </p>
                 </div>
               </div>

@@ -9,9 +9,25 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { popupApi } from "@/lib/api"
+import type { PopupResponse } from "@/lib/types"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
 
 interface PopupItem { id: number; title: string; content: string; imageUrl: string; linkUrl: string; linkText: string; active: boolean; position: string; delaySeconds: number; showOnce: boolean }
+
+function toPopupItem(popup: PopupResponse): PopupItem {
+    return {
+        id: popup.id,
+        title: popup.title,
+        content: popup.content,
+        imageUrl: popup.imageUrl || "",
+        linkUrl: popup.linkUrl || "",
+        linkText: "",
+        active: popup.active,
+        position: "CENTER",
+        delaySeconds: 3,
+        showOnce: true,
+    }
+}
 
 export default function PopupsPage() {
     const [popups, setPopups] = useState<PopupItem[]>([])
@@ -23,7 +39,10 @@ export default function PopupsPage() {
     useEffect(() => { load() }, [])
 
     const load = async () => {
-        try { setPopups(await popupApi.getAll()) }
+        try {
+            const data = await popupApi.getAll()
+            setPopups(data.map(toPopupItem))
+        }
         catch { toast.error("Yüklenemedi") }
         finally { setLoading(false) }
     }
@@ -53,7 +72,7 @@ export default function PopupsPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="font-serif text-2xl font-bold text-foreground">Popup Yönetimi</h1>
-                    <p className="text-muted-foreground">Site popup'larını oluşturun ve yönetin</p>
+                    <p className="text-muted-foreground">Site popup’larını oluşturun ve yönetin</p>
                 </div>
                 <Button className="gap-2" onClick={openCreate}><Plus className="h-4 w-4" /> Yeni Popup</Button>
             </div>

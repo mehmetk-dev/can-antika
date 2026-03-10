@@ -28,7 +28,7 @@ export default function AdminProductsPage() {
   }, [])
 
   useEffect(() => {
-    setIsLoading(true)
+    const loadingTimer = setTimeout(() => setIsLoading(true), 0)
     const params: Record<string, unknown> = { page, size: PAGE_SIZE }
     if (categoryFilter !== "all") params.categoryId = Number(categoryFilter)
 
@@ -40,6 +40,8 @@ export default function AdminProductsPage() {
       })
       .catch(() => setProducts([]))
       .finally(() => setIsLoading(false))
+
+    return () => clearTimeout(loadingTimer)
   }, [page, categoryFilter])
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)

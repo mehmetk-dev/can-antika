@@ -74,7 +74,7 @@ export function HeroSection() {
             <div className="relative">
               <div className="absolute inset-0 rounded-full border border-emerald-400/30 animate-pulse" />
               <p className="rounded-full border border-emerald-400/50 bg-emerald-900/30 px-4 py-1.5 font-serif text-xs uppercase tracking-[0.3em] text-emerald-300">
-                1990'dan Beri
+                1990’dan Beri
               </p>
             </div>
             <div className="h-px w-12 bg-gradient-to-l from-transparent to-emerald-400/60" />

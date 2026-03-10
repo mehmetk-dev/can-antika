@@ -22,7 +22,10 @@ export function BlogDetailClient({ initialPost }: BlogDetailClientProps) {
 
     useEffect(() => {
         blogApi.getCategories().then(setCategories).catch(() => setCategories([]))
-        if (!initialPost) setLoading(false)
+        if (!initialPost) {
+            const loadingTimer = setTimeout(() => setLoading(false), 0)
+            return () => clearTimeout(loadingTimer)
+        }
     }, [initialPost])
 
     const getCategoryName = (id: number) =>

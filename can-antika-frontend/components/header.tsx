@@ -61,7 +61,10 @@ export function Header() {
 
   // Debounced autocomplete search
   useEffect(() => {
-    if (searchQuery.trim().length < 2) { setSearchResults([]); return }
+    if (searchQuery.trim().length < 2) {
+      const clearTimer = setTimeout(() => setSearchResults([]), 0)
+      return () => clearTimeout(clearTimer)
+    }
     const timer = setTimeout(() => {
       productApi.search({ title: searchQuery.trim(), page: 0, size: 5 })
         .then((res) => setSearchResults(res.items || []))
@@ -222,7 +225,7 @@ export function Header() {
               {/* Footer */}
               <div className="relative mt-auto shrink-0 border-t border-primary/10 bg-muted/20 px-6 py-4 z-[2]">
                 <p className="text-center text-xs text-muted-foreground">
-                  <span className="font-serif italic">"Geçmişin izinde, geleceğe miras"</span>
+                  <span className="font-serif italic">“Geçmişin izinde, geleceğe miras”</span>
                 </p>
                 <p className="mt-1 text-center text-[10px] text-muted-foreground/60">Çukurcuma, Beyoğlu - İstanbul</p>
               </div>

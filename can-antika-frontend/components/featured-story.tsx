@@ -109,8 +109,8 @@ export function FeaturedStory() {
             <div className="mt-8 space-y-4 font-serif text-lg leading-relaxed text-amber-800/80">
               <p>
                 <span className="float-left mr-2 font-serif text-5xl font-bold leading-none text-amber-600">1</span>990
-                yılında İstanbul'un tarihi Çukurcuma semtinde küçük bir dükkân olarak başlayan yolculuğumuz, bugün
-                Türkiye'nin en saygın antika merkezlerinden biri haline geldi.
+                yılında İstanbul’un tarihi Çukurcuma semtinde küçük bir dükkân olarak başlayan yolculuğumuz, bugün
+                Türkiye’nin en saygın antika merkezlerinden biri haline geldi.
               </p>
               <p className="text-base">
                 Her eser, ekibimizin titiz araştırması ve uzman değerlendirmesinden geçerek koleksiyonumuza dahil olur.

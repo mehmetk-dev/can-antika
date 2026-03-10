@@ -42,8 +42,9 @@ export default function ActivityLogsPage() {
         setLoading(true)
         try {
             const data = await activityLogApi.getAll(p, 30)
-            if (p === 0) setLogs(data.items || [])
-            else setLogs(prev => [...prev, ...(data.items || [])])
+            const items = (data.items || []) as unknown as LogItem[]
+            if (p === 0) setLogs(items)
+            else setLogs(prev => [...prev, ...items])
             setHasMore((data.items?.length || 0) === 30)
             setPage(p)
         } catch { toast.error("Yüklenemedi") }

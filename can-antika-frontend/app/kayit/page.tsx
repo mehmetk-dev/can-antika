@@ -66,7 +66,7 @@ export default function RegisterPage() {
           </Link>
           <blockquote className="max-w-md">
             <p className="font-serif text-2xl font-medium text-primary-foreground leading-relaxed">
-              "Her antika, zamanda yolculuk yapmanıza izin veren bir penceredir."
+              “Her antika, zamanda yolculuk yapmanıza izin veren bir penceredir.”
             </p>
             <footer className="mt-4 text-primary-foreground/70">— Koleksiyoner, Mehmet Kaya</footer>
           </blockquote>
