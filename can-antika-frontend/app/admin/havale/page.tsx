@@ -27,7 +27,7 @@ export default function BankTransfersPage() {
         setLoading(true)
         try {
             const [data, cnt] = await Promise.all([bankTransferApi.getAll(0, 100, filter || undefined), bankTransferApi.getPendingCount()])
-            setTransfers(data.items || [])
+            setTransfers((data.items as unknown as Transfer[]) || [])
             setPending(cnt.count)
         } catch { toast.error("Yüklenemedi") }
         finally { setLoading(false) }
