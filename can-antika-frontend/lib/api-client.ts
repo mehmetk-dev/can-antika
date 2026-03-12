@@ -77,20 +77,21 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
 
     // Auto-refresh on 401
     if (res.status === 401 && !noAuth) {
-        const refreshed = await tryRefreshToken();
-        if (refreshed) {
-            // Yeni cookie set edildi, isteği tekrarla
-            res = await fetch(url, {
-                method,
-                headers,
-                credentials: "include",
-                body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-            });
-        } else {
-            if (typeof window !== "undefined" && !window.location.pathname.startsWith("/giris")) {
-                window.location.href = "/giris";
+        try {
+            const refreshed = await tryRefreshToken();
+            if (refreshed) {
+                // Yeni cookie set edildi, isteği tekrarla
+                res = await fetch(url, {
+                    method,
+                    headers,
+                    credentials: "include",
+                    body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+                });
+            } else {
+                throw new Error("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
             }
-            throw new Error("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
+        } catch {
+            return null as unknown as T; // Sessizce geç
         }
     }
 
