@@ -34,8 +34,8 @@ public class AdminInitializer implements CommandLineRunner {
         }
         if (adminPassword == null || adminPassword.length() < 12
                 || "admin123".equals(adminPassword) || "change-me".equals(adminPassword)) {
-            log.error("APP_ADMIN_PASSWORD güvenli değil! En az 12 karakter ve varsayılan değer olmamalı.");
-            throw new IllegalStateException("Güvenli bir APP_ADMIN_PASSWORD belirleyin (min 12 karakter).");
+            log.warn("APP_ADMIN_PASSWORD ayarlanmamış veya güvenli değil — admin oluşturma atlanıyor. En az 12 karakter belirleyin.");
+            return;
         }
         log.info("Varsayılan Admin kullanıcısı oluşturuluyor...");
         User admin = User.builder()
