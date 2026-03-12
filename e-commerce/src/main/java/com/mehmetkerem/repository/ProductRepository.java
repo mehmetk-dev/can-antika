@@ -22,6 +22,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     long countByStockLessThan(int threshold);
 
+    List<Product> findByStockLessThanEqualOrderByStockAsc(int threshold);
+
     Optional<Product> findBySlug(String slug);
 
     @Modifying

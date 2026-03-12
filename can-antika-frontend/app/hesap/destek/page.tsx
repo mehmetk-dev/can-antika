@@ -15,6 +15,7 @@ import { AuthGuard } from "@/components/auth-guard"
 import { supportTicketApi } from "@/lib/api"
 import { toast } from "sonner"
 import type { SupportTicketResponse } from "@/lib/types"
+import { formatDateTR } from "@/lib/utils"
 
 function SupportContent() {
     const [tickets, setTickets] = useState<SupportTicketResponse[]>([])
@@ -132,9 +133,7 @@ function SupportContent() {
                                                 <p className="font-medium text-foreground truncate">{ticket.subject}</p>
                                                 <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{ticket.message}</p>
                                                 <p className="mt-2 text-xs text-muted-foreground">
-                                                    {new Date(ticket.createdAt).toLocaleDateString("tr-TR", {
-                                                        day: "numeric", month: "short", year: "numeric"
-                                                    })}
+                                                    {formatDateTR(ticket.createdAt, "compact")}
                                                 </p>
                                             </div>
                                             <Badge variant={isPending ? "secondary" : "default"} className={!isPending ? "bg-primary/10 text-primary" : ""}>
@@ -154,7 +153,7 @@ function SupportContent() {
                                 <CardHeader>
                                     <CardTitle className="font-serif">{selectedTicket.subject}</CardTitle>
                                     <p className="text-xs text-muted-foreground">
-                                        #{selectedTicket.id} · {new Date(selectedTicket.createdAt).toLocaleDateString("tr-TR")}
+                                        #{selectedTicket.id} · {formatDateTR(selectedTicket.createdAt, "minimal")}
                                     </p>
                                 </CardHeader>
                                 <CardContent className="space-y-4">

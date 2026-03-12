@@ -11,6 +11,7 @@ import { Search, Mail, Loader2, Trash2 } from "lucide-react"
 import { userApi } from "@/lib/api"
 import { toast } from "sonner"
 import type { UserResponse } from "@/lib/types"
+import { formatDateTR } from "@/lib/utils"
 
 export default function AdminCustomersPage() {
   const [users, setUsers] = useState<UserResponse[]>([])
@@ -130,7 +131,7 @@ export default function AdminCustomersPage() {
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {user.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString("tr-TR")
+                    ? formatDateTR(user.createdAt, "minimal")
                     : "—"}
                 </TableCell>
                 <TableCell>

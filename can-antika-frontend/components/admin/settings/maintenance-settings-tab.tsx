@@ -1,0 +1,25 @@
+import { TextareaField } from "@/components/ui/form-fields"
+import type { SettingsTabProps } from "./types"
+
+export default function MaintenanceSettingsTab({ settings, onChange }: SettingsTabProps) {
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center gap-3 p-4 rounded-lg border bg-muted/30">
+                <input
+                    type="checkbox"
+                    id="maintenanceMode"
+                    checked={settings.maintenanceMode}
+                    onChange={(e) => onChange("maintenanceMode", e.target.checked)}
+                    className="h-5 w-5 accent-[#14452F]"
+                />
+                <div>
+                    <label htmlFor="maintenanceMode" className="text-sm font-semibold cursor-pointer">
+                        Bakım Modu {settings.maintenanceMode ? "🔴 Aktif" : "🟢 Kapalı"}
+                    </label>
+                    <p className="text-xs text-muted-foreground">Aktifken ziyaretçiler siteye giremez</p>
+                </div>
+            </div>
+            <TextareaField label="Bakım Mesajı" value={settings.maintenanceMessage} onChange={(v) => onChange("maintenanceMessage", v)} rows={3} />
+        </div>
+    )
+}

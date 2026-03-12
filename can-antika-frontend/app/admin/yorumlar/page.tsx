@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { reviewApi } from "@/lib/api"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
+import { formatDateTR } from "@/lib/utils"
 
 interface Review { id: number; userId: number; userName: string; productId: number; productTitle: string; rating: number; comment: string; createdAt: string }
 
@@ -61,7 +62,7 @@ export default function ReviewsPage() {
                                             <span className="text-sm font-semibold">{r.userName || "Anonim"}</span>
                                         </div>
                                         <p className="text-sm text-foreground line-clamp-2">{r.comment}</p>
-                                        <p className="text-xs text-muted-foreground mt-1">Ürün: {r.productTitle || `#${r.productId}`} · {r.createdAt ? new Date(r.createdAt).toLocaleDateString("tr-TR") : ""}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">Ürün: {r.productTitle || `#${r.productId}`} · {r.createdAt ? formatDateTR(r.createdAt, "minimal") : ""}</p>
                                     </div>
                                     <div className="flex gap-1 shrink-0">
                                         <Button size="icon" variant="ghost" onClick={() => setSelected(r)}><Eye className="h-4 w-4" /></Button>

@@ -6,8 +6,12 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.mehmetkerem.dto.response.OrderInvoiceResponse;
+import com.mehmetkerem.model.SiteSettings;
+import com.mehmetkerem.model.config.ContactConfig;
+import com.mehmetkerem.model.config.StoreConfig;
 import com.mehmetkerem.service.IInvoicePdfService;
 import com.mehmetkerem.service.IOrderService;
+import com.mehmetkerem.service.ISiteSettingsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -16,20 +20,15 @@ import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 
+import static com.mehmetkerem.util.PdfStyleConstants.*;
+
 @Slf4j
 @Service
 @lombok.RequiredArgsConstructor
 public class InvoicePdfServiceImpl implements IInvoicePdfService {
 
     private final IOrderService orderService;
-
-    private static final Font TITLE_FONT = new Font(Font.HELVETICA, 20, Font.BOLD, new Color(44, 62, 80));
-    private static final Font HEADER_FONT = new Font(Font.HELVETICA, 12, Font.BOLD, Color.WHITE);
-    private static final Font BODY_FONT = new Font(Font.HELVETICA, 10, Font.NORMAL, Color.DARK_GRAY);
-    private static final Font BOLD_FONT = new Font(Font.HELVETICA, 10, Font.BOLD, Color.DARK_GRAY);
-    private static final Font SMALL_FONT = new Font(Font.HELVETICA, 8, Font.NORMAL, Color.GRAY);
-    private static final Color PRIMARY_COLOR = new Color(52, 73, 94);
-    private static final Color STRIPE_COLOR = new Color(241, 245, 249);
+    private final ISiteSettingsService siteSettingsService;
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     private static final BigDecimal VAT_RATE = BigDecimal.valueOf(0.18);
@@ -37,17 +36,18 @@ public class InvoicePdfServiceImpl implements IInvoicePdfService {
     @Override
     public byte[] generateInvoicePdf(Long orderId) {
         OrderInvoiceResponse invoice = orderService.getOrderInvoice(orderId);
+        SiteSettings settings = siteSettingsService.get();
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             Document document = new Document(PageSize.A4, 40, 40, 50, 40);
             PdfWriter.getInstance(document, baos);
             document.open();
 
-            addHeader(document, invoice);
+            addHeader(document, invoice, settings.getStoreConfig());
             addCustomerInfo(document, invoice);
             addItemsTable(document, invoice);
             addTotals(document, invoice);
-            addFooter(document);
+            addFooter(document, settings.getStoreConfig(), settings.getContactConfig());
 
             document.close();
             return baos.toByteArray();
@@ -57,7 +57,7 @@ public class InvoicePdfServiceImpl implements IInvoicePdfService {
         }
     }
 
-    private void addHeader(Document document, OrderInvoiceResponse invoice) throws DocumentException {
+    private void addHeader(Document document, OrderInvoiceResponse invoice, StoreConfig store) throws DocumentException {
         PdfPTable headerTable = new PdfPTable(2);
         headerTable.setWidthPercentage(100);
         headerTable.setWidths(new float[] { 60, 40 });
@@ -65,7 +65,7 @@ public class InvoicePdfServiceImpl implements IInvoicePdfService {
         // Sol: Firma adı
         PdfPCell leftCell = new PdfPCell();
         leftCell.setBorder(0);
-        leftCell.addElement(new Phrase("CAN ANTIKA", TITLE_FONT));
+        leftCell.addElement(new Phrase(store.getStoreName().toUpperCase(), TITLE_FONT));
         leftCell.addElement(new Phrase("E-Ticaret Faturası", SMALL_FONT));
         headerTable.addCell(leftCell);
 
@@ -157,14 +157,14 @@ public class InvoicePdfServiceImpl implements IInvoicePdfService {
 
         // GENEL TOPLAM
         PdfPCell labelCell = new PdfPCell(
-                new Phrase("GENEL TOPLAM:", new Font(Font.HELVETICA, 12, Font.BOLD, PRIMARY_COLOR)));
+                new Phrase("GENEL TOPLAM:", TOTAL_FONT));
         labelCell.setBorder(0);
         labelCell.setBorderWidthTop(1);
         labelCell.setPadding(5);
         table.addCell(labelCell);
 
         PdfPCell valueCell = new PdfPCell(new Phrase(formatPrice(invoice.getTotalAmount()),
-                new Font(Font.HELVETICA, 12, Font.BOLD, PRIMARY_COLOR)));
+                TOTAL_FONT));
         valueCell.setBorder(0);
         valueCell.setBorderWidthTop(1);
         valueCell.setPadding(5);
@@ -174,13 +174,13 @@ public class InvoicePdfServiceImpl implements IInvoicePdfService {
         document.add(table);
     }
 
-    private void addFooter(Document document) throws DocumentException {
+    private void addFooter(Document document, StoreConfig store, ContactConfig contact) throws DocumentException {
         document.add(new Paragraph(" "));
         document.add(new Paragraph(" "));
 
         Paragraph footer = new Paragraph(
                 "Bu fatura elektronik ortamda oluşturulmuştur.\n" +
-                        "Can Antika E-Ticaret | info@canantika.com\n" +
+                        store.getStoreName() + " E-Ticaret | " + contact.getEmail() + "\n" +
                         "İade ve değişim koşulları için web sitemizi ziyaret ediniz.",
                 SMALL_FONT);
         footer.setAlignment(Element.ALIGN_CENTER);
@@ -201,7 +201,7 @@ public class InvoicePdfServiceImpl implements IInvoicePdfService {
         PdfPCell cell = new PdfPCell(new Phrase(text, font));
         cell.setBackgroundColor(bgColor);
         cell.setPadding(6);
-        cell.setBorderColor(new Color(220, 220, 220));
+        cell.setBorderColor(BORDER_COLOR);
         cell.setHorizontalAlignment(alignment);
         table.addCell(cell);
     }

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { notificationApi } from "@/lib/api"
 import type { NotificationResponse } from "@/lib/types"
-import { cn } from "@/lib/utils"
+import { cn, formatDateTR } from "@/lib/utils"
 
 interface TypeConfig {
     label: string
@@ -200,13 +200,7 @@ export default function AdminNotificationsPage() {
                                                 {notification.message}
                                             </p>
                                             <span className="text-xs text-muted-foreground/60 mt-1 block">
-                                                {parseDate(notification.createdAt).toLocaleString("tr-TR", {
-                                                    day: "numeric",
-                                                    month: "long",
-                                                    year: "numeric",
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                })}
+                                                {formatDateTR(parseDate(notification.createdAt), "datetime")}
                                             </span>
                                         </div>
 

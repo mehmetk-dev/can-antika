@@ -13,14 +13,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { AuthGuard } from "@/components/auth-guard"
 import { orderApi } from "@/lib/api"
 import type { OrderResponse } from "@/lib/types"
-
-const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
-  DELIVERED: { label: "Teslim Edildi", variant: "default" },
-  SHIPPED: { label: "Kargoda", variant: "secondary" },
-  PENDING: { label: "Hazırlanıyor", variant: "outline" },
-  PAID: { label: "Ödendi", variant: "default" },
-  CANCELLED: { label: "İptal Edildi", variant: "outline" },
-}
+import { getOrderStatus } from "@/lib/order-utils"
+import { formatDateTR } from "@/lib/utils"
 
 function OrdersContent() {
   const [orders, setOrders] = useState<OrderResponse[]>([])
@@ -68,11 +62,7 @@ function OrdersContent() {
 
   const formatDate = (dateStr: string) => {
     try {
-      return new Date(dateStr).toLocaleDateString("tr-TR", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
+      return formatDateTR(dateStr)
     } catch {
       return dateStr
     }
@@ -82,7 +72,7 @@ function OrdersContent() {
     <>
       <div className="space-y-4">
         {orders.map((order) => {
-          const statusInfo = statusLabels[order.orderStatus] || { label: order.orderStatus, variant: "outline" as const }
+          const statusInfo = getOrderStatus(order.orderStatus)
 
           return (
             <Card key={order.id} className="bg-card">

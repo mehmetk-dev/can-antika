@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { newsletterApi } from "@/lib/api"
 import type { NewsletterSubscriber } from "@/lib/types"
+import { formatDateTR } from "@/lib/utils"
 
 interface Subscriber {
     id: number; email: string; name?: string; active: boolean; subscribedAt: string
@@ -81,7 +82,7 @@ export default function NewsletterPage() {
                                     <div className="min-w-0">
                                         <p className="text-sm font-medium truncate">{sub.email}</p>
                                         <p className="text-xs text-muted-foreground">
-                                            {sub.name || "—"} · {new Date(sub.subscribedAt).toLocaleDateString("tr-TR")}
+                                            {sub.name || "—"} · {formatDateTR(sub.subscribedAt, "minimal")}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">

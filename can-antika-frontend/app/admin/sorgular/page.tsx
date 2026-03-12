@@ -9,6 +9,7 @@ import { Clock, CheckCircle, User, Mail, Calendar, Send, Loader2, Inbox, Message
 import { supportTicketApi } from "@/lib/api"
 import { toast } from "sonner"
 import type { SupportTicketResponse } from "@/lib/types"
+import { formatDateTR } from "@/lib/utils"
 
 type FilterStatus = "ALL" | "OPEN" | "RESOLVED"
 
@@ -78,13 +79,7 @@ export default function AdminInquiriesPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("tr-TR", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+    return formatDateTR(dateString, "datetime-compact")
   }
 
   if (loading && tickets.length === 0) {

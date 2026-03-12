@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { blogApi } from "@/lib/api"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
+import { formatDateTR } from "@/lib/utils"
 
 interface BlogPost { id: number; title: string; slug: string; content: string; summary: string; imageUrl: string; categoryId: number; author: string; published: boolean; createdAt: string }
 interface BlogCategory { id: number; name: string; slug: string; active: boolean }
@@ -107,7 +108,7 @@ export default function BlogPage() {
                                             {p.imageUrl ? <Image src={p.imageUrl} alt="" width={80} height={56} className="h-14 w-20 rounded-lg object-cover shrink-0" unoptimized /> : <div className="h-14 w-20 rounded-lg bg-muted flex items-center justify-center shrink-0"><PenTool className="h-5 w-5 text-muted-foreground" /></div>}
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-semibold truncate">{p.title}</p>
-                                                <p className="text-xs text-muted-foreground">{getCatName(p.categoryId)} · {p.author || "—"} · {p.createdAt ? new Date(p.createdAt).toLocaleDateString("tr-TR") : "—"}</p>
+                                                <p className="text-xs text-muted-foreground">{getCatName(p.categoryId)} · {p.author || "—"} · {p.createdAt ? formatDateTR(p.createdAt, "minimal") : "—"}</p>
                                             </div>
                                             <div className="flex items-center gap-2 shrink-0">
                                                 <Badge variant={p.published ? "default" : "outline"}>{p.published ? "Yayında" : "Taslak"}</Badge>

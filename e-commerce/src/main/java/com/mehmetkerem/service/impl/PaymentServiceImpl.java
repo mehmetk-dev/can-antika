@@ -1,14 +1,13 @@
 package com.mehmetkerem.service.impl;
 
-import com.mehmetkerem.dto.response.OrderResponse;
 import com.mehmetkerem.dto.response.PaymentResponse;
-import com.mehmetkerem.dto.response.UserResponse;
 import com.mehmetkerem.enums.PaymentMethod;
 import com.mehmetkerem.enums.PaymentStatus;
 import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.ExceptionMessages;
 import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.model.Payment;
+import com.mehmetkerem.mapper.PaymentMapper;
 import com.mehmetkerem.repository.PaymentRepository;
 import com.mehmetkerem.service.IPaymentService;
 import com.mehmetkerem.service.payment.PaymentStrategy;
@@ -31,6 +30,8 @@ public class PaymentServiceImpl implements IPaymentService {
     private final com.mehmetkerem.service.IUserService userService;
     private final com.mehmetkerem.service.IOrderService orderService;
     private final PaymentStrategy paymentStrategy;
+    private final PaymentMapper paymentMapper;
+    private final com.mehmetkerem.service.IOrderAuthorizationService orderAuthorizationService;
 
     @Transactional
     @Override
@@ -39,9 +40,7 @@ public class PaymentServiceImpl implements IPaymentService {
         log.info("Ödeme işlemi başlatıldı. Kullanıcı ID: {}, Sipariş ID: {}, Tutar: {}", userId, orderId, amount);
         userService.getUserById(userId);
         var order = orderService.getOrderById(orderId);
-        if (!order.getUserId().equals(userId)) {
-            throw new BadRequestException("Bu sipariş size ait değil.");
-        }
+        orderAuthorizationService.assertOwner(order, userId);
 
         // Sipariş durumu kontrolü — sadece PENDING siparişlere ödeme yapılabilir
         if (order.getOrderStatus() != com.mehmetkerem.enums.OrderStatus.PENDING) {
@@ -88,12 +87,12 @@ public class PaymentServiceImpl implements IPaymentService {
         Payment savedPayment = paymentRepository.save(payment);
         log.info("Ödeme kaydı oluşturuldu. Ödeme ID: {}, Durum: {}", savedPayment.getId(), finalStatus);
 
-        return convertPaymentToResponse(savedPayment);
+        return toResponse(savedPayment);
     }
 
     @Override
     public PaymentResponse getPaymentResponseById(Long id) {
-        return convertPaymentToResponse(getPaymentById(id));
+        return toResponse(getPaymentById(id));
     }
 
     @Override
@@ -102,7 +101,7 @@ public class PaymentServiceImpl implements IPaymentService {
         if (!payment.getUserId().equals(userId)) {
             throw new BadRequestException("Bu ödemeye erişim yetkiniz yok.");
         }
-        return convertPaymentToResponse(payment);
+        return toResponse(payment);
     }
 
     @Override
@@ -116,7 +115,7 @@ public class PaymentServiceImpl implements IPaymentService {
         log.debug("Kullanıcı ödemeleri getiriliyor. Kullanıcı ID: {}", userId);
         return paymentRepository.findByUserId(userId)
                 .stream()
-                .map(this::convertPaymentToResponse)
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -126,7 +125,7 @@ public class PaymentServiceImpl implements IPaymentService {
         log.info("Ödeme durumu güncelleniyor. Ödeme ID: {}, Yeni Durum: {}", paymentId, newStatus);
         Payment payment = getPaymentById(paymentId);
         payment.setPaymentStatus(newStatus);
-        return convertPaymentToResponse(paymentRepository.save(payment));
+        return toResponse(paymentRepository.save(payment));
     }
 
     @Override
@@ -136,18 +135,10 @@ public class PaymentServiceImpl implements IPaymentService {
         return String.format(Messages.DELETE_VALUE, id, "ödeme");
     }
 
-    private PaymentResponse convertPaymentToResponse(Payment payment) {
-        UserResponse userResponse = userService.getUserResponseById(payment.getUserId());
-        OrderResponse orderResponse = orderService.getOrderResponseById(payment.getOrderId());
-
-        return PaymentResponse.builder()
-                .id(payment.getId())
-                .order(orderResponse)
-                .user(userResponse)
-                .amount(payment.getAmount())
-                .createdAt(payment.getCreatedAt())
-                .paymentMethod(payment.getPaymentMethod())
-                .paymentStatus(payment.getPaymentStatus())
-                .build();
+    private PaymentResponse toResponse(Payment payment) {
+        return paymentMapper.toResponseWithDetails(
+                payment,
+                orderService.getOrderResponseById(payment.getOrderId()),
+                userService.getUserResponseById(payment.getUserId()));
     }
 }

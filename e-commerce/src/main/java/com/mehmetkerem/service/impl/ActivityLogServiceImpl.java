@@ -2,6 +2,7 @@ package com.mehmetkerem.service.impl;
 
 import com.mehmetkerem.dto.response.ActivityLogResponse;
 import com.mehmetkerem.enums.ActivityType;
+import com.mehmetkerem.mapper.ActivityLogMapper;
 import com.mehmetkerem.model.ActivityLog;
 import com.mehmetkerem.repository.ActivityLogRepository;
 import com.mehmetkerem.repository.specification.ActivityLogSpecification;
@@ -25,6 +26,7 @@ import java.util.List;
 public class ActivityLogServiceImpl implements IActivityLogService {
 
     private final ActivityLogRepository activityLogRepository;
+    private final ActivityLogMapper activityLogMapper;
 
     @Override
     @Async
@@ -65,19 +67,19 @@ public class ActivityLogServiceImpl implements IActivityLogService {
     @Override
     public Page<ActivityLogResponse> getAllLogs(Pageable pageable) {
         return activityLogRepository.findAllByOrderByCreatedAtDesc(pageable)
-                .map(this::toResponse);
+                .map(activityLogMapper::toResponse);
     }
 
     @Override
     public Page<ActivityLogResponse> getLogsByUserId(Long userId, Pageable pageable) {
         return activityLogRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
-                .map(this::toResponse);
+                .map(activityLogMapper::toResponse);
     }
 
     @Override
     public Page<ActivityLogResponse> getLogsByType(ActivityType activityType, Pageable pageable) {
         return activityLogRepository.findByActivityTypeOrderByCreatedAtDesc(activityType, pageable)
-                .map(this::toResponse);
+                .map(activityLogMapper::toResponse);
     }
 
     @Override
@@ -89,7 +91,7 @@ public class ActivityLogServiceImpl implements IActivityLogService {
                 .and(ActivityLogSpecification.createdAfter(from))
                 .and(ActivityLogSpecification.createdBefore(to));
 
-        return activityLogRepository.findAll(spec, pageable).map(this::toResponse);
+        return activityLogRepository.findAll(spec, pageable).map(activityLogMapper::toResponse);
     }
 
     @Override
@@ -97,27 +99,8 @@ public class ActivityLogServiceImpl implements IActivityLogService {
         LocalDateTime since = LocalDateTime.now().minusDays(days);
         return activityLogRepository.findByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(userId, since)
                 .stream()
-                .map(this::toResponse)
+                .map(activityLogMapper::toResponse)
                 .toList();
-    }
-
-    // ── Private Helpers ──
-
-    private ActivityLogResponse toResponse(ActivityLog entity) {
-        return ActivityLogResponse.builder()
-                .id(entity.getId())
-                .userId(entity.getUserId())
-                .userName(entity.getUserName())
-                .userEmail(entity.getUserEmail())
-                .activityType(entity.getActivityType())
-                .entityType(entity.getEntityType())
-                .entityId(entity.getEntityId())
-                .description(entity.getDescription())
-                .metadata(entity.getMetadata())
-                .ipAddress(entity.getIpAddress())
-                .userAgent(entity.getUserAgent())
-                .createdAt(entity.getCreatedAt())
-                .build();
     }
 
     private String resolveIpAddress() {

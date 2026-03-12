@@ -2,7 +2,6 @@ package com.mehmetkerem.service.impl;
 
 import com.mehmetkerem.dto.request.OrderRequest;
 import com.mehmetkerem.dto.response.OrderInvoiceResponse;
-import com.mehmetkerem.dto.response.OrderItemResponse;
 import com.mehmetkerem.dto.response.OrderResponse;
 import com.mehmetkerem.dto.response.ProductResponse;
 import com.mehmetkerem.dto.response.UserResponse;
@@ -14,15 +13,14 @@ import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.ExceptionMessages;
 import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.mapper.AddressMapper;
+import com.mehmetkerem.mapper.OrderMapper;
 import com.mehmetkerem.model.*;
 import com.mehmetkerem.repository.OrderRepository;
-import com.mehmetkerem.repository.OrderStatusHistoryRepository;
 import com.mehmetkerem.service.IOrderService;
 import com.mehmetkerem.service.IActivityLogService;
 import com.mehmetkerem.util.Messages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +32,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,6 +45,14 @@ import java.util.stream.Collectors;
  * {@link com.mehmetkerem.event.OrderEventListener}
  * tarafından event dinlenerek yapılır.
  * </p>
+ *
+ * <p>Sorumluluk dağılımı:</p>
+ * <ul>
+ *   <li>Stok kontrol/düşürme/iade → {@link StockService}</li>
+ *   <li>Fatura oluşturma → {@link OrderInvoiceService}</li>
+ *   <li>Durum geçmişi (timeline) → {@link OrderTimelineService}</li>
+ *   <li>DTO dönüşümleri → {@link OrderMapper}</li>
+ * </ul>
  */
 @Service
 @Slf4j
@@ -55,19 +60,20 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements IOrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final com.mehmetkerem.service.ICartService cartService;
     private final com.mehmetkerem.service.IProductService productService;
     private final com.mehmetkerem.service.IAddressService addressService;
     private final com.mehmetkerem.service.ICouponService couponService;
     private final com.mehmetkerem.service.IUserService userService;
+    private final OrderMapper orderMapper;
     private final AddressMapper addressMapper;
     private final TransactionTemplate transactionTemplate;
     private final ApplicationEventPublisher eventPublisher;
     private final IActivityLogService activityLogService;
-
-    @Value("${app.stock.alert-threshold:5}")
-    private int stockAlertThreshold;
+    private final com.mehmetkerem.service.IStockService stockService;
+    private final com.mehmetkerem.service.IOrderInvoiceService orderInvoiceService;
+    private final com.mehmetkerem.service.IOrderTimelineService orderTimelineService;
+    private final com.mehmetkerem.service.IOrderAuthorizationService orderAuthorizationService;
 
     private static final int STOCK_UPDATE_MAX_RETRIES = 3;
 
@@ -104,10 +110,15 @@ public class OrderServiceImpl implements IOrderService {
         }
 
         log.debug("Sepet doğrulandı, {} kalem ürün siparişe dönüştürülüyor.", cart.getItems().size());
-        List<OrderItem> orderItems = convertCartItemsToOrderItems(cart.getItems());
 
-        // Stok kontrolü ve düşürme — düşük stok uyarılarını topla
-        List<OrderEvent.StockAlertInfo> stockAlerts = validateAndDeductStock(orderItems);
+        List<ProductResponse> productList = productService.getProductResponsesByIds(
+                cart.getItems().stream().map(CartItem::getProductId).toList());
+        Map<Long, ProductResponse> productMap = productList.stream()
+                .collect(Collectors.toMap(ProductResponse::getId, p -> p));
+        List<OrderItem> orderItems = orderMapper.cartItemsToOrderItems(cart.getItems(), productMap);
+
+        // Stok kontrolü ve düşürme
+        List<OrderEvent.StockAlertInfo> stockAlerts = stockService.validateAndDeductStock(orderItems);
         log.debug("Stok kontrolü başarılı ve stoklar düşürüldü.");
 
         // Adresin bu kullanıcıya ait olduğunu doğrula
@@ -127,7 +138,7 @@ public class OrderServiceImpl implements IOrderService {
                 .userId(userId)
                 .orderStatus(OrderStatus.PENDING)
                 .orderDate(LocalDateTime.now())
-            .totalAmount(finalTotal)
+                .totalAmount(finalTotal)
                 .shippingAddress(shippingAddress)
                 .paymentStatus(paymentStatus)
                 .orderItems(orderItems)
@@ -138,16 +149,7 @@ public class OrderServiceImpl implements IOrderService {
         log.info("Sipariş veritabanına kaydedildi. Sipariş ID: {}, Toplam Tutar: {}", order.getId(),
                 order.getTotalAmount());
 
-        // İlk timeline kaydı
-        orderStatusHistoryRepository.save(
-                OrderStatusHistory.builder()
-                        .orderId(order.getId())
-                        .oldStatus(null)
-                        .newStatus(OrderStatus.PENDING)
-                        .changedBy(userId)
-                        .changedAt(LocalDateTime.now())
-                        .note("Sipariş oluşturuldu")
-                        .build());
+        orderTimelineService.recordCreation(order.getId(), userId);
 
         cartService.clearCart(userId);
         log.debug("Kullanıcının sepeti temizlendi. Kullanıcı ID: {}", userId);
@@ -163,7 +165,7 @@ public class OrderServiceImpl implements IOrderService {
                 .stockAlerts(stockAlerts.isEmpty() ? null : stockAlerts)
                 .build());
 
-        return convertOrderToOrderResponse(order);
+        return toOrderResponse(order);
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -178,19 +180,19 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     public OrderResponse getOrderResponseById(Long orderId) {
-        return convertOrderToOrderResponse(getOrderById(orderId));
+        return toOrderResponse(getOrderById(orderId));
     }
 
     @Override
     public Page<OrderResponse> getOrdersByUserId(Long userId, Pageable pageable) {
         return orderRepository.findByUserId(userId, pageable)
-                .map(this::convertOrderToOrderResponse);
+                .map(this::toOrderResponse);
     }
 
     @Override
     public Page<OrderResponse> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable)
-                .map(this::convertOrderToOrderResponse);
+                .map(this::toOrderResponse);
     }
 
     @Override
@@ -205,7 +207,7 @@ public class OrderServiceImpl implements IOrderService {
                 .and(com.mehmetkerem.repository.specification.OrderSpecification.dateBetween(from, to))
                 .and(com.mehmetkerem.repository.specification.OrderSpecification.searchByOrderCode(query));
 
-        return orderRepository.findAll(spec, pageable).map(this::convertOrderToOrderResponse);
+        return orderRepository.findAll(spec, pageable).map(this::toOrderResponse);
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -224,22 +226,15 @@ public class OrderServiceImpl implements IOrderService {
 
         if (newStatus == OrderStatus.CANCELLED && oldStatus != OrderStatus.CANCELLED) {
             log.info("Sipariş iptal ediliyor, stoklar iade ediliyor. Sipariş ID: {}", orderId);
-            revertStockLevels(order.getOrderItems());
+            stockService.revertStockLevels(order.getOrderItems());
         }
 
         order.setOrderStatus(newStatus);
         orderRepository.save(order);
         log.info("Sipariş durumu güncellendi: {} -> {}", oldStatus, newStatus);
 
-        // Timeline kaydı
         Long currentUserId = com.mehmetkerem.util.SecurityUtils.getCurrentUserId();
-        orderStatusHistoryRepository.save(
-                OrderStatusHistory.builder()
-                        .orderId(orderId)
-                        .oldStatus(oldStatus)
-                        .newStatus(newStatus)
-                        .changedBy(currentUserId)
-                        .build());
+        orderTimelineService.recordStatusChange(orderId, oldStatus, newStatus, currentUserId);
 
         activityLogService.log(ActivityType.ORDER_STATUS_UPDATED, currentUserId, "Sipariş durumu güncellendi: #" + orderId + " -> " + newStatus);
 
@@ -255,7 +250,7 @@ public class OrderServiceImpl implements IOrderService {
                 .newStatus(newStatus)
                 .build());
 
-        return convertOrderToOrderResponse(order);
+        return toOrderResponse(order);
     }
 
     @Transactional
@@ -298,22 +293,20 @@ public class OrderServiceImpl implements IOrderService {
                 .carrierName(carrierName)
                 .build());
 
-        return convertOrderToOrderResponse(order);
+        return toOrderResponse(order);
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // Sipariş İptali & Stok
+    // Sipariş İptali
     // ══════════════════════════════════════════════════════════════════════════
 
     @Override
     @Transactional
     public OrderResponse cancelOrder(Long orderId, Long userId) {
         Order order = getOrderById(orderId);
-        if (!order.getUserId().equals(userId)) {
-            throw new BadRequestException("Bu sipariş size ait değil.");
-        }
-        if (order.getOrderStatus() != OrderStatus.PENDING) {
-            throw new BadRequestException("Sadece bekleyen siparişler iptal edilebilir.");
+        orderAuthorizationService.assertOwner(order, userId);
+        if (order.getOrderStatus() != OrderStatus.PENDING && order.getOrderStatus() != OrderStatus.PAID) {
+            throw new BadRequestException("Sadece bekleyen veya ödenen siparişler iptal edilebilir.");
         }
         OrderResponse response = updateOrderStatus(orderId, OrderStatus.CANCELLED);
         activityLogService.log(ActivityType.ORDER_CANCELLED, userId, "Sipariş iptal edildi: #" + orderId);
@@ -324,189 +317,34 @@ public class OrderServiceImpl implements IOrderService {
     @Transactional
     public void revertStockForOrder(Long orderId) {
         Order order = getOrderById(orderId);
-        revertStockLevels(order.getOrderItems());
+        stockService.revertStockLevels(order.getOrderItems());
         log.info("Sipariş stokları iade edildi. Sipariş ID: {}", orderId);
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // Fatura & Timeline
+    // Fatura & Timeline (delege)
     // ══════════════════════════════════════════════════════════════════════════
 
     @Override
     public OrderInvoiceResponse getOrderInvoice(Long orderId) {
-        Order order = getOrderById(orderId);
-        UserResponse user = userService.getUserResponseById(order.getUserId());
-        String addressSummary = order.getShippingAddress() != null
-                ? String.join(", ", order.getShippingAddress().getAddressLine(),
-                        order.getShippingAddress().getDistrict(), order.getShippingAddress().getCity(),
-                        order.getShippingAddress().getCountry())
-                : "";
-
-        List<OrderInvoiceResponse.InvoiceItemLine> lines = order.getOrderItems().stream()
-                .map(item -> OrderInvoiceResponse.InvoiceItemLine.builder()
-                        .productTitle(item.getTitle())
-                        .quantity(item.getQuantity())
-                        .unitPrice(item.getPrice())
-                        .lineTotal(item.getPrice().multiply(java.math.BigDecimal.valueOf(item.getQuantity())))
-                        .build())
-                .toList();
-
-        return OrderInvoiceResponse.builder()
-                .invoiceNumber("INV-" + order.getId())
-                .orderId(order.getId())
-                .orderDate(order.getOrderDate())
-                .customerName(user.getName())
-                .shippingAddressSummary(addressSummary)
-                .items(lines)
-                .subtotal(order.getTotalAmount())
-                .totalAmount(order.getTotalAmount())
-                .orderStatus(order.getOrderStatus().name())
-                .build();
+        return orderInvoiceService.buildInvoice(getOrderById(orderId));
     }
 
     @Override
     public List<com.mehmetkerem.dto.response.OrderStatusHistoryResponse> getOrderTimeline(Long orderId) {
-        Order order = getOrderById(orderId);
-
-        // Yetkilendirme: sipariş sahibi veya admin görebilir
-        Long currentUserId = com.mehmetkerem.util.SecurityUtils.getCurrentUserId();
-        User currentUser = com.mehmetkerem.util.SecurityUtils.getCurrentUser();
-        boolean isOwner = currentUserId != null && order.getUserId().equals(currentUserId);
-        boolean isAdmin = currentUser != null && currentUser.getRole() == com.mehmetkerem.enums.Role.ADMIN;
-        if (!isOwner && !isAdmin) {
-            throw new BadRequestException("Bu siparişin geçmişini görüntüleme yetkiniz yok.");
-        }
-
-        return orderStatusHistoryRepository.findByOrderIdOrderByChangedAtAsc(orderId)
-                .stream()
-                .map(h -> com.mehmetkerem.dto.response.OrderStatusHistoryResponse.builder()
-                        .id(h.getId())
-                        .oldStatus(h.getOldStatus())
-                        .newStatus(h.getNewStatus())
-                        .changedBy(h.getChangedBy())
-                        .note(h.getNote())
-                        .changedAt(h.getChangedAt())
-                        .build())
-                .toList();
+        return orderTimelineService.getTimeline(getOrderById(orderId));
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // Private Helpers
+    // Private Helper
     // ══════════════════════════════════════════════════════════════════════════
 
-    private List<OrderItem> convertCartItemsToOrderItems(List<CartItem> cartItems) {
-        List<ProductResponse> productList = productService.getProductResponsesByIds(
-                cartItems.stream().map(CartItem::getProductId).toList());
-
-        Map<Long, ProductResponse> productMap = productList.stream()
-                .collect(Collectors.toMap(ProductResponse::getId, p -> p));
-
-        return cartItems.stream()
-                .map(ci -> {
-                    ProductResponse product = productMap.get(ci.getProductId());
-                    if (product == null) {
-                        throw new NotFoundException("Ürün bulunamadı. ID: " + ci.getProductId());
-                    }
-                    return OrderItem.builder()
-                            .productId(ci.getProductId())
-                            .title(product.getTitle())
-                            .price(product.getPrice())
-                            .quantity(ci.getQuantity())
-                            .build();
-                })
-                .toList();
-    }
-
-    private OrderResponse convertOrderToOrderResponse(Order order) {
-        return OrderResponse.builder()
-                .id(order.getId())
-                .orderDate(order.getOrderDate())
-                .orderStatus(order.getOrderStatus())
-                .paymentStatus(order.getPaymentStatus())
-                .user(userService.getUserResponseById(order.getUserId()))
-                .totalAmount(order.getTotalAmount())
-                .shippingAddress(addressMapper.toResponse(order.getShippingAddress()))
-                .orderItems(convertToResponseOrderItems(order.getOrderItems()))
-                .trackingNumber(order.getTrackingNumber())
-                .carrierName(order.getCarrierName())
-                .note(order.getNote())
-                .build();
-    }
-
-    private List<OrderItemResponse> convertToResponseOrderItems(List<OrderItem> orderItems) {
-        return orderItems.stream()
-                .map(orderItem -> OrderItemResponse.builder()
-                        .product(new ProductResponse(orderItem.getProductId(), orderItem.getTitle(),
-                                orderItem.getPrice()))
-                        .quantity(orderItem.getQuantity())
-                        .price(orderItem.getPrice())
-                        .build())
-                .toList();
-    }
-
-    /**
-     * Stok kontrolü ve düşürme — düşük stok uyarılarını döner.
-     * Hiçbir dış servis çağrısı yapmaz (SRP).
-     */
-    private List<OrderEvent.StockAlertInfo> validateAndDeductStock(List<OrderItem> orderItems) {
-        List<Long> productIds = orderItems.stream()
-                .map(OrderItem::getProductId)
-                .toList();
-
-        List<Product> products = productService.getProductsByIds(productIds);
-
-        Map<Long, Product> productMap = products.stream()
-                .collect(Collectors.toMap(Product::getId, p -> p));
-
-        // 1. Önce TÜM ürünlerin stok yeterliliğini kontrol et
-        for (OrderItem item : orderItems) {
-            Product product = productMap.get(item.getProductId());
-            if (product == null) {
-                throw new NotFoundException("Ürün bulunamadı. ID: " + item.getProductId());
-            }
-            if (product.getStock() < item.getQuantity()) {
-                throw new BadRequestException(
-                        String.format(ExceptionMessages.INSUFFICIENT_STOCK, product.getTitle()));
-            }
-        }
-
-        // 2. Kontrol geçtiyse stokları düşür ve düşük stok uyarılarını topla
-        List<OrderEvent.StockAlertInfo> stockAlerts = new ArrayList<>();
-        for (OrderItem item : orderItems) {
-            Product product = productMap.get(item.getProductId());
-            int newStock = product.getStock() - item.getQuantity();
-            product.setStock(newStock);
-
-            if (newStock <= stockAlertThreshold) {
-                stockAlerts.add(OrderEvent.StockAlertInfo.builder()
-                        .productTitle(product.getTitle())
-                        .remainingStock(newStock)
-                        .productId(product.getId())
-                        .build());
-            }
-        }
-
-        productService.saveAllProducts(products);
-        return stockAlerts;
-    }
-
-    private void revertStockLevels(List<OrderItem> orderItems) {
-        List<Long> productIds = orderItems.stream()
-                .map(OrderItem::getProductId)
-                .toList();
-
-        List<Product> products = productService.getProductsByIds(productIds);
-
-        Map<Long, Product> productMap = products.stream()
-                .collect(Collectors.toMap(Product::getId, p -> p));
-
-        for (OrderItem item : orderItems) {
-            Product product = productMap.get(item.getProductId());
-            int newStock = product.getStock() + item.getQuantity();
-            product.setStock(newStock);
-            log.debug("Stok iade edildi. Ürün: {}, Yeni Stok: {}", product.getTitle(), newStock);
-        }
-
-        productService.saveAllProducts(products);
+    private OrderResponse toOrderResponse(Order order) {
+        UserResponse user = userService.getUserResponseById(order.getUserId());
+        OrderResponse resp = orderMapper.toResponse(order);
+        resp.setUser(user);
+        resp.setShippingAddress(addressMapper.toResponse(order.getShippingAddress()));
+        resp.setOrderItems(orderMapper.orderItemsToResponses(order.getOrderItems()));
+        return resp;
     }
 }

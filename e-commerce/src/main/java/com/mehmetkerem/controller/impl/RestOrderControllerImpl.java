@@ -4,8 +4,7 @@ import com.mehmetkerem.controller.IRestOrderController;
 import jakarta.validation.Valid;
 import com.mehmetkerem.dto.response.OrderInvoiceResponse;
 import com.mehmetkerem.dto.response.OrderResponse;
-import com.mehmetkerem.exception.BadRequestException;
-import com.mehmetkerem.model.Order;
+import com.mehmetkerem.service.IOrderAuthorizationService;
 import com.mehmetkerem.service.IOrderService;
 import com.mehmetkerem.util.SecurityUtils;
 import com.mehmetkerem.util.ResultData;
@@ -27,6 +26,7 @@ public class RestOrderControllerImpl implements IRestOrderController {
 
     private final IOrderService orderService;
     private final com.mehmetkerem.service.IInvoicePdfService invoicePdfService;
+    private final IOrderAuthorizationService orderAuthorizationService;
     private static final Set<String> ALLOWED_ORDER_SORT_FIELDS = Set.of(
             "id", "orderDate", "totalAmount", "paymentStatus", "orderStatus", "lastUpdated");
 
@@ -114,37 +114,14 @@ public class RestOrderControllerImpl implements IRestOrderController {
     @Override
     @GetMapping("/{orderId}/invoice")
     public ResultData<OrderInvoiceResponse> getOrderInvoice(@PathVariable Long orderId) {
-        Order order = orderService.getOrderById(orderId);
-        Long currentUserId = SecurityUtils.getCurrentUserId();
-        if (currentUserId == null) {
-            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Oturum gerekli");
-        }
-        boolean isOwner = order.getUserId().equals(currentUserId);
-        boolean isAdmin = SecurityUtils.getCurrentUser() != null
-                && SecurityUtils.getCurrentUser().getRole() == com.mehmetkerem.enums.Role.ADMIN;
-        if (!isOwner && !isAdmin) {
-            throw new BadRequestException("Bu siparişe ait fişi görüntüleme yetkiniz yok.");
-        }
+        orderAuthorizationService.assertOwnerOrAdmin(orderService.getOrderById(orderId));
         return ResultHelper.success(orderService.getOrderInvoice(orderId));
     }
 
     @Override
     @PostMapping("/{orderId}/cancel")
     public ResultData<OrderResponse> cancelOrder(@PathVariable Long orderId) {
-        Order order = orderService.getOrderById(orderId);
-        Long currentUserId = SecurityUtils.getCurrentUserId();
-        if (currentUserId == null) {
-            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Oturum gerekli");
-        }
-        if (!order.getUserId().equals(currentUserId)) {
-            throw new BadRequestException("Bu siparişi iptal etme yetkiniz yok.");
-        }
-        if (order.getOrderStatus() != com.mehmetkerem.enums.OrderStatus.PENDING
-                && order.getOrderStatus() != com.mehmetkerem.enums.OrderStatus.PAID) {
-            throw new BadRequestException("Sadece bekleyen veya ödenen siparişler iptal edilebilir.");
-        }
-        return ResultHelper
-                .success(orderService.updateOrderStatus(orderId, com.mehmetkerem.enums.OrderStatus.CANCELLED));
+        return ResultHelper.success(orderService.cancelOrder(orderId, requireCurrentUserId()));
     }
 
     @Override
@@ -169,17 +146,7 @@ public class RestOrderControllerImpl implements IRestOrderController {
     @Override
     @GetMapping("/{orderId}/invoice/pdf")
     public org.springframework.http.ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long orderId) {
-        Order order = orderService.getOrderById(orderId);
-        Long currentUserId = SecurityUtils.getCurrentUserId();
-        if (currentUserId == null) {
-            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Oturum gerekli");
-        }
-        boolean isOwner = order.getUserId().equals(currentUserId);
-        boolean isAdmin = SecurityUtils.getCurrentUser() != null
-                && SecurityUtils.getCurrentUser().getRole() == com.mehmetkerem.enums.Role.ADMIN;
-        if (!isOwner && !isAdmin) {
-            throw new BadRequestException("Bu faturayı indirme yetkiniz yok.");
-        }
+        orderAuthorizationService.assertOwnerOrAdmin(orderService.getOrderById(orderId));
 
         byte[] pdfBytes = invoicePdfService.generateInvoicePdf(orderId);
         return org.springframework.http.ResponseEntity.ok()

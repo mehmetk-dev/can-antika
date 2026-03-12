@@ -26,6 +26,7 @@ public class RestBankTransferControllerImpl implements IRestBankTransferControll
 
     private final IBankTransferService bankTransferService;
     private final IOrderService orderService;
+    private final com.mehmetkerem.service.IOrderAuthorizationService orderAuthorizationService;
 
     private BankTransferResponse toResponse(BankTransfer t) {
         return BankTransferResponse.builder()
@@ -77,9 +78,7 @@ public class RestBankTransferControllerImpl implements IRestBankTransferControll
         }
 
         Order order = orderService.getOrderById(req.getOrderId());
-        if (!order.getUserId().equals(currentUserId)) {
-            throw new BadRequestException("Bu sipariş için havale bildirimi oluşturamazsınız.");
-        }
+        orderAuthorizationService.assertOwner(order, currentUserId);
         if (order.getPaymentStatus() != com.mehmetkerem.enums.PaymentStatus.PENDING) {
             throw new BadRequestException("Yalnızca bekleyen ödemeler için havale bildirimi yapılabilir.");
         }

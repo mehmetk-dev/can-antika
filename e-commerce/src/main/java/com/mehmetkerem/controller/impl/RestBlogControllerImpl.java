@@ -2,7 +2,7 @@ package com.mehmetkerem.controller.impl;
 
 import com.mehmetkerem.controller.IRestBlogController;
 import com.mehmetkerem.dto.response.CursorResponse;
-import com.mehmetkerem.model.BlogCategory;
+import com.mehmetkerem.mapper.BlogMapper;
 import com.mehmetkerem.model.BlogPost;
 import com.mehmetkerem.service.IBlogService;
 import com.mehmetkerem.util.Result;
@@ -19,54 +19,7 @@ import java.util.List;
 public class RestBlogControllerImpl implements IRestBlogController {
 
     private final IBlogService blogService;
-
-    // Mapping for Categories
-    private com.mehmetkerem.dto.response.BlogCategoryResponse toCatResponse(BlogCategory cat) {
-        return com.mehmetkerem.dto.response.BlogCategoryResponse.builder()
-                .id(cat.getId())
-                .name(cat.getName())
-                .slug(cat.getSlug())
-                .active(cat.isActive())
-                .build();
-    }
-
-    private BlogCategory toCatEntity(com.mehmetkerem.dto.request.BlogCategoryRequest req) {
-        BlogCategory cat = new BlogCategory();
-        cat.setName(req.getName());
-        cat.setSlug(req.getSlug());
-        cat.setActive(req.isActive());
-        return cat;
-    }
-
-    // Mapping for Posts
-    private com.mehmetkerem.dto.response.BlogPostResponse toPostResponse(BlogPost post) {
-        return com.mehmetkerem.dto.response.BlogPostResponse.builder()
-                .id(post.getId())
-                .title(post.getTitle())
-                .slug(post.getSlug())
-                .summary(post.getSummary())
-                .content(post.getContent())
-                .imageUrl(post.getImageUrl())
-                .categoryId(post.getCategoryId())
-                .author(post.getAuthor())
-                .published(post.isPublished())
-                .createdAt(post.getCreatedAt())
-                .updatedAt(post.getUpdatedAt())
-                .build();
-    }
-
-    private BlogPost toPostEntity(com.mehmetkerem.dto.request.BlogPostRequest req) {
-        BlogPost post = new BlogPost();
-        post.setTitle(req.getTitle());
-        post.setSlug(req.getSlug());
-        post.setSummary(req.getSummary());
-        post.setContent(req.getContent());
-        post.setImageUrl(req.getImageUrl());
-        post.setAuthor(req.getAuthor());
-        post.setCategoryId(req.getCategoryId());
-        post.setPublished(req.isPublished());
-        return post;
-    }
+    private final BlogMapper blogMapper;
 
     // ===== PUBLIC =====
     @Override
@@ -75,19 +28,19 @@ public class RestBlogControllerImpl implements IRestBlogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         var result = blogService.getPublishedPosts(page, size);
-        return ResultHelper.cursor(result.map(this::toPostResponse));
+        return ResultHelper.cursor(result.map(blogMapper::toPostResponse));
     }
 
     @Override
     @GetMapping("/v1/blog/{slug}")
     public ResultData<com.mehmetkerem.dto.response.BlogPostResponse> getPostBySlug(@PathVariable String slug) {
-        return ResultHelper.success(toPostResponse(blogService.getPostBySlug(slug)));
+        return ResultHelper.success(blogMapper.toPostResponse(blogService.getPostBySlug(slug)));
     }
 
     @Override
     @GetMapping("/v1/blog/categories")
     public ResultData<List<com.mehmetkerem.dto.response.BlogCategoryResponse>> getActiveCategories() {
-        return ResultHelper.success(blogService.getActiveCategories().stream().map(this::toCatResponse).toList());
+        return ResultHelper.success(blogService.getActiveCategories().stream().map(blogMapper::toCategoryResponse).toList());
     }
 
     // ===== ADMIN: Posts =====
@@ -98,7 +51,7 @@ public class RestBlogControllerImpl implements IRestBlogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         var result = blogService.getAllPosts(page, size);
-        return ResultHelper.cursor(result.map(this::toPostResponse));
+        return ResultHelper.cursor(result.map(blogMapper::toPostResponse));
     }
 
     @Override
@@ -107,15 +60,15 @@ public class RestBlogControllerImpl implements IRestBlogController {
     public ResultData<com.mehmetkerem.dto.response.BlogPostResponse> createPost(@RequestBody com.mehmetkerem.dto.request.BlogPostRequest post) {
         // Not: Category ayarı service katmanında veya burada yapılabilir.
         // Şimdilik postEntity'ye taşıyoruz, detayı servis çözer.
-        BlogPost entity = toPostEntity(post);
-        return ResultHelper.success(toPostResponse(blogService.savePost(entity)));
+        BlogPost entity = blogMapper.toPostEntity(post);
+        return ResultHelper.success(blogMapper.toPostResponse(blogService.savePost(entity)));
     }
 
     @Override
     @Secured("ROLE_ADMIN")
     @PutMapping("/v1/admin/blog/{id}")
     public ResultData<com.mehmetkerem.dto.response.BlogPostResponse> updatePost(@PathVariable Long id, @RequestBody com.mehmetkerem.dto.request.BlogPostRequest post) {
-        return ResultHelper.success(toPostResponse(blogService.updatePost(id, toPostEntity(post))));
+        return ResultHelper.success(blogMapper.toPostResponse(blogService.updatePost(id, blogMapper.toPostEntity(post))));
     }
 
     @Override
@@ -131,21 +84,21 @@ public class RestBlogControllerImpl implements IRestBlogController {
     @Secured("ROLE_ADMIN")
     @GetMapping("/v1/admin/blog/categories")
     public ResultData<List<com.mehmetkerem.dto.response.BlogCategoryResponse>> getAllCategories() {
-        return ResultHelper.success(blogService.getAllCategories().stream().map(this::toCatResponse).toList());
+        return ResultHelper.success(blogService.getAllCategories().stream().map(blogMapper::toCategoryResponse).toList());
     }
 
     @Override
     @Secured("ROLE_ADMIN")
     @PostMapping("/v1/admin/blog/categories")
     public ResultData<com.mehmetkerem.dto.response.BlogCategoryResponse> createCategory(@RequestBody com.mehmetkerem.dto.request.BlogCategoryRequest cat) {
-        return ResultHelper.success(toCatResponse(blogService.saveCategory(toCatEntity(cat))));
+        return ResultHelper.success(blogMapper.toCategoryResponse(blogService.saveCategory(blogMapper.toCategoryEntity(cat))));
     }
 
     @Override
     @Secured("ROLE_ADMIN")
     @PutMapping("/v1/admin/blog/categories/{id}")
     public ResultData<com.mehmetkerem.dto.response.BlogCategoryResponse> updateCategory(@PathVariable Long id, @RequestBody com.mehmetkerem.dto.request.BlogCategoryRequest cat) {
-        return ResultHelper.success(toCatResponse(blogService.updateCategory(id, toCatEntity(cat))));
+        return ResultHelper.success(blogMapper.toCategoryResponse(blogService.updateCategory(id, blogMapper.toCategoryEntity(cat))));
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.mehmetkerem.service.impl;
 
+import com.mehmetkerem.service.IEmailTemplateService;
 import com.mehmetkerem.service.INotificationService;
-import com.mehmetkerem.util.EmailTemplates;
 import com.resend.Resend;
 import com.resend.core.exception.ResendException;
 import com.resend.services.emails.model.CreateEmailOptions;
@@ -21,17 +21,20 @@ public class ResendNotificationService implements INotificationService {
 
     private final Resend resend;
     private final String fromEmail;
+    private final IEmailTemplateService emailTemplateService;
 
     public ResendNotificationService(@Value("${resend.api.key}") String apiKey,
-            @Value("${resend.from.email}") String fromEmail) {
+            @Value("${resend.from.email}") String fromEmail,
+            IEmailTemplateService emailTemplateService) {
         this.resend = new Resend(apiKey);
         this.fromEmail = fromEmail;
+        this.emailTemplateService = emailTemplateService;
     }
 
     @Override
     @Async
     public void sendOrderConfirmation(String toEmail, String orderCode) {
-        sendEmail(toEmail, "Sipariş Onayı - " + orderCode, EmailTemplates.orderConfirmation(orderCode));
+        sendEmail(toEmail, "Sipariş Onayı - " + orderCode, emailTemplateService.renderOrderConfirmation(orderCode));
     }
 
     @Override
@@ -39,33 +42,33 @@ public class ResendNotificationService implements INotificationService {
     public void sendStockAlert(String productName, int currentStock) {
         log.warn("⚠️ Stok uyarısı: {} — kalan: {}", productName, currentStock);
         sendEmail(fromEmail, "⚠️ Stok Uyarısı: " + productName,
-                EmailTemplates.stockAlert(productName, currentStock));
+                emailTemplateService.renderStockAlert(productName, currentStock));
     }
 
     @Override
     @Async
     public void sendPasswordResetLink(String toEmail, String resetUrl) {
-        sendEmail(toEmail, "Şifre Sıfırlama İsteği", EmailTemplates.passwordReset(resetUrl));
+        sendEmail(toEmail, "Şifre Sıfırlama İsteği", emailTemplateService.renderPasswordReset(resetUrl));
     }
 
     @Override
     @Async
     public void sendWelcomeEmail(String toEmail, String name) {
-        sendEmail(toEmail, "Can Antika'ya Hoş Geldiniz!", EmailTemplates.welcome(name));
+        sendEmail(toEmail, "Can Antika'ya Hoş Geldiniz!", emailTemplateService.renderWelcome(name));
     }
 
     @Override
     @Async
     public void sendOrderTrackingEmail(String toEmail, String orderCode, String trackingNumber, String carrier) {
         sendEmail(toEmail, "Siparişiniz Yola Çıktı! - " + orderCode,
-                EmailTemplates.orderTracking(orderCode, trackingNumber, carrier));
+                emailTemplateService.renderOrderTracking(orderCode, trackingNumber, carrier));
     }
 
     @Override
     @Async
     public void sendOrderStatusUpdate(String toEmail, String orderCode, String statusLabel) {
         sendEmail(toEmail, "Sipariş Durumu Güncellendi - " + orderCode,
-                EmailTemplates.orderStatusUpdate(orderCode, statusLabel));
+                emailTemplateService.renderOrderStatusUpdate(orderCode, statusLabel));
     }
 
     private void sendEmail(String to, String subject, String htmlContent) {

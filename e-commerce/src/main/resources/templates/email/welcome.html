@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <div th:fragment="content" style="text-align:center;padding:20px 0;">
+        <p style="color:#2d3830;font-size:16px;line-height:1.7;margin:0 0 16px;">
+            Merhaba <strong style="color:#1a3a2a;" th:text="${name}">İsim</strong>,
+        </p>
+        <p style="color:#2d3830;font-size:16px;line-height:1.7;margin:0 0 28px;">
+            Can Antika ailesine hoş geldiniz! 35 yılı aşkın tecrübemizle sizlere en seçkin antika eserleri sunmaktan
+            gurur duyuyoruz.
+        </p>
+        <div style="border-top:2px solid #1a3a2a;border-bottom:2px solid #1a3a2a;padding:20px 0;margin:24px 0;">
+            <p style="color:#5e6e63;font-size:14px;margin:0;"><strong style="color:#1a3a2a;">Keşfedin:</strong> Osmanlı,
+                Viktoryen, Art Deco ve daha fazlası</p>
+        </div>
+        <a href="https://canantika.com/urunler"
+            style="display:inline-block;background-color:#1a3a2a;color:#c9a84c;text-decoration:none;padding:14px 36px;font-size:13px;font-weight:600;letter-spacing:2px;font-family:'Georgia',serif;">KOLEKSİYONU
+            KEŞFET</a>
+    </div>
+</body>
+
+</html>

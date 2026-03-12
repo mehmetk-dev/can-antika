@@ -6,6 +6,7 @@ import com.mehmetkerem.enums.ReturnStatus;
 import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.ExceptionMessages;
 import com.mehmetkerem.exception.NotFoundException;
+import com.mehmetkerem.mapper.OrderReturnMapper;
 import com.mehmetkerem.model.Order;
 import com.mehmetkerem.model.OrderReturn;
 import com.mehmetkerem.repository.OrderReturnRepository;
@@ -25,14 +26,14 @@ public class OrderReturnServiceImpl implements IOrderReturnService {
 
     private final OrderReturnRepository orderReturnRepository;
     private final IOrderService orderService;
+    private final OrderReturnMapper orderReturnMapper;
+    private final com.mehmetkerem.service.IOrderAuthorizationService orderAuthorizationService;
 
     @Override
     @Transactional
     public OrderReturnResponse createReturn(Long userId, OrderReturnRequest request) {
         Order order = orderService.getOrderById(request.getOrderId());
-        if (!order.getUserId().equals(userId)) {
-            throw new BadRequestException("Bu sipariş size ait değil.");
-        }
+        orderAuthorizationService.assertOwner(order, userId);
         boolean hasPending = orderReturnRepository.existsByOrderIdAndUserIdAndStatus(
                 request.getOrderId(), userId, ReturnStatus.PENDING);
         if (hasPending) {
@@ -47,20 +48,20 @@ public class OrderReturnServiceImpl implements IOrderReturnService {
                 .createdAt(LocalDateTime.now())
                 .build();
         orderReturn = orderReturnRepository.save(orderReturn);
-        return toResponse(orderReturn);
+        return orderReturnMapper.toResponse(orderReturn);
     }
 
     @Override
     public List<OrderReturnResponse> getReturnsByUser(Long userId) {
         return orderReturnRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
-                .map(this::toResponse)
+                .map(orderReturnMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<OrderReturnResponse> getAllReturns() {
         return orderReturnRepository.findAll().stream()
-                .map(this::toResponse)
+                .map(orderReturnMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -75,7 +76,7 @@ public class OrderReturnServiceImpl implements IOrderReturnService {
         orderReturn.setStatus(ReturnStatus.APPROVED);
         orderReturn.setProcessedAt(LocalDateTime.now());
         orderReturn = orderReturnRepository.save(orderReturn);
-        return toResponse(orderReturn);
+        return orderReturnMapper.toResponse(orderReturn);
     }
 
     @Override
@@ -88,24 +89,12 @@ public class OrderReturnServiceImpl implements IOrderReturnService {
         orderReturn.setStatus(ReturnStatus.REJECTED);
         orderReturn.setProcessedAt(LocalDateTime.now());
         orderReturn = orderReturnRepository.save(orderReturn);
-        return toResponse(orderReturn);
+        return orderReturnMapper.toResponse(orderReturn);
     }
 
     private OrderReturn getById(Long id) {
         return orderReturnRepository.findById(id)
                 .orElseThrow(
                         () -> new NotFoundException(String.format(ExceptionMessages.NOT_FOUND, id, "iade talebi")));
-    }
-
-    private OrderReturnResponse toResponse(OrderReturn r) {
-        return OrderReturnResponse.builder()
-                .id(r.getId())
-                .orderId(r.getOrderId())
-                .userId(r.getUserId())
-                .status(r.getStatus())
-                .reason(r.getReason())
-                .createdAt(r.getCreatedAt())
-                .processedAt(r.getProcessedAt())
-                .build();
     }
 }

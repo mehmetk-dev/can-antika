@@ -10,6 +10,7 @@ import Link from "next/link"
 import Image from "next/image"
 import DOMPurify from "dompurify"
 import type { BlogPost, BlogCategory } from "@/lib/types"
+import { formatDateTR } from "@/lib/utils"
 
 interface BlogDetailClientProps {
     initialPost: BlogPost | null
@@ -33,11 +34,7 @@ export function BlogDetailClient({ initialPost }: BlogDetailClientProps) {
 
     const formatDate = (dateStr: string) => {
         try {
-            return new Date(dateStr).toLocaleDateString("tr-TR", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-            })
+            return formatDateTR(dateStr)
         } catch {
             return ""
         }

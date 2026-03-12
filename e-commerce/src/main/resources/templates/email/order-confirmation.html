@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <div th:fragment="content" style="text-align:center;padding:20px 0;">
+        <div style="display:inline-block;background-color:#e8f0eb;border-radius:50%;padding:20px;margin-bottom:16px;">
+            <span style="font-size:36px;color:#1a3a2a;">✓</span>
+        </div>
+        <p style="color:#2d3830;font-size:16px;line-height:1.7;margin:16px 0;">Siparişiniz başarıyla alındı ve işleme
+            konuldu.</p>
+        <div style="background-color:#f7faf8;border:2px solid #1a3a2a;padding:24px;margin:20px 0;">
+            <p style="margin:0;color:#5e6e63;font-size:12px;text-transform:uppercase;letter-spacing:2px;">Sipariş
+                Kodunuz</p>
+            <p style="margin:8px 0 0;color:#1a3a2a;font-size:26px;font-weight:700;letter-spacing:3px;font-family:'Georgia',serif;"
+                th:text="${orderCode}">ORD-12345678</p>
+        </div>
+        <p style="color:#5e6e63;font-size:14px;line-height:1.6;">Siparişinizin durumunu hesabınızdan takip
+            edebilirsiniz.</p>
+    </div>
+</body>
+
+</html>

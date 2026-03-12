@@ -13,14 +13,8 @@ import { MoreHorizontal, Eye, Truck, CheckCircle, Loader2, XCircle, CreditCard, 
 import { orderApi } from "@/lib/api"
 import { toast } from "sonner"
 import type { OrderResponse } from "@/lib/types"
-
-const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "outline"; className: string }> = {
-  PENDING: { label: "Beklemede", variant: "secondary", className: "" },
-  PAID: { label: "Ödendi", variant: "default", className: "bg-primary/20 text-primary" },
-  SHIPPED: { label: "Kargoda", variant: "outline", className: "border-accent text-accent" },
-  DELIVERED: { label: "Teslim Edildi", variant: "default", className: "bg-primary/10 text-primary" },
-  CANCELLED: { label: "İptal", variant: "secondary", className: "bg-destructive/20 text-destructive" },
-}
+import { getOrderStatus } from "@/lib/order-utils"
+import { formatDateTR } from "@/lib/utils"
 
 const carriers = [
   "Yurtiçi Kargo",
@@ -94,7 +88,7 @@ export default function AdminOrdersPage() {
     try {
       const updated = await orderApi.updateOrderStatus(orderId, newStatus)
       setOrders((prev) => prev.map((o) => (o.id === orderId ? updated : o)))
-      toast.success(`Sipariş durumu güncellendi: ${statusConfig[newStatus]?.label || newStatus}`)
+      toast.success(`Sipariş durumu güncellendi: ${getOrderStatus(newStatus).label}`)
     } catch {
       toast.error("Durum güncellenemedi")
     }
@@ -102,7 +96,7 @@ export default function AdminOrdersPage() {
 
   const formatDate = (dateStr: string) => {
     try {
-      return new Date(dateStr).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })
+      return formatDateTR(dateStr, "compact")
     } catch {
       return dateStr
     }
@@ -154,7 +148,7 @@ export default function AdminOrdersPage() {
             </TableHeader>
             <TableBody>
               {filteredOrders.map((order) => {
-                const status = statusConfig[order.orderStatus] || { label: order.orderStatus, variant: "outline" as const, className: "" }
+                const status = getOrderStatus(order.orderStatus)
                 return (
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">#{order.id}</TableCell>
@@ -322,8 +316,8 @@ export default function AdminOrdersPage() {
             <div className="space-y-4 py-2">
               {/* Status + Tracking */}
               <div className="flex items-center justify-between">
-                <Badge variant={statusConfig[detailOrder.orderStatus]?.variant || "outline"} className={statusConfig[detailOrder.orderStatus]?.className || ""}>
-                  {statusConfig[detailOrder.orderStatus]?.label || detailOrder.orderStatus}
+                <Badge variant={getOrderStatus(detailOrder.orderStatus).variant} className={getOrderStatus(detailOrder.orderStatus).className}>
+                  {getOrderStatus(detailOrder.orderStatus).label}
                 </Badge>
                 {detailOrder.trackingNumber && (
                   <div className="text-right text-sm">

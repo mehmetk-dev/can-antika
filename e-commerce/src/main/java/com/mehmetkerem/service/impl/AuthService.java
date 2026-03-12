@@ -145,32 +145,6 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
     }
 
     @Override
-    public com.mehmetkerem.dto.response.UserResponse updateProfile(Long userId,
-            com.mehmetkerem.dto.request.ProfileUpdateRequest request) {
-        User user = userService.getUserById(userId);
-
-        String newName = request.getName() != null ? request.getName().trim() : "";
-        String oldName = user.getName() != null ? user.getName().trim() : "";
-
-        if (newName.equalsIgnoreCase(oldName)) {
-            throw new BadRequestException("Yeni isim eskisiyle aynı olamaz.");
-        }
-
-        if (newName.isEmpty()) {
-            throw new BadRequestException("İsim alanı boş bırakılamaz.");
-        }
-
-        user.setName(newName);
-        userRepository.save(user);
-        return userService.getUserResponseById(userId);
-    }
-
-    @Override
-    public com.mehmetkerem.dto.response.UserResponse getMe(Long userId) {
-        return userService.getUserResponseById(userId);
-    }
-
-    @Override
     public void logout(Long userId) {
         refreshTokenService.deleteByUserId(userId);
     }

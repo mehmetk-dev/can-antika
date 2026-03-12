@@ -6,6 +6,7 @@ import { Calendar, User, ArrowRight, Search, Tag } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { formatDateTR } from "@/lib/utils"
 
 interface BlogPost {
     id: number
@@ -50,11 +51,7 @@ export function BlogPostsClient({ posts, categories }: BlogPostsClientProps) {
 
     const formatDate = (dateStr: string) => {
         try {
-            return new Date(dateStr).toLocaleDateString("tr-TR", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-            })
+            return formatDateTR(dateStr)
         } catch {
             return ""
         }

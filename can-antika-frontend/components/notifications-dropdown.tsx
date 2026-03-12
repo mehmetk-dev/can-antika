@@ -13,7 +13,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { notificationApi } from "@/lib/api"
 import type { NotificationResponse } from "@/lib/types"
-import { cn } from "@/lib/utils"
+import { cn, formatDateTR } from "@/lib/utils"
 
 export function NotificationsDropdown() {
     const [notifications, setNotifications] = useState<NotificationResponse[]>([])
@@ -163,7 +163,7 @@ export function NotificationsDropdown() {
                                                 {notification.title}
                                             </p>
                                             <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                                {parseDate(notification.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                                                {formatDateTR(parseDate(notification.createdAt), "day-month")}
                                             </span>
                                         </div>
                                         <p className="text-sm text-muted-foreground line-clamp-2">

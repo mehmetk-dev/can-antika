@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { productApi } from "@/lib/api"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { ProductDetail } from "@/components/product/product-detail"
 import type { ProductResponse } from "@/lib/types"
 
@@ -33,6 +35,10 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
     }, [initialProduct, slug, router])
 
     return (
-        <ProductDetail product={initialProduct} relatedProducts={relatedProducts} />
+        <div className="min-h-screen bg-background">
+            <Header />
+            <ProductDetail product={initialProduct} relatedProducts={relatedProducts} />
+            <Footer />
+        </div>
     )
 }

@@ -4,6 +4,7 @@ import com.mehmetkerem.dto.request.CouponRequest;
 import com.mehmetkerem.dto.response.CouponResponse;
 import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.NotFoundException;
+import com.mehmetkerem.mapper.CouponMapper;
 import com.mehmetkerem.model.Coupon;
 import com.mehmetkerem.repository.CouponRepository;
 import com.mehmetkerem.service.ICouponService;
@@ -20,22 +21,8 @@ import java.util.List;
 public class CouponServiceImpl implements ICouponService {
 
     private final CouponRepository couponRepository;
+    private final CouponMapper couponMapper;
 
-    private CouponResponse mapToResponse(Coupon coupon) {
-        return CouponResponse.builder()
-                .id(coupon.getId())
-                .code(coupon.getCode())
-                .discountAmount(coupon.getDiscountAmount())
-                .discountType(coupon.getDiscountType())
-                .minCartAmount(coupon.getMinCartAmount())
-                .expirationDate(coupon.getExpirationDate())
-                .maxUsageCount(coupon.getMaxUsageCount())
-                .currentUsageCount(coupon.getUsageCount())
-                .perUserLimit(coupon.getPerUserLimit())
-                .description(coupon.getDescription())
-                .active(coupon.isActive())
-                .build();
-    }
 
     @Override
     public CouponResponse createCoupon(String code, BigDecimal discountAmount, BigDecimal minCartAmount, int daysValid) {
@@ -52,7 +39,7 @@ public class CouponServiceImpl implements ICouponService {
                 .usageCount(0)
                 .build();
 
-        return mapToResponse(couponRepository.save(coupon));
+        return couponMapper.toResponse(couponRepository.save(coupon));
     }
 
     @Override
@@ -74,19 +61,19 @@ public class CouponServiceImpl implements ICouponService {
                 .usageCount(0)
                 .build();
 
-        return mapToResponse(couponRepository.save(coupon));
+        return couponMapper.toResponse(couponRepository.save(coupon));
     }
 
     @Override
     public CouponResponse getCouponByCode(String code) {
         Coupon coupon = couponRepository.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Kupon bulunamadı!"));
-        return mapToResponse(coupon);
+        return couponMapper.toResponse(coupon);
     }
 
     @Override
     public List<CouponResponse> getAllCoupons() {
-        return couponRepository.findAll().stream().map(this::mapToResponse).toList();
+        return couponRepository.findAll().stream().map(couponMapper::toResponse).toList();
     }
 
     @Override
@@ -104,7 +91,7 @@ public class CouponServiceImpl implements ICouponService {
         existing.setDescription(request.getDescription());
         existing.setActive(request.isActive());
 
-        return mapToResponse(couponRepository.save(existing));
+        return couponMapper.toResponse(couponRepository.save(existing));
     }
 
     @Transactional

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { couponApi } from "@/lib/api"
 import {
+import { formatDateTR } from "@/lib/utils"
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose,
 } from "@/components/ui/dialog"
 
@@ -157,7 +158,7 @@ export default function CouponsPage() {
                                     <div className="flex items-center gap-1 shrink-0">
                                         <span className="text-xs text-muted-foreground mr-2 hidden sm:block">
                                             <Calendar className="h-3 w-3 inline mr-1" />
-                                            {new Date(c.expirationDate).toLocaleDateString("tr-TR")}
+                                            {formatDateTR(c.expirationDate, "minimal")}
                                         </span>
                                         <Button size="icon" variant="ghost" onClick={() => setEditCoupon({ ...c })}>
                                             <Pencil className="h-4 w-4" />

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <div th:fragment="content" style="text-align:center;padding:20px 0;">
+        <div style="display:inline-block;background-color:#fef2f2;border-radius:50%;padding:20px;margin-bottom:16px;">
+            <span style="font-size:36px;">⚠️</span>
+        </div>
+        <p style="color:#2d3830;font-size:16px;line-height:1.7;margin:16px 0;">
+            Aşağıdaki ürünün stoku kritik seviyeye düştü.
+        </p>
+        <div style="background-color:#fef8f8;border:2px solid #b91c1c;padding:24px;margin:20px 0;">
+            <p style="margin:0;color:#5e6e63;font-size:12px;text-transform:uppercase;letter-spacing:2px;">Ürün</p>
+            <p style="margin:8px 0 0;color:#1a3a2a;font-size:18px;font-weight:700;font-family:'Georgia',serif;"
+                th:text="${productName}">Ürün Adı</p>
+            <div style="margin:16px auto;width:40px;height:1px;background-color:#d6ddd8;"></div>
+            <p style="margin:0;color:#b91c1c;font-size:26px;font-weight:700;">Kalan stok: <span
+                    th:text="${currentStock}">0</span></p>
+        </div>
+        <p style="color:#5e6e63;font-size:14px;">Lütfen stok güncellemesi yapınız.</p>
+    </div>
+</body>
+
+</html>

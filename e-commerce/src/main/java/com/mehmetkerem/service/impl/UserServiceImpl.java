@@ -1,5 +1,6 @@
 package com.mehmetkerem.service.impl;
 
+import com.mehmetkerem.dto.request.ProfileUpdateRequest;
 import com.mehmetkerem.dto.request.UserRequest;
 import com.mehmetkerem.dto.response.UserResponse;
 import com.mehmetkerem.exception.BadRequestException;
@@ -37,6 +38,25 @@ public class UserServiceImpl implements IUserService {
 
     private User createUser(UserRequest request) {
         return userMapper.toEntity(request);
+    }
+
+    @Override
+    public UserResponse updateProfile(Long userId, ProfileUpdateRequest request) {
+        User user = getUserById(userId);
+
+        String newName = request.getName() != null ? request.getName().trim() : "";
+        String oldName = user.getName() != null ? user.getName().trim() : "";
+
+        if (newName.equalsIgnoreCase(oldName)) {
+            throw new BadRequestException("Yeni isim eskisiyle aynı olamaz.");
+        }
+        if (newName.isEmpty()) {
+            throw new BadRequestException("İsim alanı boş bırakılamaz.");
+        }
+
+        user.setName(newName);
+        userRepository.save(user);
+        return getUserResponseById(userId);
     }
 
     @Override

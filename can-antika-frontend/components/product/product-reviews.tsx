@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import { useAuth } from "@/lib/auth-context"
 import { reviewApi } from "@/lib/api"
 import type { ReviewResponse } from "@/lib/types"
+import { formatDateTR } from "@/lib/utils"
 
 interface ProductReviewsProps {
     productId: number
@@ -136,7 +137,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
                                     </div>
                                 </div>
                                 <span className="text-xs text-muted-foreground">
-                                    {new Date(review.createdAt).toLocaleDateString("tr-TR")}
+                                    {formatDateTR(review.createdAt, "minimal")}
                                 </span>
                             </div>
                             <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{review.comment}</p>

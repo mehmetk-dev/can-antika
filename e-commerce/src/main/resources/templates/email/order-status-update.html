@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <div th:fragment="content" style="text-align:center;padding:20px 0;">
+        <p style="color:#2d3830;font-size:16px;line-height:1.7;margin:0 0 16px;">
+            <strong style="color:#1a3a2a;" th:text="${orderCode}">ORD-123</strong> numaralı siparişinizin durumu
+            güncellendi.
+        </p>
+        <div style="background-color:#f7faf8;border:2px solid #1a3a2a;padding:24px;margin:20px 0;">
+            <p style="margin:0;color:#5e6e63;font-size:12px;text-transform:uppercase;letter-spacing:2px;">Yeni Durum</p>
+            <p style="margin:10px 0 0;color:#1a3a2a;font-size:22px;font-weight:700;font-family:'Georgia',serif;"
+                th:text="${statusLabel}">
+                Hazırlanıyor</p>
+        </div>
+        <p style="color:#5e6e63;font-size:14px;">Detaylar için hesabınızı kontrol edebilirsiniz.</p>
+    </div>
+</body>
+
+</html>

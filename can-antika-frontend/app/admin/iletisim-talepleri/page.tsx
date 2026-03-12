@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { contactApi } from "@/lib/api"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
+import { formatDateTR } from "@/lib/utils"
 
 interface ContactReq { id: number; name: string; email: string; phone: string; subject: string; message: string; read: boolean; adminNote: string; createdAt: string }
 
@@ -76,7 +77,7 @@ export default function ContactRequestsPage() {
                                             <p className="text-sm font-semibold truncate">{r.subject || "(Konu yok)"}</p>
                                         </div>
                                         <p className="text-sm text-muted-foreground truncate">{r.name} · {r.email}</p>
-                                        <p className="text-xs text-muted-foreground mt-0.5">{r.createdAt ? new Date(r.createdAt).toLocaleString("tr-TR") : ""}</p>
+                                        <p className="text-xs text-muted-foreground mt-0.5">{r.createdAt ? formatDateTR(r.createdAt, "datetime-minimal") : ""}</p>
                                     </button>
                                     <div className="flex gap-1 shrink-0">
                                         <Button size="icon" variant="ghost" onClick={() => openDetail(r)}><Eye className="h-4 w-4" /></Button>
@@ -98,7 +99,7 @@ export default function ContactRequestsPage() {
                                 <div><span className="text-muted-foreground">Ad:</span><p className="font-medium">{selected.name}</p></div>
                                 <div><span className="text-muted-foreground">E-posta:</span><p className="font-medium">{selected.email}</p></div>
                                 {selected.phone && <div><span className="text-muted-foreground">Telefon:</span><p className="font-medium">{selected.phone}</p></div>}
-                                <div><span className="text-muted-foreground">Tarih:</span><p>{new Date(selected.createdAt).toLocaleString("tr-TR")}</p></div>
+                                <div><span className="text-muted-foreground">Tarih:</span><p>{formatDateTR(selected.createdAt, "datetime-minimal")}</p></div>
                             </div>
                             <div><span className="text-sm text-muted-foreground">Konu:</span><p className="font-medium">{selected.subject}</p></div>
                             <div className="bg-muted/50 rounded-lg p-3"><p className="text-sm whitespace-pre-wrap">{selected.message}</p></div>

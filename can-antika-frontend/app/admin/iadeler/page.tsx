@@ -9,12 +9,8 @@ import { Loader2, CheckCircle, XCircle } from "lucide-react"
 import { orderReturnApi } from "@/lib/api"
 import { toast } from "sonner"
 import type { OrderReturnResponse } from "@/lib/types"
-
-const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "outline"; className: string }> = {
-    PENDING: { label: "Beklemede", variant: "secondary", className: "bg-amber-100 text-amber-800" },
-    APPROVED: { label: "Onaylandı", variant: "default", className: "bg-green-100 text-green-800" },
-    REJECTED: { label: "Reddedildi", variant: "secondary", className: "bg-red-100 text-red-800" },
-}
+import { getReturnStatus } from "@/lib/order-utils"
+import { formatDateTR } from "@/lib/utils"
 
 export default function AdminReturnsPage() {
     const [returns, setReturns] = useState<OrderReturnResponse[]>([])
@@ -51,7 +47,7 @@ export default function AdminReturnsPage() {
 
     const formatDate = (dateStr: string) => {
         try {
-            return new Date(dateStr).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })
+            return formatDateTR(dateStr, "compact")
         } catch {
             return dateStr
         }
@@ -99,7 +95,7 @@ export default function AdminReturnsPage() {
                         </TableHeader>
                         <TableBody>
                             {filteredReturns.map((ret) => {
-                                const status = statusConfig[ret.status] || { label: ret.status, variant: "outline" as const, className: "" }
+                                const status = getReturnStatus(ret.status)
                                 return (
                                     <TableRow key={ret.id}>
                                         <TableCell className="font-medium">#{ret.id}</TableCell>

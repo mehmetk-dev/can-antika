@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { activityLogApi } from "@/lib/api"
+import { formatDateTR } from "@/lib/utils"
 
 const actionLabels: Record<string, { label: string; color: string }> = {
     PRODUCT_CREATED: { label: "Ürün Eklendi", color: "bg-emerald-500/15 text-emerald-700" },
@@ -86,7 +87,7 @@ export default function ActivityLogsPage() {
                                             )}
                                         </div>
                                         <span className="text-xs text-muted-foreground shrink-0">
-                                            {new Date(log.createdAt).toLocaleString("tr-TR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                                            {formatDateTR(log.createdAt, "datetime-compact")}
                                         </span>
                                     </div>
                                 )

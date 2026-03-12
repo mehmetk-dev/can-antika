@@ -1,5 +1,6 @@
 package com.mehmetkerem.service;
 
+import com.mehmetkerem.dto.request.ProfileUpdateRequest;
 import com.mehmetkerem.dto.request.UserRequest;
 import com.mehmetkerem.dto.response.UserResponse;
 import com.mehmetkerem.enums.Role;
@@ -8,6 +9,8 @@ import com.mehmetkerem.model.User;
 import java.util.List;
 
 public interface IUserService {
+
+    UserResponse updateProfile(Long userId, ProfileUpdateRequest request);
 
     UserResponse saveUser(UserRequest request);
 

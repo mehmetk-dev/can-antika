@@ -6,6 +6,7 @@ import com.mehmetkerem.dto.response.LoginResponse;
 import com.mehmetkerem.dto.response.UserResponse;
 import com.mehmetkerem.model.User;
 import com.mehmetkerem.service.IAuthService;
+import com.mehmetkerem.service.IUserService;
 import com.mehmetkerem.util.CookieUtil;
 import com.mehmetkerem.util.ResultData;
 import com.mehmetkerem.util.ResultHelper;
@@ -25,6 +26,7 @@ import java.util.Map;
 public class RestAuthControllerImpl implements IRestAuthController {
 
     private final IAuthService authService;
+    private final IUserService userService;
     private final CookieUtil cookieUtil;
 
     @Override
@@ -111,13 +113,13 @@ public class RestAuthControllerImpl implements IRestAuthController {
             @RequestBody @Valid ProfileUpdateRequest request,
             Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return ResultHelper.success(authService.updateProfile(user.getId(), request));
+        return ResultHelper.success(userService.updateProfile(user.getId(), request));
     }
 
     @Override
     @GetMapping("/me")
     public ResultData<com.mehmetkerem.dto.response.UserResponse> me(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return ResultHelper.success(authService.getMe(user.getId()));
+        return ResultHelper.success(userService.getUserResponseById(user.getId()));
     }
 }

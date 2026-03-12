@@ -99,3 +99,60 @@ export function VintageCorner({ className }: IconProps) {
         </svg>
     )
 }
+
+export function VintageLocationIcon({ className = "w-6 h-6" }: IconProps) {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+            <circle cx="12" cy="9" r="2.5" />
+            <path d="M9 9c0-1.66 1.34-3 3-3" strokeLinecap="round" />
+            <path d="M12 5.5V4M12 14v-1.5M8.5 9H7M17 9h-1.5" strokeWidth="1" strokeLinecap="round" opacity="0.5" />
+        </svg>
+    )
+}
+
+export function VintagePhoneIcon({ className = "w-6 h-6" }: IconProps) {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.5">
+            <rect x="5" y="4" width="14" height="16" rx="2" />
+            <circle cx="12" cy="10" r="4" />
+            <circle cx="12" cy="10" r="1.5" />
+            <circle cx="12" cy="6.5" r="0.5" fill="currentColor" />
+            <circle cx="15" cy="8" r="0.5" fill="currentColor" />
+            <circle cx="15.5" cy="11" r="0.5" fill="currentColor" />
+            <circle cx="14" cy="13.5" r="0.5" fill="currentColor" />
+            <circle cx="10" cy="13.5" r="0.5" fill="currentColor" />
+            <circle cx="8.5" cy="11" r="0.5" fill="currentColor" />
+            <circle cx="9" cy="8" r="0.5" fill="currentColor" />
+            <path d="M7 17h10" strokeLinecap="round" />
+        </svg>
+    )
+}
+
+export function VintageMailIcon({ className = "w-6 h-6" }: IconProps) {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.5">
+            <rect x="3" y="5" width="18" height="14" rx="1" />
+            <path d="M3 5l9 7 9-7" />
+            <circle cx="12" cy="15" r="2.5" />
+            <path d="M10.5 15h3M12 13.5v3" strokeWidth="1" />
+            <path d="M6 8l4 3M18 8l-4 3" strokeWidth="1" opacity="0.4" />
+        </svg>
+    )
+}
+
+export function VintageClockIcon({ className = "w-6 h-6" }: IconProps) {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="13" r="9" />
+            <circle cx="12" cy="13" r="7" strokeWidth="1" />
+            <circle cx="12" cy="3" r="1.5" />
+            <path d="M12 4.5V6" />
+            <path d="M12 13V9" strokeWidth="2" strokeLinecap="round" />
+            <path d="M12 13l3 2" strokeWidth="2" strokeLinecap="round" />
+            <path d="M12 7v0.5M12 18.5v0.5M7 13h0.5M16.5 13h0.5" strokeWidth="1" strokeLinecap="round" />
+            <text x="12" y="10" textAnchor="middle" fontSize="2" fill="currentColor" stroke="none">XII</text>
+            <text x="12" y="18" textAnchor="middle" fontSize="2" fill="currentColor" stroke="none">VI</text>
+        </svg>
+    )
+}

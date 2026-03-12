@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <div th:fragment="content" style="text-align:center;padding:20px 0;">
+        <div style="display:inline-block;background-color:#e8f0eb;border-radius:50%;padding:20px;margin-bottom:16px;">
+            <span style="font-size:36px;">📦</span>
+        </div>
+        <p style="color:#2d3830;font-size:16px;line-height:1.7;margin:16px 0;">Siparişiniz kargoya verildi!</p>
+        <div style="background-color:#f7faf8;border:2px solid #1a3a2a;padding:24px;margin:20px 0;">
+            <table width="100%" cellpadding="8" cellspacing="0" style="font-size:14px;">
+                <tr>
+                    <td style="color:#5e6e63;text-align:right;width:50%;font-size:13px;">Sipariş:</td>
+                    <td style="color:#1a3a2a;font-weight:600;" th:text="${orderCode}">ORD-123</td>
+                </tr>
+                <tr>
+                    <td style="color:#5e6e63;text-align:right;font-size:13px;">Kargo Firması:</td>
+                    <td style="color:#1a3a2a;font-weight:600;" th:text="${carrier}">Yurtiçi</td>
+                </tr>
+                <tr>
+                    <td style="color:#5e6e63;text-align:right;font-size:13px;">Takip No:</td>
+                    <td style="color:#1a3a2a;font-weight:700;letter-spacing:2px;font-size:16px;"
+                        th:text="${trackingNumber}">123456</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
