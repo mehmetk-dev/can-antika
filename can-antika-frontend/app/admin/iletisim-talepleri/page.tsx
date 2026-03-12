@@ -24,7 +24,7 @@ export default function ContactRequestsPage() {
     const load = async () => {
         try {
             const [data, countData] = await Promise.all([contactApi.getAll(0, 100), contactApi.getUnreadCount()])
-            setRequests(data.items || [])
+            setRequests((data.items as unknown as ContactReq[]) || [])
             setUnread(countData.count)
         } catch { toast.error("Yüklenemedi") }
         finally { setLoading(false) }
