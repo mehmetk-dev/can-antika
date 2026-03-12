@@ -45,7 +45,7 @@ export default function CouponsPage() {
     const loadCoupons = async () => {
         try {
             const data = await couponApi.getAll()
-            setCoupons(data)
+            setCoupons(data as unknown as Coupon[])
         } catch { toast.error("Kuponlar yüklenemedi") }
         finally { setLoading(false) }
     }

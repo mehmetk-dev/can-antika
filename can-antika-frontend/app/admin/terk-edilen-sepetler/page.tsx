@@ -26,7 +26,7 @@ export default function AbandonedCartsPage() {
 
     useEffect(() => {
         reportApi.abandonedCarts(0, 50)
-            .then((res) => setCarts(res.items || []))
+            .then((res) => setCarts((res.items as unknown as AbandonedCart[]) || []))
             .catch(() => toast.error("Veriler yüklenemedi"))
             .finally(() => setLoading(false))
     }, [])
