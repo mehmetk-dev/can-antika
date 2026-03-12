@@ -16,7 +16,7 @@ export default function SmsSettingsTab({ settings, onChange }: SettingsTabProps)
                     <label htmlFor="smsEnabled" className="text-sm font-semibold cursor-pointer">
                         SMS Gönderimi {settings.smsEnabled ? "🟢 Aktif" : "🔴 Kapalı"}
                     </label>
-                    <p className="text-xs text-muted-foreground">Sipariş ve bildirim SMS'leri</p>
+                    <p className="text-xs text-muted-foreground">Sipariş ve bildirim SMS&apos;leri</p>
                 </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
