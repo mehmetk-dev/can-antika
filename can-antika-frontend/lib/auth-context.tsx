@@ -9,7 +9,8 @@ import {
     type ReactNode,
 } from "react";
 import type { UserResponse, LoginRequest, RegisterRequest } from "./types";
-import { authApi } from "./api";
+import { authApi, cartApi } from "./api";
+import { guestCart } from "./guest-cart";
 
 interface AuthContextType {
     user: UserResponse | null;
@@ -45,6 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Backend cookie set eder, response body sadece user döner
         const user = await authApi.login(data);
         setUser(user);
+
+        // Guest sepetindeki ürünleri backend'e senkronize et
+        const guestItems = guestCart.toSyncPayload();
+        if (guestItems.length > 0) {
+            cartApi.syncCart(guestItems)
+                .then(() => guestCart.clear())
+                .catch(() => { /* senkronizasyon başarısız olursa guest cart kalır */ });
+        }
+
         return user;
     }, []);
 

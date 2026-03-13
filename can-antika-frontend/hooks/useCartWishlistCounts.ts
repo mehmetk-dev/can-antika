@@ -1,16 +1,20 @@
 import { useState, useEffect } from "react"
 import { cartApi, wishlistApi } from "@/lib/api"
+import { guestCart } from "@/lib/guest-cart"
 
 export function useCartWishlistCounts(isAuthenticated: boolean) {
     const [cartCount, setCartCount] = useState(0)
     const [wishlistCount, setWishlistCount] = useState(0)
 
     useEffect(() => {
-        if (!isAuthenticated) return
-
         const fetchCounts = () => {
-            cartApi.getCart().then((cart) => setCartCount(cart.items?.length ?? 0)).catch((e) => console.error("Sepet sayısı alınamadı:", e))
-            wishlistApi.getWishlist().then((list) => setWishlistCount(list.items?.length ?? 0)).catch((e) => console.error("İstek listesi sayısı alınamadı:", e))
+            if (isAuthenticated) {
+                cartApi.getCart().then((cart) => setCartCount(cart.items?.length ?? 0)).catch((e) => console.error("Sepet sayısı alınamadı:", e))
+                wishlistApi.getWishlist().then((list) => setWishlistCount(list.items?.length ?? 0)).catch((e) => console.error("İstek listesi sayısı alınamadı:", e))
+            } else {
+                setCartCount(guestCart.getCount())
+                setWishlistCount(0)
+            }
         }
 
         fetchCounts()

@@ -3,42 +3,57 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Minus, Plus, Trash2, ShoppingBag, Loader2, ArrowRight } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { AuthGuard } from "@/components/auth-guard"
+import { useAuth } from "@/lib/auth-context"
 import { cartApi } from "@/lib/api"
+import { guestCart, type GuestCartItem } from "@/lib/guest-cart"
 import { toast } from "sonner"
 import type { CartResponse, CartItemResponse } from "@/lib/types"
 
 function CartContent() {
+    const { isAuthenticated, isLoading: authLoading } = useAuth()
+    const router = useRouter()
     const [cart, setCart] = useState<CartResponse | null>(null)
+    const [guestItems, setGuestItems] = useState<GuestCartItem[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set())
 
-    const fetchCart = async () => {
-        try {
-            const data = await cartApi.getCart()
-            setCart(data)
-        } catch {
-            setCart(null)
-        } finally {
+    const isGuest = !authLoading && !isAuthenticated
+
+    const fetchCart = () => {
+        if (authLoading) return
+        if (isAuthenticated) {
+            cartApi.getCart()
+                .then(setCart)
+                .catch(() => setCart(null))
+                .finally(() => setIsLoading(false))
+        } else {
+            setGuestItems(guestCart.getItems())
             setIsLoading(false)
         }
     }
 
     useEffect(() => {
         fetchCart()
-    }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated, authLoading])
 
     const handleUpdateQuantity = async (productId: number, newQuantity: number) => {
         if (newQuantity < 1) return
         setUpdatingItems((prev) => new Set(prev).add(productId))
         try {
-            const updated = await cartApi.updateQuantity(productId, newQuantity)
-            setCart(updated)
+            if (isGuest) {
+                guestCart.updateQuantity(productId, newQuantity)
+                setGuestItems(guestCart.getItems())
+            } else {
+                const updated = await cartApi.updateQuantity(productId, newQuantity)
+                setCart(updated)
+            }
         } catch (err) {
             toast.error(err instanceof Error ? err.message : "Ekleyemezsiniz, stok yetersiz veya hata oluştu")
         } finally {
@@ -53,8 +68,13 @@ function CartContent() {
     const handleRemoveItem = async (productId: number) => {
         setUpdatingItems((prev) => new Set(prev).add(productId))
         try {
-            const updated = await cartApi.removeItem(productId)
-            setCart(updated)
+            if (isGuest) {
+                guestCart.removeItem(productId)
+                setGuestItems(guestCart.getItems())
+            } else {
+                const updated = await cartApi.removeItem(productId)
+                setCart(updated)
+            }
             toast.success("Ürün sepetten kaldırıldı")
         } catch {
             toast.error("Ürün kaldırılırken hata oluştu")
@@ -70,16 +90,32 @@ function CartContent() {
     const handleClearCart = async () => {
         if (!confirm("Sepetinizdeki tüm ürünleri silmek istediğinize emin misiniz?")) return
         try {
-            await cartApi.clearCart()
-            setCart(null)
+            if (isGuest) {
+                guestCart.clear()
+                setGuestItems([])
+            } else {
+                await cartApi.clearCart()
+                setCart(null)
+            }
             toast.success("Sepet temizlendi")
         } catch {
             toast.error("Sepet temizlenirken hata oluştu")
         }
     }
 
-    const cartTotal = cart?.items?.reduce((sum, item) => sum + item.total, 0) ?? 0
-    const itemCount = cart?.items?.length ?? 0
+    // Normalize both modes into a unified item list
+    const items: { id: number; product: CartItemResponse["product"]; quantity: number; price: number; total: number }[] = isGuest
+        ? guestItems.map((g) => ({
+            id: g.product.id,
+            product: g.product,
+            quantity: g.quantity,
+            price: g.product.price,
+            total: g.product.price * g.quantity,
+        }))
+        : (cart?.items ?? [])
+
+    const cartTotal = items.reduce((sum, item) => sum + item.total, 0)
+    const itemCount = items.length
 
     if (isLoading) {
         return (
@@ -90,7 +126,7 @@ function CartContent() {
         )
     }
 
-    if (!cart || itemCount === 0) {
+    if (!itemCount) {
         return (
             <div className="flex flex-col items-center justify-center py-32 text-center">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted/50 mb-6">
@@ -128,7 +164,7 @@ function CartContent() {
                     </Button>
                 </div>
 
-                {cart.items.map((item: CartItemResponse) => {
+                {items.map((item) => {
                     const imageUrl = item.product.imageUrls?.[0] || "/placeholder.svg"
                     const isUpdating = updatingItems.has(item.product.id)
 
@@ -231,12 +267,19 @@ function CartContent() {
                         <span className="text-primary text-lg">₺{cartTotal.toLocaleString("tr-TR")}</span>
                     </div>
 
-                    <Link href="/siparis">
-                        <Button className="w-full mt-6 gap-2">
-                            Siparişi Tamamla
+                    {isGuest ? (
+                        <Button className="w-full mt-6 gap-2" onClick={() => router.push("/giris?redirect=/sepet")}>
+                            Satın Almak İçin Giriş Yapın
                             <ArrowRight className="h-4 w-4" />
                         </Button>
-                    </Link>
+                    ) : (
+                        <Link href="/siparis">
+                            <Button className="w-full mt-6 gap-2">
+                                Siparişi Tamamla
+                                <ArrowRight className="h-4 w-4" />
+                            </Button>
+                        </Link>
+                    )}
 
                     <Link href="/urunler">
                         <Button variant="outline" className="w-full mt-2">
@@ -251,17 +294,15 @@ function CartContent() {
 
 export default function CartPage() {
     return (
-        <AuthGuard>
-            <div className="min-h-screen bg-background">
-                <Header />
-                <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-                    <div className="mb-8">
-                        <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground">Sepetim</h1>
-                    </div>
-                    <CartContent />
-                </main>
-                <Footer />
-            </div>
-        </AuthGuard>
+        <div className="min-h-screen bg-background">
+            <Header />
+            <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+                <div className="mb-8">
+                    <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground">Sepetim</h1>
+                </div>
+                <CartContent />
+            </main>
+            <Footer />
+        </div>
     )
 }

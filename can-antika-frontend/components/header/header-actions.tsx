@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
     VintageHeart, VintageBasket, VintageUser,
-    VintageLogout, VintagePhone, VintageShield,
+    VintageLogout, VintageShield,
 } from "@/components/ui/vintage-icons"
 import { NotificationsDropdown } from "@/components/notifications-dropdown"
 
@@ -23,6 +23,21 @@ export function HeaderActions({
     wishlistCount,
     onLogout,
 }: HeaderActionsProps) {
+    // Sepet butonu — her zaman görünür (mobil dahil)
+    const cartButton = (
+        <Link href="/sepet">
+            <Button variant="ghost" size="icon" className="relative text-foreground hover:text-primary transition-colors">
+                <VintageBasket className="h-5 w-5" />
+                {cartCount > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                        {cartCount > 9 ? "9+" : cartCount}
+                    </span>
+                )}
+                <span className="sr-only">Sepet</span>
+            </Button>
+        </Link>
+    )
+
     if (isAuthenticated && isAdmin) {
         return (
             <>
@@ -32,6 +47,7 @@ export function HeaderActions({
                         Admin Paneli
                     </Button>
                 </Link>
+                {cartButton}
                 <Button variant="ghost" size="icon" onClick={onLogout} className="hidden sm:flex text-foreground hover:text-destructive transition-colors">
                     <VintageLogout className="h-5 w-5" />
                     <span className="sr-only">Çıkış</span>
@@ -55,17 +71,7 @@ export function HeaderActions({
                         <span className="sr-only">Favoriler</span>
                     </Button>
                 </Link>
-                <Link href="/sepet" className="hidden sm:block">
-                    <Button variant="ghost" size="icon" className="relative text-foreground hover:text-primary transition-colors">
-                        <VintageBasket className="h-5 w-5" />
-                        {cartCount > 0 && (
-                            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                                {cartCount > 9 ? "9+" : cartCount}
-                            </span>
-                        )}
-                        <span className="sr-only">Sepet</span>
-                    </Button>
-                </Link>
+                {cartButton}
                 <Link href="/hesap" className="hidden sm:block">
                     <Button variant="ghost" size="icon" className="text-foreground hover:text-primary transition-colors">
                         <VintageUser className="h-5 w-5" />
@@ -82,12 +88,7 @@ export function HeaderActions({
 
     return (
         <>
-            <Link href="/iletisim" className="hidden sm:block">
-                <Button variant="ghost" size="icon" className="text-foreground hover:text-primary transition-colors">
-                    <VintagePhone className="h-5 w-5" />
-                    <span className="sr-only">İletişim</span>
-                </Button>
-            </Link>
+            {cartButton}
             <Link href="/giris" className="hidden sm:block">
                 <Button variant="ghost" size="icon" className="text-foreground hover:text-primary transition-colors">
                     <VintageUser className="h-5 w-5" />

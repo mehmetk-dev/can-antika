@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { useSiteSettings } from "@/lib/site-settings-context"
 import { categoryApi } from "@/lib/api"
 import type { CategoryResponse } from "@/lib/types"
@@ -154,15 +152,16 @@ export function Footer() {
       <VintageCorner className="absolute bottom-6 left-6 h-16 w-16 text-accent/20 -scale-y-100" />
       <VintageCorner className="absolute bottom-6 right-6 h-16 w-16 text-accent/20 scale-x-[-1] scale-y-[-1]" />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+      <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
         <div className="mb-12 flex items-center justify-center gap-4">
           <span className="h-px w-16 bg-gradient-to-r from-transparent to-accent/40" />
           <VintageStar className="h-5 w-5 text-accent/50" />
           <span className="h-px w-16 bg-gradient-to-l from-transparent to-accent/40" />
         </div>
 
-        <div className="grid gap-12 lg:grid-cols-4">
-          <div className="lg:col-span-1">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
+          {/* Brand + Contact */}
+          <div>
             <Link href="/" className="group inline-block">
               <div className="relative">
                 <span className="font-serif text-3xl font-semibold tracking-tight text-primary-foreground">
@@ -178,198 +177,105 @@ export function Footer() {
               </div>
             </Link>
 
-            <p className="mt-6 text-sm leading-relaxed text-primary-foreground/70">
+            <p className="mt-4 text-sm leading-relaxed text-primary-foreground/70 max-w-xs">
               {settings.storeDescription || settings.footerAbout || "1990'dan beri kalite ve güven."}
             </p>
 
-            <div className="mt-8 flex gap-4">
+            {/* Contact info — compact */}
+            <div className="mt-6 space-y-2.5">
+              <div className="flex items-center gap-2.5">
+                <VintagePhoneIcon className="h-4 w-4 text-accent shrink-0" />
+                <span className="text-sm text-primary-foreground/70">{settings.phone || "—"}</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <VintageMailIcon className="h-4 w-4 text-accent shrink-0" />
+                <span className="text-sm text-primary-foreground/70">{settings.email || "—"}</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <VintageMapPinIcon className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                <span className="text-sm text-primary-foreground/70">{settings.address || "—"}</span>
+              </div>
+            </div>
+
+            {/* Social icons */}
+            <div className="mt-5 flex gap-3">
               {settings.facebook && (
-                <a
-                  href={settings.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex h-10 w-10 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10"
-                >
-                  <VintageFacebookIcon className="h-5 w-5 text-primary-foreground/60 transition-colors group-hover:text-accent" />
-                  <span className="sr-only">Facebook</span>
+                <a href={settings.facebook} target="_blank" rel="noopener noreferrer" className="group flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10">
+                  <VintageFacebookIcon className="h-4 w-4 text-primary-foreground/60 transition-colors group-hover:text-accent" />
                 </a>
               )}
               {settings.instagram && (
-                <a
-                  href={settings.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex h-10 w-10 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10"
-                >
-                  <VintageInstagramIcon className="h-5 w-5 text-primary-foreground/60 transition-colors group-hover:text-accent" />
-                  <span className="sr-only">Instagram</span>
+                <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="group flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10">
+                  <VintageInstagramIcon className="h-4 w-4 text-primary-foreground/60 transition-colors group-hover:text-accent" />
                 </a>
               )}
               {settings.twitter && (
-                <a
-                  href={settings.twitter}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex h-10 w-10 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10"
-                >
-                  <VintageTwitterIcon className="h-5 w-5 text-primary-foreground/60 transition-colors group-hover:text-accent" />
-                  <span className="sr-only">Twitter</span>
+                <a href={settings.twitter} target="_blank" rel="noopener noreferrer" className="group flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10">
+                  <VintageTwitterIcon className="h-4 w-4 text-primary-foreground/60 transition-colors group-hover:text-accent" />
                 </a>
               )}
               {settings.youtube && (
-                <a
-                  href={settings.youtube}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex h-10 w-10 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10"
-                >
-                  <VintageYouTubeIcon className="h-5 w-5 text-primary-foreground/60 transition-colors group-hover:text-accent" />
-                  <span className="sr-only">YouTube</span>
+                <a href={settings.youtube} target="_blank" rel="noopener noreferrer" className="group flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10">
+                  <VintageYouTubeIcon className="h-4 w-4 text-primary-foreground/60 transition-colors group-hover:text-accent" />
                 </a>
               )}
               {settings.tiktok && (
-                <a
-                  href={settings.tiktok}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex h-10 w-10 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10"
-                >
-                  <VintageTikTokIcon className="h-5 w-5 text-primary-foreground/60 transition-colors group-hover:text-accent" />
-                  <span className="sr-only">TikTok</span>
+                <a href={settings.tiktok} target="_blank" rel="noopener noreferrer" className="group flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10">
+                  <VintageTikTokIcon className="h-4 w-4 text-primary-foreground/60 transition-colors group-hover:text-accent" />
                 </a>
               )}
             </div>
           </div>
 
+          {/* Kategoriler */}
           <div>
-            <h3 className="flex items-center gap-3 font-serif text-lg font-semibold text-primary-foreground">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-accent/30 text-xs text-accent">
-                I
-              </span>
-              Kategoriler
-            </h3>
-            <ul className="mt-6 space-y-3">
-              {apiCategories.slice(0, 6).map((cat, index) => (
+            <h3 className="font-serif text-lg font-semibold text-primary-foreground">Kategoriler</h3>
+            <ul className="mt-4 space-y-2.5">
+              {apiCategories.slice(0, 6).map((cat) => (
                 <li key={cat.id}>
                   <Link
                     href={`/urunler?category=${encodeURIComponent(cat.name)}`}
-                    className="group flex items-center gap-2 text-sm text-primary-foreground/60 transition-colors hover:text-accent"
+                    className="text-sm text-primary-foreground/60 transition-colors hover:text-accent"
                   >
-                    <span className="text-[10px] text-primary-foreground/30 group-hover:text-accent/50">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className="border-b border-transparent group-hover:border-accent/30">{cat.name}</span>
+                    {cat.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
+          {/* Kurumsal */}
           <div>
-            <h3 className="flex items-center gap-3 font-serif text-lg font-semibold text-primary-foreground">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-accent/30 text-xs text-accent">
-                II
-              </span>
-              Kurumsal
-            </h3>
-            <ul className="mt-6 space-y-3">
-              {footerLinks.company.map((link, index) => (
+            <h3 className="font-serif text-lg font-semibold text-primary-foreground">Kurumsal</h3>
+            <ul className="mt-4 space-y-2.5">
+              {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="group flex items-center gap-2 text-sm text-primary-foreground/60 transition-colors hover:text-accent"
+                    className="text-sm text-primary-foreground/60 transition-colors hover:text-accent"
                   >
-                    <span className="text-[10px] text-primary-foreground/30 group-hover:text-accent/50">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className="border-b border-transparent group-hover:border-accent/30">{link.name}</span>
+                    {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
-
-          <div>
-            <h3 className="flex items-center gap-3 font-serif text-lg font-semibold text-primary-foreground">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-accent/30 text-xs text-accent">
-                III
-              </span>
-              Bülten
-            </h3>
-            <p className="mt-6 text-sm text-primary-foreground/60">
-              Yeni gelen antikalardan ve özel fırsatlardan haberdar olun.
-            </p>
-
-            <form className="mt-4">
-              <div className="relative">
-                <Input
-                  type="email"
-                  placeholder="E-posta adresiniz"
-                  className="w-full border-primary-foreground/20 bg-primary-foreground/5 pr-24 text-primary-foreground placeholder:text-primary-foreground/40 focus:border-accent focus:ring-accent/20"
-                  suppressHydrationWarning
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 bg-accent text-accent-foreground hover:bg-accent/90"
-                >
-                  Abone Ol
-                </Button>
-              </div>
-            </form>
-
-            <div className="mt-8 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5">
-                  <VintagePhoneIcon className="h-4 w-4 text-accent" />
-                </div>
-                <span className="text-sm text-primary-foreground/70">{settings.phone || "—"}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5">
-                  <VintageMailIcon className="h-4 w-4 text-accent" />
-                </div>
-                <span className="text-sm text-primary-foreground/70">{settings.email || "—"}</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5">
-                  <VintageMapPinIcon className="h-4 w-4 text-accent" />
-                </div>
-                <span className="text-sm text-primary-foreground/70">
-                  {settings.address || "—"}
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="mt-16 border-t border-primary-foreground/10 pt-8">
-          <div className="mb-6 flex items-center justify-center gap-3">
-            <span className="h-px w-12 bg-gradient-to-r from-transparent to-primary-foreground/20" />
-            <div className="flex gap-1">
-              <span className="h-1 w-1 rounded-full bg-accent/40" />
-              <span className="h-1 w-1 rounded-full bg-accent/60" />
-              <span className="h-1 w-1 rounded-full bg-accent/40" />
-            </div>
-            <span className="h-px w-12 bg-gradient-to-l from-transparent to-primary-foreground/20" />
-          </div>
-
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <p className="text-sm text-primary-foreground/50">
-              {settings.footerCopyright || `© ${new Date().getFullYear()} ${settings.storeName || "Can Antika"}. Tüm hakları saklıdır.`}
-            </p>
-            <div className="flex flex-wrap justify-center gap-6">
-              {footerLinks.legal.map((link, index) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="group flex items-center gap-1 text-sm text-primary-foreground/50 transition-colors hover:text-accent"
-                >
-                  {index > 0 && <span className="mr-4 text-primary-foreground/20">•</span>}
-                  {link.name}
-                </Link>
-              ))}
-            </div>
+        <div className="mt-10 border-t border-primary-foreground/10 pt-6">
+          <p className="text-center text-sm text-primary-foreground/50 mb-3">
+            {settings.footerCopyright || `© ${new Date().getFullYear()} ${settings.storeName || "Can Antika"}. Tüm hakları saklıdır.`}
+          </p>
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+            {footerLinks.legal.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className="text-xs text-primary-foreground/40 transition-colors hover:text-accent"
+              >
+                {link.name}
+              </Link>
+            ))}
           </div>
         </div>
       </div>

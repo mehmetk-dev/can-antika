@@ -3,7 +3,7 @@
 import type React from "react"
 import Image from "next/image"
 import { useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Eye, EyeOff, Sparkles, Loader2, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,6 +17,10 @@ type FormMode = "login" | "register"
 
 export default function AuthPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const rawRedirect = searchParams.get("redirect") || "/hesap"
+  // Sadece site-içi yönlendirmelere izin ver (open redirect koruması)
+  const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : "/hesap"
   const { login, register, isAuthenticated, isLoading } = useAuth()
   const [mode, setMode] = useState<FormMode>("login")
   const [showPassword, setShowPassword] = useState(false)
@@ -44,9 +48,9 @@ export default function AuthPage() {
   // Zaten giriş yapmış kullanıcıyı yönlendir
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace("/hesap")
+      router.replace(redirectTo)
     }
-  }, [isLoading, isAuthenticated, router])
+  }, [isLoading, isAuthenticated, router, redirectTo])
 
   const switchMode = (newMode: FormMode) => {
     if (isAnimating) return
@@ -61,7 +65,7 @@ export default function AuthPage() {
     try {
       await login({ email: loginData.email, password: loginData.password })
       toast.success("Giriş başarılı!")
-      router.replace("/hesap")
+      router.replace(redirectTo)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Giriş başarısız")
     } finally {

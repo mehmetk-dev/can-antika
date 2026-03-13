@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useAuth } from "@/lib/auth-context"
 import { cartApi, wishlistApi } from "@/lib/api"
+import { guestCart } from "@/lib/guest-cart"
 import type { ProductResponse } from "@/lib/types"
 
 export interface ProductActionsState {
@@ -36,15 +37,16 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
                     setAddedToCart(true)
                 }
             }).catch((e) => console.error("Sepet kontrol hatası:", e))
+        } else {
+            const items = guestCart.getItems()
+            const item = items.find(i => i.product.id === product.id)
+            if (item && item.quantity >= maxStock) {
+                setAddedToCart(true)
+            }
         }
     }, [isAuthenticated, product.id, maxStock])
 
     const handleAddToCart = async () => {
-        if (!isAuthenticated) {
-            toast.error("Sepete eklemek için giriş yapmalısınız")
-            router.push("/giris")
-            return
-        }
         if (addedToCart) {
             toast.info("Bu ürün zaten sepetinizde")
             return
@@ -55,7 +57,11 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
         }
         setAddingToCart(true)
         try {
-            await cartApi.addItem({ productId: product.id, quantity })
+            if (isAuthenticated) {
+                await cartApi.addItem({ productId: product.id, quantity })
+            } else {
+                guestCart.addItem(product, quantity)
+            }
             toast.success(`${quantity} adet ürün sepete eklendi`)
             setAddedToCart(true)
         } catch (err) {
