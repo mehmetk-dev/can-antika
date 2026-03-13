@@ -37,7 +37,7 @@ export function MobileMenu({ isOpen, onOpenChange, navigation, isAuthenticated }
 
                 {/* Decorative corners */}
                 <VintageCorner className="absolute top-4 left-4 h-10 w-10 text-primary/30 z-[1]" />
-                <VintageCorner className="absolute top-4 right-4 h-10 w-10 text-primary/30 -scale-x-100 z-[1]" />
+                <VintageCorner className="absolute top-14 right-4 h-10 w-10 text-primary/30 -scale-x-100 z-[1]" />
                 <VintageCorner className="absolute bottom-4 left-4 h-10 w-10 text-primary/30 -scale-y-100 z-[1]" />
                 <VintageCorner className="absolute bottom-4 right-4 h-10 w-10 text-primary/30 scale-x-[-1] scale-y-[-1] z-[1]" />
 

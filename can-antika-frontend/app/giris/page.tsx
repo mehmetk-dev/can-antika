@@ -2,7 +2,7 @@
 
 import type React from "react"
 import Image from "next/image"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Sparkles, Loader2, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -17,7 +17,7 @@ type FormMode = "login" | "register"
 
 export default function AuthPage() {
   const router = useRouter()
-  const { login, register } = useAuth()
+  const { login, register, isAuthenticated, isLoading } = useAuth()
   const [mode, setMode] = useState<FormMode>("login")
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -41,6 +41,13 @@ export default function AuthPage() {
     acceptTerms: false,
   })
 
+  // Zaten giriş yapmış kullanıcıyı yönlendir
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/hesap")
+    }
+  }, [isLoading, isAuthenticated, router])
+
   const switchMode = (newMode: FormMode) => {
     if (isAnimating) return
     setIsAnimating(true)
@@ -54,7 +61,7 @@ export default function AuthPage() {
     try {
       await login({ email: loginData.email, password: loginData.password })
       toast.success("Giriş başarılı!")
-      router.push("/hesap")
+      router.replace("/hesap")
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Giriş başarısız")
     } finally {

@@ -14,8 +14,10 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { notificationApi } from "@/lib/api"
 import type { NotificationResponse } from "@/lib/types"
 import { cn, formatDateTR } from "@/lib/utils"
+import { useAuth } from "@/lib/auth-context"
 
 export function NotificationsDropdown() {
+    const { isAuthenticated, isLoading: authLoading } = useAuth()
     const [notifications, setNotifications] = useState<NotificationResponse[]>([])
     const [unreadCount, setUnreadCount] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
@@ -25,6 +27,7 @@ export function NotificationsDropdown() {
     const hasFetchedRef = useRef(false)
 
     const fetchNotifications = async () => {
+        if (!isAuthenticated) return
         try {
             setIsLoading(true)
             const [list, countRes] = await Promise.all([
@@ -42,6 +45,7 @@ export function NotificationsDropdown() {
 
     // Initial fetch
     useEffect(() => {
+        if (authLoading || !isAuthenticated) return
         if (!hasFetchedRef.current) {
             fetchNotifications()
             hasFetchedRef.current = true
@@ -53,7 +57,7 @@ export function NotificationsDropdown() {
             clearInterval(interval)
             window.removeEventListener("notification-updated", fetchNotifications)
         }
-    }, [])
+    }, [authLoading, isAuthenticated])
 
     // Refetch when opening
     const handleOpenChange = (open: boolean) => {

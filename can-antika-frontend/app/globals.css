@@ -257,66 +257,146 @@
 /* (tw-animate-css removed — manual defs)     */
 /* ═══════════════════════════════════════════ */
 
-@keyframes enter {
+/* ── Sheet overlay animations ── */
+[data-slot="sheet-overlay"][data-state="open"] {
+  animation: sheet-fade-in 0.3s ease-out;
+}
+
+[data-slot="sheet-overlay"][data-state="closed"] {
+  animation: sheet-fade-out 0.25s ease-in forwards;
+}
+
+@keyframes sheet-fade-in {
   from {
-    opacity: var(--tw-enter-opacity, 1);
-    transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale(var(--tw-enter-scale, 1)) rotate(var(--tw-enter-rotate, 0));
+    opacity: 0;
   }
-}
 
-@keyframes exit {
   to {
-    opacity: var(--tw-exit-opacity, 1);
-    transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale(var(--tw-exit-scale, 1)) rotate(var(--tw-exit-rotate, 0));
+    opacity: 1;
   }
 }
 
-.animate-in {
-  animation: enter 0.2s ease-out;
+@keyframes sheet-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
 }
 
-.animate-out {
-  animation: exit 0.15s ease-in forwards;
+/* ── Sheet content slide animations ── */
+@keyframes sheet-slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
 }
 
-.fade-in-0 {
-  --tw-enter-opacity: 0;
+@keyframes sheet-slide-out-left {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
 }
 
-.fade-out-0 {
-  --tw-exit-opacity: 0;
+@keyframes sheet-slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
 }
 
-.slide-in-from-left {
-  --tw-enter-translate-x: -100%;
+@keyframes sheet-slide-out-right {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
 }
 
-.slide-out-to-left {
-  --tw-exit-translate-x: -100%;
+@keyframes sheet-slide-in-top {
+  from {
+    transform: translateY(-100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }
 
-.slide-in-from-right {
-  --tw-enter-translate-x: 100%;
+@keyframes sheet-slide-out-top {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-100%);
+  }
 }
 
-.slide-out-to-right {
-  --tw-exit-translate-x: 100%;
+@keyframes sheet-slide-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }
 
-.slide-in-from-top {
-  --tw-enter-translate-y: -100%;
+@keyframes sheet-slide-out-bottom {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(100%);
+  }
 }
 
-.slide-out-to-top {
-  --tw-exit-translate-y: -100%;
+[data-slot="sheet-content"][data-side="left"][data-state="open"] {
+  animation: sheet-slide-in-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.slide-in-from-bottom {
-  --tw-enter-translate-y: 100%;
+[data-slot="sheet-content"][data-side="left"][data-state="closed"] {
+  animation: sheet-slide-out-left 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
-.slide-out-to-bottom {
-  --tw-exit-translate-y: 100%;
+[data-slot="sheet-content"][data-side="right"][data-state="open"] {
+  animation: sheet-slide-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-slot="sheet-content"][data-side="right"][data-state="closed"] {
+  animation: sheet-slide-out-right 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+[data-slot="sheet-content"][data-side="top"][data-state="open"] {
+  animation: sheet-slide-in-top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-slot="sheet-content"][data-side="top"][data-state="closed"] {
+  animation: sheet-slide-out-top 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+[data-slot="sheet-content"][data-side="bottom"][data-state="open"] {
+  animation: sheet-slide-in-bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-slot="sheet-content"][data-side="bottom"][data-state="closed"] {
+  animation: sheet-slide-out-bottom 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 /* ═══════════════════════════════════════════ */
