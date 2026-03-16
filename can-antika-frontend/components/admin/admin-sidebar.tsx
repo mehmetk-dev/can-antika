@@ -111,6 +111,7 @@ export function AdminSidebar() {
         <div className="space-y-1.5">
           {/* Dashboard - Tekil Link */}
           <Link
+            prefetch={false}
             href={DASHBOARD_LINK.href}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] font-medium transition-all duration-200 border-l-2",
@@ -184,6 +185,7 @@ function SidebarGroup({ group, pathname }: SidebarGroupProps) {
             return (
               <Link
                 key={item.name}
+                prefetch={false}
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-all duration-200 relative",

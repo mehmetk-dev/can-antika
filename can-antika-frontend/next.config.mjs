@@ -33,8 +33,8 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value: isDev
-              ? "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net; connect-src 'self' https: http://localhost:* ws://localhost:* wss://localhost:*; object-src 'none'; frame-ancestors 'none'; base-uri 'self'"
-              : "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net; connect-src 'self' https:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'",
+              ? "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net https://static.cloudflareinsights.com; script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net https://static.cloudflareinsights.com; connect-src 'self' https: http://localhost:* ws://localhost:* wss://localhost:* https://cloudflareinsights.com; object-src 'none'; frame-ancestors 'none'; base-uri 'self'"
+              : "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net https://static.cloudflareinsights.com; script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net https://static.cloudflareinsights.com; connect-src 'self' https: https://cloudflareinsights.com; object-src 'none'; frame-ancestors 'none'; base-uri 'self'",
           },
         ],
       },

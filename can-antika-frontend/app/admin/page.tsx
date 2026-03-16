@@ -17,7 +17,7 @@ const RevenueChart = dynamic(() => import("@/components/dashboard/revenue-chart"
   ssr: false,
   loading: () => (
     <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-      Grafik yÃ¼kleniyor...
+      Grafik yükleniyor...
     </div>
   ),
 })
@@ -28,25 +28,25 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
 
-      {/* 1. KÄ±sayollar */}
+      {/* 1. Kısayollar */}
       <Card className="shadow-xs border-border/50">
         <CardHeader className="py-3 border-b border-border/50">
-          <CardTitle className="text-sm font-semibold">KÄ±sayollar</CardTitle>
+          <CardTitle className="text-sm font-semibold">Kısayollar</CardTitle>
         </CardHeader>
         <CardContent className="p-3 flex items-center overflow-x-auto gap-2">
-          <Link href="/admin/urunler">
-            <Button variant="outline" size="sm" className="bg-blue-50/50 text-blue-700 hover:bg-blue-50 hover:text-blue-800 border-blue-200/50 transition-colors whitespace-nowrap">ÃœrÃ¼n YÃ¶netimi</Button>
+          <Link prefetch={false} href="/admin/urunler">
+            <Button variant="outline" size="sm" className="bg-blue-50/50 text-blue-700 hover:bg-blue-50 hover:text-blue-800 border-blue-200/50 transition-colors whitespace-nowrap">Ürün Yönetimi</Button>
           </Link>
-          <Link href="/admin/siparisler">
-            <Button variant="outline" size="sm" className="bg-blue-50/50 text-blue-700 hover:bg-blue-50 hover:text-blue-800 border-blue-200/50 transition-colors whitespace-nowrap">SipariÅŸler</Button>
+          <Link prefetch={false} href="/admin/siparisler">
+            <Button variant="outline" size="sm" className="bg-blue-50/50 text-blue-700 hover:bg-blue-50 hover:text-blue-800 border-blue-200/50 transition-colors whitespace-nowrap">Siparişler</Button>
           </Link>
-          <Link href="/admin/musteriler">
-            <Button variant="outline" size="sm" className="bg-blue-50/50 text-blue-700 hover:bg-blue-50 hover:text-blue-800 border-blue-200/50 transition-colors whitespace-nowrap">MÃ¼ÅŸteriler</Button>
+          <Link prefetch={false} href="/admin/musteriler">
+            <Button variant="outline" size="sm" className="bg-blue-50/50 text-blue-700 hover:bg-blue-50 hover:text-blue-800 border-blue-200/50 transition-colors whitespace-nowrap">Müşteriler</Button>
           </Link>
-          <Link href="/admin/ayarlar">
-            <Button variant="outline" size="sm" className="bg-blue-50/50 text-blue-700 hover:bg-blue-50 hover:text-blue-800 border-blue-200/50 transition-colors whitespace-nowrap">Site AyarlarÄ±</Button>
+          <Link prefetch={false} href="/admin/ayarlar">
+            <Button variant="outline" size="sm" className="bg-blue-50/50 text-blue-700 hover:bg-blue-50 hover:text-blue-800 border-blue-200/50 transition-colors whitespace-nowrap">Site Ayarları</Button>
           </Link>
-          <Link href="/admin/kuponlar">
+          <Link prefetch={false} href="/admin/kuponlar">
             <Button variant="outline" size="sm" className="bg-blue-50/50 text-blue-700 hover:bg-blue-50 hover:text-blue-800 border-blue-200/50 transition-colors whitespace-nowrap">Kuponlar</Button>
           </Link>
         </CardContent>
@@ -57,10 +57,10 @@ export default function AdminDashboard() {
         {/* Left Column */}
         <div className="lg:col-span-8 space-y-6">
 
-          {/* SipariÅŸ RaporlarÄ± Chart */}
+          {/* Sipariş Raporları Chart */}
           <Card className="shadow-xs border-border/50">
             <CardHeader className="py-4 border-b border-border/50 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-semibold">SipariÅŸ RaporlarÄ±</CardTitle>
+              <CardTitle className="text-sm font-semibold">Sipariş Raporları</CardTitle>
             </CardHeader>
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-6 flex-wrap">
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
                     className={`h-7 px-3 text-xs rounded-full ${chartRange === range ? "bg-teal-500 hover:bg-teal-600 text-white" : ""}`}
                     onClick={() => setChartRange(range)}
                   >
-                    {range === "7D" ? "7 GÃœNLÃœK" : range === "30D" ? "30 GÃœNLÃœK" : range === "90D" ? "90 GÃœNLÃœK" : range === "6M" ? "6 AYLIK" : "1 YILLIK"}
+                    {range === "7D" ? "7 GÜNLÜK" : range === "30D" ? "30 GÜNLÜK" : range === "90D" ? "90 GÜNLÜK" : range === "6M" ? "6 AYLIK" : "1 YILLIK"}
                   </Button>
                 ))}
               </div>
@@ -86,17 +86,17 @@ export default function AdminDashboard() {
 
           <PendingTasksGrid stats={stats} pendingTasks={pendingTasks} />
 
-          {/* Row: SipariÅŸ AkÄ±ÅŸÄ± & Kampanya ÃœrÃ¼nleri */}
+          {/* Row: Sipariş Akışı & Kampanya Ürünleri */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <RecentOrderCard recentOrders={recentOrders} />
 
             <Card className="shadow-xs border-border/50">
               <CardHeader className="py-3 border-b border-border/50">
-                <CardTitle className="text-sm font-semibold">Kampanya SÃ¼resi TanÄ±mlÄ± ÃœrÃ¼nler</CardTitle>
+                <CardTitle className="text-sm font-semibold">Kampanya Süresi Tanımlı Ürünler</CardTitle>
               </CardHeader>
               <CardContent className="p-4">
                 <div className="text-center py-4 text-sm bg-amber-50/70 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 rounded-md border border-amber-200/70 dark:border-amber-900/30">
-                  KayÄ±t bulunamadÄ±.
+                  Kayıt bulunamadı.
                 </div>
               </CardContent>
             </Card>
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
                   <ShoppingCart className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <p className="font-serif text-2xl font-bold text-foreground">{stats?.totalOrders || "0"}</p>
-                <p className="text-xs text-muted-foreground mt-1">Toplam SipariÅŸ</p>
+                <p className="text-xs text-muted-foreground mt-1">Toplam Sipariş</p>
               </CardContent>
             </Card>
 
@@ -125,21 +125,21 @@ export default function AdminDashboard() {
                   <Users className="h-5 w-5 text-slate-700 dark:text-slate-300" />
                 </div>
                 <p className="font-serif text-2xl font-bold text-foreground">{stats?.totalCustomers || "0"}</p>
-                <p className="text-xs text-muted-foreground mt-1">Toplam Ãœye</p>
+                <p className="text-xs text-muted-foreground mt-1">Toplam Üye</p>
               </CardContent>
             </Card>
           </div>
 
           <RevenueSummary stats={stats} />
 
-          {/* Ä°ÅŸlem GÃ¼nlÃ¼kleri */}
+          {/* İşlem Günlükleri */}
           <Card className="shadow-xs border-border/50">
             <CardHeader className="py-3 border-b border-border/50">
-              <CardTitle className="text-sm font-semibold">Ä°ÅŸlem GÃ¼nlÃ¼kleri ({formatDateTR(new Date(), "full")})</CardTitle>
+              <CardTitle className="text-sm font-semibold">İşlem Günlükleri ({formatDateTR(new Date(), "full")})</CardTitle>
             </CardHeader>
             <CardContent className="p-4">
               <div className="text-center py-4 text-sm bg-amber-50/70 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 rounded-md border border-amber-200/70 dark:border-amber-900/30">
-                KayÄ±t bulunamadÄ±.
+                Kayıt bulunamadı.
               </div>
             </CardContent>
           </Card>
