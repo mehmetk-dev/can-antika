@@ -56,7 +56,7 @@ public class ProductServiceImpl implements IProductService {
     private final IFileStorageService fileStorageService;
     private final IActivityLogService activityLogService;
         private static final Set<String> ALLOWED_PRODUCT_SORT_FIELDS = Set.of(
-            "id", "title", "price", "stock", "averageRating", "reviewCount", "viewCount", "createdAt", "updatedAt");
+            "id", "title", "price", "stock", "averageRating", "reviewCount", "viewCount");
 
     @Override
     @Transactional

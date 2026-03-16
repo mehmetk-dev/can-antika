@@ -27,6 +27,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Optional<Product> findBySlug(String slug);
 
     @Modifying
-    @Query("UPDATE Product p SET p.viewCount = p.viewCount + 1 WHERE p.id = :id")
+    @Query("UPDATE Product p SET p.viewCount = COALESCE(p.viewCount, 0) + 1 WHERE p.id = :id")
     void incrementViewCount(@Param("id") Long id);
 }

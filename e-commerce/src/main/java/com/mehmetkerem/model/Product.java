@@ -37,7 +37,7 @@ public class Product {
     @Column(precision = 12, scale = 2)
     private BigDecimal price;
 
-    private int stock;
+    private Integer stock;
 
     @Column(name = "category_id")
     private Long categoryId;
@@ -64,16 +64,25 @@ public class Product {
 
     @Builder.Default
     @Column(nullable = false, columnDefinition = "integer default 0")
-    private int reviewCount = 0;
+    private Integer reviewCount = 0;
 
     @Builder.Default
     @Column(name = "view_count", nullable = false, columnDefinition = "integer default 0")
-    private int viewCount = 0;
+    private Integer viewCount = 0;
 
     @PrePersist
     protected void onPrePersist() {
         if (slug == null || slug.isBlank()) {
             slug = generateSlug(title);
+        }
+        if (stock == null) {
+            stock = 0;
+        }
+        if (reviewCount == null) {
+            reviewCount = 0;
+        }
+        if (viewCount == null) {
+            viewCount = 0;
         }
     }
 
@@ -81,6 +90,15 @@ public class Product {
     protected void onPreUpdate() {
         if (slug == null || slug.isBlank()) {
             slug = generateSlug(title);
+        }
+        if (stock == null) {
+            stock = 0;
+        }
+        if (reviewCount == null) {
+            reviewCount = 0;
+        }
+        if (viewCount == null) {
+            viewCount = 0;
         }
     }
 

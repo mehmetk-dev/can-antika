@@ -27,7 +27,7 @@ public class RestProductControllerImpl implements IRestProductController {
 
     private final IProductService productService;
         private static final Set<String> ALLOWED_PRODUCT_SORT_FIELDS = Set.of(
-            "id", "title", "price", "stock", "averageRating", "reviewCount", "createdAt", "updatedAt", "viewCount");
+            "id", "title", "price", "stock", "averageRating", "reviewCount", "viewCount");
 
     public RestProductControllerImpl(IProductService productService) {
         this.productService = productService;

@@ -32,6 +32,10 @@ public class StockService implements IStockService {
     @Value("${app.stock.alert-threshold:5}")
     private int stockAlertThreshold;
 
+    private int safeStock(Product product) {
+        return product.getStock() == null ? 0 : product.getStock();
+    }
+
     /**
      * Sipariş kalemleri için stok yeterliliğini kontrol eder ve stokları düşürür.
      * Düşük stok uyarılarını döner.
@@ -53,7 +57,7 @@ public class StockService implements IStockService {
             if (product == null) {
                 throw new NotFoundException("Ürün bulunamadı. ID: " + item.getProductId());
             }
-            if (product.getStock() < item.getQuantity()) {
+            if (safeStock(product) < item.getQuantity()) {
                 throw new BadRequestException(
                         String.format(ExceptionMessages.INSUFFICIENT_STOCK, product.getTitle()));
             }
@@ -63,7 +67,7 @@ public class StockService implements IStockService {
         List<OrderEvent.StockAlertInfo> stockAlerts = new ArrayList<>();
         for (OrderItem item : orderItems) {
             Product product = productMap.get(item.getProductId());
-            int newStock = product.getStock() - item.getQuantity();
+            int newStock = safeStock(product) - item.getQuantity();
             product.setStock(newStock);
 
             if (newStock <= stockAlertThreshold) {
@@ -95,7 +99,7 @@ public class StockService implements IStockService {
 
         for (OrderItem item : orderItems) {
             Product product = productMap.get(item.getProductId());
-            int newStock = product.getStock() + item.getQuantity();
+            int newStock = safeStock(product) + item.getQuantity();
             product.setStock(newStock);
             log.debug("Stok iade edildi. Ürün: {}, Yeni Stok: {}", product.getTitle(), newStock);
         }
@@ -148,7 +152,7 @@ public class StockService implements IStockService {
 
     @Override
     public void validateCartItemStock(int quantity, Product product) {
-        if (quantity <= 0 || product.getStock() < quantity) {
+        if (quantity <= 0 || safeStock(product) < quantity) {
             throw new BadRequestException(ExceptionMessages.UNKNOW_STOCK);
         }
     }
