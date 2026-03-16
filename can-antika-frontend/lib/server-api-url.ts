@@ -8,9 +8,14 @@
  * sunucu tarafı kodlarda kullanılmalıdır.
  */
 export function getServerApiUrl(): string {
+    const fallbackApiUrl =
+        process.env.NODE_ENV === "production"
+            ? "https://api.canantika.com"
+            : "http://localhost:8085";
+
     return (
         process.env.INTERNAL_API_URL ||
         process.env.NEXT_PUBLIC_API_URL ||
-        "http://localhost:8085"
-    );
+        fallbackApiUrl
+    ).replace(/\/$/, "");
 }
