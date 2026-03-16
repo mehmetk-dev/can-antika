@@ -48,6 +48,12 @@ export const productApi = {
     update: (id: number, data: ProductRequest) =>
         api.put<ProductResponse>(`/v1/product/${id}`, { body: data }),
 
+    importFromExcel: (file: File) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        return api.post<{ importedCount: number; failedCount: number; errors: string[] }>("/v1/product/import-excel", { body: formData });
+    },
+
     delete: (id: number) =>
         api.delete<string>(`/v1/product/${id}`),
 

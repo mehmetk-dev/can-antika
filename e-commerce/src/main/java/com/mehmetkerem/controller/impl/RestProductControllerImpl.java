@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
+import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -127,5 +128,12 @@ public class RestProductControllerImpl implements IRestProductController {
     public ResultData<String> incrementViewCount(@PathVariable Long id) {
         productService.incrementViewCount(id);
         return ResultHelper.success("OK");
+    }
+
+    @Override
+    @Secured("ROLE_ADMIN")
+    @PostMapping("/import-excel")
+    public ResultData<com.mehmetkerem.dto.response.ProductImportResponse> importProductsFromExcel(@RequestParam("file") MultipartFile file) {
+        return ResultHelper.success(productService.importProductsFromExcel(file));
     }
 }

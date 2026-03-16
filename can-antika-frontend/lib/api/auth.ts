@@ -29,7 +29,7 @@ export const authApi = {
         api.put<UserResponse>("/v1/auth/profile", { body: data }),
 
     getProfile: () =>
-        api.get<UserResponse>("/v1/auth/me", { noAuth: true }),
+        api.get<UserResponse>("/v1/auth/me"),
 
     logout: () =>
         api.post<string>("/v1/auth/logout"),

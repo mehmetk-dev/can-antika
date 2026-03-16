@@ -1,9 +1,11 @@
 package com.mehmetkerem.service;
 
 import com.mehmetkerem.dto.request.ProductRequest;
+import com.mehmetkerem.dto.response.ProductImportResponse;
 import com.mehmetkerem.dto.response.ProductResponse;
 import com.mehmetkerem.model.Product;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -46,4 +48,6 @@ public interface IProductService {
 
     /** Ürün görüntülenme sayacını artır. */
     void incrementViewCount(Long productId);
+
+    ProductImportResponse importProductsFromExcel(MultipartFile file);
 }

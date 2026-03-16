@@ -2,12 +2,14 @@ package com.mehmetkerem.controller;
 
 import com.mehmetkerem.dto.request.ProductRequest;
 import com.mehmetkerem.dto.response.CursorResponse;
+import com.mehmetkerem.dto.response.ProductImportResponse;
 import com.mehmetkerem.dto.response.ProductResponse;
 import com.mehmetkerem.util.ResultData;
 
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface IRestProductController {
 
@@ -41,4 +43,6 @@ public interface IRestProductController {
 
     /** Ürün görüntülenme sayacını artır. */
     ResultData<String> incrementViewCount(Long id);
+
+    ResultData<ProductImportResponse> importProductsFromExcel(MultipartFile file);
 }

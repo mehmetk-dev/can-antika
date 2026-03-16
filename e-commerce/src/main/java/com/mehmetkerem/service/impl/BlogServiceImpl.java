@@ -44,6 +44,7 @@ public class BlogServiceImpl implements IBlogService {
 
     @Override
     public BlogPost savePost(BlogPost post) {
+        validateCategory(post.getCategoryId());
         if (post.getSlug() == null || post.getSlug().isBlank()) {
             post.setSlug(slugify(post.getTitle()));
         }
@@ -52,6 +53,7 @@ public class BlogServiceImpl implements IBlogService {
 
     @Override
     public BlogPost updatePost(Long id, BlogPost post) {
+        validateCategory(post.getCategoryId());
         BlogPost existing = getPostById(id);
         existing.setTitle(post.getTitle());
         existing.setSlug(post.getSlug() != null && !post.getSlug().isBlank() ? post.getSlug() : slugify(post.getTitle()));
@@ -108,5 +110,18 @@ public class BlogServiceImpl implements IBlogService {
                 .replaceAll("[\\s]+", "-")
                 .replaceAll("-+", "-")
                 .replaceAll("^-|-$", "");
+    }
+
+    private void validateCategory(Long categoryId) {
+        if (categoryId == null || categoryId <= 0) {
+            throw new NotFoundException("Geçerli bir blog kategorisi seçmelisiniz.");
+        }
+
+        BlogCategory category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("Blog kategorisi bulunamadı: " + categoryId));
+
+        if (!category.isActive()) {
+            throw new NotFoundException("Pasif kategoriye yazı atanamaz: " + categoryId);
+        }
     }
 }

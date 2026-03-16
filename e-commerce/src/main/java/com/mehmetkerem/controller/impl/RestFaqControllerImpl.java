@@ -6,6 +6,7 @@ import com.mehmetkerem.service.IFaqService;
 import com.mehmetkerem.util.Result;
 import com.mehmetkerem.util.ResultData;
 import com.mehmetkerem.util.ResultHelper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -53,14 +54,14 @@ public class RestFaqControllerImpl implements IRestFaqController {
     @Override
     @Secured("ROLE_ADMIN")
     @PostMapping("/v1/admin/faq")
-    public ResultData<com.mehmetkerem.dto.response.FaqItemResponse> createFaq(@RequestBody com.mehmetkerem.dto.request.FaqItemRequest request) {
+    public ResultData<com.mehmetkerem.dto.response.FaqItemResponse> createFaq(@Valid @RequestBody com.mehmetkerem.dto.request.FaqItemRequest request) {
         return ResultHelper.success(toResponse(faqService.saveFaq(toEntity(request))));
     }
 
     @Override
     @Secured("ROLE_ADMIN")
     @PutMapping("/v1/admin/faq/{id}")
-    public ResultData<com.mehmetkerem.dto.response.FaqItemResponse> updateFaq(@PathVariable Long id, @RequestBody com.mehmetkerem.dto.request.FaqItemRequest request) {
+    public ResultData<com.mehmetkerem.dto.response.FaqItemResponse> updateFaq(@PathVariable Long id, @Valid @RequestBody com.mehmetkerem.dto.request.FaqItemRequest request) {
         return ResultHelper.success(toResponse(faqService.updateFaq(id, toEntity(request))));
     }
 

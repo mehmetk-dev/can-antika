@@ -82,6 +82,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<SiteSettingsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [maintenanceSaving, setMaintenanceSaving] = useState(false)
   const [activeTab, setActiveTab] = useState("store")
 
   useEffect(() => {
@@ -102,6 +103,26 @@ export default function SettingsPage() {
 
   const handleChange = (key: string, value: unknown) => {
     setSettings((prev) => (prev ? { ...prev, [key]: value } : prev))
+  }
+
+  const handleMaintenanceModeChange = async (nextMode: boolean) => {
+    if (!settings) return
+
+    const prev = settings
+    const optimistic = { ...settings, maintenanceMode: nextMode }
+    setSettings(optimistic)
+    setMaintenanceSaving(true)
+
+    try {
+      const updated = await siteSettingsApi.update(optimistic)
+      setSettings(updated)
+      toast.success(nextMode ? "Bakım modu aktif edildi" : "Bakım modu kapatıldı")
+    } catch {
+      setSettings(prev)
+      toast.error("Bakım modu güncellenemedi")
+    } finally {
+      setMaintenanceSaving(false)
+    }
   }
 
   const handleSave = async () => {
@@ -198,7 +219,14 @@ export default function SettingsPage() {
             <CardContent>
               {(() => {
                 const TabComponent = TAB_COMPONENTS[activeTab]
-                return TabComponent ? <TabComponent settings={settings} onChange={handleChange} /> : null
+                return TabComponent ? (
+                  <TabComponent
+                    settings={settings}
+                    onChange={handleChange}
+                    onMaintenanceModeChange={handleMaintenanceModeChange}
+                    maintenanceSaving={maintenanceSaving}
+                  />
+                ) : null
               })()}
             </CardContent>
           </Card>

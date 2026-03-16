@@ -105,14 +105,14 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
 
     @Override
     public void forgotPassword(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("Kullanıcı bulunamadı: " + email));
+        String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
+        userRepository.findByEmail(normalizedEmail).ifPresent(user -> {
+            String token = UUID.randomUUID().toString();
+            userService.createPasswordResetTokenForUser(user, token);
 
-        String token = UUID.randomUUID().toString();
-        userService.createPasswordResetTokenForUser(user, token);
-
-        String link = frontendUrl.replaceAll("/$", "") + "/reset-password?token=" + token;
-        eventPublisher.publishEvent(new com.mehmetkerem.event.ForgotPasswordEvent(this, email, link));
+            String link = frontendUrl.replaceAll("/$", "") + "/reset-password?token=" + token;
+            eventPublisher.publishEvent(new com.mehmetkerem.event.ForgotPasswordEvent(this, normalizedEmail, link));
+        });
     }
 
     @Override
@@ -129,11 +129,17 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
         User user = passToken.getUser();
         userService.changeUserPassword(user, request.getNewPassword());
         passwordResetTokenRepository.delete(passToken);
+        // Şifre reset sonrası tüm aktif oturumları düşür
+        refreshTokenService.deleteByUserId(user.getId());
     }
 
     @Override
     public void changePassword(Long userId, String oldPassword, String newPassword) {
         User user = userService.getUserById(userId);
+
+        if (oldPassword != null && oldPassword.equals(newPassword)) {
+            throw new BadRequestException("Yeni şifre mevcut şifreyle aynı olamaz.");
+        }
 
         if (user.getPasswordHash() != null && !user.getPasswordHash().isEmpty()) {
             if (!encoder.matches(oldPassword, user.getPasswordHash())) {
@@ -142,6 +148,8 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
         }
 
         userService.changeUserPassword(user, newPassword);
+        // Şifre değişimi sonrası tüm aktif oturumları düşür
+        refreshTokenService.deleteByUserId(user.getId());
     }
 
     @Override

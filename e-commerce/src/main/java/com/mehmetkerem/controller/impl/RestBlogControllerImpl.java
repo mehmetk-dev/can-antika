@@ -8,6 +8,7 @@ import com.mehmetkerem.service.IBlogService;
 import com.mehmetkerem.util.Result;
 import com.mehmetkerem.util.ResultData;
 import com.mehmetkerem.util.ResultHelper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +58,7 @@ public class RestBlogControllerImpl implements IRestBlogController {
     @Override
     @Secured("ROLE_ADMIN")
     @PostMapping("/v1/admin/blog")
-    public ResultData<com.mehmetkerem.dto.response.BlogPostResponse> createPost(@RequestBody com.mehmetkerem.dto.request.BlogPostRequest post) {
+    public ResultData<com.mehmetkerem.dto.response.BlogPostResponse> createPost(@Valid @RequestBody com.mehmetkerem.dto.request.BlogPostRequest post) {
         // Not: Category ayarı service katmanında veya burada yapılabilir.
         // Şimdilik postEntity'ye taşıyoruz, detayı servis çözer.
         BlogPost entity = blogMapper.toPostEntity(post);
@@ -67,7 +68,7 @@ public class RestBlogControllerImpl implements IRestBlogController {
     @Override
     @Secured("ROLE_ADMIN")
     @PutMapping("/v1/admin/blog/{id}")
-    public ResultData<com.mehmetkerem.dto.response.BlogPostResponse> updatePost(@PathVariable Long id, @RequestBody com.mehmetkerem.dto.request.BlogPostRequest post) {
+    public ResultData<com.mehmetkerem.dto.response.BlogPostResponse> updatePost(@PathVariable Long id, @Valid @RequestBody com.mehmetkerem.dto.request.BlogPostRequest post) {
         return ResultHelper.success(blogMapper.toPostResponse(blogService.updatePost(id, blogMapper.toPostEntity(post))));
     }
 

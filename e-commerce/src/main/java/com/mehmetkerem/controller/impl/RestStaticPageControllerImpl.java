@@ -8,6 +8,7 @@ import com.mehmetkerem.service.IStaticPageService;
 import com.mehmetkerem.util.Result;
 import com.mehmetkerem.util.ResultData;
 import com.mehmetkerem.util.ResultHelper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -62,14 +63,14 @@ public class RestStaticPageControllerImpl implements IRestStaticPageController {
     @Override
     @Secured("ROLE_ADMIN")
     @PostMapping("/v1/admin/pages")
-    public ResultData<StaticPageResponse> createPage(@RequestBody StaticPageRequest req) {
+    public ResultData<StaticPageResponse> createPage(@Valid @RequestBody StaticPageRequest req) {
         return ResultHelper.success(toResponse(staticPageService.savePage(toEntity(req))));
     }
 
     @Override
     @Secured("ROLE_ADMIN")
     @PutMapping("/v1/admin/pages/{id}")
-    public ResultData<StaticPageResponse> updatePage(@PathVariable Long id, @RequestBody StaticPageRequest req) {
+    public ResultData<StaticPageResponse> updatePage(@PathVariable Long id, @Valid @RequestBody StaticPageRequest req) {
         return ResultHelper.success(toResponse(staticPageService.updatePage(id, toEntity(req))));
     }
 

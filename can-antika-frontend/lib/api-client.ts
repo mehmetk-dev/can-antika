@@ -91,7 +91,7 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
                 throw new Error("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
             }
         } catch {
-            return null as unknown as T; // Sessizce geç
+            throw new Error("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
         }
     }
 

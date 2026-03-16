@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Header } from "@/components/header"
+import Link from "next/link"
 import { useAuth } from "@/lib/auth-context"
 import { toast } from "sonner"
 
@@ -224,6 +225,11 @@ export default function AuthPage() {
                       className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
                     <Label htmlFor="rememberMe" className="text-sm cursor-pointer text-muted-foreground">Beni hatırla</Label>
+                  </div>
+                  <div className="text-right -mt-1">
+                    <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                      Şifremi unuttum
+                    </Link>
                   </div>
 
                   <Button

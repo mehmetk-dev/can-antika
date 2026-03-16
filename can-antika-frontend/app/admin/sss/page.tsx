@@ -12,7 +12,7 @@ import { faqApi } from "@/lib/api"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
 
 interface FaqItem {
-    id: number; question: string; answer: string; sortOrder: number; active: boolean
+    id: number; question: string; answer: string; displayOrder: number; active: boolean
 }
 
 export default function FaqPage() {
@@ -20,7 +20,7 @@ export default function FaqPage() {
     const [loading, setLoading] = useState(true)
     const [showForm, setShowForm] = useState(false)
     const [editItem, setEditItem] = useState<FaqItem | null>(null)
-    const [form, setForm] = useState({ question: "", answer: "", sortOrder: 0, active: true })
+    const [form, setForm] = useState({ question: "", answer: "", displayOrder: 0, active: true })
 
     useEffect(() => { load() }, [])
 
@@ -32,13 +32,13 @@ export default function FaqPage() {
 
     const openEdit = (f: FaqItem) => {
         setEditItem(f)
-        setForm({ question: f.question, answer: f.answer, sortOrder: f.sortOrder, active: f.active })
+        setForm({ question: f.question, answer: f.answer, displayOrder: f.displayOrder, active: f.active })
         setShowForm(true)
     }
 
     const openCreate = () => {
         setEditItem(null)
-        setForm({ question: "", answer: "", sortOrder: faqs.length, active: true })
+        setForm({ question: "", answer: "", displayOrder: faqs.length, active: true })
         setShowForm(true)
     }
 
@@ -53,7 +53,7 @@ export default function FaqPage() {
                 toast.success("SSS eklendi")
             }
             setShowForm(false)
-            load()
+            await load()
         } catch { toast.error("İşlem başarısız") }
     }
 
@@ -79,7 +79,7 @@ export default function FaqPage() {
                 <Card><CardContent className="py-12 text-center text-muted-foreground">Henüz SSS eklenmemiş</CardContent></Card>
             ) : (
                 <div className="space-y-2">
-                    {faqs.sort((a, b) => a.sortOrder - b.sortOrder).map((f) => (
+                    {[...faqs].sort((a, b) => a.displayOrder - b.displayOrder).map((f) => (
                         <Card key={f.id} className={!f.active ? "opacity-50" : ""}>
                             <CardContent className="p-4">
                                 <div className="flex items-start justify-between gap-3">
@@ -117,7 +117,7 @@ export default function FaqPage() {
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
                                 <label className="text-sm font-medium">Sıralama</label>
-                                <Input type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} />
+                                <Input type="number" value={form.displayOrder} onChange={(e) => setForm({ ...form, displayOrder: Number(e.target.value) })} />
                             </div>
                             <div className="space-y-1 flex items-end gap-2 pb-0.5">
                                 <label className="text-sm font-medium">Aktif</label>

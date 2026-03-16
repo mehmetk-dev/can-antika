@@ -11,7 +11,7 @@ interface FaqItem {
     id: number
     question: string
     answer: string
-    sortOrder: number
+    displayOrder: number
     active: boolean
 }
 
@@ -27,7 +27,7 @@ export default function FaqPage() {
     const loadFaqs = async () => {
         try {
             const data = await faqApi.getActive()
-            setFaqs(data || [])
+            setFaqs([...(data || [])].sort((a, b) => a.displayOrder - b.displayOrder))
         } catch {
             // Silently handle
         } finally {

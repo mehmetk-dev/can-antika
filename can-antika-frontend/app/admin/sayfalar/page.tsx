@@ -53,7 +53,7 @@ export default function StaticPagesPage() {
                 toast.success("Sayfa oluşturuldu")
             }
             setShowForm(false)
-            load()
+            await load()
         } catch { toast.error("İşlem başarısız") }
     }
 

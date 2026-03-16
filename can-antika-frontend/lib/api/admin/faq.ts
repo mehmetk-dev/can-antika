@@ -8,10 +8,10 @@ export const faqApi = {
     getAll: () =>
         api.get<FaqItem[]>("/v1/admin/faq"),
 
-    create: (data: { question: string; answer: string; sortOrder?: number; active?: boolean }) =>
+    create: (data: { question: string; answer: string; displayOrder?: number; active?: boolean }) =>
         api.post<FaqItem>("/v1/admin/faq", { body: data }),
 
-    update: (id: number, data: { question: string; answer: string; sortOrder?: number; active?: boolean }) =>
+    update: (id: number, data: { question: string; answer: string; displayOrder?: number; active?: boolean }) =>
         api.put<FaqItem>(`/v1/admin/faq/${id}`, { body: data }),
 
     delete: (id: number) =>

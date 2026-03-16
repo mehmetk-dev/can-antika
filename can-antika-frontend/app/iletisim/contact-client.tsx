@@ -32,8 +32,8 @@ export function ContactClient() {
     setIsSubmitting(true)
     try {
       await supportTicketApi.create({
-        subject: `İletişim Formu - ${name} (${email}, ${phone})`,
-        message,
+        subject: "İletişim Formu",
+        message: `Ad Soyad: ${name}\nE-posta: ${email}\nTelefon: ${phone}\n\nMesaj:\n${message}`,
       })
       setIsSubmitted(true)
       toast.success("Mesajınız başarıyla gönderildi")

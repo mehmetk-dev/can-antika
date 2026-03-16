@@ -39,3 +39,7 @@ token.json
 .env
 .env.*
 !.env.example
+
+# Runtime artifacts
+logs/
+uploads/

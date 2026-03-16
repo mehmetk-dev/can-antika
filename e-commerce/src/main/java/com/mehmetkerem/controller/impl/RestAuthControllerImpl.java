@@ -31,13 +31,13 @@ public class RestAuthControllerImpl implements IRestAuthController {
 
     @Override
     @PostMapping("/register")
-    public ResultData<Map<String, String>> register(@RequestBody RegisterRequest req) {
+    public ResultData<Map<String, String>> register(@RequestBody @Valid RegisterRequest req) {
         return ResultHelper.success(authService.register(req));
     }
 
     @Override
     @PostMapping("/login")
-    public ResultData<UserResponse> login(@RequestBody LoginRequest req, HttpServletResponse response) {
+    public ResultData<UserResponse> login(@RequestBody @Valid LoginRequest req, HttpServletResponse response) {
         LoginResponse loginResponse = authService.login(req);
         cookieUtil.addAccessTokenCookie(response, loginResponse.getAccessToken());
         cookieUtil.addRefreshTokenCookie(response, loginResponse.getRefreshToken());

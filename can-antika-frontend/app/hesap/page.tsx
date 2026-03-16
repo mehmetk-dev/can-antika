@@ -61,8 +61,16 @@ export default function DashboardPage() {
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (passwordData.newPassword.length < 6) {
+      toast.error("Yeni şifre en az 6 karakter olmalı")
+      return
+    }
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
       toast.error("Şifreler eşleşmiyor")
+      return
+    }
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      toast.error("Yeni şifre mevcut şifreyle aynı olamaz")
       return
     }
     setIsChangingPassword(true)
@@ -170,6 +178,7 @@ export default function DashboardPage() {
                           type="password"
                           value={passwordData.newPassword}
                           onChange={(e) => setPasswordData((prev) => ({ ...prev, newPassword: e.target.value }))}
+                          minLength={6}
                           className="bg-muted/50"
                           required
                         />
@@ -181,6 +190,7 @@ export default function DashboardPage() {
                           type="password"
                           value={passwordData.confirmNewPassword}
                           onChange={(e) => setPasswordData((prev) => ({ ...prev, confirmNewPassword: e.target.value }))}
+                          minLength={6}
                           className="bg-muted/50"
                           required
                         />

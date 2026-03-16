@@ -136,7 +136,7 @@ public class ReviewServiceImpl implements IReviewService {
         // yapılır
         java.util.Map<Long, UserResponse> userMap = new java.util.HashMap<>();
         for (Long uid : userIds) {
-            userMap.put(uid, userService.getUserResponseById(uid));
+            userMap.put(uid, toPublicUser(userService.getUserResponseById(uid)));
         }
 
         return reviews.stream()
@@ -146,8 +146,18 @@ public class ReviewServiceImpl implements IReviewService {
     }
 
     private ReviewResponse getDetails(Review review) {
-        UserResponse userResponse = userService.getUserResponseById(review.getUserId());
+        UserResponse userResponse = toPublicUser(userService.getUserResponseById(review.getUserId()));
         ProductResponse productResponse = productService.getProductResponseById(review.getProductId());
         return reviewMapper.toResponseWithDetails(review, productResponse, userResponse);
+    }
+
+    private UserResponse toPublicUser(UserResponse user) {
+        if (user == null) {
+            return null;
+        }
+        UserResponse publicUser = new UserResponse();
+        publicUser.setId(user.getId());
+        publicUser.setName(user.getName());
+        return publicUser;
     }
 }

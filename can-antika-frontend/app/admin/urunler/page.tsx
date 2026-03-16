@@ -1,10 +1,9 @@
-"use client"
+﻿"use client"
 
 import Image from "next/image"
-import { useState, useEffect } from "react"
-import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye, Loader2 } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { Plus, MoreHorizontal, Pencil, Trash2, Eye, Loader2, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -19,30 +18,34 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<ProductResponse[]>([])
   const [categories, setCategories] = useState<CategoryResponse[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isImporting, setIsImporting] = useState(false)
   const [page, setPage] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
   const [categoryFilter, setCategoryFilter] = useState("all")
+  const excelInputRef = useRef<HTMLInputElement>(null)
   const PAGE_SIZE = 20
 
   useEffect(() => {
     categoryApi.getAll().then(setCategories).catch((e) => console.error("Kategori listesi alınamadı:", e))
   }, [])
 
+  const loadProducts = async () => {
+    setIsLoading(true)
+    try {
+      const params: Record<string, unknown> = { page, size: PAGE_SIZE }
+      if (categoryFilter !== "all") params.categoryId = Number(categoryFilter)
+      const data = await productApi.search(params as Parameters<typeof productApi.search>[0])
+      setProducts(data.items)
+      setTotalCount(data.totalElement)
+    } catch {
+      setProducts([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
-    const loadingTimer = setTimeout(() => setIsLoading(true), 0)
-    const params: Record<string, unknown> = { page, size: PAGE_SIZE }
-    if (categoryFilter !== "all") params.categoryId = Number(categoryFilter)
-
-    productApi
-      .search(params as Parameters<typeof productApi.search>[0])
-      .then((data) => {
-        setProducts(data.items)
-        setTotalCount(data.totalElement)
-      })
-      .catch(() => setProducts([]))
-      .finally(() => setIsLoading(false))
-
-    return () => clearTimeout(loadingTimer)
+    void loadProducts()
   }, [page, categoryFilter])
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
@@ -59,6 +62,34 @@ export default function AdminProductsPage() {
     }
   }
 
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.name.toLowerCase().endsWith(".xlsx")) {
+      toast.error("Sadece .xlsx dosyası desteklenir")
+      if (excelInputRef.current) excelInputRef.current.value = ""
+      return
+    }
+
+    setIsImporting(true)
+    try {
+      const result = await productApi.importFromExcel(file)
+      const preview = (result.errors || []).slice(0, 3).join(" | ")
+      if (result.failedCount > 0) {
+        toast.warning(`Aktarıldı: ${result.importedCount}, Hata: ${result.failedCount}${preview ? ` (${preview})` : ""}`)
+      } else {
+        toast.success(`${result.importedCount} ürün başarıyla aktarıldı`)
+      }
+      await loadProducts()
+    } catch {
+      toast.error("Excel aktarımı başarısız")
+    } finally {
+      setIsImporting(false)
+      if (excelInputRef.current) excelInputRef.current.value = ""
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -66,15 +97,21 @@ export default function AdminProductsPage() {
           <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground">Ürünler</h1>
           <p className="mt-1 text-muted-foreground">{totalCount} ürün kayıtlı</p>
         </div>
-        <Link href="/admin/urunler/yeni">
-          <Button className="gap-2 bg-primary text-primary-foreground">
-            <Plus className="h-4 w-4" />
-            Yeni Ürün Ekle
+        <div className="flex items-center gap-2">
+          <input ref={excelInputRef} type="file" accept=".xlsx" className="hidden" onChange={handleImportExcel} />
+          <Button variant="outline" className="gap-2" onClick={() => excelInputRef.current?.click()} disabled={isImporting}>
+            {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            Excel'den Yükle
           </Button>
-        </Link>
+          <Link href="/admin/urunler/yeni">
+            <Button className="gap-2 bg-primary text-primary-foreground">
+              <Plus className="h-4 w-4" />
+              Yeni Ürün Ekle
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      {/* Filters */}
       <Card className="bg-card">
         <CardContent className="p-4">
           <div className="flex flex-col gap-4 sm:flex-row">
@@ -95,7 +132,6 @@ export default function AdminProductsPage() {
         </CardContent>
       </Card>
 
-      {/* Products Table */}
       <Card className="bg-card">
         <CardContent className="p-0">
           {isLoading ? (
@@ -168,10 +204,7 @@ export default function AdminProductsPage() {
                               Düzenle
                             </DropdownMenuItem>
                           </Link>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDelete(product.id)}
-                          >
+                          <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(product.id)}>
                             <Trash2 className="mr-2 h-4 w-4" />
                             Sil
                           </DropdownMenuItem>
@@ -186,7 +219,6 @@ export default function AdminProductsPage() {
         </CardContent>
       </Card>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>

@@ -10,6 +10,10 @@ certbot/
 # DB yedekleri
 backups/
 
+# Runtime logs
+logs/
+e-commerce/logs/
+
 # SQL dump dosyaları (hassas veri içerebilir)
 *.sql
 
