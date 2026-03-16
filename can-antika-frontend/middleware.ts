@@ -1,6 +1,45 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+const MAINTENANCE_CACHE_TTL_MS = 30_000;
+let maintenanceModeCache: { value: boolean; expiresAt: number } | null = null;
+
+async function readMaintenanceMode(apiBase: string): Promise<boolean> {
+    const now = Date.now();
+    if (maintenanceModeCache && maintenanceModeCache.expiresAt > now) {
+        return maintenanceModeCache.value;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 1200);
+
+    try {
+        const settingsRes = await fetch(`${apiBase.replace(/\/$/, "")}/v1/site-settings`, {
+            method: "GET",
+            headers: { Accept: "application/json" },
+            cache: "no-store",
+            signal: controller.signal,
+        });
+
+        if (!settingsRes.ok) {
+            return maintenanceModeCache?.value ?? false;
+        }
+
+        const json = await settingsRes.json();
+        const maintenanceMode = json?.data?.maintenanceMode === true;
+        maintenanceModeCache = {
+            value: maintenanceMode,
+            expiresAt: now + MAINTENANCE_CACHE_TTL_MS,
+        };
+        return maintenanceMode;
+    } catch {
+        // Upstream yavaş/erişilemez durumda navigasyonu bloklama.
+        return maintenanceModeCache?.value ?? false;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
 /**
  * Lightweight middleware — sadece security header'ları ekler.
  *
@@ -26,24 +65,10 @@ export async function middleware(request: NextRequest) {
             process.env.NEXT_PUBLIC_API_URL ||
             "http://localhost:8085";
 
-        try {
-            const settingsRes = await fetch(`${apiBase.replace(/\/$/, "")}/v1/site-settings`, {
-                method: "GET",
-                headers: { Accept: "application/json" },
-                cache: "no-store",
-            });
-
-            if (settingsRes.ok) {
-                const json = await settingsRes.json();
-                const maintenanceMode = json?.data?.maintenanceMode === true;
-
-                if (maintenanceMode) {
-                    const maintenanceUrl = new URL("/bakim", request.url);
-                    return NextResponse.redirect(maintenanceUrl);
-                }
-            }
-        } catch {
-            // Settings endpoint fail ederse siteyi bloklama
+        const maintenanceMode = await readMaintenanceMode(apiBase);
+        if (maintenanceMode) {
+            const maintenanceUrl = new URL("/bakim", request.url);
+            return NextResponse.redirect(maintenanceUrl);
         }
     }
 
