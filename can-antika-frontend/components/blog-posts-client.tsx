@@ -1,12 +1,13 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Calendar, User, ArrowRight, Search, Tag } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { formatDateTR } from "@/lib/utils"
+import { blogApi } from "@/lib/api"
 
 interface BlogPost {
     id: number
@@ -29,13 +30,49 @@ interface BlogCategory {
 }
 
 interface BlogPostsClientProps {
-    posts: BlogPost[]
-    categories: BlogCategory[]
+    initialPosts?: BlogPost[]
+    initialCategories?: BlogCategory[]
 }
 
-export function BlogPostsClient({ posts, categories }: BlogPostsClientProps) {
+export function BlogPostsClient({ initialPosts = [], initialCategories = [] }: BlogPostsClientProps) {
+    const [posts, setPosts] = useState<BlogPost[]>(initialPosts)
+    const [categories, setCategories] = useState<BlogCategory[]>(initialCategories)
+    const [loading, setLoading] = useState(initialPosts.length === 0)
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
+
+    useEffect(() => {
+        let cancelled = false
+
+        async function load() {
+            setLoading(true)
+            try {
+                const [postsRes, categoriesRes] = await Promise.allSettled([
+                    blogApi.getPosts(0, 50),
+                    blogApi.getCategories(),
+                ])
+
+                if (!cancelled) {
+                    if (postsRes.status === "fulfilled") {
+                        setPosts(postsRes.value.items || [])
+                    } else {
+                        setPosts([])
+                    }
+
+                    if (categoriesRes.status === "fulfilled") {
+                        setCategories(categoriesRes.value || [])
+                    } else {
+                        setCategories([])
+                    }
+                }
+            } finally {
+                if (!cancelled) setLoading(false)
+            }
+        }
+
+        void load()
+        return () => { cancelled = true }
+    }, [])
 
     const getCategoryName = (id: number) =>
         categories.find((c) => c.id === id)?.name || ""
@@ -59,6 +96,10 @@ export function BlogPostsClient({ posts, categories }: BlogPostsClientProps) {
 
     return (
         <>
+            {loading && (
+                <div className="mb-8 text-sm text-muted-foreground">Yazılar yükleniyor...</div>
+            )}
+
             {/* Search & Category Filters */}
             <div className="flex flex-col md:flex-row gap-4 mb-12">
                 <div className="relative flex-1 max-w-md">
