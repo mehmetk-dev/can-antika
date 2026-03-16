@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const MAINTENANCE_CACHE_TTL_MS = 30_000;
+const MAINTENANCE_CACHE_TTL_MS = 120_000;
 let maintenanceModeCache: { value: boolean; expiresAt: number } | null = null;
 
 async function readMaintenanceMode(apiBase: string): Promise<boolean> {
@@ -11,7 +11,7 @@ async function readMaintenanceMode(apiBase: string): Promise<boolean> {
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1200);
+    const timeout = setTimeout(() => controller.abort(), 350);
 
     try {
         const settingsRes = await fetch(`${apiBase.replace(/\/$/, "")}/v1/site-settings`, {

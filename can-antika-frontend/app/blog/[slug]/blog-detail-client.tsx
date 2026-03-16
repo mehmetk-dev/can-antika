@@ -85,37 +85,36 @@ export function BlogDetailClient({ initialPost, slug }: BlogDetailClientProps) {
             <main>
                 {/* Hero Image */}
                 {post.imageUrl && (
-                    <section className="relative h-[400px] md:h-[500px] overflow-hidden">
+                    <section className="relative h-[240px] md:h-[320px] overflow-hidden">
                         <Image
                             src={post.imageUrl}
                             alt={post.title}
                             fill
                             priority
                             sizes="100vw"
-                            className="object-cover"
+                            className="object-cover object-[center_20%]"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
                     </section>
                 )}
 
                 {/* Article Content */}
-                <article className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
-                    {/* Back Link */}
-                    <Link
-                        href="/blog"
-                        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-8"
-                        id="blog-detail-back"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        Blog&apos;a Dön
-                    </Link>
-
-                    {/* Category */}
-                    {getCategoryName(post.categoryId) && (
-                        <Badge variant="outline" className="mb-4">
-                            {getCategoryName(post.categoryId)}
-                        </Badge>
-                    )}
+                <article className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-10 md:py-12">
+                    <div className="mb-6 flex flex-wrap items-center gap-3">
+                        <Link
+                            href="/blog"
+                            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                            id="blog-detail-back"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                            Blog&apos;a Dön
+                        </Link>
+                        {getCategoryName(post.categoryId) && (
+                            <Badge variant="outline">
+                                {getCategoryName(post.categoryId)}
+                            </Badge>
+                        )}
+                    </div>
 
                     {/* Title */}
                     <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground leading-tight">
