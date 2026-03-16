@@ -85,16 +85,19 @@ export function BlogDetailClient({ initialPost, slug }: BlogDetailClientProps) {
             <main>
                 {/* Hero Image */}
                 {post.imageUrl && (
-                    <section className="relative h-[240px] md:h-[320px] overflow-hidden">
-                        <Image
-                            src={post.imageUrl}
-                            alt={post.title}
-                            fill
-                            priority
-                            sizes="100vw"
-                            className="object-cover object-[center_20%]"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+                    <section className="py-6 md:py-8">
+                        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                            <div className="relative h-[260px] md:h-[360px] rounded-xl overflow-hidden bg-muted border border-border/50">
+                                <Image
+                                    src={post.imageUrl}
+                                    alt={post.title}
+                                    fill
+                                    priority
+                                    sizes="(max-width: 1024px) 100vw, 1024px"
+                                    className="object-contain"
+                                />
+                            </div>
+                        </div>
                     </section>
                 )}
 
