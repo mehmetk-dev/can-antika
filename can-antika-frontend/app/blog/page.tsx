@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 
 async function fetchBlogData() {
     const apiBases = Array.from(new Set([API_URL, FALLBACK_API_URL]))
+    let firstSuccessful: { posts: unknown[]; categories: unknown[] } | null = null
 
     for (const base of apiBases) {
         try {
@@ -34,17 +35,19 @@ async function fetchBlogData() {
                     : null
 
             if (postsJson?.data?.items) {
-                return {
-                    posts: postsJson.data.items,
-                    categories: catsJson?.data || [],
+                const current = {
+                    posts: postsJson.data.items as unknown[],
+                    categories: (catsJson?.data || []) as unknown[],
                 }
+                if (!firstSuccessful) firstSuccessful = current
+                if (current.posts.length > 0) return current
             }
         } catch {
             // try next api base
         }
     }
 
-    return { posts: [], categories: [] }
+    return firstSuccessful ?? { posts: [], categories: [] }
 }
 
 export default async function BlogPage() {
