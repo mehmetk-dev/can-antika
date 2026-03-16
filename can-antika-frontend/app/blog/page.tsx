@@ -2,6 +2,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { BlogPostsClient } from "@/components/blog-posts-client"
 import type { Metadata } from "next"
+import type { BlogPost, BlogCategory } from "@/lib/types"
 
 import { getServerApiUrl } from "@/lib/server-api-url"
 const API_URL = getServerApiUrl()
@@ -14,9 +15,14 @@ export const metadata: Metadata = {
     description: "Antika koleksiyonculuğu, restorasyon ipuçları ve tarihi eserler hakkında yazılarımız",
 }
 
-async function fetchBlogData() {
+interface BlogPageData {
+    posts: BlogPost[]
+    categories: BlogCategory[]
+}
+
+async function fetchBlogData(): Promise<BlogPageData> {
     const apiBases = Array.from(new Set([API_URL, FALLBACK_API_URL]))
-    let firstSuccessful: { posts: unknown[]; categories: unknown[] } | null = null
+    let firstSuccessful: BlogPageData | null = null
 
     for (const base of apiBases) {
         try {
@@ -35,9 +41,9 @@ async function fetchBlogData() {
                     : null
 
             if (postsJson?.data?.items) {
-                const current = {
-                    posts: postsJson.data.items as unknown[],
-                    categories: (catsJson?.data || []) as unknown[],
+                const current: BlogPageData = {
+                    posts: postsJson.data.items as BlogPost[],
+                    categories: (catsJson?.data || []) as BlogCategory[],
                 }
                 if (!firstSuccessful) firstSuccessful = current
                 if (current.posts.length > 0) return current
