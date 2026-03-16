@@ -186,7 +186,10 @@ public class ProductServiceImpl implements IProductService {
         return productPage.map(this::mapProductWithCategory);
     }
 
-    @Cacheable(cacheNames = "products:list", key = "'p='+#page+';s='+#size+';sort='+#sortBy+';dir='+#direction")
+    // NOTE:
+    // products:list cache anahtarını versiyonlayarak eski/stale Redis kayıtlarından
+    // kaynaklanan deserialization kaynaklı 500 hatalarını engeller.
+    @Cacheable(cacheNames = "products:list", key = "'v2;p='+#page+';s='+#size+';sort='+#sortBy+';dir='+#direction")
     public Page<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction) {
         String safeSortBy = ALLOWED_PRODUCT_SORT_FIELDS.contains(sortBy) ? sortBy : "id";
         Sort sort = direction.equalsIgnoreCase("desc")
