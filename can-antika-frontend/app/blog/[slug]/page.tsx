@@ -69,5 +69,5 @@ export default async function BlogDetailPage({
     const { slug } = await params
     const post = await fetchBlogPost(slug)
 
-    return <BlogDetailClient initialPost={post} />
+    return <BlogDetailClient initialPost={post} slug={slug} />
 }

@@ -14,9 +14,10 @@ import { formatDateTR } from "@/lib/utils"
 
 interface BlogDetailClientProps {
     initialPost: BlogPost | null
+    slug: string
 }
 
-export function BlogDetailClient({ initialPost }: BlogDetailClientProps) {
+export function BlogDetailClient({ initialPost, slug }: BlogDetailClientProps) {
     const [post, setPost] = useState<BlogPost | null>(initialPost)
     const [categories, setCategories] = useState<BlogCategory[]>([])
     const [loading, setLoading] = useState(!initialPost)
@@ -24,10 +25,13 @@ export function BlogDetailClient({ initialPost }: BlogDetailClientProps) {
     useEffect(() => {
         blogApi.getCategories().then(setCategories).catch(() => setCategories([]))
         if (!initialPost) {
-            const loadingTimer = setTimeout(() => setLoading(false), 0)
-            return () => clearTimeout(loadingTimer)
+            blogApi
+                .getPostBySlug(slug)
+                .then((p) => setPost(p))
+                .catch(() => setPost(null))
+                .finally(() => setLoading(false))
         }
-    }, [initialPost])
+    }, [initialPost, slug])
 
     const getCategoryName = (id: number) =>
         categories.find((c) => c.id === id)?.name || ""
