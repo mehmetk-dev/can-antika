@@ -6,6 +6,20 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
     title: "Blog | Antika Dünyası",
     description: "Antika koleksiyonculuğu, restorasyon ipuçları ve tarihi eserler hakkında yazılarımız",
+    alternates: {
+        canonical: "/blog",
+    },
+    openGraph: {
+        title: "Blog | Antika Dünyası",
+        description: "Antika koleksiyonculuğu, restorasyon ipuçları ve tarihi eserler hakkında yazılarımız",
+        url: "/blog",
+        type: "website",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Blog | Antika Dünyası",
+        description: "Antika koleksiyonculuğu, restorasyon ipuçları ve tarihi eserler hakkında yazılarımız",
+    },
 }
 
 export default async function BlogPage() {
