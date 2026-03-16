@@ -5,6 +5,7 @@ import type { Metadata } from "next"
 
 import { getServerApiUrl } from "@/lib/server-api-url"
 const API_URL = getServerApiUrl()
+const FALLBACK_API_URL = "https://api.canantika.com"
 
 export const revalidate = 0 // Blog tarafında yeni yazıları anlık göstermek için cache kapalı
 
@@ -14,22 +15,36 @@ export const metadata: Metadata = {
 }
 
 async function fetchBlogData() {
-    try {
-        const [postsRes, catsRes] = await Promise.all([
-            fetch(`${API_URL}/v1/blog?page=0&size=50`, { cache: "no-store" }),
-            fetch(`${API_URL}/v1/blog/categories`, { cache: "no-store" }),
-        ])
+    const apiBases = Array.from(new Set([API_URL, FALLBACK_API_URL]))
 
-        const postsJson = postsRes.ok ? await postsRes.json() : null
-        const catsJson = catsRes.ok ? await catsRes.json() : null
+    for (const base of apiBases) {
+        try {
+            const [postsRes, catsRes] = await Promise.allSettled([
+                fetch(`${base}/v1/blog?page=0&size=50`, { cache: "no-store" }),
+                fetch(`${base}/v1/blog/categories`, { cache: "no-store" }),
+            ])
 
-        return {
-            posts: postsJson?.data?.items || [],
-            categories: catsJson?.data || [],
+            const postsJson =
+                postsRes.status === "fulfilled" && postsRes.value.ok
+                    ? await postsRes.value.json()
+                    : null
+            const catsJson =
+                catsRes.status === "fulfilled" && catsRes.value.ok
+                    ? await catsRes.value.json()
+                    : null
+
+            if (postsJson?.data?.items) {
+                return {
+                    posts: postsJson.data.items,
+                    categories: catsJson?.data || [],
+                }
+            }
+        } catch {
+            // try next api base
         }
-    } catch {
-        return { posts: [], categories: [] }
     }
+
+    return { posts: [], categories: [] }
 }
 
 export default async function BlogPage() {

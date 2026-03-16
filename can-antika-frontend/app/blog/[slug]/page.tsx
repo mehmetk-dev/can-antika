@@ -3,18 +3,23 @@ import { BlogDetailClient } from "./blog-detail-client"
 import { getServerApiUrl } from "@/lib/server-api-url"
 
 const API_URL = getServerApiUrl()
+const FALLBACK_API_URL = "https://api.canantika.com"
 
 async function fetchBlogPost(slug: string) {
-    try {
-        const res = await fetch(`${API_URL}/v1/blog/${slug}`, {
-            next: { revalidate: 60 },
-        })
-        if (!res.ok) return null
-        const json = await res.json()
-        return json.data ?? null
-    } catch {
-        return null
+    const apiBases = Array.from(new Set([API_URL, FALLBACK_API_URL]))
+    for (const base of apiBases) {
+        try {
+            const res = await fetch(`${base}/v1/blog/${slug}`, {
+                next: { revalidate: 60 },
+            })
+            if (!res.ok) continue
+            const json = await res.json()
+            if (json?.data) return json.data
+        } catch {
+            // try next api base
+        }
     }
+    return null
 }
 
 export async function generateMetadata({
