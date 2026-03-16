@@ -6,7 +6,7 @@ import type { Metadata } from "next"
 import { getServerApiUrl } from "@/lib/server-api-url"
 const API_URL = getServerApiUrl()
 
-export const revalidate = 300 // ISR: 5 dakikada bir yenile (AUDIT M7)
+export const revalidate = 0 // Blog tarafında yeni yazıları anlık göstermek için cache kapalı
 
 export const metadata: Metadata = {
     title: "Blog | Antika Dünyası",
@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 async function fetchBlogData() {
     try {
         const [postsRes, catsRes] = await Promise.all([
-            fetch(`${API_URL}/v1/blog?page=0&size=50`, { next: { revalidate: 300 } }),
-            fetch(`${API_URL}/v1/blog/categories`, { next: { revalidate: 300 } }),
+            fetch(`${API_URL}/v1/blog?page=0&size=50`, { cache: "no-store" }),
+            fetch(`${API_URL}/v1/blog/categories`, { cache: "no-store" }),
         ])
 
         const postsJson = postsRes.ok ? await postsRes.json() : null

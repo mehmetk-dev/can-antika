@@ -117,7 +117,7 @@ export function BlogPostsClient({ posts, categories }: BlogPostsClientProps) {
                         >
                             <Link href={`/blog/${post.slug}`} id={`blog-post-${post.id}`}>
                                 {/* Image */}
-                                <div className="aspect-[16/10] overflow-hidden bg-muted">
+                                <div className="relative aspect-[16/10] overflow-hidden bg-muted">
                                     {post.imageUrl ? (
                                         <Image
                                             src={post.imageUrl}
