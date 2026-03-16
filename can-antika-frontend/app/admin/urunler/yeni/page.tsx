@@ -36,13 +36,25 @@ export default function NewProductPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+    const parsedCategoryId = Number(categoryId)
+    const parsedPrice = Number(formData.get("price"))
+
+    if (!Number.isFinite(parsedCategoryId) || parsedCategoryId <= 0) {
+      toast.error("Lütfen geçerli bir kategori seçin")
+      return
+    }
+
+    if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
+      toast.error("Lütfen geçerli bir fiyat girin")
+      return
+    }
 
     const data: ProductRequest = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
-      price: Number(formData.get("price")),
+      price: parsedPrice,
       stock: 1,
-      categoryId: Number(categoryId),
+      categoryId: parsedCategoryId,
       imageUrls: images,
       attributes: {
         era,
@@ -60,8 +72,9 @@ export default function NewProductPage() {
       await productApi.save(data)
       toast.success("Ürün başarıyla eklendi")
       router.push("/admin/urunler")
-    } catch {
-      toast.error("Ürün eklenirken hata oluştu")
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Ürün eklenirken hata oluştu"
+      toast.error(message)
     } finally {
       setIsSaving(false)
     }

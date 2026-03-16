@@ -28,7 +28,6 @@ public class ProductRequest {
     @NotNull(message = "Kategori ID boş olamaz.")
     private Long categoryId;
 
-    @NotEmpty(message = "En az bir görsel URL'i gereklidir.")
     private List<@NotBlank(message = "Görsel URL'i boş olamaz.") String> imageUrls;
 
     private Map<String, Object> attributes;
