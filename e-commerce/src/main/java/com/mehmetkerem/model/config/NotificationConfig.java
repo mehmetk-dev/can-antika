@@ -14,7 +14,7 @@ import lombok.Setter;
 public class NotificationConfig {
 
     // SMTP
-    private String smtpHost = "smtp.zoho.com";
+    private String smtpHost = "smtp.zoho.eu";
 
     private Integer smtpPort = 465;
 
