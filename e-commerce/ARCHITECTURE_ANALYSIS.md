@@ -236,7 +236,7 @@
 - 6 farklı e-posta şablonu: `orderConfirmation`, `welcome`, `passwordReset`, `orderTracking`, `stockAlert`, `orderStatusUpdate`
 - Tüm HTML markup inline string olarak Java sınıfında tanımlı
 - Ortak wrap fonksiyonu: header + footer + body template
-- Firma bilgileri ("Çukurcuma Caddesi...", "info@canantika.com") hardcoded
+- Firma bilgileri ("Çukurcuma Caddesi...", "destek@canantika.com") hardcoded
 
 **Sorun:** HTML şablonları Java kodunda yaşıyor. Tasarım değişikliği için yeniden derleme gerekiyor. Firma bilgileri `SiteSettings`'ten gelmeli.
 
@@ -354,7 +354,7 @@
 **Çözüm:** `util/OrderStatusUtils.java` → `getLabel(OrderStatus)` — tüm status label mantığı tek yerde.
 
 ### 4. Firma Bilgileri Hardcoded
-`EmailTemplates.java` ("Çukurcuma Caddesi No: 45, Beyoğlu, İstanbul", "info@canantika.com"), `InvoicePdfServiceImpl.java` ("CAN ANTIKA", aynı adres) ve `SiteSettings` entity'si default değerler — üç farklı yerde aynı bilgiler tekrarlanıyor.
+`EmailTemplates.java` ("Çukurcuma Caddesi No: 45, Beyoğlu, İstanbul", "destek@canantika.com"), `InvoicePdfServiceImpl.java` ("CAN ANTIKA", aynı adres) ve `SiteSettings` entity'si default değerler — üç farklı yerde aynı bilgiler tekrarlanıyor.
 
 **Çözüm:** Tek kaynak: `SiteSettings` entity'si. Email template ve PDF servisleri `SiteSettings`'i inject ederek dinamik okuma yapmalı.
 

@@ -68,7 +68,7 @@ export default async function KVKKPage() {
                             <div className="mt-4 rounded-lg bg-muted p-6 space-y-2">
                                 <p className="text-sm text-muted-foreground"><strong className="text-foreground">Veri Sorumlusu:</strong> {companyName}</p>
                                 {address && <p className="text-sm text-muted-foreground"><strong className="text-foreground">Adres:</strong> {address}</p>}
-                                <p className="text-sm text-muted-foreground"><strong className="text-foreground">E-posta:</strong> kvkk@canantika.com</p>
+                                <p className="text-sm text-muted-foreground"><strong className="text-foreground">E-posta:</strong> destek@canantika.com</p>
                                 <p className="text-sm text-muted-foreground"><strong className="text-foreground">İrtibat Kişisi:</strong> Can Antika Veri Koruma Sorumlusu</p>
                             </div>
                         </section>
@@ -238,7 +238,7 @@ export default async function KVKKPage() {
                                     <h3 className="font-serif text-base font-semibold text-foreground">Elektronik Başvuru</h3>
                                     <p className="mt-2 text-sm text-muted-foreground">
                                         Kayıtlı elektronik posta (KEP) adresinizden veya sisteminizde kayıtlı e-posta adresinizden
-                                        <strong className="text-foreground"> kvkk@canantika.com</strong> adresine başvurabilirsiniz.
+                                        <strong className="text-foreground"> destek@canantika.com</strong> adresine başvurabilirsiniz.
                                     </p>
                                 </div>
                             </div>

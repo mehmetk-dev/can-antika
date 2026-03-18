@@ -9,7 +9,7 @@ export default function SmtpSettingsTab({ settings, onChange }: SettingsTabProps
                 <Field label="SMTP Port" value={settings.smtpPort} onChange={(v) => onChange("smtpPort", Number(v))} type="number" placeholder="587" />
                 <Field label="Kullanıcı Adı" value={settings.smtpUsername} onChange={(v) => onChange("smtpUsername", v)} />
                 <Field label="Şifre" value={settings.smtpPassword} onChange={(v) => onChange("smtpPassword", v)} type="password" />
-                <Field label="Gönderen E-posta" value={settings.smtpFromEmail} onChange={(v) => onChange("smtpFromEmail", v)} placeholder="info@canantika.com" />
+                <Field label="Gönderen E-posta" value={settings.smtpFromEmail} onChange={(v) => onChange("smtpFromEmail", v)} placeholder="destek@canantika.com" />
                 <Field label="Gönderen Adı" value={settings.smtpFromName} onChange={(v) => onChange("smtpFromName", v)} placeholder="Can Antika" />
             </div>
         </div>

@@ -16,7 +16,7 @@ public class ContactConfig {
 
     private String phone = "+90 (212) 555-0123";
 
-    private String email = "info@canantika.com";
+    private String email = "destek@canantika.com";
 
     private String website = "www.canantika.com";
 

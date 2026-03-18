@@ -351,7 +351,7 @@ export default async function PrivacyPage() {
               <div className="mt-6 rounded-lg border-2 border-primary/20 bg-primary/5 p-4">
                 <p className="text-sm text-muted-foreground">
                   <strong className="text-foreground">Başvuru Yöntemi:</strong> Haklarınızı kullanmak için
-                  <strong className="text-foreground"> kvkk@canantika.com</strong> adresine kimliğinizi tespit edici
+                  <strong className="text-foreground"> destek@canantika.com</strong> adresine kimliğinizi tespit edici
                   belgeler ile birlikte yazılı başvuruda bulunabilirsiniz. Başvurunuz en geç <strong className="text-foreground">30 gün</strong> içinde
                   ücretsiz olarak sonuçlandırılacaktır. İşlemin ek maliyet gerektirmesi halinde Kurul tarafından
                   belirlenen tarife uygulanabilir.
@@ -397,7 +397,7 @@ export default async function PrivacyPage() {
               </p>
               <div className="mt-4 rounded-lg bg-muted p-6">
                 <p className="font-serif font-semibold text-foreground">{companyName}</p>
-                <p className="mt-2 text-muted-foreground">Veri Sorumlusu İrtibat: kvkk@canantika.com</p>
+                <p className="mt-2 text-muted-foreground">Veri Sorumlusu İrtibat: destek@canantika.com</p>
                 {email && <p className="text-muted-foreground">Genel İletişim: {email}</p>}
                 {phone && <p className="text-muted-foreground">Telefon: {phone}</p>}
                 {address && <p className="text-muted-foreground">Adres: {address}</p>}

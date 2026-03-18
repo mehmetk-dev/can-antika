@@ -268,7 +268,7 @@ export default async function CookiesPage() {
               <div className="mt-4 rounded-lg bg-muted p-6">
                 <p className="font-serif font-semibold text-foreground">{companyName}</p>
                 {email && <p className="mt-2 text-muted-foreground">E-posta: {email}</p>}
-                <p className="text-muted-foreground">KVKK İletişim: kvkk@canantika.com</p>
+                <p className="text-muted-foreground">KVKK İletişim: destek@canantika.com</p>
                 {phone && <p className="text-muted-foreground">Telefon: {phone}</p>}
               </div>
             </section>

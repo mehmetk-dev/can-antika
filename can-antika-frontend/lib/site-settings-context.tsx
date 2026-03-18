@@ -18,7 +18,7 @@ const DEFAULTS: SiteSettingsResponse = {
     taxId: "",
     taxOffice: "",
     phone: "+90 (212) 555-0123",
-    email: "info@canantika.com",
+    email: "destek@canantika.com",
     website: "www.canantika.com",
     address: "Çukurcuma Caddesi No: 45, Beyoğlu, İstanbul",
     whatsapp: "+90 (212) 555-0123",

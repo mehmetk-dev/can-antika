@@ -213,7 +213,7 @@ export default async function DistanceSalesPage() {
                                 <div className="rounded-lg border border-border p-4">
                                     <h3 className="font-serif text-base font-semibold text-foreground">Cayma Hakkının Kullanılması</h3>
                                     <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                                        <li className="flex items-start gap-2"><span className="text-primary">•</span>Cayma bildirimi, <strong className="text-foreground">{email || "info@canantika.com"}</strong> adresine{phone && ` veya ${phone} numaralı hattımıza`} yapılabilir.</li>
+                                        <li className="flex items-start gap-2"><span className="text-primary">•</span>Cayma bildirimi, <strong className="text-foreground">{email || "destek@canantika.com"}</strong> adresine{phone && ` veya ${phone} numaralı hattımıza`} yapılabilir.</li>
                                         <li className="flex items-start gap-2"><span className="text-primary">•</span>Cayma bildiriminin 14 günlük süre içinde SATICI&apos;ya yöneltilmiş olması yeterlidir.</li>
                                         <li className="flex items-start gap-2"><span className="text-primary">•</span>ALICI, ürünü cayma tarihinden itibaren 10 gün içinde SATICI&apos;ya iade etmekle yükümlüdür.</li>
                                         <li className="flex items-start gap-2"><span className="text-primary">•</span>İade kargo bedeli ALICI&apos;ya aittir; ancak ürün ayıplı ise kargo bedeli SATICI tarafından karşılanır.</li>
