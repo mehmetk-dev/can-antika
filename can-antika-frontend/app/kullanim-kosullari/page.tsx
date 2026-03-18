@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 
 export default async function TermsPage() {
   const s = await fetchSiteSettings()
-  const companyName = s?.companyName || "Can Antika Ticaret Ltd. Şti."
+  const companyName = s?.companyName || "Mesut Can Bireysel Şirketi"
   const phone = s?.phone || ""
   const email = s?.email || ""
   const address = s?.address || ""
@@ -76,7 +76,7 @@ export default async function TermsPage() {
               <p className="mt-4 text-muted-foreground leading-relaxed">
                 Bu web sitesini (<strong className="text-foreground">www.canantika.com</strong>) kullanarak,
                 aşağıdaki kullanım koşullarını okuduğunuzu, anladığınızı ve kabul ettiğinizi beyan edersiniz.
-                Can Antika Ticaret Ltd. Şti. (&quot;Can Antika&quot;), bu koşulları herhangi bir zamanda
+                Mesut Can Bireysel Şirketi (&quot;Can Antika&quot;), bu koşulları herhangi bir zamanda
                 güncelleme hakkını saklı tutar. Güncellenmiş koşullar sitede yayınlandığı tarihte yürürlüğe girer.
               </p>
               <p className="mt-3 text-muted-foreground leading-relaxed">
@@ -90,7 +90,7 @@ export default async function TermsPage() {
               <h2 className="font-serif text-2xl font-semibold text-foreground">2. Tanımlar</h2>
               <div className="mt-4 space-y-3 text-muted-foreground">
                 <p><strong className="text-foreground">&quot;Site&quot;</strong>: www.canantika.com alan adı üzerinden yayınlanan web sitesi.</p>
-                <p><strong className="text-foreground">&quot;Satıcı&quot;</strong>: Can Antika Ticaret Ltd. Şti.</p>
+                <p><strong className="text-foreground">&quot;Satıcı&quot;</strong>: Mesut Can Bireysel Şirketi</p>
                 <p><strong className="text-foreground">&quot;Kullanıcı&quot;</strong>: Siteye erişen, üye olan veya alışveriş yapan gerçek veya tüzel kişi.</p>
                 <p><strong className="text-foreground">&quot;Antika Eser&quot;</strong>: Tarihi, sanatsal veya kültürel değer taşıyan, kural olarak 100 yıldan eski taşınır kültür varlıkları.</p>
                 <p><strong className="text-foreground">&quot;Provenans&quot;</strong>: Bir eserin sahiplik geçmişi, üretim yeri ve dönemine ilişkin belgeleme zinciri.</p>

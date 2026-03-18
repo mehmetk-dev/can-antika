@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 
 export default async function PrivacyPage() {
   const s = await fetchSiteSettings()
-  const companyName = s?.companyName || "Can Antika Ticaret Ltd. Şti."
+  const companyName = s?.companyName || "Mesut Can Bireysel Şirketi"
   const phone = s?.phone || ""
   const email = s?.email || ""
   const address = s?.address || ""
@@ -73,7 +73,7 @@ export default async function PrivacyPage() {
               <h2 className="font-serif text-2xl font-semibold text-foreground">1. Veri Sorumlusu</h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
                 6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) uyarınca, kişisel verileriniz;
-                veri sorumlusu sıfatıyla <strong className="text-foreground">Can Antika Ticaret Ltd. Şti.</strong>
+                veri sorumlusu sıfatıyla <strong className="text-foreground">Mesut Can Bireysel Şirketi</strong>
                 tarafından aşağıda açıklanan kapsamda işlenmektedir.
               </p>
               <div className="mt-4 rounded-lg bg-muted p-6 space-y-2">

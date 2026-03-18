@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 
 export default async function CookiesPage() {
   const s = await fetchSiteSettings()
-  const companyName = s?.companyName || "Can Antika Ticaret Ltd. Şti."
+  const companyName = s?.companyName || "Mesut Can Bireysel Şirketi"
   const phone = s?.phone || ""
   const email = s?.email || ""
   return (

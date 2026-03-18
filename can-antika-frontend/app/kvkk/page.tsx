@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 
 export default async function KVKKPage() {
     const s = await fetchSiteSettings()
-    const companyName = s?.companyName || "Can Antika Ticaret Ltd. Şti."
+    const companyName = s?.companyName || "Mesut Can Bireysel Şirketi"
     const address = s?.address || ""
     return (
         <div className="min-h-screen bg-background">
@@ -55,7 +55,7 @@ export default async function KVKKPage() {
                         {/* Başlangıç */}
                         <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-6">
                             <p className="text-muted-foreground leading-relaxed">
-                                <strong className="text-foreground">Can Antika Ticaret Ltd. Şti.</strong> olarak kişisel verilerinizin
+                                <strong className="text-foreground">Mesut Can Bireysel Şirketi</strong> olarak kişisel verilerinizin
                                 güvenliği konusunda büyük hassasiyet göstermekteyiz. Bu aydınlatma metni, 6698 sayılı Kişisel Verilerin
                                 Korunması Kanunu&apos;nun (&quot;KVKK&quot;) 10. maddesi ile Aydınlatma Yükümlülüğünün Yerine Getirilmesinde
                                 Uyulacak Usul ve Esaslar Hakkında Tebliğ kapsamında hazırlanmıştır.
