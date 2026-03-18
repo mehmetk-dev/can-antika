@@ -128,7 +128,7 @@ public class SmtpNotificationService implements INotificationService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            String fromAddress = config.getSmtpFromEmail();
+            String fromAddress = from;
             String fromName = config.getSmtpFromName();
             
             if (fromName != null && !fromName.isEmpty()) {
