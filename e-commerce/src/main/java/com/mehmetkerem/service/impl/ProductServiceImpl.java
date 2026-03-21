@@ -199,7 +199,7 @@ public class ProductServiceImpl implements IProductService {
     // NOTE:
     // products:list cache anahtarını versiyonlayarak eski/stale Redis kayıtlarından
     // kaynaklanan deserialization kaynaklı 500 hatalarını engeller.
-    @Cacheable(cacheNames = "products:list", key = "'v2;p='+#page+';s='+#size+';sort='+#sortBy+';dir='+#direction")
+    @Cacheable(cacheNames = "products:list", key = "'v3;p='+#page+';s='+#size+';sort='+#sortBy+';dir='+#direction")
     public Page<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction) {
         String safeSortBy = ALLOWED_PRODUCT_SORT_FIELDS.contains(sortBy) ? sortBy : "id";
         Sort sort = direction.equalsIgnoreCase("desc")
@@ -208,7 +208,7 @@ public class ProductServiceImpl implements IProductService {
 
         PageRequest pageable = PageRequest.of(page, size, sort);
 
-        return productRepository.findAll(pageable).map(productMapper::toResponse);
+        return productRepository.findAll(pageable).map(this::mapProductWithCategory);
     }
 
     /**

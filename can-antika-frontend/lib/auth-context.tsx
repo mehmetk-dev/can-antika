@@ -30,13 +30,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     // Sayfa yüklendiğinde cookie ile backend'e doğrulat
+    // HttpOnly cookie olduğu için JS'den kontrol edemiyoruz, sessizce deneriz
     useEffect(() => {
-        authApi.getProfile()
-            .then((freshUser: UserResponse) => {
-                setUser(freshUser);
+        const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8085";
+        fetch(`${BASE_URL}/v1/auth/me`, { credentials: "include" })
+            .then(async (res) => {
+                if (!res.ok) {
+                    setUser(null);
+                    return;
+                }
+                const json = await res.json();
+                if (json?.data) {
+                    setUser(json.data);
+                } else {
+                    setUser(null);
+                }
             })
             .catch(() => {
-                // Cookie yoksa veya geçersizse — oturum yok
                 setUser(null);
             })
             .finally(() => setIsLoading(false));
