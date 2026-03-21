@@ -35,7 +35,9 @@ export async function generateMetadata({
   return {
     title: `${product.title} | Can Antika`,
     description,
-    keywords: [product.title, product.category?.name, "antika", "koleksiyon", "can antika"].filter(Boolean),
+    keywords: [product.title, product.category?.name, "antika", "koleksiyon", "can antika"].filter(
+      (keyword): keyword is string => Boolean(keyword)
+    ),
     openGraph: {
       title: `${product.title} | Can Antika`,
       description,
