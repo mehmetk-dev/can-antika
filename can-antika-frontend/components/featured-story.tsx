@@ -66,6 +66,7 @@ export function FeaturedStory() {
                 src="/antique-dealer-examining-vintage-clock-with-magnif.jpg"
                 alt="Antika değerlendirme"
                 fill
+                unoptimized={true}
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />

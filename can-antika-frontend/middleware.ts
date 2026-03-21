@@ -10,15 +10,12 @@ async function readMaintenanceMode(apiBase: string): Promise<boolean> {
         return maintenanceModeCache.value;
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 150);
-
     try {
         const settingsRes = await fetch(`${apiBase.replace(/\/$/, "")}/v1/site-settings`, {
             method: "GET",
             headers: { Accept: "application/json" },
             cache: "no-store",
-            signal: controller.signal,
+            signal: AbortSignal.timeout(150),
         });
 
         if (!settingsRes.ok) {
@@ -35,8 +32,6 @@ async function readMaintenanceMode(apiBase: string): Promise<boolean> {
     } catch {
         // Upstream yavaş/erişilemez durumda navigasyonu bloklama.
         return maintenanceModeCache?.value ?? false;
-    } finally {
-        clearTimeout(timeout);
     }
 }
 

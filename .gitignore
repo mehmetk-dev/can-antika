@@ -20,3 +20,4 @@ e-commerce/logs/
 
 # Frontend local pnpm store
 can-antika-frontend/.pnpm-store/v10/
+.agent

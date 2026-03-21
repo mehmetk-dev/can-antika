@@ -1,28 +1,35 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { cache } from "react"
 import { ProductPageClient } from "./product-page-client"
 import { getServerApiUrl } from "@/lib/server-api-url"
 
 
-async function fetchProduct(slug: string) {
-    const apiUrl = getServerApiUrl()
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 5000)
+const fetchProduct = cache(async (slug: string) => {
+    const internalApiUrl = getServerApiUrl()
+    const publicApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.canantika.com"
 
     try {
-        const res = await fetch(`${apiUrl}/v1/product/slug/${encodeURIComponent(slug)}`, {
+        let res = await fetch(`${internalApiUrl}/v1/product/slug/${encodeURIComponent(slug)}`, {
             cache: "no-store",
-            signal: controller.signal,
-        })
-        if (!res.ok) return null
+            signal: AbortSignal.timeout(5000),
+        }).catch(() => null);
+
+        // Docker içindeki ağ sorunu yaşanırsa, public URL üzerinden tekrar dene
+        if (!res || !res.ok) {
+            res = await fetch(`${publicApiUrl}/v1/product/slug/${encodeURIComponent(slug)}`, {
+                cache: "no-store",
+                signal: AbortSignal.timeout(5000),
+            }).catch(() => null);
+        }
+
+        if (!res || !res.ok) return null
         const json = await res.json()
         return json.data ?? null
     } catch {
         return null
-    } finally {
-        clearTimeout(timeout)
     }
-}
+})
 
 export async function generateMetadata({
     params,

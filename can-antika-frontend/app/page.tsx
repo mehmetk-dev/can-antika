@@ -9,18 +9,32 @@ import { TrustIndicators } from "@/components/trust-indicators"
 import { FeaturedStory } from "@/components/featured-story"
 
 import { getServerApiUrl } from "@/lib/server-api-url"
-const API_URL = getServerApiUrl()
+import { cache } from "react"
 
-async function fetchSiteSettings() {
-  try {
-    const res = await fetch(`${API_URL}/v1/site-settings`, { next: { revalidate: 60 } })
-    if (!res.ok) return null
-    const json = await res.json()
-    return json.data ?? null
-  } catch {
-    return null
-  }
-}
+const fetchSiteSettings = cache(async () => {
+    const internalApiUrl = getServerApiUrl()
+    const publicApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.canantika.com"
+
+    try {
+        let res = await fetch(`${internalApiUrl}/v1/site-settings`, {
+            next: { revalidate: 60 },
+            signal: AbortSignal.timeout(3000)
+        }).catch(() => null);
+
+        if (!res || !res.ok) {
+            res = await fetch(`${publicApiUrl}/v1/site-settings`, {
+                next: { revalidate: 60 },
+                signal: AbortSignal.timeout(3000)
+            }).catch(() => null);
+        }
+
+        if (!res || !res.ok) return null
+        const json = await res.json()
+        return json.data ?? null
+    } catch {
+        return null
+    }
+})
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await fetchSiteSettings()

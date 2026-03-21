@@ -26,6 +26,7 @@ export function HeroSection() {
           alt="Antika oda"
           fill
           priority
+          unoptimized={true}
           sizes="100vw"
           className="object-cover"
         />

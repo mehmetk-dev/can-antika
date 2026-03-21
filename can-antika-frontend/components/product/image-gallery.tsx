@@ -34,6 +34,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
               alt={productName}
               fill
               priority
+              unoptimized={true}
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
@@ -77,6 +78,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
               src={images[selectedIndex] || "/placeholder.svg"}
               alt={productName}
               fill
+              unoptimized={true}
               sizes="80vw"
               className="object-contain"
             />
@@ -120,6 +122,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                 src={image || "/placeholder.svg"}
                 alt={`${productName} - ${index + 1}`}
                 fill
+                unoptimized={true}
                 sizes="80px"
                 className="object-cover"
               />
