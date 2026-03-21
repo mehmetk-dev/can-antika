@@ -3,18 +3,24 @@ import { notFound } from "next/navigation"
 import { ProductPageClient } from "./product-page-client"
 import { getServerApiUrl } from "@/lib/server-api-url"
 
-const API_URL = getServerApiUrl()
 
 async function fetchProduct(slug: string) {
+    const apiUrl = getServerApiUrl()
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000)
+
     try {
-        const res = await fetch(`${API_URL}/v1/product/slug/${encodeURIComponent(slug)}`, {
-            next: { revalidate: 60 },
+        const res = await fetch(`${apiUrl}/v1/product/slug/${encodeURIComponent(slug)}`, {
+            cache: "no-store",
+            signal: controller.signal,
         })
         if (!res.ok) return null
         const json = await res.json()
         return json.data ?? null
     } catch {
         return null
+    } finally {
+        clearTimeout(timeout)
     }
 }
 
