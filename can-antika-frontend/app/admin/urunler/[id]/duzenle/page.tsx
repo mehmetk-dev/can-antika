@@ -29,7 +29,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     const [status, setStatus] = useState("active")
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
-    const [isUploading, setIsUploading] = useState(false)
+    const [uploadingCount, setUploadingCount] = useState(0)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
@@ -86,22 +86,41 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     }
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error("Dosya boyutu 5MB'dan büyük olamaz.")
+        const files = e.target.files
+        if (!files || files.length === 0) return
+
+        const maxSlots = 6 - images.length
+        const selectedFiles = Array.from(files).slice(0, maxSlots)
+
+        const oversized = selectedFiles.filter((f) => f.size > 5 * 1024 * 1024)
+        if (oversized.length > 0) {
+            toast.error(`${oversized.length} dosya 5MB sınırını aşıyor, atlandı.`)
+        }
+
+        const validFiles = selectedFiles.filter((f) => f.size <= 5 * 1024 * 1024)
+        if (validFiles.length === 0) {
+            if (fileInputRef.current) fileInputRef.current.value = ""
             return
         }
-        setIsUploading(true)
-        try {
-            const url = await fileApi.upload(file)
-            setImages((prev) => [...prev, url])
-        } catch {
-            toast.error("Görsel yüklenirken hata oluştu")
-        } finally {
-            setIsUploading(false)
-            if (fileInputRef.current) fileInputRef.current.value = ""
-        }
+
+        setUploadingCount(validFiles.length)
+
+        const uploadPromises = validFiles.map(async (file) => {
+            try {
+                const url = await fileApi.upload(file)
+                setImages((prev) => {
+                    if (prev.length >= 6) return prev
+                    return [...prev, url]
+                })
+            } catch {
+                toast.error(`"${file.name}" yüklenemedi`)
+            } finally {
+                setUploadingCount((prev) => prev - 1)
+            }
+        })
+
+        await Promise.allSettled(uploadPromises)
+        if (fileInputRef.current) fileInputRef.current.value = ""
     }
 
     const removeImage = (index: number) => {
@@ -171,7 +190,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                             <CardDescription>Ürün fotoğraflarını yönetin</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                            <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
                             <div className="grid gap-4 sm:grid-cols-3">
                                 {images.map((image, index) => (
                                     <div key={index} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
@@ -189,13 +208,19 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
-                                        disabled={isUploading}
+                                        disabled={uploadingCount > 0}
                                         className="flex aspect-square flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
                                     >
-                                        {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : (
+                                        {uploadingCount > 0 ? (
+                                            <>
+                                                <Loader2 className="h-8 w-8 animate-spin" />
+                                                <span className="mt-2 text-sm">{uploadingCount} yükleniyor...</span>
+                                            </>
+                                        ) : (
                                             <>
                                                 <Upload className="h-8 w-8" />
                                                 <span className="mt-2 text-sm">Yükle</span>
+                                                <span className="mt-0.5 text-xs opacity-60">Çoklu seçim yapabilirsiniz</span>
                                             </>
                                         )}
                                     </button>

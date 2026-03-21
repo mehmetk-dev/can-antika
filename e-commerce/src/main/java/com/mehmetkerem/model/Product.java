@@ -90,6 +90,9 @@ public class Product {
     protected void onPreUpdate() {
         if (slug == null || slug.isBlank()) {
             slug = generateSlug(title);
+            if (id != null) {
+                slug = slug + "-" + id;
+            }
         }
         if (stock == null) {
             stock = 0;

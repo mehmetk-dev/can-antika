@@ -62,7 +62,17 @@ public class ProductServiceImpl implements IProductService {
     @Transactional
     @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
     public ProductResponse saveProduct(ProductRequest request) {
-        ProductResponse response = productMapper.toResponseWithCategory(productRepository.save(productMapper.toEntity(request)),
+        Product entity = productMapper.toEntity(request);
+        entity = productRepository.save(entity);
+
+        // Slug'ı ID ile benzersiz yap ve tekrar kaydet
+        if (entity.getSlug() != null && entity.getId() != null
+                && !entity.getSlug().endsWith("-" + entity.getId())) {
+            entity.setSlug(entity.getSlug() + "-" + entity.getId());
+            entity = productRepository.save(entity);
+        }
+
+        ProductResponse response = productMapper.toResponseWithCategory(entity,
                 categoryService.getCategoryResponseById(request.getCategoryId()));
         activityLogService.log(ActivityType.PRODUCT_CREATED, SecurityUtils.getCurrentUserId(), "Ürün eklendi: " + request.getTitle());
         return response;
@@ -236,7 +246,20 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public ProductResponse getProductBySlug(String slug) {
-        Product product = productRepository.findBySlug(slug)
+        // Önce slug ile ara
+        var optionalProduct = productRepository.findBySlug(slug);
+
+        // Slug bulunamazsa ve değer numeric ise ID ile dene (fallback)
+        if (optionalProduct.isEmpty()) {
+            try {
+                Long id = Long.parseLong(slug);
+                optionalProduct = productRepository.findById(id);
+            } catch (NumberFormatException ignored) {
+                // Numeric değil, fallback yapma
+            }
+        }
+
+        Product product = optionalProduct
                 .orElseThrow(() -> new com.mehmetkerem.exception.NotFoundException(
                         "Ürün bulunamadı: " + slug));
         return mapProductWithCategory(product);
