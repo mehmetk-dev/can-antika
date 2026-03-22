@@ -3,29 +3,47 @@ import type { NextRequest } from "next/server";
 import { getServerApiUrlCandidates } from "@/lib/server-api-url";
 
 const MAINTENANCE_CACHE_TTL_MS = 30_000;
+const MAINTENANCE_TIMEOUT_MS = 900;
 let maintenanceModeCache: { value: boolean; expiresAt: number } | null = null;
 
-async function readMaintenanceMode(apiBase: string): Promise<boolean> {
+async function fetchMaintenanceModeFromBase(apiBase: string): Promise<boolean> {
+    const settingsUrl = new URL("/v1/site-settings", `${apiBase.replace(/\/$/, "")}/`).toString();
+    const settingsRes = await fetch(settingsUrl, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+        signal: AbortSignal.timeout(MAINTENANCE_TIMEOUT_MS),
+    });
+
+    if (!settingsRes.ok) {
+        throw new Error(`HTTP ${settingsRes.status}`);
+    }
+
+    const json = await settingsRes.json();
+    const envelopeMode = json?.data?.maintenanceMode;
+    const directMode = json?.maintenanceMode;
+
+    if (typeof envelopeMode === "boolean") return envelopeMode;
+    if (typeof directMode === "boolean") return directMode;
+
+    throw new Error("maintenanceMode payload missing");
+}
+
+async function readMaintenanceMode(): Promise<boolean> {
     const now = Date.now();
     if (maintenanceModeCache && maintenanceModeCache.expiresAt > now) {
         return maintenanceModeCache.value;
     }
 
+    const apiBases = getServerApiUrlCandidates();
+    if (apiBases.length === 0) {
+        return false;
+    }
+
     try {
-        const settingsUrl = new URL("/v1/site-settings", `${apiBase.replace(/\/$/, "")}/`).toString();
-        const settingsRes = await fetch(settingsUrl, {
-            method: "GET",
-            headers: { Accept: "application/json" },
-            cache: "no-store",
-            signal: AbortSignal.timeout(1200),
-        });
-
-        if (!settingsRes.ok) {
-            return false;
-        }
-
-        const json = await settingsRes.json();
-        const maintenanceMode = json?.data?.maintenanceMode === true;
+        const maintenanceMode = await Promise.any(
+            apiBases.map((apiBase) => fetchMaintenanceModeFromBase(apiBase))
+        );
         maintenanceModeCache = {
             value: maintenanceMode,
             expiresAt: now + MAINTENANCE_CACHE_TTL_MS,
@@ -56,9 +74,7 @@ export async function middleware(request: NextRequest) {
         pathname === "/favicon.ico";
 
     if (!skipMaintenanceCheck) {
-        const [apiBase] = getServerApiUrlCandidates();
-
-        const maintenanceMode = await readMaintenanceMode(apiBase ?? "http://localhost:8085");
+        const maintenanceMode = await readMaintenanceMode();
         if (maintenanceMode) {
             const maintenanceUrl = new URL("/bakim", request.url);
             return NextResponse.redirect(maintenanceUrl);
