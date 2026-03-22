@@ -32,8 +32,13 @@ function getCandidateBaseUrls(): string[] {
 }
 
 function buildUrl(baseUrl: string, path: string, params?: Record<string, string | number | boolean | undefined | null>): string {
-    const combinedPath = `${baseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
-    const url = new URL(combinedPath);
+    const normalizedBase = /^https?:\/\//i.test(baseUrl)
+        ? baseUrl
+        : (typeof window !== "undefined"
+            ? new URL(baseUrl, window.location.origin).toString()
+            : `http://localhost:8085${baseUrl.startsWith("/") ? baseUrl : `/${baseUrl}`}`);
+
+    const url = new URL(path.replace(/^\//, ""), `${normalizedBase.replace(/\/$/, "")}/`);
 
     if (params) {
         Object.entries(params).forEach(([key, value]) => {
@@ -80,16 +85,16 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
     let lastError: Error | null = null;
 
     for (const baseUrl of baseUrls) {
-        const url = buildUrl(baseUrl, path, params);
-        const headers: Record<string, string> = {
-            ...extraHeaders,
-        };
-
-        if (body !== undefined && !(body instanceof FormData)) {
-            headers["Content-Type"] = "application/json";
-        }
-
         try {
+            const url = buildUrl(baseUrl, path, params);
+            const headers: Record<string, string> = {
+                ...extraHeaders,
+            };
+
+            if (body !== undefined && !(body instanceof FormData)) {
+                headers["Content-Type"] = "application/json";
+            }
+
             let res = await fetch(url, {
                 method,
                 headers,
@@ -155,14 +160,14 @@ export const api = {
         let lastError: Error | null = null;
 
         for (const baseUrl of baseUrls) {
-            const url = buildUrl(baseUrl, path, params);
-            const headers: Record<string, string> = { ...extraHeaders };
-
-            if (body !== undefined && !(body instanceof FormData)) {
-                headers["Content-Type"] = "application/json";
-            }
-
             try {
+                const url = buildUrl(baseUrl, path, params);
+                const headers: Record<string, string> = { ...extraHeaders };
+
+                if (body !== undefined && !(body instanceof FormData)) {
+                    headers["Content-Type"] = "application/json";
+                }
+
                 const res = await fetch(url, {
                     method,
                     headers,
