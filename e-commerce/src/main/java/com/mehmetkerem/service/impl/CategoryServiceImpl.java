@@ -8,6 +8,7 @@ import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.mapper.CategoryMapper;
 import com.mehmetkerem.model.Category;
 import com.mehmetkerem.repository.CategoryRepository;
+import com.mehmetkerem.repository.ProductRepository;
 import com.mehmetkerem.service.ICategoryService;
 import com.mehmetkerem.service.IActivityLogService;
 import com.mehmetkerem.enums.ActivityType;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements ICategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final CategoryMapper categoryMapper;
     private final IActivityLogService activityLogService;
 
@@ -44,6 +46,9 @@ public class CategoryServiceImpl implements ICategoryService {
     @Override
     public String deleteCategory(Long id) {
         Category category = getCategoryById(id);
+        if (productRepository.existsByCategoryId(id)) {
+            throw new BadRequestException("Bu kategoriye bağlı ürünler var. Önce ürünleri başka kategoriye taşıyın veya silin.");
+        }
         categoryRepository.delete(category);
         activityLogService.log(ActivityType.CATEGORY_DELETED, SecurityUtils.getCurrentUserId(), "Kategori silindi: " + category.getName());
         return String.format(Messages.DELETE_VALUE, id, "kategori");

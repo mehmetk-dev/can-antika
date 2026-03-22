@@ -20,6 +20,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     List<Product> findByCategoryId(Long categoryId);
 
+    boolean existsByCategoryId(Long categoryId);
+
     long countByStockLessThan(int threshold);
 
     List<Product> findByStockLessThanEqualOrderByStockAsc(int threshold);

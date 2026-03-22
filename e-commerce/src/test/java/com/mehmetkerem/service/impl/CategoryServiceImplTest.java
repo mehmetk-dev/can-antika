@@ -7,6 +7,8 @@ import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.mapper.CategoryMapper;
 import com.mehmetkerem.model.Category;
 import com.mehmetkerem.repository.CategoryRepository;
+import com.mehmetkerem.repository.ProductRepository;
+import com.mehmetkerem.service.IActivityLogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,10 +20,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("null")
@@ -31,7 +39,13 @@ class CategoryServiceImplTest {
     private CategoryRepository categoryRepository;
 
     @Mock
+    private ProductRepository productRepository;
+
+    @Mock
     private CategoryMapper categoryMapper;
+
+    @Mock
+    private IActivityLogService activityLogService;
 
     @InjectMocks
     private CategoryServiceImpl categoryService;
@@ -57,7 +71,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("saveCategory - yeni kategori başarıyla kaydedilir")
+    @DisplayName("saveCategory - yeni kategori basariyla kaydedilir")
     void saveCategory_WhenNameNotExists_ShouldSaveAndReturnResponse() {
         when(categoryRepository.existsByName("Antika")).thenReturn(false);
         when(categoryMapper.toEntity(categoryRequest)).thenReturn(category);
@@ -74,7 +88,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("saveCategory - aynı isimde kategori varsa BadRequestException fırlatır")
+    @DisplayName("saveCategory - ayni isimde kategori varsa BadRequestException firlatir")
     void saveCategory_WhenNameExists_ShouldThrowBadRequestException() {
         when(categoryRepository.existsByName("Antika")).thenReturn(true);
 
@@ -83,7 +97,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("getCategoryById - mevcut id ile kategori döner")
+    @DisplayName("getCategoryById - mevcut id ile kategori doner")
     void getCategoryById_WhenExists_ShouldReturnCategory() {
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
 
@@ -95,7 +109,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("getCategoryById - olmayan id ile NotFoundException fırlatır")
+    @DisplayName("getCategoryById - olmayan id ile NotFoundException firlatir")
     void getCategoryById_WhenNotExists_ShouldThrowNotFoundException() {
         when(categoryRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -103,7 +117,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("getCategoryResponseById - response döner")
+    @DisplayName("getCategoryResponseById - response doner")
     void getCategoryResponseById_ShouldReturnResponse() {
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(categoryMapper.toResponse(category)).thenReturn(categoryResponse);
@@ -116,7 +130,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("updateCategory - güncelleme başarılı")
+    @DisplayName("updateCategory - guncelleme basarili")
     void updateCategory_WhenExists_ShouldUpdateAndReturn() {
         CategoryRequest updateRequest = new CategoryRequest();
         updateRequest.setName("Antika Saatler");
@@ -132,9 +146,10 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("deleteCategory - kategori silinir ve mesaj döner")
+    @DisplayName("deleteCategory - kategori silinir ve mesaj doner")
     void deleteCategory_WhenExists_ShouldDeleteAndReturnMessage() {
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(productRepository.existsByCategoryId(1L)).thenReturn(false);
         doNothing().when(categoryRepository).delete(category);
 
         String result = categoryService.deleteCategory(1L);
@@ -145,7 +160,17 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    @DisplayName("findAllCategories - tüm kategoriler listelenir")
+    @DisplayName("deleteCategory - kategoriye bagli urun varsa hata firlatir")
+    void deleteCategory_WhenProductsExist_ShouldThrowBadRequestException() {
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(productRepository.existsByCategoryId(1L)).thenReturn(true);
+
+        assertThrows(BadRequestException.class, () -> categoryService.deleteCategory(1L));
+        verify(categoryRepository, never()).delete(any(Category.class));
+    }
+
+    @Test
+    @DisplayName("findAllCategories - tum kategoriler listelenir")
     void findAllCategories_ShouldReturnAllCategories() {
         when(categoryRepository.findAll()).thenReturn(List.of(category));
         when(categoryMapper.toResponse(category)).thenReturn(categoryResponse);

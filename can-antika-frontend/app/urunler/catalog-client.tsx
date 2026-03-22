@@ -82,26 +82,26 @@ export function CatalogClient() {
   // Fetch products when filters/sort/page change
   const fetchProducts = useCallback(async () => {
     setIsLoading(true)
+    const sort = SORT_MAP[sortBy] || SORT_MAP.newest
+
+    // Price range
+    let minPrice: number | undefined
+    let maxPrice: number | undefined
+    if (selectedFilters.priceRanges.length > 0) {
+      const ranges = selectedFilters.priceRanges
+        .map((v) => priceRanges.find((r) => r.value === v))
+        .filter(Boolean) as (typeof priceRanges)[number][]
+      minPrice = Math.min(...ranges.map((r) => r.min))
+      const maxVals = ranges.map((r) => r.max).filter((v) => v !== Number.POSITIVE_INFINITY)
+      maxPrice = maxVals.length > 0 ? Math.max(...maxVals) : undefined
+    }
+
+    // Category: filter value is already category ID
+    const categoryId = selectedFilters.categories.length > 0
+      ? Number(selectedFilters.categories[0])
+      : undefined
+
     try {
-      const sort = SORT_MAP[sortBy] || SORT_MAP.newest
-
-      // Price range
-      let minPrice: number | undefined
-      let maxPrice: number | undefined
-      if (selectedFilters.priceRanges.length > 0) {
-        const ranges = selectedFilters.priceRanges
-          .map((v) => priceRanges.find((r) => r.value === v))
-          .filter(Boolean) as (typeof priceRanges)[number][]
-        minPrice = Math.min(...ranges.map((r) => r.min))
-        const maxVals = ranges.map((r) => r.max).filter((v) => v !== Number.POSITIVE_INFINITY)
-        maxPrice = maxVals.length > 0 ? Math.max(...maxVals) : undefined
-      }
-
-      // Category — filter value is already category ID
-      const categoryId = selectedFilters.categories.length > 0
-        ? Number(selectedFilters.categories[0])
-        : undefined
-
       const result: CursorResponse<ProductResponse> = await productApi.search({
         title: searchQuery || undefined,
         categoryId,
@@ -113,11 +113,24 @@ export function CatalogClient() {
         direction: sort.direction,
       })
 
-      setProducts(result.items)
-      setTotalCount(result.totalElement)
-    } catch {
-      setProducts([])
-      setTotalCount(0)
+      const items = Array.isArray(result.items) ? result.items : []
+      const total = typeof result.totalElement === "number" ? result.totalElement : items.length
+      setProducts(items)
+      setTotalCount(total)
+    } catch (searchError) {
+      console.error("Product search endpoint failed, trying getAll fallback:", searchError)
+      try {
+        const fallbackResult = await productApi.getAll(page, PAGE_SIZE, sort.sortBy, sort.direction)
+        const fallbackItems = Array.isArray(fallbackResult.items) ? fallbackResult.items : []
+        const fallbackTotal =
+          typeof fallbackResult.totalElement === "number" ? fallbackResult.totalElement : fallbackItems.length
+        setProducts(fallbackItems)
+        setTotalCount(fallbackTotal)
+      } catch (fallbackError) {
+        console.error("Product listing fallback failed:", fallbackError)
+        setProducts([])
+        setTotalCount(0)
+      }
     } finally {
       setIsLoading(false)
     }

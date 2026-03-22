@@ -1,6 +1,7 @@
 import type { ResultData } from "./types";
 
-const ENV_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+const ENV_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").trim();
+const REQUEST_TIMEOUT_MS = 4500;
 
 // ======================== Core Fetch ========================
 
@@ -13,19 +14,37 @@ interface RequestOptions {
     noAuth?: boolean;
 }
 
+function normalizeBaseUrl(baseUrl: string): string | null {
+    const normalized = baseUrl.trim().replace(/\/$/, "");
+    if (!normalized) return null;
+
+    if (/^https?:\/\//i.test(normalized)) {
+        return normalized;
+    }
+
+    if (typeof window !== "undefined" && window.location?.origin) {
+        // Relative env values (e.g. /v1) should resolve to same-origin API root.
+        return window.location.origin.replace(/\/$/, "");
+    }
+
+    return null;
+}
+
 function getCandidateBaseUrls(): string[] {
     const urls = new Set<string>();
-
-    if (ENV_BASE_URL) {
-        urls.add(ENV_BASE_URL);
-    }
 
     if (typeof window !== "undefined" && window.location?.origin) {
         urls.add(window.location.origin.replace(/\/$/, ""));
     }
 
+    const normalizedEnvBaseUrl = normalizeBaseUrl(ENV_BASE_URL);
+    if (normalizedEnvBaseUrl) {
+        urls.add(normalizedEnvBaseUrl);
+    }
+
     if (urls.size === 0) {
         urls.add("http://localhost:8085");
+        urls.add("http://127.0.0.1:8085");
     }
 
     return Array.from(urls);
@@ -65,6 +84,7 @@ async function tryRefreshToken(baseUrl: string): Promise<boolean> {
                 headers: { "Content-Type": "application/json" },
                 credentials: "include", // Cookie'den refresh token gönderilir
                 body: JSON.stringify({}), // Body boş - backend cookie'den okur
+                signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
             });
             return res.ok;
         } catch {
@@ -100,6 +120,7 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
                 headers,
                 credentials: "include",
                 body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+                signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
             });
 
             // Auto-refresh on 401
@@ -111,6 +132,7 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
                         headers,
                         credentials: "include",
                         body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+                        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
                     });
                 } else {
                     throw new Error("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
@@ -173,6 +195,7 @@ export const api = {
                     headers,
                     credentials: "include",
                     body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+                    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
                 });
 
                 if (!res.ok) {

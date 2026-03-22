@@ -11,6 +11,9 @@ export const productApi = {
     getById: (id: number) =>
         api.get<ProductResponse>(`/v1/product/${id}`, { noAuth: true }),
 
+    getBySlug: (slug: string) =>
+        api.get<ProductResponse>(`/v1/product/slug/${encodeURIComponent(slug)}`, { noAuth: true }),
+
     search: (params: {
         title?: string;
         categoryId?: number;

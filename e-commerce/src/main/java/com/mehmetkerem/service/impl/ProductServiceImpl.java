@@ -115,8 +115,7 @@ public class ProductServiceImpl implements IProductService {
     @Cacheable(cacheNames = "products:byId", key = "#id")
     public ProductResponse getProductResponseById(Long id) {
         Product product = getProductById(id);
-        return productMapper.toResponseWithCategory(
-                product, categoryService.getCategoryResponseById(product.getCategoryId()));
+        return mapProductWithCategory(product);
     }
 
     @Override
@@ -239,7 +238,8 @@ public class ProductServiceImpl implements IProductService {
     private ProductResponse mapProductWithCategory(Product product) {
         CategoryResponse categoryResponse = null;
         if (product.getCategoryId() != null) {
-            categoryResponse = categoryService.getCategoryResponseById(product.getCategoryId());
+            categoryResponse = categoryService.getCategoryResponsesByIds(List.of(product.getCategoryId()))
+                    .get(product.getCategoryId());
         }
         return productMapper.toResponseWithCategory(product, categoryResponse);
     }
