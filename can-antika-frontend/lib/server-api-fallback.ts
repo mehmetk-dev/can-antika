@@ -1,4 +1,4 @@
-import { getServerApiUrl } from "@/lib/server-api-url"
+import { getServerApiUrlCandidates } from "@/lib/server-api-url"
 
 type ApiEnvelope<T> = {
   data?: T
@@ -9,23 +9,23 @@ type FetchWithFallbackOptions = {
   timeoutMs?: number
 }
 
-function getCandidateApiBaseUrls(): string[] {
-  const internalApiUrl = getServerApiUrl()
-  const publicApiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "")
-  return Array.from(new Set([internalApiUrl, publicApiUrl].filter(Boolean)))
+function buildApiUrl(baseUrl: string, path: string): string {
+  const normalizedBase = baseUrl.replace(/\/$/, "")
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`
+  return new URL(normalizedPath, `${normalizedBase}/`).toString()
 }
 
 export async function fetchApiDataWithFallback<T>(
   path: string,
   options: FetchWithFallbackOptions = {}
 ): Promise<T | null> {
-  const { revalidate = 60, timeoutMs = 2500 } = options
-  const baseUrls = getCandidateApiBaseUrls()
+  const { revalidate = 60, timeoutMs = 1200 } = options
+  const baseUrls = getServerApiUrlCandidates()
 
   if (baseUrls.length === 0) return null
 
   const attempts = baseUrls.map(async (baseUrl) => {
-    const res = await fetch(`${baseUrl}${path}`, {
+    const res = await fetch(buildApiUrl(baseUrl, path), {
       next: { revalidate },
       signal: AbortSignal.timeout(timeoutMs),
     })

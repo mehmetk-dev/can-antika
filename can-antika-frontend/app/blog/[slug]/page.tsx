@@ -8,7 +8,7 @@ const fetchBlogPost = cache(async (slug: string) => {
   const safeSlug = encodeURIComponent(slug)
   return fetchApiDataWithFallback<BlogPost>(`/v1/blog/${safeSlug}`, {
     revalidate: 60,
-    timeoutMs: 2500,
+    timeoutMs: 1200,
   })
 })
 
@@ -22,13 +22,13 @@ export async function generateMetadata({
 
   if (!post) {
     return {
-      title: "Blog | Can Antika",
+      title: "Blog",
       description: "Can Antika blog yazilari.",
     }
   }
 
-  const title = post.title
-  const description = post.summary || `${post.title} - Can Antika Blog`
+  const title = post.title?.trim() || "Blog"
+  const description = post.summary || `${title} - Can Antika Blog`
 
   return {
     title,

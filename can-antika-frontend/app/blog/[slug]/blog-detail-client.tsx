@@ -33,6 +33,12 @@ export function BlogDetailClient({ initialPost, slug }: BlogDetailClientProps) {
         }
     }, [initialPost, slug])
 
+    useEffect(() => {
+        if (post?.title) {
+            document.title = `${post.title} | Can Antika`
+        }
+    }, [post?.title])
+
     const getCategoryName = (id: number) =>
         categories.find((c) => c.id === id)?.name || ""
 

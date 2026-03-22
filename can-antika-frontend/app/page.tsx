@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
+import { cache } from "react"
+
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { HeroSection } from "@/components/hero-section"
@@ -8,39 +10,21 @@ import { CategoriesSection } from "@/components/categories-section"
 import { TrustIndicators } from "@/components/trust-indicators"
 import { FeaturedStory } from "@/components/featured-story"
 
-import { getServerApiUrl } from "@/lib/server-api-url"
-import { cache } from "react"
+import { fetchApiDataWithFallback } from "@/lib/server-api-fallback"
+import type { SiteSettingsResponse } from "@/lib/types"
 
 const fetchSiteSettings = cache(async () => {
-    const internalApiUrl = getServerApiUrl()
-    const publicApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.canantika.com"
-
-    try {
-        let res = await fetch(`${internalApiUrl}/v1/site-settings`, {
-            next: { revalidate: 60 },
-            signal: AbortSignal.timeout(3000)
-        }).catch(() => null);
-
-        if (!res || !res.ok) {
-            res = await fetch(`${publicApiUrl}/v1/site-settings`, {
-                next: { revalidate: 60 },
-                signal: AbortSignal.timeout(3000)
-            }).catch(() => null);
-        }
-
-        if (!res || !res.ok) return null
-        const json = await res.json()
-        return json.data ?? null
-    } catch {
-        return null
-    }
+  return fetchApiDataWithFallback<SiteSettingsResponse>("/v1/site-settings", {
+    revalidate: 60,
+    timeoutMs: 1200,
+  })
 })
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await fetchSiteSettings()
   const storeName = s?.storeName || "Can Antika"
-  const storeDesc = s?.storeDescription || "1990'dan beri İstanbul'un en güvenilir antika mağazası."
-  const metaTitle = s?.metaTitle || `${storeName} | Geçmişin Zarafeti`
+  const storeDesc = s?.storeDescription || "1990'dan beri Istanbul'un en guvenilir antika magazasi."
+  const metaTitle = s?.metaTitle || `${storeName} | Gecmisin Zarafeti`
   const metaDesc = s?.metaDescription || storeDesc
 
   return { title: metaTitle, description: metaDesc }
@@ -49,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const s = await fetchSiteSettings()
 
-  // Bakım modu açıksa /bakim sayfasına yönlendir
+  // Bakim modu aciksa /bakim sayfasina yonlendir
   if (s?.maintenanceMode === true) {
     redirect("/bakim")
   }

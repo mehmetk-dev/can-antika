@@ -7,6 +7,7 @@ import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.mapper.ProductMapper;
 import com.mehmetkerem.model.Product;
 import com.mehmetkerem.repository.ProductRepository;
+import com.mehmetkerem.service.IActivityLogService;
 import com.mehmetkerem.service.ICategoryService;
 import com.mehmetkerem.service.IFileStorageService;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,13 +24,21 @@ import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("null")
@@ -46,6 +55,9 @@ class ProductServiceImplTest {
 
     @Mock
     private IFileStorageService fileStorageService;
+
+    @Mock
+    private IActivityLogService activityLogService;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -86,7 +98,7 @@ class ProductServiceImplTest {
     }
 
     @Test
-    @DisplayName("saveProduct - ürün kaydedilir ve response döner")
+    @DisplayName("saveProduct - urun kaydedilir ve response doner")
     void saveProduct_ShouldSaveAndReturnResponse() {
         when(productMapper.toEntity(productRequest)).thenReturn(product);
         when(productRepository.save(any(Product.class))).thenReturn(product);
@@ -101,7 +113,7 @@ class ProductServiceImplTest {
     }
 
     @Test
-    @DisplayName("getProductById - mevcut ürün döner")
+    @DisplayName("getProductById - mevcut urun doner")
     void getProductById_WhenExists_ShouldReturnProduct() {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
@@ -113,7 +125,7 @@ class ProductServiceImplTest {
     }
 
     @Test
-    @DisplayName("getProductById - olmayan id ile NotFoundException fırlatır")
+    @DisplayName("getProductById - olmayan id ile NotFoundException firlatir")
     void getProductById_WhenNotExists_ShouldThrowNotFoundException() {
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -121,10 +133,10 @@ class ProductServiceImplTest {
     }
 
     @Test
-    @DisplayName("getProductResponseById - response döner")
+    @DisplayName("getProductResponseById - kategori varsa response doner")
     void getProductResponseById_ShouldReturnResponse() {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(categoryService.getCategoryResponseById(1L)).thenReturn(categoryResponse);
+        when(categoryService.getCategoryResponsesByIds(anyList())).thenReturn(Map.of(1L, categoryResponse));
         when(productMapper.toResponseWithCategory(product, categoryResponse)).thenReturn(productResponse);
 
         ProductResponse result = productService.getProductResponseById(1L);
@@ -134,9 +146,21 @@ class ProductServiceImplTest {
     }
 
     @Test
-    @DisplayName("deleteProduct - ürün ve resimleri silinir")
+    @DisplayName("getProductResponseById - kategori kaydi yoksa null kategori ile doner")
+    void getProductResponseById_WhenCategoryMissing_ShouldReturnResponseWithNullCategory() {
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(categoryService.getCategoryResponsesByIds(anyList())).thenReturn(Map.of());
+        when(productMapper.toResponseWithCategory(product, null)).thenReturn(productResponse);
+
+        ProductResponse result = productService.getProductResponseById(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+    }
+
+    @Test
+    @DisplayName("deleteProduct - urun ve resimleri silinir")
     void deleteProduct_WhenExists_ShouldDelete() {
-        // Ürüne resim ekle
         product.setImageUrls(List.of("http://resim1.jpg", "http://resim2.jpg"));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         doNothing().when(productRepository).delete(product);
@@ -144,14 +168,13 @@ class ProductServiceImplTest {
         String result = productService.deleteProduct(1L);
 
         assertTrue(result.contains("1"));
-        assertTrue(result.contains("ürün"));
-        // 2 adet resim url'i olduğu için deleteFile 2 kez çağrılmalı
+        assertTrue(result.contains("urun"));
         verify(fileStorageService, times(2)).deleteFile(anyString());
         verify(productRepository).delete(product);
     }
 
     @Test
-    @DisplayName("updateProduct - ürün güncellenir")
+    @DisplayName("updateProduct - urun guncellenir")
     void updateProduct_WhenExists_ShouldUpdateAndReturn() {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
@@ -165,11 +188,10 @@ class ProductServiceImplTest {
     }
 
     @Test
-    @DisplayName("findAllProducts - tüm ürünler listelenir")
+    @DisplayName("findAllProducts - tum urunler listelenir")
     void findAllProducts_ShouldReturnAllProducts() {
         when(productRepository.findAll()).thenReturn(List.of(product));
-        // Batch fetch kullanıldığı için getCategoryResponsesByIds mocklanmalı
-        when(categoryService.getCategoryResponsesByIds(anyList())).thenReturn(java.util.Map.of(1L, categoryResponse));
+        when(categoryService.getCategoryResponsesByIds(anyList())).thenReturn(Map.of(1L, categoryResponse));
         when(productMapper.toResponseWithCategory(product, categoryResponse)).thenReturn(productResponse);
 
         List<ProductResponse> result = productService.findAllProducts();
@@ -180,10 +202,10 @@ class ProductServiceImplTest {
     }
 
     @Test
-    @DisplayName("getProductsByTitle - başlığa göre ürünler döner")
+    @DisplayName("getProductsByTitle - basliga gore urunler doner")
     void getProductsByTitle_ShouldReturnMatchingProducts() {
         when(productRepository.findByTitleContainingIgnoreCase("Antika")).thenReturn(List.of(product));
-        when(categoryService.getCategoryResponseById(1L)).thenReturn(categoryResponse);
+        when(categoryService.getCategoryResponsesByIds(anyList())).thenReturn(Map.of(1L, categoryResponse));
         when(productMapper.toResponseWithCategory(product, categoryResponse)).thenReturn(productResponse);
 
         List<ProductResponse> result = productService.getProductsByTitle("Antika");
@@ -194,10 +216,10 @@ class ProductServiceImplTest {
     }
 
     @Test
-    @DisplayName("getProductsByCategory - kategoriye göre ürünler döner")
+    @DisplayName("getProductsByCategory - kategoriye gore urunler doner")
     void getProductsByCategory_ShouldReturnProductsByCategory() {
         when(productRepository.findByCategoryId(1L)).thenReturn(List.of(product));
-        when(categoryService.getCategoryResponseById(1L)).thenReturn(categoryResponse);
+        when(categoryService.getCategoryResponsesByIds(anyList())).thenReturn(Map.of(1L, categoryResponse));
         when(productMapper.toResponseWithCategory(product, categoryResponse)).thenReturn(productResponse);
 
         List<ProductResponse> result = productService.getProductsByCategory(1L);
@@ -207,12 +229,13 @@ class ProductServiceImplTest {
     }
 
     @Test
-    @DisplayName("getAllProducts - sayfalı liste döner")
+    @DisplayName("getAllProducts - sayfali liste doner")
     void getAllProducts_ShouldReturnPagedResults() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Product> productPage = new PageImpl<>(List.of(product), pageable, 1);
         when(productRepository.findAll(any(PageRequest.class))).thenReturn(productPage);
-        when(productMapper.toResponse(product)).thenReturn(productResponse);
+        when(categoryService.getCategoryResponsesByIds(anyList())).thenReturn(Map.of(1L, categoryResponse));
+        when(productMapper.toResponseWithCategory(product, categoryResponse)).thenReturn(productResponse);
 
         Page<ProductResponse> result = productService.getAllProducts(0, 10, "id", "asc");
 

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getServerApiUrlCandidates } from "@/lib/server-api-url";
 
-const MAINTENANCE_CACHE_TTL_MS = 300_000;
+const MAINTENANCE_CACHE_TTL_MS = 30_000;
 let maintenanceModeCache: { value: boolean; expiresAt: number } | null = null;
 
 async function readMaintenanceMode(apiBase: string): Promise<boolean> {
@@ -11,15 +12,16 @@ async function readMaintenanceMode(apiBase: string): Promise<boolean> {
     }
 
     try {
-        const settingsRes = await fetch(`${apiBase.replace(/\/$/, "")}/v1/site-settings`, {
+        const settingsUrl = new URL("/v1/site-settings", `${apiBase.replace(/\/$/, "")}/`).toString();
+        const settingsRes = await fetch(settingsUrl, {
             method: "GET",
             headers: { Accept: "application/json" },
             cache: "no-store",
-            signal: AbortSignal.timeout(150),
+            signal: AbortSignal.timeout(1200),
         });
 
         if (!settingsRes.ok) {
-            return maintenanceModeCache?.value ?? false;
+            return false;
         }
 
         const json = await settingsRes.json();
@@ -30,19 +32,18 @@ async function readMaintenanceMode(apiBase: string): Promise<boolean> {
         };
         return maintenanceMode;
     } catch {
-        // Upstream yavaş/erişilemez durumda navigasyonu bloklama.
-        return maintenanceModeCache?.value ?? false;
+        // Fail-open: upstream yavas/erisilemez oldugunda siteyi bakim moduna kilitleme.
+        return false;
     }
 }
 
 /**
- * Lightweight middleware — sadece security header'ları ekler.
+ * Lightweight middleware - sadece security header'lari ekler.
  *
  * NOT: Auth cookie (can_antika_token) api.canantika.com domain'inde
- * set edildiğinden, canantika.com'daki middleware tarafından okunamaz.
- * Tüm auth redirect'leri client-side AuthGuard ile yapılır.
+ * set edildiginden, canantika.com'daki middleware tarafindan okunamaz.
+ * Tum auth redirect'leri client-side AuthGuard ile yapilir.
  */
-
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
@@ -55,12 +56,9 @@ export async function middleware(request: NextRequest) {
         pathname === "/favicon.ico";
 
     if (!skipMaintenanceCheck) {
-        const apiBase =
-            process.env.INTERNAL_API_URL ||
-            process.env.NEXT_PUBLIC_API_URL ||
-            "http://localhost:8085";
+        const [apiBase] = getServerApiUrlCandidates();
 
-        const maintenanceMode = await readMaintenanceMode(apiBase);
+        const maintenanceMode = await readMaintenanceMode(apiBase ?? "http://localhost:8085");
         if (maintenanceMode) {
             const maintenanceUrl = new URL("/bakim", request.url);
             return NextResponse.redirect(maintenanceUrl);
@@ -69,7 +67,7 @@ export async function middleware(request: NextRequest) {
 
     const response = NextResponse.next();
 
-    // Security headers (defence-in-depth)
+    // Security headers (defense-in-depth)
     response.headers.set("X-Content-Type-Options", "nosniff");
     response.headers.set("X-Frame-Options", "DENY");
     response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -79,9 +77,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        /*
-         * Match all request paths except static files and images
-         */
         "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
     ],
 };
