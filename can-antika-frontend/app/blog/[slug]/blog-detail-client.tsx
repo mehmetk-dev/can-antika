@@ -23,15 +23,64 @@ export function BlogDetailClient({ initialPost, slug }: BlogDetailClientProps) {
     const [loading, setLoading] = useState(!initialPost)
 
     useEffect(() => {
-        blogApi.getCategories().then(setCategories).catch(() => setCategories([]))
-        if (!initialPost) {
-            blogApi
-                .getPostBySlug(slug)
-                .then((p) => setPost(p))
-                .catch(() => setPost(null))
-                .finally(() => setLoading(false))
+        let isCancelled = false
+
+        if (initialPost) {
+            setPost(initialPost)
+            setLoading(false)
+            return () => {
+                isCancelled = true
+            }
+        }
+
+        setLoading(true)
+        blogApi
+            .getPostBySlug(slug)
+            .then((p) => {
+                if (!isCancelled) {
+                    setPost(p)
+                }
+            })
+            .catch(() => {
+                if (!isCancelled) {
+                    setPost(null)
+                }
+            })
+            .finally(() => {
+                if (!isCancelled) {
+                    setLoading(false)
+                }
+            })
+
+        return () => {
+            isCancelled = true
         }
     }, [initialPost, slug])
+
+    useEffect(() => {
+        if (!post?.categoryId) {
+            setCategories([])
+            return
+        }
+
+        let isCancelled = false
+
+        blogApi.getCategories()
+            .then((items) => {
+                if (!isCancelled) {
+                    setCategories(items)
+                }
+            })
+            .catch(() => {
+                if (!isCancelled) {
+                    setCategories([])
+                }
+            })
+
+        return () => {
+            isCancelled = true
+        }
+    }, [post?.categoryId])
 
     useEffect(() => {
         if (post?.title) {

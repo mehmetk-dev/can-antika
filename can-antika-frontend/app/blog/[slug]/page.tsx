@@ -4,11 +4,27 @@ import { BlogDetailClient } from "./blog-detail-client"
 import { fetchApiDataWithFallback } from "@/lib/server-api-fallback"
 import type { BlogPost } from "@/lib/types"
 
+function slugToTitle(slug: string): string {
+  const raw = decodeURIComponent(slug || "")
+  const normalized = raw
+    .trim()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+
+  if (!normalized || /^\d+$/.test(normalized)) return "Blog"
+
+  return normalized
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+}
+
 const fetchBlogPost = cache(async (slug: string) => {
   const safeSlug = encodeURIComponent(slug)
   return fetchApiDataWithFallback<BlogPost>(`/v1/blog/${safeSlug}`, {
     revalidate: 60,
-    timeoutMs: 1200,
+    timeoutMs: 900,
   })
 })
 
@@ -18,17 +34,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const post = await fetchBlogPost(slug)
-
-  if (!post) {
-    return {
-      title: "Blog",
-      description: "Can Antika blog yazilari.",
-    }
-  }
-
-  const title = post.title?.trim() || "Blog"
-  const description = post.summary || `${title} - Can Antika Blog`
+  const title = slugToTitle(slug)
+  const description = `${title} - Can Antika Blog yazisi.`
 
   return {
     title,
@@ -38,15 +45,11 @@ export async function generateMetadata({
       description,
       type: "article",
       locale: "tr_TR",
-      images: post.imageUrl ? [{ url: post.imageUrl, alt: title }] : [],
-      publishedTime: post.createdAt,
-      authors: post.author ? [post.author] : [],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: post.imageUrl ? [post.imageUrl] : [],
     },
     alternates: {
       canonical: `/blog/${slug}`,
