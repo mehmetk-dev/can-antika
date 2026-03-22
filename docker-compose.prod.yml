@@ -44,7 +44,10 @@ services:
 
   # --- FRONTEND (Production Build) ---
   frontend:
-    build: ./can-antika-frontend
+    build:
+      context: ./can-antika-frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.canantika.com}
     container_name: can-antika-frontend-app
     environment:
       - INTERNAL_API_URL=http://backend:8080

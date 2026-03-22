@@ -255,7 +255,7 @@ export default function AuthPage() {
 
                 {/* Google Login */}
                 <a
-                  href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8085"}/oauth2/authorization/google`}
+                  href="/oauth2/authorization/google"
                   className="flex w-full items-center justify-center gap-3 rounded-lg border border-border/50 bg-card px-4 py-3 text-sm font-medium text-foreground shadow-sm hover:bg-muted/50 transition-colors"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
