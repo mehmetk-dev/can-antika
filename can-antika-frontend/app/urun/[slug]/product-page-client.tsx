@@ -36,8 +36,20 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
     }
 
     setIsLoading(true)
-    productApi
-      .getBySlug(slug)
+    const numericId = /^\d+$/.test(slug) ? Number.parseInt(slug, 10) : null
+
+    const fetchProduct = async () => {
+      try {
+        return await productApi.getBySlug(slug)
+      } catch {
+        if (numericId !== null) {
+          return productApi.getById(numericId)
+        }
+        throw new Error("product-not-found")
+      }
+    }
+
+    fetchProduct()
       .then((fetchedProduct) => {
         if (!isCancelled) {
           setProduct(fetchedProduct)
@@ -69,8 +81,6 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
     if (product.title) {
       document.title = `${product.title} | Can Antika`
     }
-
-    productApi.incrementViewCount(product.id).catch(() => {})
 
     if (product.category?.id) {
       productApi

@@ -1,7 +1,7 @@
 import type { ResultData } from "./types";
 
 const ENV_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").trim();
-const REQUEST_TIMEOUT_MS = 4500;
+const REQUEST_TIMEOUT_MS = 1200;
 
 // ======================== Core Fetch ========================
 
@@ -31,23 +31,45 @@ function normalizeBaseUrl(baseUrl: string): string | null {
 }
 
 function getCandidateBaseUrls(): string[] {
-    const urls = new Set<string>();
+    const urls: string[] = [];
+    const seen = new Set<string>();
 
-    if (typeof window !== "undefined" && window.location?.origin) {
-        urls.add(window.location.origin.replace(/\/$/, ""));
-    }
+    const addUrl = (url?: string | null) => {
+        if (!url) return;
+        const normalized = url.replace(/\/$/, "");
+        if (seen.has(normalized)) return;
+        seen.add(normalized);
+        urls.push(normalized);
+    };
 
     const normalizedEnvBaseUrl = normalizeBaseUrl(ENV_BASE_URL);
-    if (normalizedEnvBaseUrl) {
-        urls.add(normalizedEnvBaseUrl);
+
+    if (typeof window !== "undefined" && window.location?.origin) {
+        const originBaseUrl = window.location.origin.replace(/\/$/, "");
+        const hostname = window.location.hostname.toLowerCase();
+        const onCanAntikaDomain = hostname === "canantika.com" || hostname === "www.canantika.com";
+
+        // Prefer explicit env URL when it points to a different host (e.g. api.canantika.com).
+        if (normalizedEnvBaseUrl && normalizedEnvBaseUrl !== originBaseUrl) {
+            addUrl(normalizedEnvBaseUrl);
+        }
+
+        // Production safety net: if /v1 proxy on main domain breaks, call API domain directly.
+        if (onCanAntikaDomain) {
+            addUrl("https://api.canantika.com");
+        }
+
+        addUrl(originBaseUrl);
     }
 
-    if (urls.size === 0) {
-        urls.add("http://localhost:8085");
-        urls.add("http://127.0.0.1:8085");
+    addUrl(normalizedEnvBaseUrl);
+
+    if (urls.length === 0) {
+        addUrl("http://localhost:8085");
+        addUrl("http://127.0.0.1:8085");
     }
 
-    return Array.from(urls);
+    return urls;
 }
 
 function buildUrl(baseUrl: string, path: string, params?: Record<string, string | number | boolean | undefined | null>): string {
