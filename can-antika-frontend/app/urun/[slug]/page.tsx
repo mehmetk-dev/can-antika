@@ -23,8 +23,8 @@ export async function generateMetadata({
 
   if (!product) {
     return {
-      title: "Urun | Can Antika",
-      description: "Can Antika urunleri.",
+      title: "Ürün Bulunamadı | Can Antika",
+      description: "Aradığınız ürün bulunamadı.",
     }
   }
 
