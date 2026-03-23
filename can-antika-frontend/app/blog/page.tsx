@@ -1,38 +1,78 @@
+import { cache } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { BlogPostsClient } from "@/components/blog-posts-client"
+import { fetchApiDataWithFallback } from "@/lib/server-api-fallback"
 import type { Metadata } from "next"
+import Image from "next/image"
+import type { BlogPost, BlogCategory, CursorResponse } from "@/lib/types"
+
+export const revalidate = 60
 
 export const metadata: Metadata = {
-    title: "Blog | Antika Dünyası",
+    title: "Blog",
     description: "Antika koleksiyonculuğu, restorasyon ipuçları ve tarihi eserler hakkında yazılarımız",
     alternates: {
         canonical: "/blog",
     },
     openGraph: {
-        title: "Blog | Antika Dünyası",
+        title: "Blog | Can Antika",
         description: "Antika koleksiyonculuğu, restorasyon ipuçları ve tarihi eserler hakkında yazılarımız",
         url: "/blog",
         type: "website",
     },
     twitter: {
         card: "summary_large_image",
-        title: "Blog | Antika Dünyası",
+        title: "Blog | Can Antika",
         description: "Antika koleksiyonculuğu, restorasyon ipuçları ve tarihi eserler hakkında yazılarımız",
     },
 }
 
+const fetchBlogPosts = cache(async () => {
+    return fetchApiDataWithFallback<CursorResponse<BlogPost>>("/v1/blog?page=0&size=50", {
+        revalidate: 60,
+        timeoutMs: 2500,
+    })
+})
+
+const fetchBlogCategories = cache(async () => {
+    return fetchApiDataWithFallback<BlogCategory[]>("/v1/blog/categories", {
+        revalidate: 300,
+        timeoutMs: 1500,
+    })
+})
+
 export default async function BlogPage() {
+    const [postsResult, categoriesResult] = await Promise.allSettled([
+        fetchBlogPosts(),
+        fetchBlogCategories(),
+    ])
+
+    const initialPosts = postsResult.status === "fulfilled" && postsResult.value
+        ? Array.isArray(postsResult.value.items) ? postsResult.value.items : []
+        : []
+
+    const initialCategories = categoriesResult.status === "fulfilled" && Array.isArray(categoriesResult.value)
+        ? categoriesResult.value
+        : []
+
     return (
         <div className="min-h-screen bg-background">
             <Header />
             <main>
-                {/* Hero */}
-                <section className="relative py-28 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-b from-primary via-primary/95 to-primary/90" />
-                    <div className="absolute top-8 left-8 right-8 bottom-8 border border-accent/20 pointer-events-none" />
+                {/* Hero - Vintage Style */}
+                <section className="relative py-32 overflow-hidden flex flex-col items-center justify-center min-h-[450px]">
+                    {/* Background */}
+                    <div className="absolute inset-0">
+                        <Image src="/blog-hero.png" alt="Blog" fill priority sizes="100vw" className="object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-primary/95 via-primary/90 to-primary/95" />
+                    </div>
 
-                    <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+                    {/* Decorative Frame */}
+                    <div className="absolute top-8 left-8 right-8 bottom-8 border border-accent/20 pointer-events-none" />
+                    <div className="absolute top-12 left-12 right-12 bottom-12 border border-accent/10 pointer-events-none" />
+
+                    <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
                         <div className="flex items-center justify-center gap-4 mb-6">
                             <div className="w-16 h-px bg-accent/50" />
                             <div className="w-2 h-2 rotate-45 border border-accent/50" />
@@ -62,7 +102,10 @@ export default async function BlogPage() {
                 {/* Filters & Posts */}
                 <section className="py-16">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <BlogPostsClient />
+                        <BlogPostsClient
+                            initialPosts={initialPosts}
+                            initialCategories={initialCategories}
+                        />
                     </div>
                 </section>
             </main>

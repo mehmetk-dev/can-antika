@@ -6,6 +6,7 @@ import { Footer } from "@/components/footer"
 import { Loader2, HelpCircle, ChevronDown } from "lucide-react"
 import { faqApi } from "@/lib/api"
 import Link from "next/link"
+import Image from "next/image"
 
 interface FaqItem {
     id: number
@@ -51,12 +52,19 @@ export default function FaqPage() {
         <div className="min-h-screen bg-background">
             <Header />
             <main>
-                {/* Hero */}
-                <section className="relative py-28 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-b from-primary via-primary/95 to-primary/90" />
-                    <div className="absolute top-8 left-8 right-8 bottom-8 border border-accent/20 pointer-events-none" />
+                {/* Hero - Vintage Style */}
+                <section className="relative py-32 overflow-hidden flex flex-col items-center justify-center min-h-[450px]">
+                    {/* Background */}
+                    <div className="absolute inset-0">
+                        <Image src="/sss-hero.png" alt="SSS" fill priority sizes="100vw" className="object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-primary/95 via-primary/90 to-primary/95" />
+                    </div>
 
-                    <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+                    {/* Decorative Frame */}
+                    <div className="absolute top-8 left-8 right-8 bottom-8 border border-accent/20 pointer-events-none" />
+                    <div className="absolute top-12 left-12 right-12 bottom-12 border border-accent/10 pointer-events-none" />
+
+                    <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
                         <div className="flex items-center justify-center gap-4 mb-6">
                             <div className="w-16 h-px bg-accent/50" />
                             <div className="w-2 h-2 rotate-45 border border-accent/50" />

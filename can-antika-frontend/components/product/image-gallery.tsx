@@ -28,13 +28,12 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
       {/* Main Image */}
       <Dialog>
         <DialogTrigger asChild>
-          <div className="group relative aspect-[4/5] cursor-zoom-in overflow-hidden rounded-lg bg-muted">
+          <div className="group relative aspect-[3/4] cursor-zoom-in overflow-hidden rounded-lg bg-muted">
             <Image
               src={images[selectedIndex] || "/placeholder.svg"}
               alt={productName}
               fill
               priority
-              unoptimized={true}
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
@@ -71,15 +70,14 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
             )}
           </div>
         </DialogTrigger>
-        <DialogContent className="max-w-4xl bg-background p-0">
+        <DialogContent className="max-w-5xl bg-background p-2">
           <DialogTitle className="sr-only">{productName}</DialogTitle>
-          <div className="relative aspect-square w-full">
+          <div className="relative aspect-[3/4] w-full max-h-[85vh]">
             <Image
               src={images[selectedIndex] || "/placeholder.svg"}
               alt={productName}
               fill
-              unoptimized={true}
-              sizes="80vw"
+              sizes="85vw"
               className="object-contain"
             />
             {images.length > 1 && (
@@ -122,7 +120,6 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                 src={image || "/placeholder.svg"}
                 alt={`${productName} - ${index + 1}`}
                 fill
-                unoptimized={true}
                 sizes="80px"
                 className="object-cover"
               />

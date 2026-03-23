@@ -23,8 +23,8 @@ export const materials = [
 ]
 
 export const priceRanges = [
-  { value: "0-50000", label: "₺50.000'e kadar", min: 0, max: 50000 },
-  { value: "50000-100000", label: "₺50.000 - ₺100.000", min: 50000, max: 100000 },
-  { value: "100000-200000", label: "₺100.000 - ₺200.000", min: 100000, max: 200000 },
-  { value: "200000+", label: "₺200.000 ve üzeri", min: 200000, max: Number.POSITIVE_INFINITY },
+  { value: "0-500", label: "₺500'e kadar", min: 0, max: 500 },
+  { value: "500-1000", label: "₺500 - ₺1.000", min: 500, max: 1000 },
+  { value: "1000-5000", label: "₺1.000 - ₺5.000", min: 1000, max: 5000 },
+  { value: "5000+", label: "₺5.000 ve üzeri", min: 5000, max: Number.POSITIVE_INFINITY },
 ]

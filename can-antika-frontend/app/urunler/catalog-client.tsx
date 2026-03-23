@@ -35,19 +35,35 @@ const SORT_MAP: Record<string, { sortBy: string; direction: string }> = {
   name: { sortBy: "title", direction: "asc" },
 }
 
-export function CatalogClient() {
+interface CatalogClientProps {
+  initialProducts?: ProductResponse[]
+  initialTotalCount?: number
+  initialCategories?: CategoryResponse[]
+}
+
+export function CatalogClient({
+  initialProducts = [],
+  initialTotalCount = 0,
+  initialCategories = [],
+}: CatalogClientProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const categoryParam = searchParams.get("category")
   const searchQuery = searchParams.get("q") || ""
 
-  // Data state
-  const [products, setProducts] = useState<ProductResponse[]>([])
-  const [categories, setCategories] = useState<CategoryResponse[]>([])
-  const [totalCount, setTotalCount] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
+  // Determine if we have server-provided data for the initial render
+  const hasInitialData = initialProducts.length > 0
+
+  // Data state — seed with server data when available
+  const [products, setProducts] = useState<ProductResponse[]>(initialProducts)
+  const [categories, setCategories] = useState<CategoryResponse[]>(initialCategories)
+  const [totalCount, setTotalCount] = useState(initialTotalCount)
+  const [isLoading, setIsLoading] = useState(!hasInitialData)
   const [page, setPage] = useState(0)
   const PAGE_SIZE = 20
+
+  // Track whether any user interaction has occurred (filter, sort, page, search)
+  const [userInteracted, setUserInteracted] = useState(false)
 
   // Filter state — categories now stores category IDs as strings
   const [selectedFilters, setSelectedFilters] = useState({
@@ -58,20 +74,29 @@ export function CatalogClient() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
-  // Fetch categories on mount, then resolve URL param
+  // Fetch categories on mount if not provided by server, then resolve URL param
   useEffect(() => {
-    categoryApi.getAll().then((cats) => {
-      setCategories(cats)
-      // If URL has ?category=Mobilya, find the matching category ID
+    const resolveCategories = (cats: CategoryResponse[]) => {
       if (categoryParam) {
         const match = cats.find(
           (c) => c.name.toLowerCase() === categoryParam.toLowerCase() || c.id.toString() === categoryParam
         )
         if (match) {
           setSelectedFilters((prev) => ({ ...prev, categories: [match.id.toString()] }))
+          setUserInteracted(true)
         }
       }
-    }).catch((e) => console.error("Kategori yükleme hatası:", e))
+    }
+
+    if (initialCategories.length > 0) {
+      resolveCategories(initialCategories)
+    } else {
+      categoryApi.getAll().then((cats) => {
+        setCategories(cats)
+        resolveCategories(cats)
+      }).catch((e) => console.error("Kategori yükleme hatası:", e))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryParam])
 
   // Reset page when search or category changes
@@ -136,9 +161,12 @@ export function CatalogClient() {
     }
   }, [selectedFilters, sortBy, page, searchQuery])
 
+  // Only fetch client-side when user has interacted OR when we don't have initial data
   useEffect(() => {
-    fetchProducts()
-  }, [fetchProducts])
+    if (!hasInitialData || userInteracted) {
+      fetchProducts()
+    }
+  }, [fetchProducts, hasInitialData, userInteracted])
 
   const handleFilterChange = (filterType: string, value: string) => {
     setSelectedFilters((prev) => {
@@ -147,6 +175,7 @@ export function CatalogClient() {
       return { ...prev, [filterType]: updated }
     })
     setPage(0)
+    setUserInteracted(true)
   }
 
   const handleClearFilters = () => {
@@ -155,8 +184,20 @@ export function CatalogClient() {
       priceRanges: [],
     })
     setPage(0)
+    setUserInteracted(true)
     // URL'deki ?q= ve ?category= parametrelerini de temizle
     router.replace("/urunler")
+  }
+
+  const handleSortChange = (v: string) => {
+    setSortBy(v)
+    setPage(0)
+    setUserInteracted(true)
+  }
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage)
+    setUserInteracted(true)
   }
 
   const activeFilterCount =
@@ -267,7 +308,7 @@ export function CatalogClient() {
               </div>
 
               <div className="flex items-center gap-3">
-                <Select value={sortBy} onValueChange={(v) => { setSortBy(v); setPage(0); }}>
+                <Select value={sortBy} onValueChange={handleSortChange}>
                   <SelectTrigger className="w-44 bg-transparent border-primary/20 hover:border-primary/40">
                     <SelectValue placeholder="Sıralama" />
                   </SelectTrigger>
@@ -327,7 +368,7 @@ export function CatalogClient() {
                       variant="outline"
                       size="sm"
                       disabled={page === 0}
-                      onClick={() => setPage((p) => p - 1)}
+                      onClick={() => handlePageChange(page - 1)}
                       className="border-primary/30"
                     >
                       Önceki
@@ -339,7 +380,7 @@ export function CatalogClient() {
                       variant="outline"
                       size="sm"
                       disabled={page >= totalPages - 1}
-                      onClick={() => setPage((p) => p + 1)}
+                      onClick={() => handlePageChange(page + 1)}
                       className="border-primary/30"
                     >
                       Sonraki

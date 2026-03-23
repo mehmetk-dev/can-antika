@@ -78,10 +78,6 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
       router.replace(`/urun/${product.slug}`)
     }
 
-    if (product.title) {
-      document.title = `${product.title} | Can Antika`
-    }
-
     if (product.category?.id) {
       productApi
         .search({ categoryId: product.category.id, size: 5 })

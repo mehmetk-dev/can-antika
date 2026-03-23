@@ -92,12 +92,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         const maxSlots = 6 - images.length
         const selectedFiles = Array.from(files).slice(0, maxSlots)
 
-        const oversized = selectedFiles.filter((f) => f.size > 5 * 1024 * 1024)
+        const oversized = selectedFiles.filter((f) => f.size > 100 * 1024 * 1024)
         if (oversized.length > 0) {
-            toast.error(`${oversized.length} dosya 5MB sınırını aşıyor, atlandı.`)
+            toast.error(`${oversized.length} dosya 100MB sınırını aşıyor, atlandı.`)
         }
 
-        const validFiles = selectedFiles.filter((f) => f.size <= 5 * 1024 * 1024)
+        const validFiles = selectedFiles.filter((f) => f.size <= 100 * 1024 * 1024)
         if (validFiles.length === 0) {
             if (fileInputRef.current) fileInputRef.current.value = ""
             return

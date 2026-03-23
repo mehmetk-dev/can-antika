@@ -23,7 +23,7 @@ export default function AboutPage() {
       <Header />
       <main>
         {/* Hero - Vintage Style */}
-        <section className="relative py-32 overflow-hidden">
+        <section className="relative py-32 overflow-hidden flex flex-col items-center justify-center min-h-[450px]">
           {/* Background */}
           <div className="absolute inset-0">
             <Image src="/vintage-sepia-antique-collection-old-photographs-o.jpg" alt="" fill sizes="100vw" className="object-cover" />
@@ -34,7 +34,7 @@ export default function AboutPage() {
           <div className="absolute top-8 left-8 right-8 bottom-8 border border-accent/20 pointer-events-none" />
           <div className="absolute top-12 left-12 right-12 bottom-12 border border-accent/10 pointer-events-none" />
 
-          <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+          <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
             {/* Decorative Element */}
             <div className="flex items-center justify-center gap-4 mb-8">
               <div className="w-16 h-px bg-accent/50" />

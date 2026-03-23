@@ -62,8 +62,15 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const safeTitle = slugToTitle(slug)
-  const description = `${safeTitle} - Can Antika koleksiyonundan antika eser.`
+  const product = await fetchProduct(slug)
+  const safeTitle = product?.title || slugToTitle(slug)
+  const description = product?.description
+    ? product.description.slice(0, 160)
+    : `${safeTitle} - Can Antika koleksiyonundan antika eser.`
+
+  const images = product?.imageUrls?.[0]
+    ? [{ url: product.imageUrls[0], alt: safeTitle }]
+    : []
 
   return {
     title: safeTitle,
@@ -76,6 +83,7 @@ export async function generateMetadata({
       description,
       type: "website",
       locale: "tr_TR",
+      images,
     },
   }
 }

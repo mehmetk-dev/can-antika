@@ -42,6 +42,9 @@ export function BlogPostsClient({ initialPosts = [], initialCategories = [] }: B
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
 
     useEffect(() => {
+        // If server already provided data, skip the client-side fetch
+        if (initialPosts.length > 0) return
+
         let cancelled = false
 
         async function load() {
@@ -72,7 +75,7 @@ export function BlogPostsClient({ initialPosts = [], initialCategories = [] }: B
 
         void load()
         return () => { cancelled = true }
-    }, [])
+    }, [initialPosts])
 
     const getCategoryName = (id: number) =>
         categories.find((c) => c.id === id)?.name || ""
@@ -166,7 +169,6 @@ export function BlogPostsClient({ initialPosts = [], initialCategories = [] }: B
                                             fill
                                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                             className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                            unoptimized
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-primary/5">

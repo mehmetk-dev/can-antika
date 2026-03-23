@@ -33,11 +33,7 @@ export function BlogDetailClient({ initialPost, slug }: BlogDetailClientProps) {
         }
     }, [initialPost, slug])
 
-    useEffect(() => {
-        if (post?.title) {
-            document.title = `${post.title} | Can Antika`
-        }
-    }, [post?.title])
+
 
     const getCategoryName = (id: number) =>
         categories.find((c) => c.id === id)?.name || ""
@@ -93,14 +89,14 @@ export function BlogDetailClient({ initialPost, slug }: BlogDetailClientProps) {
                 {post.imageUrl && (
                     <section className="py-6 md:py-8">
                         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-                            <div className="relative h-[260px] md:h-[360px] rounded-xl overflow-hidden bg-muted border border-border/50">
+                            <div className="relative aspect-[21/9] rounded-xl overflow-hidden bg-muted border border-border/50">
                                 <Image
                                     src={post.imageUrl}
                                     alt={post.title}
                                     fill
                                     priority
                                     sizes="(max-width: 1024px) 100vw, 1024px"
-                                    className="object-contain"
+                                    className="object-cover"
                                 />
                             </div>
                         </div>

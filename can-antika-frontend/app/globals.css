@@ -16,9 +16,9 @@
   --popover: oklch(0.98 0.008 85);
   --popover-foreground: oklch(0.25 0.02 150);
 
-  /* Vintage Forest Green as primary */
-  --primary: oklch(0.32 0.08 145);
-  --primary-foreground: oklch(0.98 0.01 145);
+  /* Vintage Leather Brown as primary */
+  --primary: #7B4019;
+  --primary-foreground: #FDF8F1;
 
   /* Warm Gold as secondary */
   --secondary: oklch(0.75 0.12 85);
@@ -38,9 +38,9 @@
   /* Subtle borders */
   --border: oklch(0.88 0.02 145);
   --input: oklch(0.92 0.01 145);
-  --ring: oklch(0.32 0.08 145);
+  --ring: #7B4019;
 
-  --chart-1: oklch(0.32 0.08 145);
+  --chart-1: #7B4019;
   --chart-2: oklch(0.72 0.14 75);
   --chart-3: oklch(0.45 0.08 145);
   --chart-4: oklch(0.65 0.1 85);
@@ -65,8 +65,8 @@
   --card-foreground: oklch(0.95 0.01 90);
   --popover: oklch(0.22 0.02 145);
   --popover-foreground: oklch(0.95 0.01 90);
-  --primary: oklch(0.55 0.12 145);
-  --primary-foreground: oklch(0.98 0.01 90);
+  --primary: #8C4E23;
+  --primary-foreground: #FDF8F1;
   --secondary: oklch(0.65 0.12 85);
   --secondary-foreground: oklch(0.18 0.02 160);
   --muted: oklch(0.28 0.02 145);
@@ -77,8 +77,8 @@
   --destructive-foreground: oklch(0.95 0 0);
   --border: oklch(0.32 0.02 145);
   --input: oklch(0.28 0.02 145);
-  --ring: oklch(0.55 0.12 145);
-  --chart-1: oklch(0.55 0.12 145);
+  --ring: #8C4E23;
+  --chart-1: #8C4E23;
   --chart-2: oklch(0.72 0.14 75);
   --chart-3: oklch(0.65 0.1 150);
   --chart-4: oklch(0.7 0.1 85);

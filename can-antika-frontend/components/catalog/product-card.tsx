@@ -34,7 +34,6 @@ export function ProductCard({ product }: ProductCardProps) {
           src={imageUrl}
           alt={product.title}
           fill
-          unoptimized={true}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className={`object-cover transition-transform duration-500 group-hover:scale-105 ${isSold ? "grayscale opacity-60" : ""}`}
         />
