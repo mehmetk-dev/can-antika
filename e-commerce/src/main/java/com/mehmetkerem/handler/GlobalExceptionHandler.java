@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Result> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex) {
         return new ResponseEntity<>(ResultHelper.error(
-                "Dosya boyutu çok büyük. Maksimum 5MB yüklenebilir.", HttpStatus.PAYLOAD_TOO_LARGE),
+                "Dosya boyutu çok büyük. Maksimum 100MB yüklenebilir.", HttpStatus.PAYLOAD_TOO_LARGE),
                 HttpStatus.PAYLOAD_TOO_LARGE);
     }
 

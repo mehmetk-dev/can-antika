@@ -1,7 +1,7 @@
 import type { ResultData } from "./types";
 
 const ENV_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").trim();
-const REQUEST_TIMEOUT_MS = 1200;
+const REQUEST_TIMEOUT_MS = 120000;
 
 // ======================== Core Fetch ========================
 
