@@ -1,282 +1,261 @@
-"use client"
+﻿"use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { useSiteSettings } from "@/lib/site-settings-context"
+
 import { categoryApi } from "@/lib/api"
+import { useSiteSettings } from "@/lib/site-settings-context"
 import type { CategoryResponse } from "@/lib/types"
 
 const footerLinks = {
   company: [
+    { name: "Ürünler", href: "/urunler" },
     { name: "Hakkımızda", href: "/hakkimizda" },
     { name: "Blog", href: "/blog" },
     { name: "SSS", href: "/sss" },
-    { name: "Teslimat Bilgileri", href: "/teslimat" },
-    { name: "İade Politikası", href: "/iade" },
     { name: "İletişim", href: "/iletisim" },
+    { name: "Teslimat / Kargo", href: "/teslimat" },
+    { name: "İade / İptal / Cayma", href: "/iade" },
   ],
   legal: [
+    { name: "KVKK Aydınlatma Metni", href: "/kvkk" },
     { name: "Gizlilik Politikası", href: "/gizlilik" },
-    { name: "KVKK Aydınlatma", href: "/kvkk" },
+    { name: "Çerez Politikası", href: "/cerezler" },
     { name: "Kullanım Koşulları", href: "/kullanim-kosullari" },
     { name: "Mesafeli Satış Sözleşmesi", href: "/mesafeli-satis-sozlesmesi" },
-    { name: "Çerez Politikası", href: "/cerezler" },
   ],
 }
 
-function VintageCorner({ className }: { className?: string }) {
+function SocialIcon({ type }: { type: "facebook" | "instagram" | "twitter" | "youtube" | "tiktok" }) {
+  if (type === "facebook") {
+    return (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M14 8h-2a2 2 0 0 0-2 2v10" strokeLinecap="round" />
+        <path d="M8 13h6" strokeLinecap="round" />
+        <rect x="2" y="2" width="20" height="20" rx="4" />
+      </svg>
+    )
+  }
+  if (type === "instagram") {
+    return (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="2" y="2" width="20" height="20" rx="6" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    )
+  }
+  if (type === "twitter") {
+    return (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M22 5.8a8.2 8.2 0 0 1-2.3.7 4 4 0 0 0-7 2.7v.8A10.4 10.4 0 0 1 4 6s-2.8 5.7 3.2 8.4A10.8 10.8 0 0 1 2 15.9c6 3.3 13.3.6 16-5.4a12 12 0 0 0 1-4.7c0-.1 0-.2 0-.3.8-.5 1.5-1 2-1.7Z" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )
+  }
+  if (type === "youtube") {
+    return (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M22 12s0-3-1-4c-1-1-3.8-1-9-1s-8 .1-9 1c-1 1-1 4-1 4s0 3 1 4c1 1 3.8 1 9 1s8-.1 9-1c1-1 1-4 1-4Z" />
+        <path d="m10 9 5 3-5 3V9Z" fill="currentColor" stroke="none" />
+      </svg>
+    )
+  }
+
   return (
-    <svg className={className} viewBox="0 0 60 60" fill="none">
-      <path d="M0 60V30C0 13.431 13.431 0 30 0h30" stroke="currentColor" strokeWidth="1.5" fill="none" />
-      <path d="M0 50V35C0 19.536 12.536 7 28 7h22" stroke="currentColor" strokeWidth="0.75" fill="none" opacity="0.5" />
-      <circle cx="30" cy="30" r="3" fill="currentColor" opacity="0.3" />
-      <circle cx="15" cy="45" r="1.5" fill="currentColor" opacity="0.2" />
-      <circle cx="45" cy="15" r="1.5" fill="currentColor" opacity="0.2" />
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M9 11.5a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
 
-function VintagePhoneIcon({ className }: { className?: string }) {
+function CornerOrnament({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path
-        d="M12 2C8 2 6 4 6 8v4c0 2 1 3 3 3h1v5c0 1 1 2 2 2s2-1 2-2v-5h1c2 0 3-1 3-3V8c0-4-2-6-6-6z"
-        strokeLinecap="round"
-      />
-      <circle cx="12" cy="7" r="2" fill="currentColor" opacity="0.3" />
-      <path d="M9 12h6" strokeLinecap="round" />
-      <path d="M8 2c-2 1-3 3-3 5" strokeLinecap="round" opacity="0.5" />
-      <path d="M16 2c2 1 3 3 3 5" strokeLinecap="round" opacity="0.5" />
-    </svg>
-  )
-}
-
-function VintageMailIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <rect x="2" y="4" width="20" height="16" rx="2" />
-      <path d="M2 6l10 7 10-7" strokeLinecap="round" />
-      <circle cx="12" cy="12" r="1" fill="currentColor" opacity="0.5" />
-      <path d="M6 4V2M18 4V2" strokeLinecap="round" opacity="0.5" />
-    </svg>
-  )
-}
-
-function VintageMapPinIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-      <circle cx="12" cy="9" r="2.5" />
-      <path d="M12 22v-2" strokeLinecap="round" opacity="0.5" />
-      <path d="M8 21h8" strokeLinecap="round" opacity="0.5" />
-    </svg>
-  )
-}
-
-function VintageStar({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2L9 9H2l6 4.5L5.5 22 12 17l6.5 5-2.5-8.5L22 9h-7L12 2z" />
-    </svg>
-  )
-}
-
-function VintageFacebookIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <rect x="2" y="2" width="20" height="20" rx="3" />
-      <path d="M15 8h-2c-1.1 0-2 .9-2 2v10M9 13h6" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function VintageInstagramIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <rect x="2" y="2" width="20" height="20" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="18" cy="6" r="1" fill="currentColor" />
-    </svg>
-  )
-}
-
-function VintageTwitterIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path
-        d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function VintageYouTubeIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.43z" strokeLinecap="round" strokeLinejoin="round" />
-      <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor" opacity="0.3" stroke="none" />
-    </svg>
-  )
-}
-
-function VintageTikTokIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M9 12a4 4 0 104 4V4a5 5 0 005 5" strokeLinecap="round" strokeLinejoin="round" />
+    <svg className={className} viewBox="0 0 120 120" fill="none" aria-hidden="true">
+      <path d="M6 114V64C6 31 31 6 64 6h50" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M14 106V68C14 40 36 14 64 14h38" stroke="currentColor" strokeWidth="0.9" opacity="0.75" />
+      <path d="M22 98V72c0-22 18-40 40-40h26" stroke="currentColor" strokeWidth="0.8" opacity="0.55" />
+      <circle cx="64" cy="64" r="4" fill="currentColor" opacity="0.45" />
+      <circle cx="40" cy="88" r="2.5" fill="currentColor" opacity="0.35" />
+      <circle cx="88" cy="40" r="2.5" fill="currentColor" opacity="0.35" />
     </svg>
   )
 }
 
 export function Footer() {
   const settings = useSiteSettings()
-  const [apiCategories, setApiCategories] = useState<CategoryResponse[]>([])
+  const [categories, setCategories] = useState<CategoryResponse[]>([])
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(true)
 
   useEffect(() => {
-    categoryApi.getAll().then(setApiCategories).catch((e) => console.error("Kategori listesi alınamadı:", e))
+    categoryApi
+      .getAll()
+      .then((items) => setCategories(items.slice(0, 6)))
+      .catch(() => setCategories([]))
+      .finally(() => setIsCategoriesLoading(false))
   }, [])
 
+  const socialLinks = useMemo(
+    () => [
+      { key: "facebook" as const, href: settings.facebook },
+      { key: "instagram" as const, href: settings.instagram },
+      { key: "twitter" as const, href: settings.twitter },
+      { key: "youtube" as const, href: settings.youtube },
+      { key: "tiktok" as const, href: settings.tiktok },
+    ].filter((item) => Boolean(item.href)),
+    [settings.facebook, settings.instagram, settings.twitter, settings.youtube, settings.tiktok]
+  )
+
+  const phoneHref = settings.phone ? `tel:${settings.phone.replace(/\s+/g, "")}` : ""
+  const mailHref = settings.email ? `mailto:${settings.email}` : ""
+  const mapHref = "https://maps.app.goo.gl/Sv4bqXDK7164WQGR9"
+  const hasCategories = categories.length > 0
+
   return (
-    <footer className="relative border-t border-primary/20 bg-primary text-primary-foreground overflow-hidden">
+    <footer className="relative mt-20 overflow-hidden border-t border-primary-foreground/10 bg-primary text-primary-foreground">
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03]"
+        className="pointer-events-none absolute inset-0 opacity-[0.22]"
         style={{
           backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E\")",
+            "url(\"data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d1a46e' stroke-opacity='0.6' stroke-width='1'%3E%3Crect x='10' y='10' width='100' height='100'/%3E%3Crect x='28' y='28' width='64' height='64'/%3E%3Cpath d='M10 60h100M60 10v100'/%3E%3C/g%3E%3C/svg%3E\")",
+          backgroundSize: "120px 120px",
+          backgroundPosition: "0 0",
         }}
       />
+      <div className="pointer-events-none absolute inset-0 opacity-20">
+        <div className="absolute -top-32 left-[-10%] h-80 w-80 rounded-full bg-accent/10 blur-3xl" />
+        <div className="absolute -bottom-32 right-[-10%] h-80 w-80 rounded-full bg-accent/10 blur-3xl" />
+      </div>
+      <CornerOrnament className="pointer-events-none absolute left-5 top-5 h-20 w-20 text-accent/30" />
+      <CornerOrnament className="pointer-events-none absolute right-5 top-5 h-20 w-20 -scale-x-100 text-accent/30" />
+      <CornerOrnament className="pointer-events-none absolute bottom-5 left-5 h-20 w-20 -scale-y-100 text-accent/30" />
+      <CornerOrnament className="pointer-events-none absolute bottom-5 right-5 h-20 w-20 scale-x-[-1] scale-y-[-1] text-accent/30" />
 
-      <VintageCorner className="absolute top-6 left-6 h-16 w-16 text-accent/20" />
-      <VintageCorner className="absolute top-6 right-6 h-16 w-16 text-accent/20 -scale-x-100" />
-      <VintageCorner className="absolute bottom-6 left-6 h-16 w-16 text-accent/20 -scale-y-100" />
-      <VintageCorner className="absolute bottom-6 right-6 h-16 w-16 text-accent/20 scale-x-[-1] scale-y-[-1]" />
-
-      <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
-        <div className="mb-12 flex items-center justify-center gap-4">
-          <span className="h-px w-16 bg-gradient-to-r from-transparent to-accent/40" />
-          <VintageStar className="h-5 w-5 text-accent/50" />
-          <span className="h-px w-16 bg-gradient-to-l from-transparent to-accent/40" />
-        </div>
-
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
-          {/* Brand + Contact */}
+      <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
+        <div
+          className={`grid gap-10 border-b border-primary-foreground/10 pb-10 md:grid-cols-2 xl:gap-8 ${
+            hasCategories ? "xl:grid-cols-4" : "xl:grid-cols-3"
+          }`}
+        >
           <div>
-            <Link href="/" className="group inline-block">
-              <div className="relative">
-                <span className="font-serif text-3xl font-semibold tracking-tight text-primary-foreground">
-                  {settings.storeName || "Can Antika"}
-                </span>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="h-px w-8 bg-gradient-to-r from-accent/60 to-transparent" />
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-accent">
-                    {settings.businessType || "Antika"}
-                  </span>
-                  <span className="h-px w-8 bg-gradient-to-l from-accent/60 to-transparent" />
-                </div>
-              </div>
+            <Link href="/" className="inline-block">
+              <h2 className="font-serif text-3xl font-semibold tracking-tight text-primary-foreground">{settings.storeName || "Can Antika"}</h2>
             </Link>
-
-            <p className="mt-4 text-sm leading-relaxed text-primary-foreground/70 max-w-xs">
-              {settings.storeDescription || settings.footerAbout || "1990'dan beri kalite ve güven."}
+            <div className="mt-2 flex items-center gap-2">
+              <span className="h-px w-8 bg-gradient-to-r from-accent/60 to-transparent" />
+              <span className="text-[10px] uppercase tracking-[0.24em] text-accent">{settings.businessType || "Antika Eşya Satışı"}</span>
+              <span className="h-px w-8 bg-gradient-to-l from-accent/60 to-transparent" />
+            </div>
+            <p className="mt-5 max-w-md text-sm leading-7 text-primary-foreground/75">
+              {settings.storeDescription || settings.footerAbout || "Nadir parçaları güvenli alışveriş deneyimiyle koleksiyonerlerle buluşturuyoruz."}
             </p>
 
-            {/* Contact info — compact */}
-            <div className="mt-6 space-y-2.5">
-              <div className="flex items-center gap-2.5">
-                <VintagePhoneIcon className="h-4 w-4 text-accent shrink-0" />
-                <span className="text-sm text-primary-foreground/70">{settings.phone || "—"}</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <VintageMailIcon className="h-4 w-4 text-accent shrink-0" />
-                <span className="text-sm text-primary-foreground/70">{settings.email || "—"}</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <VintageMapPinIcon className="h-4 w-4 text-accent shrink-0 mt-0.5" />
-                <span className="text-sm text-primary-foreground/70">{settings.address || "—"}</span>
-              </div>
-            </div>
-
-            {/* Social icons */}
-            <div className="mt-5 flex gap-3">
-              {settings.facebook && (
-                <a href={settings.facebook} target="_blank" rel="noopener noreferrer" className="group flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10">
-                  <VintageFacebookIcon className="h-4 w-4 text-primary-foreground/60 transition-colors group-hover:text-accent" />
+            <div className="mt-6 space-y-2 text-sm text-primary-foreground/75">
+              {settings.phone ? (
+                <a href={phoneHref} className="block transition-colors hover:text-accent">
+                  {settings.phone}
                 </a>
+              ) : (
+                <p>—</p>
               )}
-              {settings.instagram && (
-                <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="group flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10">
-                  <VintageInstagramIcon className="h-4 w-4 text-primary-foreground/60 transition-colors group-hover:text-accent" />
+              {settings.email ? (
+                <a href={mailHref} className="block transition-colors hover:text-accent">
+                  {settings.email}
                 </a>
+              ) : (
+                <p>—</p>
               )}
-              {settings.twitter && (
-                <a href={settings.twitter} target="_blank" rel="noopener noreferrer" className="group flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10">
-                  <VintageTwitterIcon className="h-4 w-4 text-primary-foreground/60 transition-colors group-hover:text-accent" />
+              {settings.address ? (
+                <a
+                  href={mapHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block max-w-md transition-colors hover:text-accent"
+                >
+                  {settings.address}
                 </a>
-              )}
-              {settings.youtube && (
-                <a href={settings.youtube} target="_blank" rel="noopener noreferrer" className="group flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10">
-                  <VintageYouTubeIcon className="h-4 w-4 text-primary-foreground/60 transition-colors group-hover:text-accent" />
-                </a>
-              )}
-              {settings.tiktok && (
-                <a href={settings.tiktok} target="_blank" rel="noopener noreferrer" className="group flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 transition-all hover:border-accent hover:bg-accent/10">
-                  <VintageTikTokIcon className="h-4 w-4 text-primary-foreground/60 transition-colors group-hover:text-accent" />
-                </a>
+              ) : (
+                <p className="max-w-md">—</p>
               )}
             </div>
-          </div>
 
-          {/* Kategoriler */}
-          <div>
-            <h3 className="font-serif text-lg font-semibold text-primary-foreground">Kategoriler</h3>
-            <ul className="mt-4 space-y-2.5">
-              {apiCategories.slice(0, 6).map((cat) => (
-                <li key={cat.id}>
-                  <Link
-                    href={`/urunler?category=${encodeURIComponent(cat.name)}`}
-                    className="text-sm text-primary-foreground/60 transition-colors hover:text-accent"
+            {socialLinks.length > 0 && (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.key}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 text-primary-foreground/70 transition-colors hover:border-accent hover:bg-accent/10 hover:text-accent"
                   >
-                    {cat.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                    <SocialIcon type={social.key} />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Kurumsal */}
           <div>
             <h3 className="font-serif text-lg font-semibold text-primary-foreground">Kurumsal</h3>
             <ul className="mt-4 space-y-2.5">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-primary-foreground/60 transition-colors hover:text-accent"
-                  >
+                  <Link href={link.href} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
                     {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
+
+          {hasCategories && (
+            <div>
+              <h3 className="font-serif text-lg font-semibold text-primary-foreground">Kategoriler</h3>
+              <ul className="mt-4 space-y-2.5">
+                {categories.map((cat) => (
+                  <li key={cat.id}>
+                    <Link
+                      href={`/urunler?category=${encodeURIComponent(cat.name)}`}
+                      className="text-sm text-primary-foreground/70 transition-colors hover:text-accent"
+                    >
+                      {cat.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div>
+            <h3 className="font-serif text-lg font-semibold text-primary-foreground">Hukuki</h3>
+            <ul className="mt-4 space-y-2.5">
+              {footerLinks.legal.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {!hasCategories && isCategoriesLoading && (
+              <p className="mt-4 text-xs text-primary-foreground/45">Kategoriler yükleniyor...</p>
+            )}
+          </div>
         </div>
 
-        <div className="mt-10 border-t border-primary-foreground/10 pt-6">
-          <p className="text-center text-sm text-primary-foreground/50 mb-3">
-            {settings.footerCopyright || `© ${new Date().getFullYear()} ${settings.storeName || "Can Antika"}. Tüm hakları saklıdır.`}
+        <div className="mt-6 flex items-center justify-between gap-4">
+          <p className="text-sm text-primary-foreground/60">© 2026 Can Antika</p>
+          <p className="text-sm text-primary-foreground/50">
+            Dijital altyapı ve geliştirme:{" "}
+            <a
+              href="https://fogistanbul.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-primary-foreground/30 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+            >
+              Fogistanbul.com
+            </a>
           </p>
-          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-            {footerLinks.legal.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-xs text-primary-foreground/40 transition-colors hover:text-accent"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
         </div>
       </div>
     </footer>

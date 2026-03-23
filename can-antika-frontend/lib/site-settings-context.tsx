@@ -14,7 +14,7 @@ const DEFAULTS: SiteSettingsResponse = {
     storeName: "Can Antika",
     businessType: "Antika Eşya Satışı",
     storeDescription: "1989'den beri İstanbul'da en kaliteli antika eşyaları sunuyoruz.",
-    companyName: "Mesut Can Bireysel Şirketi",
+    companyName: "Mesut Can (Şahıs İşletmesi)",
     taxId: "",
     taxOffice: "",
     phone: "+90 (212) 555-0123",

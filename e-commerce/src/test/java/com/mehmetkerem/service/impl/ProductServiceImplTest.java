@@ -227,20 +227,4 @@ class ProductServiceImplTest {
         assertNotNull(result);
         assertEquals(1, result.size());
     }
-
-    @Test
-    @DisplayName("getAllProducts - sayfali liste doner")
-    void getAllProducts_ShouldReturnPagedResults() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Product> productPage = new PageImpl<>(List.of(product), pageable, 1);
-        when(productRepository.findAll(any(PageRequest.class))).thenReturn(productPage);
-        when(categoryService.getCategoryResponsesByIds(anyList())).thenReturn(Map.of(1L, categoryResponse));
-        when(productMapper.toResponseWithCategory(product, categoryResponse)).thenReturn(productResponse);
-
-        Page<ProductResponse> result = productService.getAllProducts(0, 10, "id", "asc");
-
-        assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals(1, result.getContent().size());
-    }
 }

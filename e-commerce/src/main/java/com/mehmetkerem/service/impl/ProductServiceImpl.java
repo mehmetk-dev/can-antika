@@ -17,12 +17,14 @@ import com.mehmetkerem.service.IActivityLogService;
 import com.mehmetkerem.enums.ActivityType;
 import com.mehmetkerem.util.SecurityUtils;
 import com.mehmetkerem.util.Messages;
+import com.mehmetkerem.util.ResultHelper;
+import com.mehmetkerem.dto.response.CursorResponse;
+import org.springframework.data.domain.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import com.mehmetkerem.repository.specification.ProductSpecification;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -183,7 +185,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public Page<ProductResponse> searchProducts(String title, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice,
+    public com.mehmetkerem.dto.response.CursorResponse<ProductResponse> searchProducts(String title, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice,
             Double minRating, Pageable pageable) {
 
         Specification<Product> spec = Specification.where(ProductSpecification.hasTitle(title))
@@ -192,14 +194,15 @@ public class ProductServiceImpl implements IProductService {
                 .and(ProductSpecification.greaterThanRating(minRating));
 
         Page<Product> productPage = productRepository.findAll(spec, pageable);
-        return productPage.map(this::mapProductWithCategory);
+        return ResultHelper.toCursor(productPage.map(this::mapProductWithCategory));
     }
 
     // NOTE:
     // products:list cache anahtarını versiyonlayarak eski/stale Redis kayıtlarından
     // kaynaklanan deserialization kaynaklı 500 hatalarını engeller.
+    @Override
     @Cacheable(cacheNames = "products:list", key = "'v3;p='+#page+';s='+#size+';sort='+#sortBy+';dir='+#direction")
-    public Page<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction) {
+    public com.mehmetkerem.dto.response.CursorResponse<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction) {
         String safeSortBy = ALLOWED_PRODUCT_SORT_FIELDS.contains(sortBy) ? sortBy : "id";
         Sort sort = direction.equalsIgnoreCase("desc")
             ? Sort.by(safeSortBy).descending()
@@ -207,7 +210,7 @@ public class ProductServiceImpl implements IProductService {
 
         PageRequest pageable = PageRequest.of(page, size, sort);
 
-        return productRepository.findAll(pageable).map(this::mapProductWithCategory);
+        return ResultHelper.toCursor(productRepository.findAll(pageable).map(this::mapProductWithCategory));
     }
 
     /**

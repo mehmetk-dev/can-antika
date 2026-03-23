@@ -1,271 +1,297 @@
-import type { Metadata } from "next"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import Link from "next/link"
-import type { SiteSettingsResponse } from "@/lib/types"
+﻿import type { Metadata } from "next";
+import Link from "next/link";
 
-import { getServerApiUrl } from "@/lib/server-api-url"
-const API_URL = getServerApiUrl()
-
-async function fetchSiteSettings(): Promise<SiteSettingsResponse | null> {
-    try {
-        const res = await fetch(`${API_URL}/v1/site-settings`, { next: { revalidate: 3600 } })
-        if (!res.ok) return null
-        const json = await res.json()
-        return json.data ?? null
-    } catch {
-        return null
-    }
-}
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
-    title: "KVKK Aydınlatma Metni | Can Antika",
-    description:
-        "Can Antika KVKK Aydınlatma Metni. 6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında veri sahiplerinin aydınlatılmasına ilişkin bilgilendirme.",
-    keywords: ["kvkk aydınlatma metni", "6698 kvkk", "kişisel veri aydınlatma", "can antika kvkk"],
-    openGraph: {
-        title: "KVKK Aydınlatma Metni | Can Antika",
-        description: "6698 sayılı KVKK kapsamında aydınlatma yükümlülüğümüz.",
-        type: "website",
-        locale: "tr_TR",
-    },
-}
+  title: "KVKK Aydınlatma Metni",
+  description: "Can Antika KVKK Aydınlatma Metni.",
+};
 
-export default async function KVKKPage() {
-    const s = await fetchSiteSettings()
-    const companyName = s?.companyName || "Mesut Can Bireysel Şirketi"
-    const address = s?.address || ""
-    return (
-        <div className="min-h-screen bg-background">
-            <Header />
-            <main>
-                {/* Hero */}
-                <section className="bg-primary py-20 text-primary-foreground">
-                    <div className="mx-auto max-w-4xl px-4 text-center">
-                        <h1 className="font-serif text-4xl font-bold md:text-5xl">KVKK Aydınlatma Metni</h1>
-                        <p className="mt-4 text-lg text-primary-foreground/80">
-                            6698 Sayılı Kişisel Verilerin Korunması Kanunu Kapsamında
-                        </p>
-                        <p className="mt-2 text-sm text-primary-foreground/60">Son güncelleme: 17 Şubat 2026</p>
-                    </div>
-                </section>
+export default function KvkkPage() {
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <Header />
 
-                <div className="mx-auto max-w-4xl px-4 py-16">
-                    <div className="prose prose-lg max-w-none space-y-12">
-                        {/* Başlangıç */}
-                        <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-6">
-                            <p className="text-muted-foreground leading-relaxed">
-                                <strong className="text-foreground">Mesut Can Bireysel Şirketi</strong> olarak kişisel verilerinizin
-                                güvenliği konusunda büyük hassasiyet göstermekteyiz. Bu aydınlatma metni, 6698 sayılı Kişisel Verilerin
-                                Korunması Kanunu&apos;nun (&quot;KVKK&quot;) 10. maddesi ile Aydınlatma Yükümlülüğünün Yerine Getirilmesinde
-                                Uyulacak Usul ve Esaslar Hakkında Tebliğ kapsamında hazırlanmıştır.
-                            </p>
-                        </div>
+      <main className="container mx-auto px-4 py-10 md:py-14">
+        <article className="mx-auto max-w-4xl rounded-2xl border bg-card p-6 shadow-sm md:p-10">
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">KVKK Aydınlatma Metni</h1>
+          <p className="mt-3 text-sm text-muted-foreground">Son Güncelleme: 23 Mart 2026</p>
 
-                        {/* Veri Sorumlusu */}
-                        <section>
-                            <h2 className="font-serif text-2xl font-semibold text-foreground">Veri Sorumlusunun Kimliği</h2>
-                            <div className="mt-4 rounded-lg bg-muted p-6 space-y-2">
-                                <p className="text-sm text-muted-foreground"><strong className="text-foreground">Veri Sorumlusu:</strong> {companyName}</p>
-                                {address && <p className="text-sm text-muted-foreground"><strong className="text-foreground">Adres:</strong> {address}</p>}
-                                <p className="text-sm text-muted-foreground"><strong className="text-foreground">E-posta:</strong> destek@canantika.com</p>
-                                <p className="text-sm text-muted-foreground"><strong className="text-foreground">İrtibat Kişisi:</strong> Can Antika Veri Koruma Sorumlusu</p>
-                            </div>
-                        </section>
+          <p className="mt-6 leading-7">
+            Mesut Can (Şahıs İşletmesi) olarak, canantika.com üzerinden sunduğumuz ürün ve hizmetler kapsamında
+            kişisel verilerinizin güvenliğine önem veriyoruz. İşbu Aydınlatma Metni, 6698 sayılı Kişisel Verilerin
+            Korunması Kanunu&apos;nun (&quot;KVKK&quot;) 10. maddesi ile Aydınlatma Yükümlülüğünün Yerine Getirilmesinde Uyulacak
+            Usul ve Esaslar Hakkında Tebliğ kapsamında hazırlanmıştır.
+          </p>
 
-                        {/* İşlenen Veriler ve Amaçlar */}
-                        <section>
-                            <h2 className="font-serif text-2xl font-semibold text-foreground">İşlenen Kişisel Veriler, Amaçları ve Hukuki Sebepleri</h2>
-                            <p className="mt-4 text-muted-foreground leading-relaxed">
-                                Aşağıdaki tabloda kişisel verilerinizin hangi amaçlarla ve hangi hukuki sebeplere dayalı olarak
-                                işlendiği belirtilmiştir:
-                            </p>
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">1. Veri Sorumlusunun Kimliği</h2>
+            <p className="leading-7">
+              KVKK uyarınca kişisel verileriniz, veri sorumlusu sıfatıyla aşağıda bilgileri yer alan işletme tarafından
+              işlenmektedir:
+            </p>
+            <ul className="list-disc space-y-1 pl-6 leading-7">
+              <li>Veri Sorumlusu: Mesut Can (Şahıs İşletmesi)</li>
+              <li>Marka / Site: Can Antika</li>
+              <li>Adres: Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
+              <li>Telefon: +90 507 687 92 15</li>
+              <li>E-posta: destek@canantika.com</li>
+            </ul>
+          </section>
 
-                            <div className="mt-6 space-y-6">
-                                {[
-                                    {
-                                        title: "Üyelik ve Hesap Yönetimi",
-                                        data: "Ad, soyad, e-posta, telefon, şifre (hash)",
-                                        purpose: "Üyelik kaydı oluşturma, kimlik doğrulama, hesap güvenliği",
-                                        legal: "Sözleşmenin ifası (Md. 5/2-c)",
-                                        method: "Web sitesi üyelik formu",
-                                    },
-                                    {
-                                        title: "Sipariş ve Satış İşlemleri",
-                                        data: "Ad, soyad, adres, telefon, sipariş detayları, fatura bilgileri",
-                                        purpose: "Sipariş işleme, faturalama, teslimat, iade ve değişim süreçleri",
-                                        legal: "Sözleşmenin ifası (Md. 5/2-c), Kanuni yükümlülük (Md. 5/2-ç)",
-                                        method: "Sipariş formu, ödeme sayfası",
-                                    },
-                                    {
-                                        title: "Ödeme İşlemleri",
-                                        data: "Kredi kartı bilgileri, banka hesap bilgileri",
-                                        purpose: "Ödeme tahsilâtı, 3D Secure doğrulama, iade ödemeleri",
-                                        legal: "Sözleşmenin ifası (Md. 5/2-c)",
-                                        method: "Ödeme altyapısı (PCI DSS uyumlu)",
-                                    },
-                                    {
-                                        title: "Antika Eser Belgeleme",
-                                        data: "Ad, soyad, T.C. kimlik no, satın alma bilgileri",
-                                        purpose: "Orijinallik sertifikası, provenans kaydı, 2863 sayılı Kanun bildirimleri",
-                                        legal: "Kanuni yükümlülük (Md. 5/2-ç), Hakkın tesisi (Md. 5/2-e)",
-                                        method: "Satış sözleşmesi, sertifika düzenleme",
-                                    },
-                                    {
-                                        title: "Müşteri İletişimi",
-                                        data: "Ad, e-posta, telefon, destek talep içerikleri",
-                                        purpose: "Destek taleplerinin yanıtlanması, şikâyet yönetimi",
-                                        legal: "Sözleşmenin ifası (Md. 5/2-c), Meşru menfaat (Md. 5/2-f)",
-                                        method: "İletişim formu, e-posta, telefon",
-                                    },
-                                    {
-                                        title: "Pazarlama ve İletişim",
-                                        data: "Ad, e-posta, tercihler, satın alma geçmişi",
-                                        purpose: "Kampanya bildirimleri, yeni koleksiyon duyuruları, kişiselleştirilmiş öneriler",
-                                        legal: "Açık rıza (Md. 5/1)",
-                                        method: "E-posta bülteni, web sitesi",
-                                    },
-                                    {
-                                        title: "Web Sitesi Güvenliği",
-                                        data: "IP adresi, tarayıcı bilgisi, erişim logları",
-                                        purpose: "Dolandırıcılık önleme, siber güvenlik, site performansı",
-                                        legal: "Meşru menfaat (Md. 5/2-f), Kanuni yükümlülük (Md. 5/2-ç)",
-                                        method: "Otomatik toplama (sunucu logları, güvenlik sistemleri)",
-                                    },
-                                ].map((item) => (
-                                    <div key={item.title} className="rounded-lg border border-border p-5">
-                                        <h3 className="font-serif text-lg font-semibold text-foreground">{item.title}</h3>
-                                        <div className="mt-3 grid gap-2 text-sm">
-                                            <div className="flex flex-col sm:flex-row gap-1">
-                                                <span className="shrink-0 font-semibold text-foreground w-32">İşlenen Veriler:</span>
-                                                <span className="text-muted-foreground">{item.data}</span>
-                                            </div>
-                                            <div className="flex flex-col sm:flex-row gap-1">
-                                                <span className="shrink-0 font-semibold text-foreground w-32">Amaç:</span>
-                                                <span className="text-muted-foreground">{item.purpose}</span>
-                                            </div>
-                                            <div className="flex flex-col sm:flex-row gap-1">
-                                                <span className="shrink-0 font-semibold text-foreground w-32">Hukuki Sebep:</span>
-                                                <span className="text-muted-foreground">{item.legal}</span>
-                                            </div>
-                                            <div className="flex flex-col sm:flex-row gap-1">
-                                                <span className="shrink-0 font-semibold text-foreground w-32">Toplama Yöntemi:</span>
-                                                <span className="text-muted-foreground">{item.method}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
+          <section className="mt-8 space-y-5">
+            <h2 className="text-xl font-semibold">
+              2. Hangi Kişisel Verileri, Hangi Amaçlarla ve Hangi Hukuki Sebeplerle İşliyoruz?
+            </h2>
 
-                        {/* Aktarım */}
-                        <section>
-                            <h2 className="font-serif text-2xl font-semibold text-foreground">Kişisel Verilerin Aktarılması</h2>
-                            <p className="mt-4 text-muted-foreground leading-relaxed">
-                                Toplanan kişisel verileriniz; KVKK&apos;nın 8. ve 9. maddelerinde belirtilen şartlara uygun olarak:
-                            </p>
-                            <ul className="mt-4 space-y-3 text-muted-foreground">
-                                <li className="flex items-start gap-3">
-                                    <span className="text-primary font-bold">→</span>
-                                    Kargo firmaları ile teslimat amacıyla (ad, adres, telefon)
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="text-primary font-bold">→</span>
-                                    Ödeme kuruluşları ve bankalar ile ödeme tahsilâtı amacıyla
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="text-primary font-bold">→</span>
-                                    Kültür ve Turizm Bakanlığı ile 2863 sayılı Kanun kapsamında tescilli eser bildirimi amacıyla
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="text-primary font-bold">→</span>
-                                    Gelir İdaresi Başkanlığı ve mali müşavir ile vergi mevzuatı kapsamında
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="text-primary font-bold">→</span>
-                                    Yetkili kamu kurum ve kuruluşları ile yasal talep halinde
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="text-primary font-bold">→</span>
-                                    Sigorta şirketleri ile yüksek değerli eser sigortalama amacıyla
-                                </li>
-                            </ul>
-                        </section>
+            <div className="space-y-2">
+              <p className="font-medium">a) Üyelik ve Hesap Yönetimi</p>
+              <p className="leading-7">
+                İşlenen Veriler: Ad, soyad, e-posta adresi, telefon numarası, şifre bilgisi (hashlenmiş olarak)
+              </p>
+              <p className="leading-7">
+                Amaç: Üyelik hesabının oluşturulması, oturum açma işlemlerinin yürütülmesi, hesap güvenliğinin
+                sağlanması, kullanıcı hesabının yönetilmesi
+              </p>
+              <p className="leading-7">
+                Hukuki Sebep: Bir sözleşmenin kurulması veya ifasıyla doğrudan doğruya ilgili olması (KVKK m. 5/2-c),
+                veri sorumlusunun meşru menfaati (KVKK m. 5/2-f)
+              </p>
+              <p className="leading-7">Toplama Yöntemi: Web sitesi üyelik formu, giriş ekranları, hesap yönetim sayfaları</p>
+            </div>
 
-                        {/* Haklar */}
-                        <section>
-                            <h2 className="font-serif text-2xl font-semibold text-foreground">Veri Sahibi Olarak Haklarınız</h2>
-                            <p className="mt-4 text-muted-foreground leading-relaxed">
-                                KVKK&apos;nın 11. maddesi gereğince, şirketimize başvurarak kişisel verilerinizle ilgili şu haklarınızı kullanabilirsiniz:
-                            </p>
-                            <div className="mt-6 space-y-2">
-                                {[
-                                    "Kişisel verilerinizin işlenip işlenmediğini öğrenme",
-                                    "Kişisel verileriniz işlenmişse buna ilişkin bilgi talep etme",
-                                    "Kişisel verilerinizin işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme",
-                                    "Yurt içinde veya yurt dışında kişisel verilerinizin aktarıldığı üçüncü kişileri bilme",
-                                    "Kişisel verilerinizin eksik veya yanlış işlenmiş olması halinde bunların düzeltilmesini isteme",
-                                    "KVKK'nın 7. maddesinde öngörülen şartlar çerçevesinde kişisel verilerinizin silinmesini veya yok edilmesini isteme",
-                                    "Düzeltme, silme ve yok etme işlemlerinin kişisel verilerin aktarıldığı üçüncü kişilere bildirilmesini isteme",
-                                    "İşlenen verilerin münhasıran otomatik sistemler vasıtasıyla analiz edilmesi suretiyle aleyhinize bir sonucun ortaya çıkmasına itiraz etme",
-                                    "Kişisel verilerinizin kanuna aykırı olarak işlenmesi sebebiyle zarara uğramanız halinde zararın giderilmesini talep etme",
-                                ].map((right, i) => (
-                                    <div key={i} className="flex items-start gap-3 rounded-lg bg-muted/50 p-3">
-                                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                                            {i + 1}
-                                        </span>
-                                        <span className="text-sm text-muted-foreground">{right}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
+            <div className="space-y-2">
+              <p className="font-medium">b) Sipariş, Satış ve Teslimat Süreçleri</p>
+              <p className="leading-7">
+                İşlenen Veriler: Ad, soyad, teslimat adresi, fatura adresi, telefon numarası, e-posta adresi, sipariş
+                bilgileri, ürün detayları, teslimat ve iade kayıtları
+              </p>
+              <p className="leading-7">
+                Amaç: Siparişin alınması, hazırlanması, kargolanması, teslim edilmesi, iade ve iptal süreçlerinin
+                yürütülmesi, satış sonrası destek sağlanması, faturalandırma yapılması
+              </p>
+              <p className="leading-7">
+                Hukuki Sebep: Bir sözleşmenin kurulması veya ifasıyla doğrudan doğruya ilgili olması (KVKK m. 5/2-c),
+                veri sorumlusunun hukuki yükümlülüğünü yerine getirmesi (KVKK m. 5/2-ç)
+              </p>
+              <p className="leading-7">Toplama Yöntemi: Sipariş formu, ödeme adımı, müşteri hizmetleri görüşmeleri, e-posta ve telefon kanalları</p>
+            </div>
 
-                        {/* Başvuru */}
-                        <section>
-                            <h2 className="font-serif text-2xl font-semibold text-foreground">Başvuru Yöntemi</h2>
-                            <p className="mt-4 text-muted-foreground leading-relaxed">
-                                Yukarıda belirtilen haklarınızı kullanmak için aşağıdaki yöntemlerden biriyle şirketimize başvurabilirsiniz:
-                            </p>
-                            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                                <div className="rounded-lg border border-border p-4">
-                                    <h3 className="font-serif text-base font-semibold text-foreground">Yazılı Başvuru</h3>
-                                    <p className="mt-2 text-sm text-muted-foreground">
-                                        Islak imzalı dileğçe ile {address || "mevcut adresimize"} şahsen
-                                        veya noter kanalıyla iadeli taahhütlü posta ile iletebilirsiniz.
-                                    </p>
-                                </div>
-                                <div className="rounded-lg border border-border p-4">
-                                    <h3 className="font-serif text-base font-semibold text-foreground">Elektronik Başvuru</h3>
-                                    <p className="mt-2 text-sm text-muted-foreground">
-                                        Kayıtlı elektronik posta (KEP) adresinizden veya sisteminizde kayıtlı e-posta adresinizden
-                                        <strong className="text-foreground"> destek@canantika.com</strong> adresine başvurabilirsiniz.
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="mt-6 rounded-lg bg-accent/10 border border-accent/20 p-4">
-                                <p className="text-sm text-muted-foreground">
-                                    <strong className="text-foreground">Yanıt Süresi:</strong> Başvurunuz, talebin niteliğine göre
-                                    en kısa sürede ve en geç <strong className="text-foreground">30 gün</strong> içinde ücretsiz
-                                    olarak sonuçlandırılacaktır. İşlemin ayrıca bir maliyet gerektirmesi halinde, Kişisel Verileri
-                                    Koruma Kurulu tarafından belirlenen tarifedeki ücret alınabilir.
-                                </p>
-                            </div>
-                        </section>
+            <div className="space-y-2">
+              <p className="font-medium">c) Ödeme Süreçleri</p>
+              <p className="leading-7">
+                İşlenen Veriler: Ödeme işlemine ilişkin sınırlı bilgiler, iade yapılması gereken hallerde banka hesap /
+                IBAN bilgisi
+              </p>
+              <p className="leading-7">
+                Amaç: Ödeme işlemlerinin yürütülmesi, iade ödemelerinin gerçekleştirilmesi, işlem güvenliğinin
+                sağlanması
+              </p>
+              <p className="leading-7">
+                Hukuki Sebep: Bir sözleşmenin kurulması veya ifasıyla doğrudan doğruya ilgili olması (KVKK m. 5/2-c),
+                veri sorumlusunun hukuki yükümlülüğünü yerine getirmesi (KVKK m. 5/2-ç)
+              </p>
+              <p className="leading-7">Toplama Yöntemi: Ödeme kuruluşu / banka altyapısı, iade süreçlerinde müşteri beyanı</p>
+              <p className="leading-7">
+                Önemli Bilgilendirme: Ödeme sırasında girilen kart verileri, bankalar veya yetkili ödeme kuruluşları
+                tarafından işlenir. Kart bilgileriniz tarafımızca kaydedilmez, saklanmaz veya doğrudan erişilmez.
+              </p>
+            </div>
 
-                        {/* İlgili Sayfalar */}
-                        <div className="mt-8 rounded-lg border border-border bg-muted/30 p-6">
-                            <p className="font-serif font-semibold text-foreground mb-3">İlgili Hukuki Metinler</p>
-                            <div className="flex flex-wrap gap-3">
-                                <Link href="/gizlilik" className="text-sm text-primary hover:underline">Gizlilik Politikası →</Link>
-                                <Link href="/mesafeli-satis-sozlesmesi" className="text-sm text-primary hover:underline">Mesafeli Satış Sözleşmesi →</Link>
-                                <Link href="/kullanim-kosullari" className="text-sm text-primary hover:underline">Kullanım Koşulları →</Link>
-                                <Link href="/cerezler" className="text-sm text-primary hover:underline">Çerez Politikası →</Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-            <Footer />
-        </div>
-    )
+            <div className="space-y-2">
+              <p className="font-medium">d) Müşteri İletişimi ve Destek Süreçleri</p>
+              <p className="leading-7">
+                İşlenen Veriler: Ad, soyad, telefon numarası, e-posta adresi, destek / şikâyet / talep içerikleri
+              </p>
+              <p className="leading-7">
+                Amaç: Soruların yanıtlanması, destek taleplerinin yönetilmesi, şikâyet süreçlerinin yürütülmesi, satış
+                öncesi ve sonrası iletişimin sağlanması
+              </p>
+              <p className="leading-7">
+                Hukuki Sebep: Bir sözleşmenin kurulması veya ifasıyla doğrudan doğruya ilgili olması (KVKK m. 5/2-c),
+                veri sorumlusunun meşru menfaati (KVKK m. 5/2-f)
+              </p>
+              <p className="leading-7">Toplama Yöntemi: İletişim formu, e-posta, telefon, WhatsApp [yalnızca kullanıyorsanız bırakın]</p>
+            </div>
+
+            <div className="space-y-2">
+              <p className="font-medium">e) Pazarlama ve Ticari İletişim</p>
+              <p className="leading-7">
+                İşlenen Veriler: Ad, soyad, e-posta adresi, telefon numarası, alışveriş tercihleri, kampanya izin
+                kayıtları
+              </p>
+              <p className="leading-7">
+                Amaç: Kampanya ve duyuruların gönderilmesi, yeni ürün ve koleksiyonların tanıtılması, size özel
+                tekliflerin sunulması
+              </p>
+              <p className="leading-7">Hukuki Sebep: Açık rıza (KVKK m. 5/1)</p>
+              <p className="leading-7">Toplama Yöntemi: E-bülten üyeliği, kampanya izin kutuları, açık rıza alınan formlar</p>
+            </div>
+
+            <div className="space-y-2">
+              <p className="font-medium">f) Web Sitesi Güvenliği ve Teknik Süreçler</p>
+              <p className="leading-7">
+                İşlenen Veriler: IP adresi, tarih-saat bilgisi, erişim logları, tarayıcı bilgisi, cihaz bilgisi, çerez
+                verileri, hata kayıtları
+              </p>
+              <p className="leading-7">
+                Amaç: Site güvenliğinin sağlanması, dolandırıcılık ve kötüye kullanımın önlenmesi, sistem performansının
+                izlenmesi, teknik hataların giderilmesi
+              </p>
+              <p className="leading-7">
+                Hukuki Sebep: Veri sorumlusunun meşru menfaati (KVKK m. 5/2-f), veri sorumlusunun hukuki yükümlülüğünü
+                yerine getirmesi (KVKK m. 5/2-ç)
+              </p>
+              <p className="leading-7">Toplama Yöntemi: Sunucu logları, çerezler, güvenlik sistemleri, otomatik teknik kayıt mekanizmaları</p>
+            </div>
+
+            <div className="space-y-2">
+              <p className="font-medium">g) Antika Ürünlere İlişkin Belgeleme ve Satış Sonrası İspat Süreçleri</p>
+              <p className="leading-7">
+                İşlenen Veriler: Ad, soyad, satın alma bilgileri, ürün açıklamaları, ürün görselleri, ürün kondisyon /
+                nitelik kayıtları, talep halinde ekspertiz veya belge sürecine ilişkin bilgiler
+              </p>
+              <p className="leading-7">
+                Amaç: Ürün özelliklerinin kayıt altına alınması, satış sonrası ispat süreçlerinin yürütülmesi, ürün
+                açıklamalarının doğrulanması, talep halinde ekspertiz / belgeleme süreçlerinin yürütülmesi
+              </p>
+              <p className="leading-7">
+                Hukuki Sebep: Bir hakkın tesisi, kullanılması veya korunması için veri işlemenin zorunlu olması (KVKK m.
+                5/2-e), veri sorumlusunun hukuki yükümlülüğünü yerine getirmesi (KVKK m. 5/2-ç)
+              </p>
+              <p className="leading-7">Toplama Yöntemi: Sipariş ve satış kayıtları, müşteri talepleri, ürün belgeleme süreçleri</p>
+            </div>
+
+            <p className="leading-7">
+              T.C. kimlik numarası gibi ek veriler yalnızca mevzuat gerektiriyorsa veya somut işlem için gerçekten
+              zorunluysa işlenir. Rutin müşteri işlemleri için genel kural olarak talep edilmez.
+            </p>
+          </section>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">3. Kişisel Verilerin Kimlere ve Hangi Amaçlarla Aktarılabileceği</h2>
+            <p className="leading-7">
+              Kişisel verileriniz, KVKK&apos;nın 8. ve 9. maddelerine uygun olarak, aşağıdaki alıcı gruplarına ve belirtilen
+              amaçlarla aktarılabilir:
+            </p>
+            <ul className="list-disc space-y-1 pl-6 leading-7">
+              <li>Kargo ve lojistik firmalarına: Siparişlerin teslim edilmesi ve kargo takibinin yapılması amacıyla ad, soyad, adres ve telefon bilgileri</li>
+              <li>Bankalara ve ödeme kuruluşlarına: Ödeme işlemlerinin gerçekleştirilmesi, 3D Secure doğrulama ve iade süreçlerinin yürütülmesi amacıyla işlem bilgileri</li>
+              <li>Muhasebe, mali müşavirlik ve e-fatura/e-arşiv hizmet sağlayıcılarına: Muhasebe, faturalandırma ve vergi yükümlülüklerinin yerine getirilmesi amacıyla kimlik ve işlem bilgileri</li>
+              <li>Yetkili kamu kurum ve kuruluşlarına: Mevzuattan kaynaklanan yükümlülüklerin yerine getirilmesi veya usulüne uygun resmi talep bulunması halinde gerekli bilgiler</li>
+              <li>Sigorta şirketlerine: Yalnızca sigortalanması talep edilen veya gerekli görülen yüksek değerli ürünlere ilişkin işlemlerde gerekli minimum bilgiler</li>
+              <li>Uzman / ekspertiz / restorasyon hizmeti sağlayıcılarına: Yalnızca bu yönde hizmet talebi bulunması halinde, talep konusu ürün bilgileri ve gerekli iletişim verileri</li>
+            </ul>
+          </section>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">4. Yurt Dışına Veri Aktarımı</h2>
+            <p className="leading-7">
+              Bu bölüm yalnızca fiilen yurt dışı servis kullanıyorsanız yayımlanmalıdır. Kullandığımız bazı e-posta,
+              bulut bilişim, güvenlik, analitik veya barındırma hizmetlerinin yurt dışında bulunması halinde kişisel
+              verileriniz, KVKK&apos;nın 9. maddesinde öngörülen kurallara uygun olarak yurt dışına aktarılabilir.
+            </p>
+            <p className="leading-7">
+              Yurt dışı aktarım gereken durumlarda, yürürlükteki mevzuat uyarınca yeterlilik kararı, uygun güvence,
+              standart sözleşme veya ilgili diğer hukuki mekanizmalar esas alınır.
+            </p>
+            <p className="leading-7">
+              Google, Meta, Cloudflare, Vercel, Microsoft, yabancı barındırma ya da yabancı e-posta servisleri
+              kullanıyorsan bu bölümü bırak. Tamamen yerli altyapı kullanıyorsan çıkar.
+            </p>
+          </section>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">5. Kişisel Veri Toplama Yöntemleri</h2>
+            <p className="leading-7">Kişisel verileriniz;</p>
+            <ul className="list-disc space-y-1 pl-6 leading-7">
+              <li>web sitesi üyelik ve sipariş formları,</li>
+              <li>iletişim formu,</li>
+              <li>e-posta ve telefon görüşmeleri,</li>
+              <li>ödeme kuruluşu / banka altyapıları,</li>
+              <li>çerezler ve teknik sistemler,</li>
+              <li>müşteri destek süreçleri,</li>
+              <li>kargo ve teslimat organizasyonları</li>
+            </ul>
+            <p className="leading-7">vasıtasıyla elektronik veya fiziki ortamda toplanabilmektedir.</p>
+          </section>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">6. KVKK Kapsamındaki Haklarınız</h2>
+            <p className="leading-7">KVKK&apos;nın 11. maddesi uyarınca veri sahibi olarak aşağıdaki haklara sahipsiniz:</p>
+            <ul className="list-disc space-y-1 pl-6 leading-7">
+              <li>Kişisel verilerinizin işlenip işlenmediğini öğrenme</li>
+              <li>İşlenmişse buna ilişkin bilgi talep etme</li>
+              <li>İşlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme</li>
+              <li>Yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme</li>
+              <li>Eksik veya yanlış işlenmiş olması halinde düzeltilmesini isteme</li>
+              <li>KVKK&apos;nın 7. maddesi çerçevesinde silinmesini veya yok edilmesini isteme</li>
+              <li>Düzeltme, silme veya yok etme işlemlerinin aktarıldığı üçüncü kişilere bildirilmesini isteme</li>
+              <li>İşlenen verilerin münhasıran otomatik sistemler vasıtasıyla analiz edilmesi nedeniyle aleyhinize bir sonucun ortaya çıkmasına itiraz etme</li>
+              <li>Kanuna aykırı işlenmesi sebebiyle zarara uğramanız halinde zararın giderilmesini talep etme</li>
+            </ul>
+          </section>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">7. Başvuru Yöntemi</h2>
+            <p className="leading-7">KVKK kapsamındaki taleplerinizi, ilgili mevzuata uygun olarak aşağıdaki yöntemlerle bize iletebilirsiniz:</p>
+            <ul className="list-disc space-y-1 pl-6 leading-7">
+              <li>Islak imzalı dilekçe ile, yukarıda belirtilen adrese şahsen veya noter / iadeli taahhütlü posta yoluyla</li>
+              <li>Varsa kayıtlı elektronik posta (KEP) adresiniz üzerinden</li>
+              <li>Güvenli elektronik imza veya mobil imza kullanarak</li>
+              <li>Daha önce tarafımıza bildirilen ve sistemimizde kayıtlı bulunan e-posta adresiniz üzerinden</li>
+              <li>Başvuruya özel geliştirilmiş bir sistem bulunuyorsa bu sistem üzerinden</li>
+            </ul>
+            <p className="leading-7">E-posta ile başvurular için iletişim adresimiz: destek@canantika.com</p>
+            <p className="leading-7">
+              Başvurularınız, talebin niteliğine göre en kısa sürede ve en geç 30 gün içinde ücretsiz olarak
+              sonuçlandırılır. İşlemin ayrıca bir maliyet gerektirmesi halinde, Kişisel Verileri Koruma Kurulu
+              tarafından belirlenen tarifedeki ücret talep edilebilir.
+            </p>
+          </section>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">8. İletişim</h2>
+            <p className="leading-7">
+              Kişisel verilerinizin işlenmesine ilişkin her türlü soru ve başvurunuz için bizimle iletişime geçebilirsiniz:
+            </p>
+            <ul className="list-disc space-y-1 pl-6 leading-7">
+              <li>Mesut Can (Şahıs İşletmesi)</li>
+              <li>Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
+              <li>Telefon: +90 507 687 92 15</li>
+              <li>E-posta: destek@canantika.com</li>
+            </ul>
+          </section>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">9. İlgili Hukuki Metinler</h2>
+            <ul className="list-disc space-y-1 pl-6 leading-7">
+              <li>
+                <Link href="/gizlilik" className="underline-offset-4 hover:underline">Gizlilik Politikası</Link>
+              </li>
+              <li>
+                <Link href="/cerezler" className="underline-offset-4 hover:underline">Çerez Politikası</Link>
+              </li>
+              <li>
+                <Link href="/mesafeli-satis-sozlesmesi" className="underline-offset-4 hover:underline">Mesafeli Satış Sözleşmesi</Link>
+              </li>
+              <li>
+                <Link href="/mesafeli-satis-sozlesmesi" className="underline-offset-4 hover:underline">Ön Bilgilendirme Formu</Link>
+              </li>
+              <li>
+                <Link href="/iade" className="underline-offset-4 hover:underline">İade / İptal / Cayma Politikası</Link>
+              </li>
+              <li>
+                <Link href="/kullanim-kosullari" className="underline-offset-4 hover:underline">Kullanım Koşulları</Link>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </main>
+
+      <Footer />
+    </div>
+  );
 }

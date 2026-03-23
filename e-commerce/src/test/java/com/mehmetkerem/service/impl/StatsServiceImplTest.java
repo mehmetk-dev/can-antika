@@ -12,8 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -44,11 +42,8 @@ class StatsServiceImplTest {
     private void stubCommonMocks() {
         lenient().when(orderRepository.getTopSellingProducts(anyInt())).thenReturn(List.of());
         lenient().when(orderRepository.getTopCustomers(anyInt())).thenReturn(List.of());
-        lenient().when(orderRepository.getOrderStatusCounts()).thenReturn(List.of());
         lenient().when(orderRepository.getMonthlyRevenue(any(LocalDateTime.class))).thenReturn(List.of());
-        lenient().when(orderRepository.countPendingOrders()).thenReturn(0L);
-        lenient().when(orderRepository.findAllByOrderByOrderDateDesc(any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of()));
+        lenient().when(orderRepository.countByOrderStatus(any())).thenReturn(0L);
         lenient().when(userRepository.countByRole(any(Role.class))).thenReturn(0L);
         lenient().when(userRepository.countByRoleAndCreatedAtAfter(any(Role.class), any(LocalDateTime.class)))
                 .thenReturn(0L);
@@ -65,7 +60,6 @@ class StatsServiceImplTest {
                         new Object[] { "2025-02-11", new BigDecimal("2000"), 8L }));
         when(productRepository.countByStockLessThan(5)).thenReturn(3L);
         when(productRepository.count()).thenReturn(100L);
-        when(productRepository.countByStockLessThan(1)).thenReturn(2L);
         stubCommonMocks();
 
         StatsResponse result = statsService.getAdminStats();
@@ -89,7 +83,6 @@ class StatsServiceImplTest {
         when(orderRepository.countTotalOrders()).thenReturn(0L);
         when(orderRepository.getDailyStats(any(LocalDateTime.class))).thenReturn(List.of());
         when(productRepository.countByStockLessThan(5)).thenReturn(0L);
-        when(productRepository.countByStockLessThan(1)).thenReturn(0L);
         when(productRepository.count()).thenReturn(0L);
         stubCommonMocks();
 
@@ -107,7 +100,6 @@ class StatsServiceImplTest {
         when(orderRepository.getDailyStats(any(LocalDateTime.class)))
                 .thenReturn(List.<Object[]>of(row));
         when(productRepository.countByStockLessThan(5)).thenReturn(0L);
-        when(productRepository.countByStockLessThan(1)).thenReturn(0L);
         when(productRepository.count()).thenReturn(0L);
         stubCommonMocks();
 

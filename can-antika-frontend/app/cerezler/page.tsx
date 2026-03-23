@@ -1,292 +1,54 @@
-import type { Metadata } from "next"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import Link from "next/link"
-import type { SiteSettingsResponse } from "@/lib/types"
+﻿import type { Metadata } from "next";
+import Link from "next/link";
 
-import { getServerApiUrl } from "@/lib/server-api-url"
-const API_URL = getServerApiUrl()
-
-async function fetchSiteSettings(): Promise<SiteSettingsResponse | null> {
-  try {
-    const res = await fetch(`${API_URL}/v1/site-settings`, { next: { revalidate: 3600 } })
-    if (!res.ok) return null
-    const json = await res.json()
-    return json.data ?? null
-  } catch {
-    return null
-  }
-}
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
-  title: "Çerez Politikası | Can Antika",
-  description:
-    "Can Antika çerez politikası. Hangi çerezlerin kullanıldığını, amaçlarını, sürelerini ve nasıl yönetebileceğinizi detaylıca öğrenin.",
-  keywords: ["çerez politikası", "cookies", "çerez ayarları", "can antika çerezler", "kvkk çerez"],
-  openGraph: {
-    title: "Çerez Politikası | Can Antika",
-    description: "Çerez kullanımımız hakkında detaylı bilgi.",
-    type: "website",
-    locale: "tr_TR",
-  },
-}
+  title: "Çerez Politikası",
+  description: "Can Antika Çerez Politikası.",
+};
 
-export default async function CookiesPage() {
-  const s = await fetchSiteSettings()
-  const companyName = s?.companyName || "Mesut Can Bireysel Şirketi"
-  const phone = s?.phone || ""
-  const email = s?.email || ""
+export default function CookiePolicyPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <main>
-        {/* Hero */}
-        <section className="bg-primary py-20 text-primary-foreground">
-          <div className="mx-auto max-w-4xl px-4 text-center">
-            <h1 className="font-serif text-4xl font-bold md:text-5xl">Çerez Politikası</h1>
-            <p className="mt-4 text-lg text-primary-foreground/80">Son güncelleme: 17 Şubat 2026</p>
-          </div>
-        </section>
+      <main className="container mx-auto px-4 py-10 md:py-14">
+        <article className="mx-auto max-w-4xl rounded-2xl border bg-card p-6 shadow-sm md:p-10">
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Çerez Politikası</h1>
+          <p className="mt-3 text-sm text-muted-foreground">Son Güncelleme: 23 Mart 2026</p>
 
-        <div className="mx-auto max-w-4xl px-4 py-16">
-          <div className="prose prose-lg max-w-none space-y-12">
-            {/* Çerez Nedir */}
-            <section>
-              <h2 className="font-serif text-2xl font-semibold text-foreground">Çerez (Cookie) Nedir?</h2>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                Çerezler, web sitemizi ziyaret ettiğinizde tarayıcınız aracılığıyla cihazınıza (bilgisayar,
-                tablet, akıllı telefon) yerleştirilen küçük metin dosyalarıdır. Bu dosyalar, sizi tanımak,
-                tercihlerinizi hatırlamak ve size daha iyi bir kullanıcı deneyimi sunmak amacıyla kullanılır.
-              </p>
-              <p className="mt-3 text-muted-foreground leading-relaxed">
-                6698 sayılı KVKK ve 5809 sayılı Elektronik Haberleşme Kanunu kapsamında, zorunlu çerezler
-                dışındaki çerezler yalnızca açık onayınızla yerleştirilmektedir.
-              </p>
-            </section>
+          <p className="mt-6 leading-7">Bu Çerez Politikası, www.canantika.com internet sitesini ziyaret eden kullanıcıların cihazlarında kullanılan çerezler ve benzeri teknolojiler hakkında bilgilendirme amacıyla hazırlanmıştır.</p>
+          <p className="leading-7">Çerezler yoluyla gerçekleştirilen kişisel veri işleme faaliyetleri bakımından, 6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) ve ilgili mevzuat hükümleri uygulanır.</p>
 
-            {/* Çerez Türleri — Detaylı Tablo */}
-            <section>
-              <h2 className="font-serif text-2xl font-semibold text-foreground">Kullandığımız Çerez Türleri</h2>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">1. Veri Sorumlusu</h2><ul className="list-disc space-y-1 pl-6 leading-7"><li>Mesut Can (Şahıs İşletmesi)</li><li>Marka: Can Antika</li><li>Adres: Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li><li>Telefon: +90 507 687 92 15</li><li>E-posta: destek@canantika.com</li></ul></section>
 
-              <div className="mt-6 space-y-6">
-                {/* Zorunlu */}
-                <div className="rounded-lg border border-border overflow-hidden">
-                  <div className="bg-primary/10 px-5 py-3 border-b border-border">
-                    <h3 className="font-serif text-lg font-semibold text-foreground flex items-center gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-green-600 text-xs text-white">✓</span>
-                      Zorunlu (Kesinlikle Gerekli) Çerezler
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">Bu çerezler olmadan site düzgün çalışmaz. Onay gerektirmez.</p>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead><tr className="border-b border-border text-left">
-                        <th className="px-5 py-2 font-semibold text-foreground">Çerez Adı</th>
-                        <th className="px-5 py-2 font-semibold text-foreground">Amacı</th>
-                        <th className="px-5 py-2 font-semibold text-foreground">Süre</th>
-                      </tr></thead>
-                      <tbody className="divide-y divide-border text-muted-foreground">
-                        <tr><td className="px-5 py-2">session_id</td><td className="px-5 py-2">Oturum yönetimi ve kimlik doğrulama</td><td className="px-5 py-2">Oturum</td></tr>
-                        <tr><td className="px-5 py-2">csrf_token</td><td className="px-5 py-2">Siteler arası istek sahteciliği koruması</td><td className="px-5 py-2">Oturum</td></tr>
-                        <tr><td className="px-5 py-2">cart_items</td><td className="px-5 py-2">Sepet içeriğinin korunması</td><td className="px-5 py-2">7 gün</td></tr>
-                        <tr><td className="px-5 py-2">cookie_consent</td><td className="px-5 py-2">Çerez tercihlerinizin saklanması</td><td className="px-5 py-2">1 yıl</td></tr>
-                        <tr><td className="px-5 py-2">locale</td><td className="px-5 py-2">Dil ve bölge tercihi</td><td className="px-5 py-2">1 yıl</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">2. Çerez Nedir?</h2><p className="leading-7">Çerezler, bir internet sitesini ziyaret ettiğinizde tarayıcınız aracılığıyla cihazınıza kaydedilen küçük metin dosyalarıdır. Oturumun devam ettirilmesi, tercihlerin hatırlanması, güvenliğin sağlanması ve performans ölçümü gibi amaçlarla kullanılabilir.</p></section>
 
-                {/* Performans */}
-                <div className="rounded-lg border border-border overflow-hidden">
-                  <div className="bg-blue-50 dark:bg-blue-950/30 px-5 py-3 border-b border-border">
-                    <h3 className="font-serif text-lg font-semibold text-foreground flex items-center gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs text-white">📊</span>
-                      Performans ve Analitik Çerezler
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">Site kullanım istatistikleri için. Açık rıza ile yerleştirilir.</p>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead><tr className="border-b border-border text-left">
-                        <th className="px-5 py-2 font-semibold text-foreground">Çerez Adı</th>
-                        <th className="px-5 py-2 font-semibold text-foreground">Amacı</th>
-                        <th className="px-5 py-2 font-semibold text-foreground">Süre</th>
-                        <th className="px-5 py-2 font-semibold text-foreground">Sağlayıcı</th>
-                      </tr></thead>
-                      <tbody className="divide-y divide-border text-muted-foreground">
-                        <tr><td className="px-5 py-2">_ga</td><td className="px-5 py-2">Tekil ziyaretçi kimliği</td><td className="px-5 py-2">2 yıl</td><td className="px-5 py-2">Google Analytics</td></tr>
-                        <tr><td className="px-5 py-2">_ga_*</td><td className="px-5 py-2">Oturum durumu takibi</td><td className="px-5 py-2">2 yıl</td><td className="px-5 py-2">Google Analytics</td></tr>
-                        <tr><td className="px-5 py-2">_gid</td><td className="px-5 py-2">24 saatlik ziyaretçi ayrımı</td><td className="px-5 py-2">24 saat</td><td className="px-5 py-2">Google Analytics</td></tr>
-                        <tr><td className="px-5 py-2">_gat</td><td className="px-5 py-2">İstek hızı sınırlama</td><td className="px-5 py-2">1 dakika</td><td className="px-5 py-2">Google Analytics</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">3. Çerezleri Hangi Amaçlarla Kullanıyoruz?</h2><ul className="list-disc space-y-1 pl-6 leading-7"><li>internet sitesinin çalışması ve güvenliğinin sağlanması,</li><li>oturum yönetimi ve kullanıcı giriş işlemlerinin yürütülmesi,</li><li>sepet ve sipariş süreçlerinin devam ettirilmesi,</li><li>dil, bölge veya kullanıcı tercihleri gibi ayarların hatırlanması,</li><li>site performansının ve kullanım istatistiklerinin analiz edilmesi,</li><li>reklam, pazarlama ve yeniden hedefleme faaliyetlerinin yürütülmesi,</li><li>kullanıcı deneyiminin geliştirilmesi.</li></ul></section>
 
-                {/* İşlevsellik */}
-                <div className="rounded-lg border border-border overflow-hidden">
-                  <div className="bg-purple-50 dark:bg-purple-950/30 px-5 py-3 border-b border-border">
-                    <h3 className="font-serif text-lg font-semibold text-foreground flex items-center gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-600 text-xs text-white">⚙</span>
-                      İşlevsellik Çerezleri
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">Deneyiminizi kişiselleştirmek için. Açık rıza ile yerleştirilir.</p>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead><tr className="border-b border-border text-left">
-                        <th className="px-5 py-2 font-semibold text-foreground">Çerez Adı</th>
-                        <th className="px-5 py-2 font-semibold text-foreground">Amacı</th>
-                        <th className="px-5 py-2 font-semibold text-foreground">Süre</th>
-                      </tr></thead>
-                      <tbody className="divide-y divide-border text-muted-foreground">
-                        <tr><td className="px-5 py-2">recently_viewed</td><td className="px-5 py-2">Son görüntülenen antika eserlerin listesi</td><td className="px-5 py-2">30 gün</td></tr>
-                        <tr><td className="px-5 py-2">wishlist</td><td className="px-5 py-2">Favori ürünler listesi (misafir kullanıcı)</td><td className="px-5 py-2">90 gün</td></tr>
-                        <tr><td className="px-5 py-2">preferred_category</td><td className="px-5 py-2">Tercih edilen antika kategorileri</td><td className="px-5 py-2">1 yıl</td></tr>
-                        <tr><td className="px-5 py-2">theme</td><td className="px-5 py-2">Açık/koyu tema tercihi</td><td className="px-5 py-2">1 yıl</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">4. Kullandığımız Çerez Türleri</h2><p className="font-medium">A. Zorunlu Çerezler</p><p className="leading-7">Sitenin düzgün çalışması için gereklidir. Kural olarak açık rıza gerektirmeden kullanılabilir.</p><p className="font-medium">B. İşlevsellik Çerezleri</p><p className="leading-7">Tercihlerinizi hatırlayarak kullanım deneyimini kişiselleştirir. Niteliğine göre açık rıza gerekebilir.</p><p className="font-medium">C. Performans ve Analitik Çerezleri</p><p className="leading-7">Trafik ve kullanım davranışı ölçümü için kullanılır. Açık rıza ile çalıştırılır.</p><p className="font-medium">D. Pazarlama ve Hedefleme Çerezleri</p><p className="leading-7">İlgi alanına uygun reklam ve kampanya gösterimi için kullanılır. Açık rıza ile çalıştırılır.</p></section>
 
-                {/* Pazarlama */}
-                <div className="rounded-lg border border-border overflow-hidden">
-                  <div className="bg-orange-50 dark:bg-orange-950/30 px-5 py-3 border-b border-border">
-                    <h3 className="font-serif text-lg font-semibold text-foreground flex items-center gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-600 text-xs text-white">📢</span>
-                      Pazarlama ve Hedefleme Çerezleri
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">Reklam kişiselleştirme için. Açık rıza ile yerleştirilir.</p>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead><tr className="border-b border-border text-left">
-                        <th className="px-5 py-2 font-semibold text-foreground">Çerez Adı</th>
-                        <th className="px-5 py-2 font-semibold text-foreground">Amacı</th>
-                        <th className="px-5 py-2 font-semibold text-foreground">Süre</th>
-                        <th className="px-5 py-2 font-semibold text-foreground">Sağlayıcı</th>
-                      </tr></thead>
-                      <tbody className="divide-y divide-border text-muted-foreground">
-                        <tr><td className="px-5 py-2">_fbp</td><td className="px-5 py-2">Facebook reklam optimizasyonu</td><td className="px-5 py-2">3 ay</td><td className="px-5 py-2">Meta (Facebook)</td></tr>
-                        <tr><td className="px-5 py-2">_fbc</td><td className="px-5 py-2">Facebook tıklama takibi</td><td className="px-5 py-2">2 yıl</td><td className="px-5 py-2">Meta (Facebook)</td></tr>
-                        <tr><td className="px-5 py-2">IDE</td><td className="px-5 py-2">Google Ads reklam kişiselleştirme</td><td className="px-5 py-2">13 ay</td><td className="px-5 py-2">Google</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </section>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">5. Kullandığımız Çerezlere İlişkin Bilgilendirme</h2><p className="leading-7">Sitede kullanılan çerezler birinci taraf veya üçüncü taraf olabilir. Güncel çerez listesi çerez yönetim panelinde gösterilir. Google Analytics, Meta Pixel, Google Ads gibi üçüncü taraf servisler yalnızca sitede gerçekten aktifse bu politikada ve panelde gösterilmelidir.</p></section>
 
-            {/* Çerez Yönetimi */}
-            <section>
-              <h2 className="font-serif text-2xl font-semibold text-foreground">Çerezleri Nasıl Yönetebilirsiniz?</h2>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                Çerez tercihlerinizi aşağıdaki yöntemlerle kontrol edebilirsiniz:
-              </p>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">6. Çerezlerin Hukuki Sebepleri</h2><p className="leading-7">Zorunlu çerezler sözleşmenin ifası, meşru menfaat veya hukuki yükümlülük kapsamında işlenebilir. Analitik, işlevsellik ve pazarlama çerezleri açık rızaya dayanır.</p></section>
 
-              <div className="mt-6 space-y-4">
-                <div className="rounded-lg border border-border p-4">
-                  <h3 className="font-serif text-base font-semibold text-foreground">1. Site İçi Çerez Yönetimi</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Sitemizi ilk ziyaretinizde görüntülenen çerez onay banneri üzerinden tercihlerinizi
-                    belirleyebilirsiniz. Dilediğiniz zaman sayfanın alt kısmındaki &quot;Çerez Ayarları&quot;
-                    bağlantısından tercihlerinizi güncelleyebilirsiniz.
-                  </p>
-                </div>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">7. Açık Rıza ve Tercih Yönetimi</h2><p className="leading-7">Zorunlu olmayan çerezler yalnızca açık rızanızla etkinleştirilir. Tercihlerinizi çerez banner’ı üzerinden belirleyebilir ve sonradan güncelleyebilirsiniz. Kullanıcıya &quot;Hepsini Kabul Et&quot;, &quot;Hepsini Reddet&quot; ve &quot;Tercihleri Yönet&quot; seçenekleri sunulur.</p></section>
 
-                <div className="rounded-lg border border-border p-4">
-                  <h3 className="font-serif text-base font-semibold text-foreground">2. Tarayıcı Ayarları</h3>
-                  <p className="mt-2 text-sm text-muted-foreground mb-3">
-                    Tüm modern tarayıcılar, çerez ayarlarını değiştirmenize olanak tanır:
-                  </p>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {[
-                      { browser: "Google Chrome", path: "Ayarlar → Gizlilik ve Güvenlik → Üçüncü Taraf Çerezleri" },
-                      { browser: "Mozilla Firefox", path: "Seçenekler → Gizlilik ve Güvenlik → Çerezler ve Site Verileri" },
-                      { browser: "Apple Safari", path: "Tercihler → Gizlilik → Çerezler ve Web Sitesi Verileri" },
-                      { browser: "Microsoft Edge", path: "Ayarlar → Çerezler ve Site İzinleri → Çerezler" },
-                    ].map((item) => (
-                      <div key={item.browser} className="rounded bg-muted/50 p-3">
-                        <p className="font-semibold text-foreground text-sm">{item.browser}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{item.path}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">8. Çerezleri Nasıl Kontrol Edebilirsiniz?</h2><p className="leading-7">Çerez tercihlerinizi site üzerindeki çerez ayarları bağlantısından veya tarayıcı ayarlarınızdan yönetebilirsiniz. Tarayıcı düzeyinde tüm çerezlerin kapatılması bazı işlevleri etkileyebilir.</p></section>
 
-                <div className="rounded-lg border border-border p-4">
-                  <h3 className="font-serif text-base font-semibold text-foreground">3. Üçüncü Taraf Çerez Yönetimi</h3>
-                  <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2"><span className="text-primary">•</span>
-                      <strong className="text-foreground">Google Analytics:</strong>{" "}
-                      <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                        Google Analytics Opt-out Browser Add-on
-                      </a>
-                    </li>
-                    <li className="flex items-start gap-2"><span className="text-primary">•</span>
-                      <strong className="text-foreground">Facebook:</strong>{" "}
-                      <a href="https://www.facebook.com/settings?tab=ads" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                        Facebook Reklam Tercihleri
-                      </a>
-                    </li>
-                    <li className="flex items-start gap-2"><span className="text-primary">•</span>
-                      <strong className="text-foreground">Google Ads:</strong>{" "}
-                      <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                        Google Reklam Ayarları
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">9. Üçüncü Taraf Çerezler ve Yurt Dışı Aktarım</h2><p className="leading-7">Üçüncü taraf analiz, reklam veya altyapı hizmetleri kullanılması halinde veriler yurt içinde veya yurt dışında işlenebilir. Aktarımlar güncel KVKK hükümlerine uygun yürütülür.</p></section>
 
-              <div className="mt-6 rounded-lg bg-accent/10 border border-accent/20 p-4">
-                <p className="text-sm text-muted-foreground">
-                  <strong className="text-foreground">Uyarı:</strong> Zorunlu çerezleri devre dışı bırakmak,
-                  oturum yönetimi, sepet işlevleri ve ödeme sistemlerinin çalışmamasına neden olabilir.
-                  Performans ve pazarlama çerezlerini devre dışı bırakmak, sitenin temel işlevlerini etkilemez
-                  ancak kişiselleştirilmiş deneyim sunulmasını engeller.
-                </p>
-              </div>
-            </section>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">10. İlgili Kişi Olarak Haklarınız</h2><p className="leading-7">KVKK’nın 11. maddesi kapsamındaki haklarınızı kullanabilirsiniz. Ayrıntılar için KVKK Aydınlatma Metni sayfasını inceleyebilirsiniz.</p></section>
 
-            {/* Değişiklikler */}
-            <section>
-              <h2 className="font-serif text-2xl font-semibold text-foreground">Politika Değişiklikleri</h2>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                Bu çerez politikasını, yasal gereklilikler veya teknolojik gelişmeler doğrultusunda
-                güncelleme hakkımız saklıdır. Önemli değişiklikler olması durumunda sitemiz üzerinden
-                bildirimde bulunulacaktır.
-              </p>
-            </section>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">11. Politika Değişiklikleri</h2><p className="leading-7">Bu Çerez Politikası, mevzuat değişiklikleri, teknik altyapı güncellemeleri veya hizmet değişiklikleri doğrultusunda güncellenebilir. Güncel metin yayımlandığı tarihten itibaren geçerlidir.</p></section>
 
-            {/* İletişim */}
-            <section>
-              <h2 className="font-serif text-2xl font-semibold text-foreground">İletişim</h2>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                Çerez politikamız hakkında sorularınız için:
-              </p>
-              <div className="mt-4 rounded-lg bg-muted p-6">
-                <p className="font-serif font-semibold text-foreground">{companyName}</p>
-                {email && <p className="mt-2 text-muted-foreground">E-posta: {email}</p>}
-                <p className="text-muted-foreground">KVKK İletişim: destek@canantika.com</p>
-                {phone && <p className="text-muted-foreground">Telefon: {phone}</p>}
-              </div>
-            </section>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">12. İletişim</h2><ul className="list-disc space-y-1 pl-6 leading-7"><li>Mesut Can (Şahıs İşletmesi)</li><li>Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li><li>Telefon: +90 507 687 92 15</li><li>E-posta: destek@canantika.com</li></ul></section>
 
-            {/* İlgili Sayfalar */}
-            <div className="mt-8 rounded-lg border border-border bg-muted/30 p-6">
-              <p className="font-serif font-semibold text-foreground mb-3">İlgili Hukuki Metinler</p>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/gizlilik" className="text-sm text-primary hover:underline">Gizlilik Politikası →</Link>
-                <Link href="/kvkk" className="text-sm text-primary hover:underline">KVKK Aydınlatma Metni →</Link>
-                <Link href="/mesafeli-satis-sozlesmesi" className="text-sm text-primary hover:underline">Mesafeli Satış Sözleşmesi →</Link>
-                <Link href="/kullanim-kosullari" className="text-sm text-primary hover:underline">Kullanım Koşulları →</Link>
-              </div>
-            </div>
-          </div>
-        </div>
+          <section className="mt-8 space-y-3"><h2 className="text-xl font-semibold">13. İlgili Hukuki Metinler</h2><ul className="list-disc space-y-1 pl-6 leading-7"><li><Link href="/kvkk" className="underline-offset-4 hover:underline">KVKK Aydınlatma Metni</Link></li><li><Link href="/gizlilik" className="underline-offset-4 hover:underline">Gizlilik Politikası</Link></li><li><Link href="/kullanim-kosullari" className="underline-offset-4 hover:underline">Kullanım Koşulları</Link></li><li><Link href="/mesafeli-satis-sozlesmesi" className="underline-offset-4 hover:underline">Mesafeli Satış Sözleşmesi</Link></li><li><Link href="/mesafeli-satis-sozlesmesi" className="underline-offset-4 hover:underline">Ön Bilgilendirme Formu</Link></li><li><Link href="/iade" className="underline-offset-4 hover:underline">İade / İptal / Cayma Politikası</Link></li></ul></section>
+        </article>
       </main>
       <Footer />
     </div>
-  )
+  );
 }

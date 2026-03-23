@@ -54,7 +54,7 @@ export function CatalogClient({
   // Determine if we have server-provided data for the initial render
   const hasInitialData = initialProducts.length > 0
 
-  // Data state — seed with server data when available
+  // Data state -- seed with server data when available
   const [products, setProducts] = useState<ProductResponse[]>(initialProducts)
   const [categories, setCategories] = useState<CategoryResponse[]>(initialCategories)
   const [totalCount, setTotalCount] = useState(initialTotalCount)
@@ -65,7 +65,7 @@ export function CatalogClient({
   // Track whether any user interaction has occurred (filter, sort, page, search)
   const [userInteracted, setUserInteracted] = useState(false)
 
-  // Filter state — categories now stores category IDs as strings
+  // Filter state -- categories now stores category IDs as strings
   const [selectedFilters, setSelectedFilters] = useState({
     categories: [] as string[],
     priceRanges: [] as string[],
@@ -345,75 +345,96 @@ export function CatalogClient({
 
             <ActiveFilters selectedFilters={selectedFilters} onRemoveFilter={handleFilterChange} apiCategories={categories} />
 
-            {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-16">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="mt-4 text-muted-foreground">Ürünler yükleniyor...</p>
-              </div>
-            ) : products.length > 0 ? (
-              <>
-                <div
-                  className={`grid gap-6 ${viewMode === "large" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3"
+            <div className="relative min-h-[520px]">
+              {products.length > 0 ? (
+                <>
+                  <div
+                    className={`grid gap-6 transition-opacity ${isLoading ? "opacity-60" : "opacity-100"} ${
+                      viewMode === "large" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3"
                     }`}
+                  >
+                    {products.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-8">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page === 0}
+                        onClick={() => handlePageChange(page - 1)}
+                        className="border-primary/30"
+                      >
+                        Önceki
+                      </Button>
+                      <span className="text-sm text-muted-foreground px-3">
+                        {page + 1} / {totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page >= totalPages - 1}
+                        onClick={() => handlePageChange(page + 1)}
+                        className="border-primary/30"
+                      >
+                        Sonraki
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : isLoading ? (
+                <div
+                  className={`grid gap-6 ${viewMode === "large" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3"}`}
                 >
-                  {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                  {Array.from({ length: viewMode === "large" ? 4 : 6 }).map((_, index) => (
+                    <div key={index} className="overflow-hidden rounded-lg border border-primary/10 bg-card">
+                      <div className="aspect-[3/4] animate-pulse bg-muted/60" />
+                      <div className="space-y-3 p-4">
+                        <div className="h-3 w-24 animate-pulse rounded bg-muted/70" />
+                        <div className="h-4 w-3/4 animate-pulse rounded bg-muted/70" />
+                        <div className="h-4 w-20 animate-pulse rounded bg-muted/70" />
+                      </div>
+                    </div>
                   ))}
                 </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-8">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page === 0}
-                      onClick={() => handlePageChange(page - 1)}
-                      className="border-primary/30"
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-16 h-16 rounded-full border-2 border-primary/20 flex items-center justify-center mb-4">
+                    <svg
+                      className="w-8 h-8 text-primary/40"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
                     >
-                      Önceki
-                    </Button>
-                    <span className="text-sm text-muted-foreground px-3">
-                      {page + 1} / {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page >= totalPages - 1}
-                      onClick={() => handlePageChange(page + 1)}
-                      className="border-primary/30"
-                    >
-                      Sonraki
-                    </Button>
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="M21 21l-4.35-4.35" />
+                      <path d="M8 11h6M11 8v6" strokeLinecap="round" />
+                    </svg>
                   </div>
-                )}
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="w-16 h-16 rounded-full border-2 border-primary/20 flex items-center justify-center mb-4">
-                  <svg
-                    className="w-8 h-8 text-primary/40"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
+                  <p className="font-serif text-xl text-foreground">Ürün bulunamadı</p>
+                  <p className="mt-2 text-muted-foreground">Filtrelerinizi değiştirmeyi deneyin</p>
+                  <Button
+                    variant="outline"
+                    className="mt-4 bg-transparent border-primary/30 hover:bg-primary/5"
+                    onClick={handleClearFilters}
                   >
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="M21 21l-4.35-4.35" />
-                    <path d="M8 11h6M11 8v6" strokeLinecap="round" />
-                  </svg>
+                    Filtreleri Temizle
+                  </Button>
                 </div>
-                <p className="font-serif text-xl text-foreground">Ürün bulunamadı</p>
-                <p className="mt-2 text-muted-foreground">Filtrelerinizi değiştirmeyi deneyin</p>
-                <Button
-                  variant="outline"
-                  className="mt-4 bg-transparent border-primary/30 hover:bg-primary/5"
-                  onClick={handleClearFilters}
-                >
-                  Filtreleri Temizle
-                </Button>
-              </div>
-            )}
+              )}
+
+              {isLoading && products.length > 0 && (
+                <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/35 backdrop-blur-[1px]">
+                  <div className="flex items-center gap-2 rounded-full border border-primary/20 bg-card/90 px-4 py-2 shadow-sm">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <span className="text-sm text-muted-foreground">Ürünler güncelleniyor...</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>

@@ -1,203 +1,198 @@
-import type { Metadata } from "next"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { RotateCcw, CheckCircle, XCircle, Clock, Phone } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { SiteSettingsResponse } from "@/lib/types"
+﻿import type { Metadata } from "next";
 
-import { getServerApiUrl } from "@/lib/server-api-url"
-const API_URL = getServerApiUrl()
-
-async function fetchSiteSettings(): Promise<SiteSettingsResponse | null> {
-  try {
-    const res = await fetch(`${API_URL}/v1/site-settings`, { next: { revalidate: 3600 } })
-    if (!res.ok) return null
-    const json = await res.json()
-    return json.data ?? null
-  } catch {
-    return null
-  }
-}
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
-  title: "İade Politikası | Can Antika - 14 Gün İade Hakkı",
-  description:
-    "Can Antika iade politikası. 14 gün içinde koşulsuz iade hakkı. Müşteri memnuniyeti garantisi ile güvenle alışveriş yapın.",
-  keywords: ["antika iade", "can antika iade politikası", "antika değişim", "müşteri memnuniyeti"],
-  openGraph: {
-    title: "İade Politikası | Can Antika",
-    description: "14 gün içinde koşulsuz iade hakkı. Müşteri memnuniyeti bizim için en önemli değerdir.",
-    type: "website",
-    locale: "tr_TR",
-  },
-}
+  title: "İade / İptal / Cayma Politikası",
+  description: "Can Antika İade / İptal / Cayma Politikası.",
+};
 
-export default async function ReturnsPage() {
-  const s = await fetchSiteSettings()
-  const phone = s?.phone || ""
-  const email = s?.email || ""
+export default function ReturnPolicyPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <main>
-        {/* Hero */}
-        <section className="bg-primary py-20 text-primary-foreground">
-          <div className="mx-auto max-w-4xl px-4 text-center">
-            <h1 className="font-serif text-4xl font-bold md:text-5xl">İade Politikası</h1>
-            <p className="mt-4 text-lg text-primary-foreground/80">
-              Müşteri memnuniyeti bizim için en önemli değerdir.
+
+      <main className="container mx-auto px-4 py-10 md:py-14">
+        <article className="mx-auto max-w-4xl rounded-2xl border bg-card p-6 shadow-sm md:p-10">
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">İade / İptal / Cayma Politikası</h1>
+          <p className="mt-3 text-sm text-muted-foreground">Son Güncelleme: 23 Mart 2026</p>
+
+          <p className="mt-6 leading-7">
+            Can Antika olarak müşteri memnuniyetine önem veriyoruz. Bu politika, www.canantika.com üzerinden satın
+            alınan ürünlere ilişkin cayma hakkı, iade, iptal ve ayıplı ürün süreçlerini düzenlemek amacıyla
+            hazırlanmıştır.
+          </p>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">1. Cayma Hakkı</h2>
+            <p className="leading-7">
+              Tüketici, satın aldığı ürünü teslim aldığı tarihten itibaren 14 gün içinde, herhangi bir gerekçe
+              göstermeksizin ve cezai şart ödemeksizin iade etme hakkına sahiptir. Ürün henüz teslim edilmemişse,
+              teslimata kadar olan sürede de cayma hakkı kullanılabilir.
             </p>
-          </div>
-        </section>
-
-        <div className="mx-auto max-w-4xl px-4 py-16">
-          {/* Return Period */}
-          <section className="mb-16">
-            <Card className="border-accent/30 bg-accent/5">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <Clock className="h-12 w-12 shrink-0 text-accent" />
-                  <div>
-                    <h2 className="font-serif text-2xl font-semibold">14 Gün İade Hakkı</h2>
-                    <p className="mt-2 text-muted-foreground">
-                      Satın aldığınız ürünü, teslim tarihinden itibaren 14 gün içinde iade edebilirsiniz.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <p className="leading-7">
+              Cayma hakkının kullanılması için bu süre içinde tarafımıza açık bir bildirim yapılması yeterlidir.
+            </p>
+            <p className="leading-7">İletişim Bilgileri:</p>
+            <ul className="list-disc space-y-1 pl-6 leading-7">
+              <li>Telefon: +90 507 687 92 15</li>
+              <li>E-posta: destek@canantika.com</li>
+            </ul>
           </section>
 
-          {/* Conditions */}
-          <section className="mb-16">
-            <h2 className="mb-8 font-serif text-2xl font-semibold">İade Koşulları</h2>
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card className="bg-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 font-serif text-green-700">
-                    <CheckCircle className="h-6 w-6" />
-                    İade Edilebilir
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600">•</span>
-                      Orijinal ambalajında, hasarsız ürünler
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600">•</span>
-                      Sertifika ve belgeleri eksiksiz ürünler
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600">•</span>
-                      Kullanılmamış ve denenmemiş ürünler
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600">•</span>
-                      Fatura ile birlikte iade edilen ürünler
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-              <Card className="bg-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 font-serif text-red-700">
-                    <XCircle className="h-6 w-6" />
-                    İade Edilemez
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-600">•</span>
-                      Müşteri isteğiyle özel restore edilen ürünler
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-600">•</span>
-                      Hasar görmüş veya değiştirilmiş ürünler
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-600">•</span>
-                      14 günlük süreyi aşan iade talepleri
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-600">•</span>
-                      Özel sipariş veya müzayede ürünleri
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">2. Cayma Hakkının Kullanımı</h2>
+            <p className="leading-7">
+              Cayma hakkınızı kullanmak için, 14 günlük süre içinde telefon veya e-posta yoluyla bizimle iletişime
+              geçerek iade talebinizi bildirmeniz gerekir.
+            </p>
+            <p className="leading-7">
+              Cayma bildiriminizin ardından, ürünü bildirim tarihinden itibaren 10 gün içinde tarafımıza geri
+              göndermeniz gerekmektedir. Satıcı olarak biz de cayma bildiriminin tarafımıza ulaştığı tarihten itibaren
+              14 gün içinde tahsil edilen ödemeleri iade etmekle yükümlüyüz. Ancak iade, ürünün tarafımıza ulaşması
+              veya tüketici tarafından geri gönderildiğinin ispat edilmesi beklenerek yapılabilir.
+            </p>
           </section>
 
-          {/* Process */}
-          <section className="mb-16">
-            <h2 className="mb-8 font-serif text-2xl font-semibold">İade Süreci</h2>
-            <div className="space-y-6">
-              {[
-                { step: 1, title: "İletişime Geçin", desc: "Telefon veya e-posta ile iade talebinizi bildirin." },
-                { step: 2, title: "Onay Alın", desc: "İade talebiniz incelenerek 24 saat içinde onaylanır." },
-                { step: 3, title: "Ürünü Gönderin", desc: "Orijinal ambalajında, sigortalı kargo ile gönderin." },
-                { step: 4, title: "İnceleme", desc: "Ürün tarafımıza ulaştığında uzmanlarımızca incelenir." },
-                { step: 5, title: "Geri Ödeme", desc: "Onay sonrası 5 iş günü içinde ödemeniz iade edilir." },
-              ].map((item) => (
-                <div key={item.step} className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary font-serif text-lg font-semibold text-primary-foreground">
-                    {item.step}
-                  </div>
-                  <div>
-                    <h3 className="font-serif text-lg font-semibold">{item.title}</h3>
-                    <p className="text-muted-foreground">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">3. İade Koşulları</h2>
+            <p className="leading-7">
+              İade edilecek ürünün mümkünse eksiksiz şekilde, varsa birlikte gönderilen belge, sertifika, fatura ve ek
+              parçalarıyla birlikte gönderilmesi gerekir.
+            </p>
+            <p className="leading-7">
+              Bununla birlikte, cayma hakkının kullanılması için ürünün mutlaka hiç açılmamış, hiç dokunulmamış veya
+              hiç incelenmemiş olması şart değildir. Tüketici, ürünü niteliğine, özelliklerine ve işleyişine uygun
+              şekilde makul ölçüde inceleyebilir. Cayma süresi içinde malın mutat kullanımı sebebiyle meydana gelen
+              değişiklik ve bozulmalardan tüketici sorumlu değildir.
+            </p>
+            <p className="leading-7">Ancak aşağıdaki haller ayrıca değerlendirilir:</p>
+            <ul className="list-disc space-y-1 pl-6 leading-7">
+              <li>ürünün tüketici tarafından olağan inceleme sınırını aşacak şekilde kullanılması,</li>
+              <li>ürünün zarar görmesi, eksiltilmesi veya değiştirilmesi,</li>
+              <li>birlikte verilen sertifika, belge veya ayırt edici unsurların kaybedilmesi,</li>
+              <li>ürüne sonradan müdahale edilmesi, restore edilmesi veya yapısının değiştirilmesi.</li>
+            </ul>
+            <p className="leading-7">
+              Antika ürünlerde yaş, dönem, patina, yüzey izleri ve ürün açıklamasında önceden belirtilmiş kondisyon
+              unsurları ayrıca dikkate alınır.
+            </p>
           </section>
 
-          {/* Refund */}
-          <section className="mb-16">
-            <h2 className="mb-6 font-serif text-2xl font-semibold">Geri Ödeme</h2>
-            <Card className="bg-card">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <RotateCcw className="h-8 w-8 shrink-0 text-accent" />
-                  <div className="space-y-3 text-muted-foreground">
-                    <p>İade onaylandıktan sonra, ödemeniz orijinal ödeme yönteminize 5 iş günü içinde iade edilir.</p>
-                    <ul className="list-inside list-disc space-y-1">
-                      <li>Kredi kartı ödemeleri: 5-10 iş günü (banka sürecine bağlı)</li>
-                      <li>Havale/EFT ödemeleri: 3-5 iş günü</li>
-                      <li>Kargo ücreti: Ürün kaynaklı iadelerde tarafımızca karşılanır</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">4. İade Edilemeyecek Durumlar</h2>
+            <p className="leading-7">
+              Mesafeli satış mevzuatında yer alan cayma hakkı istisnaları saklıdır. Ayrıca aşağıdaki durumlar iade
+              değerlendirmesinde dikkate alınabilir:
+            </p>
+            <ul className="list-disc space-y-1 pl-6 leading-7">
+              <li>tüketicinin özel isteği doğrultusunda özel olarak restore edilen veya kişiselleştirilen ürünler,</li>
+              <li>siparişe özel hazırlanan veya üzerinde özel işlem yapılan ürünler,</li>
+              <li>ürünün niteliği gereği tekrar satışa uygun olmayacak şekilde değiştirilmiş olması,</li>
+              <li>mevzuat gereği cayma hakkı dışında kalan diğer haller.</li>
+            </ul>
+            <p className="leading-7">
+              “Özel sipariş” veya “müzayede ürünü” ifadelerini yalnızca sitende gerçekten böyle bir satış modeli varsa
+              kullanman daha doğru olur. Aksi halde bu ifadeler gereksiz yere geniş kalır.
+            </p>
           </section>
 
-          {/* Contact */}
-          <section>
-            <Card className="bg-primary text-primary-foreground">
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
-                  <Phone className="h-8 w-8 shrink-0 text-accent" />
-                  <div>
-                    <p className="font-serif text-lg font-semibold">İade talebi oluşturmak için</p>
-                    <p className="text-primary-foreground/80">
-                      {phone && email
-                        ? `${phone} veya ${email} adresinden bize ulaşın.`
-                        : phone || email
-                          ? `${phone || email} üzerinden bize ulaşın.`
-                          : "İletişim sayfamızdan bize ulaşabilirsiniz."}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">5. İade Kargo Süreci</h2>
+            <p className="leading-7">
+              Cayma hakkı kapsamında yapılacak iadelerde kargo masrafı, ön bilgilendirme metninde belirtilen taşıyıcı
+              ve şartlara göre belirlenir.
+            </p>
+            <p className="leading-7">
+              Satıcı, ön bilgilendirmede cayma halinde kullanılacak anlaşmalı taşıyıcıyı belirtmişse ve ürün bu taşıyıcı
+              ile gönderilmişse, tüketici iadeye ilişkin masraflardan sorumlu tutulamaz. Ön bilgilendirmede böyle bir
+              taşıyıcı belirtilmemişse de tüketiciden iade masrafı talep edilemez. Belirtilen taşıyıcının tüketicinin
+              bulunduğu yerde şubesi yoksa, satıcı ilave masraf talep etmeksizin ürünü tüketiciden almakla yükümlüdür.
+            </p>
+            <p className="leading-7">
+              Bu nedenle sitede ayrıca Ön Bilgilendirme Formu içinde iade taşıyıcısının net yazılması gerekir.
+            </p>
           </section>
-        </div>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">6. Geri Ödeme</h2>
+            <p className="leading-7">
+              Cayma hakkının usulüne uygun kullanılması halinde, ürün bedeli ve tahsil edilmişse teslimat dahil ilgili
+              ödemeler, cayma bildiriminin tarafımıza ulaştığı tarihten itibaren 14 gün içinde iade edilir. İade,
+              tüketicinin satın alma sırasında kullandığı ödeme aracına uygun şekilde ve tüketiciye ek maliyet
+              yüklenmeden yapılır.
+            </p>
+            <p className="leading-7">
+              Bankaların iç işlem süreleri nedeniyle tutarın kartınıza veya hesabınıza yansıması ayrıca birkaç gün
+              sürebilir.
+            </p>
+          </section>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">7. Ayıplı veya Hasarlı Ürünler</h2>
+            <p className="leading-7">
+              Teslim edilen ürünün ayıplı, eksik, kırık veya açıklamada belirtilenden farklı olduğu düşünülüyorsa,
+              durumun mümkün olan en kısa sürede tarafımıza bildirilmesi gerekir.
+            </p>
+            <p className="leading-7">
+              Ayıplı mal halinde tüketicinin, 6502 sayılı Kanun kapsamındaki seçimlik hakları saklıdır. Bunlar somut
+              olaya göre sözleşmeden dönme, bedelde indirim, ücretsiz onarım veya mümkünse ayıpsız misliyle değişim
+              olabilir. Tekil antika ürünlerde birebir değişim her zaman mümkün olmayabileceğinden, diğer yasal haklar
+              ayrıca değerlendirilir.
+            </p>
+            <p className="leading-7">
+              Teslimat sırasında kargo paketinde açık hasar görülüyorsa, kargo görevlisi ile birlikte tutanak tutulması
+              faydalıdır. Ancak tutanak tutulmamış olması tek başına tüm hakların kaybı anlamına gelmez. Bu nedenle
+              “tutanaksız hiçbir hasar kabul edilmez” gibi kesin bir ifade kullanmaman daha güvenlidir. Bu yaklaşım,
+              teslimata kadar oluşan kayıp ve hasardan kural olarak satıcının sorumlu olduğu genel tüketici rejimiyle de
+              uyumludur.
+            </p>
+          </section>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">8. Sipariş İptali</h2>
+            <p className="leading-7">
+              Sipariş, ürün henüz kargoya verilmeden önce iptal edilebilir. İptal talebi için bizimle telefon veya
+              e-posta üzerinden iletişime geçebilirsiniz.
+            </p>
+            <p className="leading-7">
+              Siparişin iptal edilmesi halinde, tahsil edilen tutar ödeme yöntemine göre uygun süre içinde iade edilir.
+              Banka ve ödeme kuruluşlarının işlem süreleri ayrıca uygulanabilir.
+            </p>
+          </section>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">9. Antika Ürünlere İlişkin Özel Not</h2>
+            <p className="leading-7">
+              Can Antika&apos;da satışa sunulan ürünlerin önemli bir bölümü tekil, dönemsel ve yaşa bağlı izler taşıyan
+              ürünlerden oluşabilir. Bu nedenle ürün açıklamalarında belirtilen kondisyon, patina, yüzey izleri, eski
+              kullanım izleri, onarım veya restorasyon bilgileri iade değerlendirmesinde dikkate alınır.
+            </p>
+            <p className="leading-7">
+              Ürün açıklamasında açıkça belirtilmiş doğal yaş izleri veya dönemsel özellikler, tek başına ayıp olarak
+              değerlendirilmez; buna karşılık açıklamada yer almayan önemli kusurlar ayrıca incelenir. Bu yaklaşım,
+              tüketicinin sözleşme kurulurken bildiği veya bilmesinin beklendiği nitelikler bakımından ayrıca önem
+              taşır.
+            </p>
+          </section>
+
+          <section className="mt-8 space-y-3">
+            <h2 className="text-xl font-semibold">10. İletişim</h2>
+            <p className="leading-7">
+              İade, iptal, cayma hakkı veya ayıplı ürün başvurularınız için bizimle iletişime geçebilirsiniz:
+            </p>
+            <ul className="list-disc space-y-1 pl-6 leading-7">
+              <li>Mesut Can (Şahıs İşletmesi)</li>
+              <li>Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
+              <li>Telefon: +90 507 687 92 15</li>
+              <li>E-posta: destek@canantika.com</li>
+            </ul>
+          </section>
+        </article>
       </main>
+
       <Footer />
     </div>
-  )
+  );
 }

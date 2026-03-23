@@ -82,7 +82,7 @@ export default async function RootLayout({
   const fbPixelId = s?.facebookPixelId || ""
 
   return (
-    <html lang="tr">
+    <html lang="tr" suppressHydrationWarning>
       <head>
         {gaId && (
           <>

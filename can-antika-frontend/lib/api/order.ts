@@ -42,11 +42,29 @@ export const orderApi = {
         api.get<OrderStatusHistoryResponse[]>(`/v1/order/${orderId}/timeline`),
 
     downloadInvoicePdf: async (orderId: number): Promise<Blob> => {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8085";
-        const res = await fetch(`${baseUrl}/v1/order/${orderId}/invoice/pdf`, {
-            credentials: "include",
-        });
-        if (!res.ok) throw new Error("PDF indirilemedi");
+        const baseUrls = [
+            process.env.NEXT_PUBLIC_API_URL,
+            "http://localhost:8080",
+            "http://127.0.0.1:8080",
+            "http://localhost:8085",
+            "http://127.0.0.1:8085",
+        ].filter(Boolean) as string[];
+
+        let lastError: Error | null = null;
+        let res: Response | null = null;
+        for (const baseUrl of baseUrls) {
+            try {
+                res = await fetch(`${baseUrl.replace(/\/$/, "")}/v1/order/${orderId}/invoice/pdf`, {
+                    credentials: "include",
+                });
+                if (res.ok) break;
+                lastError = new Error(`PDF endpoint failed: ${res.status}`);
+            } catch (error) {
+                lastError = error instanceof Error ? error : new Error("PDF indirilemedi");
+            }
+        }
+
+        if (!res || !res.ok) throw lastError ?? new Error("PDF indirilemedi");
         return res.blob();
     },
 };

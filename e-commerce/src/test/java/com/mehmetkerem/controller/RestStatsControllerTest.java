@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,14 +35,14 @@ class RestStatsControllerTest {
                 .lowStockProducts(2L)
                 .totalProducts(100L)
                 .build();
-        when(statsService.getAdminStats()).thenReturn(stats);
+        when(statsService.getAdminStats(anyInt())).thenReturn(stats);
 
-        ResultData<StatsResponse> result = controller.getStats();
+        ResultData<StatsResponse> result = controller.getStats(30);
 
         assertTrue(result.isStatus());
         assertNotNull(result.getData());
         assertEquals(BigDecimal.TEN, result.getData().getTotalRevenue());
         assertEquals(5L, result.getData().getTotalOrders());
-        verify(statsService).getAdminStats();
+        verify(statsService).getAdminStats(30);
     }
 }

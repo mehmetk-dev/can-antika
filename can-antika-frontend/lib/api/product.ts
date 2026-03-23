@@ -2,7 +2,7 @@ import { api } from "../api-client";
 import type { ProductResponse, ProductRequest, CursorResponse } from "../types";
 
 export const productApi = {
-    getAll: (page = 0, size = 20, sortBy = "id", direction = "asc") =>
+    getAll: (page = 0, size = 20, sortBy = "createdAt", direction = "desc") =>
         api.get<CursorResponse<ProductResponse>>("/v1/product", {
             params: { page, size, sortBy, direction },
             noAuth: true,

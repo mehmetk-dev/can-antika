@@ -14,19 +14,20 @@ interface RequestOptions {
     noAuth?: boolean;
 }
 
+function stripV1Suffix(url: string): string {
+    return url.replace(/\/v1$/i, "");
+}
+
 function normalizeBaseUrl(baseUrl: string): string | null {
     const normalized = baseUrl.trim().replace(/\/$/, "");
     if (!normalized) return null;
 
     if (/^https?:\/\//i.test(normalized)) {
-        return normalized;
+        return stripV1Suffix(normalized);
     }
 
-    if (typeof window !== "undefined" && window.location?.origin) {
-        // Relative env values (e.g. /v1) should resolve to same-origin API root.
-        return window.location.origin.replace(/\/$/, "");
-    }
-
+    // Relative values like /v1 are valid only if there's an explicit proxy.
+    // We avoid forcing same-origin in production since many deployments use api subdomain.
     return null;
 }
 
@@ -43,30 +44,54 @@ function getCandidateBaseUrls(): string[] {
     };
 
     const normalizedEnvBaseUrl = normalizeBaseUrl(ENV_BASE_URL);
+    const internalApiUrl = normalizeBaseUrl(process.env.INTERNAL_API_URL || "");
 
-    if (typeof window !== "undefined" && window.location?.origin) {
+    const isBrowser = typeof window !== "undefined";
+
+    // Server-side: Always use INTERNAL_API_URL first
+    if (!isBrowser && internalApiUrl) {
+        addUrl(internalApiUrl);
+    }
+
+    // Explicitly configured public API URL
+    addUrl(normalizedEnvBaseUrl);
+
+    if (isBrowser && window.location?.origin) {
         const originBaseUrl = window.location.origin.replace(/\/$/, "");
         const hostname = window.location.hostname.toLowerCase();
         const onCanAntikaDomain = hostname === "canantika.com" || hostname === "www.canantika.com";
 
-        // Prefer explicit env URL when it points to a different host (e.g. api.canantika.com).
-        if (normalizedEnvBaseUrl && normalizedEnvBaseUrl !== originBaseUrl) {
-            addUrl(normalizedEnvBaseUrl);
-        }
-
-        // Production safety net: if /v1 proxy on main domain breaks, call API domain directly.
+        // Production safety net: call API domain directly on main domain.
         if (onCanAntikaDomain) {
             addUrl("https://api.canantika.com");
         }
 
-        addUrl(originBaseUrl);
-    }
+        // In development, keep local fallbacks and same-origin proxy option.
+        if (process.env.NODE_ENV !== "production") {
+            addUrl("http://localhost:8080");
+            addUrl("http://127.0.0.1:8080");
+            addUrl("http://localhost:8085");
+            addUrl("http://127.0.0.1:8085");
+            addUrl(originBaseUrl);
+        } else if (!normalizedEnvBaseUrl && !onCanAntikaDomain) {
+            // Non-canantika production environments may use same-origin proxy.
+            addUrl(originBaseUrl);
+        }
+    } else {
+        // Server-side fallbacks
+        if (process.env.NODE_ENV !== "production") {
+            addUrl("http://localhost:8080");
+            addUrl("http://127.0.0.1:8080");
+            addUrl("http://localhost:8085");
+            addUrl("http://127.0.0.1:8085");
+        }
+        addUrl("http://backend:8080");
+        addUrl("https://api.canantika.com");
 
-    addUrl(normalizedEnvBaseUrl);
-
-    if (urls.length === 0) {
-        addUrl("http://localhost:8085");
-        addUrl("http://127.0.0.1:8085");
+        // Fallback for Node.js if internalApiUrl was not set
+        if (!internalApiUrl && process.env.INTERNAL_API_URL) {
+            addUrl(process.env.INTERNAL_API_URL);
+        }
     }
 
     return urls;
@@ -74,10 +99,10 @@ function getCandidateBaseUrls(): string[] {
 
 function buildUrl(baseUrl: string, path: string, params?: Record<string, string | number | boolean | undefined | null>): string {
     const normalizedBase = /^https?:\/\//i.test(baseUrl)
-        ? baseUrl
+        ? stripV1Suffix(baseUrl)
         : (typeof window !== "undefined"
             ? new URL(baseUrl, window.location.origin).toString()
-            : `http://localhost:8085${baseUrl.startsWith("/") ? baseUrl : `/${baseUrl}`}`);
+            : `http://localhost:8080${baseUrl.startsWith("/") ? baseUrl : `/${baseUrl}`}`);
 
     const url = new URL(path.replace(/^\//, ""), `${normalizedBase.replace(/\/$/, "")}/`);
 
@@ -162,6 +187,10 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
             }
 
             if (!res.ok) {
+                const isExpectedGuestAuthCheck = noAuth && res.status === 401 && path === "/v1/auth/me";
+                if (!isExpectedGuestAuthCheck && process.env.NODE_ENV !== "production") {
+                    console.error(`Fetch failed for URL: ${url}, Status: ${res.status}`);
+                }
                 let errorMessage = `API error: ${res.status}`;
                 try {
                     const errorBody = await res.json();
@@ -179,9 +208,21 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
             }
 
             return result.data;
-        } catch (error) {
+        } catch (error: any) {
             lastError = error instanceof Error ? error : new Error("İstek başarısız");
-            continue;
+            
+            // Only continue for networking errors (down server, etc.)
+            const isNetworkError = 
+                error instanceof TypeError || 
+                error?.message === "AbortError" || 
+                (error?.message && error.message.includes("NetworkError")) ||
+                error?.message === "Failed to fetch";
+
+            if (isNetworkError) {
+                continue;
+            }
+            // Real API error (404, 401 etc.) or re-throw after logging
+            throw lastError;
         }
     }
 

@@ -1,0 +1,90 @@
+# Local Development Docker Compose
+# Kullanım: docker-compose --env-file .env.local -f docker-compose.local.yml up -d
+
+services:
+  # --- REDIS (Cache & Rate Limit) ---
+  redis:
+    image: redis:7-alpine
+    container_name: can-antika-redis-local
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data_local:/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # --- VERİTABANI ---
+  db:
+    image: postgres:15-alpine
+    container_name: can-antika-db-local
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-can_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-can_password}
+      POSTGRES_DB: ${POSTGRES_DB:-can_antika_db}
+    ports:
+      - "127.0.0.1:5440:5432"
+    volumes:
+      - postgres_data_local:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-can_user} -d ${POSTGRES_DB:-can_antika_db}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- BACKEND ---
+  backend:
+    build:
+      context: ./e-commerce
+      dockerfile: Dockerfile
+    container_name: can-antika-backend-local
+    environment:
+      - DB_URL=${DB_URL:-jdbc:postgresql://db:5432/can_antika_db?characterEncoding=UTF-8}
+      - DB_USERNAME=${DB_USERNAME:-can_user}
+      - DB_PASSWORD=${DB_PASSWORD:-can_password}
+      - APP_CORS_ALLOWED_ORIGINS=${APP_CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3005}
+      - JWT_SECRET=${JWT_SECRET:-ouh4cuMRWhRm6ZZMyWlSy3d0XchzIOZPX8qVTkr6Bx3}
+      - APP_ADMIN_PASSWORD=${APP_ADMIN_PASSWORD:-admin123}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - APP_FRONTEND_URL=${APP_FRONTEND_URL:-http://localhost:3000}
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:8080}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-disabled}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-disabled}
+      - RESEND_API_KEY=${RESEND_API_KEY:-re_placeholder}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-onboarding@resend.dev}
+      - SMTP_HOST=${SMTP_HOST:-smtp.zoho.eu}
+      - SMTP_PORT=${SMTP_PORT:-465}
+      - SMTP_USERNAME=${SMTP_USERNAME:-placeholder}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-placeholder}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-info@canantika.com}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - COOKIE_SECURE=false
+      - SPRINGDOC_ENABLED=true
+      - JPA_DDL_AUTO=update
+      - FLYWAY_ENABLED=false
+      - MANAGEMENT_HEALTH_MAIL_ENABLED=false
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+volumes:
+  postgres_data_local:
+  redis_data_local:

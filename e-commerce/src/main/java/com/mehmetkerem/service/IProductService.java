@@ -32,10 +32,10 @@ public interface IProductService {
 
     List<ProductResponse> getProductsByCategory(Long categoryId);
 
-    Page<ProductResponse> searchProducts(String title, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice,
-            Double minRating, Pageable pageable);
+    com.mehmetkerem.dto.response.CursorResponse<ProductResponse> searchProducts(String title, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice,
+            Double minRating, org.springframework.data.domain.Pageable pageable);
 
-    Page<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction);
+    com.mehmetkerem.dto.response.CursorResponse<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction);
 
     void updateProductRating(Long productId, double averageRating, int reviewCount);
 

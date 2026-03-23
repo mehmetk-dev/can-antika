@@ -58,7 +58,7 @@ public class StatsServiceImpl implements com.mehmetkerem.service.IStatsService {
                 long newCustomersThisMonth = userRepository.countByRoleAndCreatedAtAfter(Role.USER, monthStart);
 
                 // Sipariş durumları
-                long pendingOrders = orderRepository.count(); // Toplam — pending filtresi repo'da eklenebilir
+                long pendingOrders = orderRepository.countByOrderStatus(OrderStatus.PENDING);
                 long totalOrders = orderRepository.countTotalOrders();
                 long totalProducts = productRepository.count();
                 long activeProducts = totalProducts; // soft delete zaten filtreler

@@ -18,7 +18,7 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@SQLDelete(sql = "UPDATE products SET deleted = true WHERE id=?")
+@SQLDelete(sql = "UPDATE products SET deleted = true WHERE id=? and version=?")
 @SQLRestriction("deleted=false")
 public class Product {
 

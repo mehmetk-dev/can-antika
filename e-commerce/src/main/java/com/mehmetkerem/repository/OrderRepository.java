@@ -58,4 +58,6 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
                         + "GROUP BY TO_CHAR(order_date, 'YYYY-MM') ORDER BY month ASC", nativeQuery = true)
         List<Object[]> getMonthlyRevenue(
                         @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate);
+
+        long countByOrderStatus(com.mehmetkerem.enums.OrderStatus orderStatus);
 }

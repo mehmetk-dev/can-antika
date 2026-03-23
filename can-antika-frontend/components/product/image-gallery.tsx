@@ -14,6 +14,8 @@ interface ImageGalleryProps {
 export function ImageGallery({ images, productName }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
+  const mainImage = images[selectedIndex] || "/placeholder.svg"
+  const isRemoteMainImage = /^https?:\/\//i.test(mainImage)
 
   const handlePrevious = () => {
     setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
@@ -30,10 +32,11 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
         <DialogTrigger asChild>
           <div className="group relative aspect-[3/4] cursor-zoom-in overflow-hidden rounded-lg bg-muted">
             <Image
-              src={images[selectedIndex] || "/placeholder.svg"}
+              src={mainImage}
               alt={productName}
               fill
               priority
+              unoptimized={isRemoteMainImage}
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
@@ -74,9 +77,10 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
           <DialogTitle className="sr-only">{productName}</DialogTitle>
           <div className="relative aspect-[3/4] w-full max-h-[85vh]">
             <Image
-              src={images[selectedIndex] || "/placeholder.svg"}
+              src={mainImage}
               alt={productName}
               fill
+              unoptimized={isRemoteMainImage}
               sizes="85vw"
               className="object-contain"
             />
@@ -120,6 +124,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                 src={image || "/placeholder.svg"}
                 alt={`${productName} - ${index + 1}`}
                 fill
+                unoptimized={/^https?:\/\//i.test(image || "")}
                 sizes="80px"
                 className="object-cover"
               />

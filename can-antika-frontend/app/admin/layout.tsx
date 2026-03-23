@@ -21,7 +21,7 @@ export default function AdminLayout({
   return (
     <AuthGuard adminOnly>
       <div className="min-h-screen bg-muted/30">
-        <AdminSidebar />
+        <AdminSidebar className="hidden lg:flex" />
         <div className="lg:pl-64">
           <AdminHeader />
           <main className="p-4 lg:p-6">{children}</main>

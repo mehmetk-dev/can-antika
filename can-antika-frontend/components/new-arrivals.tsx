@@ -13,11 +13,37 @@ export function NewArrivals() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    productApi
-      .getAll(0, 8, "id", "desc")
-      .then((data) => setProducts(data.items))
-      .catch(() => setProducts([]))
-      .finally(() => setIsLoading(false))
+    let isMounted = true
+
+    const loadProducts = async () => {
+      try {
+        // Production'da sortBy=id bazı ortamlarda 500 döndüğü için güvenli sıralama kullan.
+        const data = await productApi.getAll(0, 8, "createdAt", "desc")
+        if (isMounted && (data.items?.length ?? 0) > 0) {
+          setProducts(data.items ?? [])
+          return
+        }
+      } catch {
+        // fall through to secondary fallback
+      }
+
+      try {
+        // Secondary fallback: bu endpoint canlıda daha stabil.
+        const all = await productApi.findAll()
+        const latest = [...all].sort((a, b) => (b.id ?? 0) - (a.id ?? 0)).slice(0, 8)
+        if (isMounted) setProducts(latest)
+      } catch {
+        if (isMounted) setProducts([])
+      } finally {
+        if (isMounted) setIsLoading(false)
+      }
+    }
+
+    loadProducts()
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   return (

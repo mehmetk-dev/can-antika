@@ -25,12 +25,18 @@ export function getServerApiUrlCandidates(): string[] {
   const defaults =
     process.env.NODE_ENV === "production"
       ? ["http://backend:8080", "https://api.canantika.com", "https://canantika.com"]
-      : ["http://localhost:8085", "http://127.0.0.1:8085", "http://backend:8080"]
+      : [
+          "http://localhost:8080",
+          "http://127.0.0.1:8080",
+          "http://localhost:8085",
+          "http://127.0.0.1:8085",
+          "http://backend:8080",
+        ]
 
   defaults.forEach((url) => urls.add(url))
   return Array.from(urls)
 }
 
 export function getServerApiUrl(): string {
-  return getServerApiUrlCandidates()[0] ?? "http://localhost:8085"
+  return getServerApiUrlCandidates()[0] ?? "http://localhost:8080"
 }

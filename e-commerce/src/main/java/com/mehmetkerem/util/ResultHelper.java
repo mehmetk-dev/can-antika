@@ -27,12 +27,15 @@ public class ResultHelper {
     }
 
     public static <T> ResultData<CursorResponse<T>> cursor(Page<T> pageData) {
+        return ResultHelper.success(toCursor(pageData));
+    }
+
+    public static <T> CursorResponse<T> toCursor(Page<T> pageData) {
         CursorResponse<T> cursor = new CursorResponse<>();
         cursor.setItems(pageData.getContent());
         cursor.setPageNumber(pageData.getNumber());
         cursor.setPageSize(pageData.getSize());
         cursor.setTotalElement(pageData.getTotalElements());
-
-        return ResultHelper.success(cursor);
+        return cursor;
     }
 }

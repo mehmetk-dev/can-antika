@@ -13,6 +13,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const imageUrl = product.imageUrls?.[0] || "/placeholder.svg"
+  const isRemoteImage = /^https?:\/\//i.test(imageUrl)
   const era = (product.attributes?.era as string) || ""
   const condition = (product.attributes?.condition as string) || ""
   const status = (product.attributes?.status as string) || "active"
@@ -34,6 +35,7 @@ export function ProductCard({ product }: ProductCardProps) {
           src={imageUrl}
           alt={product.title}
           fill
+          unoptimized={isRemoteImage}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className={`object-cover transition-transform duration-500 group-hover:scale-105 ${isSold ? "grayscale opacity-60" : ""}`}
         />

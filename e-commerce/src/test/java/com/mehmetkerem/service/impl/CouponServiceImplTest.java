@@ -1,5 +1,6 @@
 package com.mehmetkerem.service.impl;
 
+import com.mehmetkerem.dto.response.CouponResponse;
 import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.model.Coupon;
@@ -50,7 +51,7 @@ class CouponServiceImplTest {
         when(couponRepository.findByCode("indirim10")).thenReturn(Optional.empty());
         when(couponRepository.save(any(Coupon.class))).thenReturn(coupon);
 
-        Coupon result = couponService.createCoupon("indirim10", new BigDecimal("10"),
+        CouponResponse result = couponService.createCoupon("indirim10", new BigDecimal("10"),
                 new BigDecimal("100"), 7);
 
         assertNotNull(result);
@@ -73,7 +74,7 @@ class CouponServiceImplTest {
     void getCouponByCode_WhenExists_ShouldReturnCoupon() {
         when(couponRepository.findByCode("INDIRIM10")).thenReturn(Optional.of(coupon));
 
-        Coupon result = couponService.getCouponByCode("INDIRIM10");
+        CouponResponse result = couponService.getCouponByCode("INDIRIM10");
 
         assertNotNull(result);
         assertEquals("INDIRIM10", result.getCode());

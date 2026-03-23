@@ -87,9 +87,9 @@ public class RestProductControllerImpl implements IRestProductController {
         Sort sort = resolveProductSort(sortBy, direction);
         int cappedSize = Math.min(Math.max(size, 1), 100);
         Pageable pageable = PageRequest.of(page, cappedSize, sort);
-        Page<ProductResponse> productPage = productService.searchProducts(title, categoryId, minPrice, maxPrice,
+        CursorResponse<ProductResponse> cursorResult = productService.searchProducts(title, categoryId, minPrice, maxPrice,
                 minRating, pageable);
-        return ResultHelper.cursor(productPage);
+        return ResultHelper.success(cursorResult);
     }
 
     @Secured("ROLE_ADMIN")
@@ -112,9 +112,8 @@ public class RestProductControllerImpl implements IRestProductController {
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
         int cappedSize = Math.min(Math.max(size, 1), 100);
-        Page<ProductResponse> productPage = productService.getAllProducts(page, cappedSize, sortBy, direction);
-
-        return ResultHelper.cursor(productPage);
+        CursorResponse<ProductResponse> cursorResult = productService.getAllProducts(page, cappedSize, sortBy, direction);
+        return ResultHelper.success(cursorResult);
     }
 
     @Override

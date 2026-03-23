@@ -14,6 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import com.mehmetkerem.dto.response.UserResponse;
 
 import java.util.Map;
 
@@ -29,6 +32,12 @@ class RestAuthControllerTest {
 
     @InjectMocks
     private RestAuthControllerImpl controller;
+
+    @Mock
+    private HttpServletRequest request;
+
+    @Mock
+    private HttpServletResponse response;
 
     private RegisterRequest registerRequest;
     private LoginRequest loginRequest;
@@ -63,27 +72,29 @@ class RestAuthControllerTest {
     }
 
     @Test
-    @DisplayName("login - ResultData ile LoginResponse döner")
-    void login_ShouldReturnSuccessWithLoginResponse() {
+    @DisplayName("login - ResultData ile UserResponse döner")
+    void login_ShouldReturnSuccessWithUserResponse() {
         when(authService.login(any(LoginRequest.class))).thenReturn(loginResponse);
 
-        ResultData<LoginResponse> result = controller.login(loginRequest);
+        ResultData<UserResponse> result = controller.login(loginRequest, response);
 
         assertTrue(result.isStatus());
-        assertEquals("token", result.getData().getAccessToken());
+        assertNotNull(result.getData());
         verify(authService).login(loginRequest);
+        verify(response, atLeastOnce()).addCookie(any());
     }
 
     @Test
     @DisplayName("refreshToken - yeni token döner")
-    void refreshToken_ShouldReturnNewTokens() {
+    void refreshToken_ShouldReturnUserResponse() {
         TokenRefreshRequest req = new TokenRefreshRequest();
         req.setRefreshToken("old-refresh");
         when(authService.refreshToken(any(TokenRefreshRequest.class))).thenReturn(loginResponse);
 
-        ResultData<LoginResponse> result = controller.refreshToken(req);
+        ResultData<UserResponse> result = controller.refreshToken(req, request, response);
 
         assertTrue(result.isStatus());
+        assertNotNull(result.getData());
         verify(authService).refreshToken(req);
     }
 

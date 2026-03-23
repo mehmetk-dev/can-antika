@@ -1,6 +1,5 @@
 "use client"
 
-import { useMemo } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -17,8 +16,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 
-/* ────────────────────── Tip Tanımları ────────────────────── */
-
 interface NavItem {
   name: string
   href: string
@@ -31,14 +28,12 @@ interface NavGroup {
   items: NavItem[]
 }
 
-/* ── Tekil Link ── */
 const DASHBOARD_LINK: NavItem = {
   name: "Dashboard",
   href: "/admin",
   icon: LayoutDashboard,
 }
 
-/* ── Accordion Gruplar ── */
 const GROUPS: NavGroup[] = [
   {
     label: "Katalog Yönetimi",
@@ -91,14 +86,11 @@ const GROUPS: NavGroup[] = [
   },
 ]
 
-/* ────────────────────── Sidebar Bileşeni ────────────────────── */
-
-export function AdminSidebar() {
+export function AdminSidebar({ className }: { className?: string }) {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col bg-[#0a2614] text-[#e8e6e3] lg:flex border-r border-[#14452F]">
-      {/* Logo */}
+    <aside className={cn("fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-[#0a2614] text-[#e8e6e3] border-r border-[#14452F]", className)}>
       <div className="flex h-16 items-center gap-3 border-b border-[#1a3d24] px-6 shrink-0">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#14452F] text-[#4ade80]">
           <Store className="h-4 w-4" />
@@ -106,10 +98,8 @@ export function AdminSidebar() {
         <span className="font-serif text-xl font-semibold text-white tracking-wide">Can Antika</span>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-5 scrollbar-thin scrollbar-thumb-[#1a3d24] scrollbar-track-transparent">
         <div className="space-y-1.5">
-          {/* Dashboard - Tekil Link */}
           <Link
             prefetch={false}
             href={DASHBOARD_LINK.href}
@@ -124,10 +114,8 @@ export function AdminSidebar() {
             {DASHBOARD_LINK.name}
           </Link>
 
-          {/* Ayırıcı */}
           <div className="my-4 mx-2 border-t border-[#1a3d24]" />
 
-          {/* Accordion Gruplar */}
           <div className="space-y-1.5">
             {GROUPS.map((group) => (
               <SidebarGroup key={group.label} group={group} pathname={pathname} />
@@ -136,7 +124,6 @@ export function AdminSidebar() {
         </div>
       </nav>
 
-      {/* Footer - Sabit */}
       <div className="border-t border-[#1a3d24] bg-[#0a2614] p-4 shrink-0">
         <div className="flex items-center gap-3 mb-4 px-2">
           <UserCircle className="h-9 w-9 text-[#4ade80]" />
@@ -155,8 +142,6 @@ export function AdminSidebar() {
     </aside>
   )
 }
-
-/* ────────────────────── Collapsible Grup ────────────────────── */
 
 interface SidebarGroupProps {
   group: NavGroup
