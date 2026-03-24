@@ -6,6 +6,7 @@ export const productApi = {
         api.get<CursorResponse<ProductResponse>>("/v1/product", {
             params: { page, size, sortBy, direction },
             noAuth: true,
+            timeoutMs: 8000,
         }),
 
     getById: (id: number) =>
@@ -17,6 +18,7 @@ export const productApi = {
     search: (params: {
         title?: string;
         categoryId?: number;
+        periodId?: number;
         minPrice?: number;
         maxPrice?: number;
         minRating?: number;
@@ -28,6 +30,7 @@ export const productApi = {
         api.get<CursorResponse<ProductResponse>>("/v1/product/search", {
             params: params as Record<string, string | number>,
             noAuth: true,
+            timeoutMs: 8000,
         }),
 
     searchByTitle: (title: string) =>
@@ -43,7 +46,7 @@ export const productApi = {
         }),
 
     findAll: () =>
-        api.get<ProductResponse[]>("/v1/product/find-all", { noAuth: true }),
+        api.get<ProductResponse[]>("/v1/product/find-all", { noAuth: true, timeoutMs: 8000 }),
 
     save: (data: ProductRequest) =>
         api.post<ProductResponse>("/v1/product/save", { body: data }),

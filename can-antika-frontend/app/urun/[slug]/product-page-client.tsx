@@ -27,15 +27,8 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   useEffect(() => {
     let isCancelled = false
 
-    if (initialProduct) {
-      setProduct(initialProduct)
-      setIsLoading(false)
-      return () => {
-        isCancelled = true
-      }
-    }
+    if (initialProduct) return () => { isCancelled = true }
 
-    setIsLoading(true)
     const numericId = /^\d+$/.test(slug) ? Number.parseInt(slug, 10) : null
 
     const fetchProduct = async () => {
@@ -72,21 +65,47 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   }, [initialProduct, slug])
 
   useEffect(() => {
-    if (!product) return
-
-    if (product.slug && product.slug !== slug) {
-      router.replace(`/urun/${product.slug}`)
-    }
-
-    if (product.category?.id) {
-      productApi
-        .search({ categoryId: product.category.id, size: 5 })
-        .then((data) => setRelatedProducts(data.items))
-        .catch(() => setRelatedProducts([]))
-    } else {
-      setRelatedProducts([])
-    }
+    if (!product || !product.slug || product.slug === slug) return
+    router.replace(`/urun/${product.slug}`)
   }, [product, slug, router])
+
+  useEffect(() => {
+    if (!product) return
+    let isCancelled = false
+
+    const loadRelatedProducts = async () => {
+      try {
+        const sameCategoryItems = product.category?.id
+          ? (await productApi.search({ categoryId: product.category.id, size: 12 })).items
+          : []
+
+        const sameCategoryFiltered = (sameCategoryItems || []).filter((item) => item.id !== product.id)
+
+        if (sameCategoryFiltered.length >= 4) {
+          if (!isCancelled) setRelatedProducts(sameCategoryFiltered.slice(0, 4))
+          return
+        }
+
+        const allProducts = await productApi.findAll()
+        const fallbackProducts = allProducts.filter(
+          (item) =>
+            item.id !== product.id &&
+            !sameCategoryFiltered.some((same) => same.id === item.id)
+        )
+
+        const merged = [...sameCategoryFiltered, ...fallbackProducts].slice(0, 4)
+        if (!isCancelled) setRelatedProducts(merged)
+      } catch {
+        if (!isCancelled) setRelatedProducts([])
+      }
+    }
+
+    void loadRelatedProducts()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [product])
 
   if (isLoading) {
     return (
@@ -120,7 +139,7 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen overflow-x-hidden bg-background">
       <Header />
       <ProductDetail product={product} relatedProducts={relatedProducts} />
       <Footer />

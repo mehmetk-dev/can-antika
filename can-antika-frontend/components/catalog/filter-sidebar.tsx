@@ -5,17 +5,19 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { priceRanges } from "@/lib/products"
-import type { CategoryResponse } from "@/lib/types"
+import type { CategoryResponse, PeriodResponse } from "@/lib/types"
 
 interface FilterSidebarProps {
   selectedFilters: {
     categories: string[]
+    periods: string[]
     priceRanges: string[]
   }
   onFilterChange: (filterType: string, value: string) => void
   onClearFilters: () => void
   isMobile?: boolean
   apiCategories: CategoryResponse[]
+  apiPeriods: PeriodResponse[]
 }
 
 export function FilterSidebar({
@@ -24,13 +26,15 @@ export function FilterSidebar({
   onClearFilters,
   isMobile = false,
   apiCategories,
+  apiPeriods,
 }: FilterSidebarProps) {
   const activeFilterCount =
     selectedFilters.categories.length +
+    selectedFilters.periods.length +
     selectedFilters.priceRanges.length
 
   const content = (
-    <Accordion type="multiple" defaultValue={["category", "price"]} className="w-full">
+    <Accordion type="multiple" defaultValue={["category", "period", "price"]} className="w-full">
       {/* Category Filter — DB'den gelen kategoriler */}
       <AccordionItem value="category" className="border-primary/10">
         <AccordionTrigger className="font-serif text-base hover:no-underline hover:text-primary py-3">
@@ -51,6 +55,32 @@ export function FilterSidebar({
                   className="cursor-pointer text-sm text-foreground group-hover:text-primary transition-colors"
                 >
                   {cat.name}
+                </Label>
+              </div>
+            ))}
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+
+      <AccordionItem value="period" className="border-primary/10">
+        <AccordionTrigger className="font-serif text-base hover:no-underline hover:text-primary py-3">
+          Dönem
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="space-y-3 pt-2 pb-1">
+            {apiPeriods.map((period) => (
+              <div key={period.id} className="flex items-center gap-3 group">
+                <Checkbox
+                  id={`${isMobile ? "mobile-" : ""}period-${period.id}`}
+                  checked={selectedFilters.periods.includes(period.id.toString())}
+                  onCheckedChange={() => onFilterChange("periods", period.id.toString())}
+                  className="border-primary/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                />
+                <Label
+                  htmlFor={`${isMobile ? "mobile-" : ""}period-${period.id}`}
+                  className="cursor-pointer text-sm text-foreground group-hover:text-primary transition-colors"
+                >
+                  {period.name}
                 </Label>
               </div>
             ))}

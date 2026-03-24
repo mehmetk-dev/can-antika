@@ -94,8 +94,8 @@
 }
 
 @theme inline {
-  --font-sans: "Inter", "Inter Fallback", sans-serif;
-  --font-serif: "Playfair Display", "Georgia", serif;
+  --font-sans: var(--font-inter), sans-serif;
+  --font-serif: var(--font-playfair), serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -145,91 +145,49 @@
   }
 }
 
-/* 🏺 Anti-Translucent Antique Toaster 🏺 */
-/* Targeting the root container to kill any default transparency */
+/* Toast styles */
 [data-sonner-toaster] {
-  --normal-bg: #fdf8f1 !important;
-  --success-bg: #f7faf7 !important;
-  --error-bg: #fff5f5 !important;
+  --normal-bg: #fffdf8 !important;
+  --success-bg: #f3fbf4 !important;
+  --error-bg: #fff4f4 !important;
 }
 
 .antique-toast {
-  background-color: #fdf8f1 !important;
-  /* Solid fallback */
-  background: linear-gradient(145deg, #fdf8f1 0%, #f4e9d5 100%) !important;
-  opacity: 1 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 1px solid #c9b896 !important;
-  border-radius: 0 !important;
+  background: linear-gradient(145deg, #fffdf8 0%, #f6efdf 100%) !important;
+  border: 1px solid #d2bf97 !important;
+  border-radius: 12px !important;
   font-family: var(--font-playfair), serif !important;
   color: #3d2b1f !important;
-  box-shadow: 12px 12px 40px rgba(0, 0, 0, 0.4) !important;
-  position: relative;
-  overflow: visible !important;
-  padding: 1.5rem 1.75rem !important;
-  outline: 4px double #b29e71 !important;
-  outline-offset: -8px;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)' opacity='0.2'/%3E%3C/svg%3E") !important;
-}
-
-/* Ornate Corner Elements - Stabilized */
-.antique-toast::after {
-  content: "";
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  border: 12px solid transparent;
-  background-image:
-    linear-gradient(to right, #8b734b 3px, transparent 3px),
-    linear-gradient(to bottom, #8b734b 3px, transparent 3px),
-    linear-gradient(to left, #8b734b 3px, transparent 3px),
-    linear-gradient(to top, #8b734b 3px, transparent 3px);
-  background-size: 20px 20px;
-  background-repeat: no-repeat;
-  background-position: top left, top left, bottom right, bottom right;
-  pointer-events: none;
-  z-index: 5;
-  opacity: 1 !important;
-  transform: none !important;
-  transition: none !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2) !important;
+  padding: 0.9rem 1rem !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  overflow: hidden !important;
 }
 
 .antique-toast-success {
-  outline-color: #1a3a16 !important;
-  /* Deeper Green */
-  border-left: 10px solid #1a3a16 !important;
-  background: linear-gradient(145deg, #f7faf7 0%, #d8e5d8 100%) !important;
+  border-left: 5px solid #1e6a2b !important;
+  background: linear-gradient(145deg, #f3fbf4 0%, #e2f0e3 100%) !important;
 }
 
-/* Hata Durumu - Ultra Red & Non-Transparent */
 .antique-toast-error {
-  outline-color: #8b0000 !important;
-  /* Blood Red Overlay */
-  border-left: 10px solid #8b0000 !important;
-  background-color: #fff0f0 !important;
-  background: linear-gradient(145deg, #fff0f0 0%, #f9d8d8 100%) !important;
+  border-left: 5px solid #8b0000 !important;
+  background: linear-gradient(145deg, #fff4f4 0%, #f8dede 100%) !important;
   color: #600000 !important;
-  box-shadow: 12px 12px 40px rgba(139, 0, 0, 0.2) !important;
 }
 
 .antique-toast-description {
   color: #4a3a2a !important;
-  font-size: 0.95rem !important;
+  font-size: 0.92rem !important;
   font-weight: 500;
-  font-style: italic;
-  margin-top: 8px;
+  margin-top: 0.25rem;
   display: block;
 }
 
 @media (max-width: 640px) {
   .antique-toast {
-    margin: 12px !important;
-    width: calc(100vw - 40px) !important;
-    outline: 3px double #b29e71 !important;
-    outline-offset: -6px;
+    margin: 10px !important;
+    width: calc(100vw - 24px) !important;
   }
 }
 
@@ -252,12 +210,10 @@
   animation-play-state: paused;
 }
 
-/* ═══════════════════════════════════════════ */
 /* Sheet / Dialog Animation Keyframes         */
-/* (tw-animate-css removed — manual defs)     */
-/* ═══════════════════════════════════════════ */
+/* (tw-animate-css removed -- manual defs)     */
 
-/* ── Sheet overlay animations ── */
+/* -- Sheet overlay animations -- */
 [data-slot="sheet-overlay"][data-state="open"] {
   animation: sheet-fade-in 0.3s ease-out;
 }
@@ -286,7 +242,7 @@
   }
 }
 
-/* ── Sheet content slide animations ── */
+/* -- Sheet content slide animations -- */
 @keyframes sheet-slide-in-left {
   from {
     transform: translateX(-100%);
@@ -399,9 +355,7 @@
   animation: sheet-slide-out-bottom 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
-/* ═══════════════════════════════════════════ */
-/* Mobile Menu — staggered content animation  */
-/* ═══════════════════════════════════════════ */
+/* Mobile Menu -- staggered content animation  */
 
 @keyframes menu-item-enter {
   from {
@@ -451,9 +405,7 @@
   animation: menu-fade-up 0.3s ease-out 0.45s both;
 }
 
-/* ═══════════════════════════════════════════ */
 /* Scrollbar hide utility                     */
-/* ═══════════════════════════════════════════ */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -463,9 +415,7 @@
   display: none;
 }
 
-/* ═══════════════════════════════════════════ */
-/* 🏺 Custom Scrollbar — Antique Theme 🏺    */
-/* ═══════════════════════════════════════════ */
+/* Custom Scrollbar -- Antique Theme */
 
 /* Webkit (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
@@ -497,7 +447,7 @@
   background: oklch(0.94 0.01 90);
 }
 
-/* Admin Sidebar — koyu arka plan için */
+/* Admin Sidebar -- koyu arka plan için */
 [data-sidebar="sidebar"] ::-webkit-scrollbar-track,
 .dark ::-webkit-scrollbar-track {
   background: oklch(0.22 0.03 145);

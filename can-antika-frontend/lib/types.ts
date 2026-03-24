@@ -27,6 +27,13 @@ export interface CategoryResponse {
     id: number;
     name: string;
     description?: string;
+    coverImageUrl?: string;
+}
+
+export interface PeriodResponse {
+    id: number;
+    name: string;
+    active?: boolean;
 }
 
 export interface ProductResponse {
@@ -37,6 +44,7 @@ export interface ProductResponse {
     price: number;
     stock?: number;
     category?: CategoryResponse;
+    period?: PeriodResponse;
     imageUrls?: string[];
     attributes?: Record<string, unknown>;
     averageRating?: number;
@@ -345,6 +353,8 @@ export interface ProductRequest {
     price: number;
     stock: number;
     categoryId: number;
+    periodId?: number;
+    periodName?: string;
     imageUrls: string[];
     attributes?: Record<string, unknown>;
 }
@@ -352,6 +362,7 @@ export interface ProductRequest {
 export interface CategoryRequest {
     name: string;
     description?: string;
+    coverImageUrl?: string;
 }
 
 export interface OrderReturnRequest {

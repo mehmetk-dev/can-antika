@@ -43,3 +43,6 @@ token.json
 # Runtime artifacts
 logs/
 uploads/
+
+# Allow Flyway migrations
+!src/main/resources/db/migration/*.sql

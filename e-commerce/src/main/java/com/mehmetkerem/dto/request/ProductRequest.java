@@ -10,25 +10,30 @@ import java.util.Map;
 @Data
 public class ProductRequest {
 
-    @NotBlank(message = "Ürün adı boş olamaz.")
-    @Size(max = 500, message = "Ürün adı 500 karakteri geçemez.")
+    @NotBlank(message = "Urun adi bos olamaz.")
+    @Size(max = 500, message = "Urun adi 500 karakteri gecemez.")
     private String title;
 
-    @Size(max = 4000, message = "Açıklama 4000 karakteri geçemez.")
+    @Size(max = 4000, message = "Aciklama 4000 karakteri gecemez.")
     private String description;
 
-    @NotNull(message = "Fiyat boş olamaz.")
-    @Positive(message = "Fiyat 0'dan büyük olmalıdır.")
+    @NotNull(message = "Fiyat bos olamaz.")
+    @Positive(message = "Fiyat 0'dan buyuk olmali.")
     private BigDecimal price;
 
-    @NotNull(message = "Stok adedi boş olamaz.")
+    @NotNull(message = "Stok adedi bos olamaz.")
     @PositiveOrZero(message = "Stok adedi eksi olamaz.")
     private Integer stock;
 
-    @NotNull(message = "Kategori ID boş olamaz.")
+    @NotNull(message = "Kategori ID bos olamaz.")
     private Long categoryId;
 
-    private List<@NotBlank(message = "Görsel URL'i boş olamaz.") String> imageUrls;
+    private Long periodId;
+
+    @Size(max = 120, message = "Donem adi 120 karakteri gecemez.")
+    private String periodName;
+
+    private List<@NotBlank(message = "Gorsel URL'i bos olamaz.") String> imageUrls;
 
     private Map<String, Object> attributes;
 }

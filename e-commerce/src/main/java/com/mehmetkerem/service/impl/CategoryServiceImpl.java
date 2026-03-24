@@ -32,14 +32,20 @@ public class CategoryServiceImpl implements ICategoryService {
 
     @Override
     public CategoryResponse saveCategory(CategoryRequest request) {
+        String normalizedName = normalizeRequired(request.getName(), "Kategori adı boş olamaz.");
 
-        if (categoryRepository.existsByName(request.getName())) {
+        if (categoryRepository.existsByName(normalizedName)) {
             throw new BadRequestException(
-                    String.format(ExceptionMessages.CATEGORY_ALL_READY_EXISTS, request.getName()));
+                    String.format(ExceptionMessages.CATEGORY_ALL_READY_EXISTS, normalizedName));
         }
 
-        Category savedCategory = categoryRepository.save(categoryMapper.toEntity(request));
-        activityLogService.log(ActivityType.CATEGORY_CREATED, SecurityUtils.getCurrentUserId(), "Kategori eklendi: " + request.getName());
+        Category category = categoryMapper.toEntity(request);
+        category.setName(normalizedName);
+        category.setDescription(normalizeOptional(request.getDescription()));
+        category.setCoverImageUrl(normalizeOptional(request.getCoverImageUrl()));
+
+        Category savedCategory = categoryRepository.save(category);
+        activityLogService.log(ActivityType.CATEGORY_CREATED, SecurityUtils.getCurrentUserId(), "Kategori eklendi: " + normalizedName);
         return categoryMapper.toResponse(savedCategory);
     }
 
@@ -57,7 +63,12 @@ public class CategoryServiceImpl implements ICategoryService {
     @Override
     public CategoryResponse updateCategory(Long id, CategoryRequest request) {
         Category category = getCategoryById(id);
-        categoryMapper.update(category, request);
+
+        String normalizedName = normalizeRequired(request.getName(), "Kategori adı boş olamaz.");
+        category.setName(normalizedName);
+        category.setDescription(normalizeOptional(request.getDescription()));
+        category.setCoverImageUrl(normalizeOptional(request.getCoverImageUrl()));
+
         activityLogService.log(ActivityType.CATEGORY_UPDATED, SecurityUtils.getCurrentUserId(), "Kategori güncellendi: " + category.getName());
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
@@ -85,5 +96,19 @@ public class CategoryServiceImpl implements ICategoryService {
     public Map<Long, CategoryResponse> getCategoryResponsesByIds(List<Long> ids) {
         return categoryRepository.findAllById(ids).stream()
                 .collect(Collectors.toMap(Category::getId, categoryMapper::toResponse));
+    }
+
+    private String normalizeRequired(String value, String errorMessage) {
+        String normalized = normalizeOptional(value);
+        if (normalized == null) {
+            throw new BadRequestException(errorMessage);
+        }
+        return normalized;
+    }
+
+    private String normalizeOptional(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

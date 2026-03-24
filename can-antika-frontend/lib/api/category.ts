@@ -3,7 +3,7 @@ import type { CategoryResponse, CategoryRequest } from "../types";
 
 export const categoryApi = {
     getAll: () =>
-        api.get<CategoryResponse[]>("/v1/category/find-all", { noAuth: true }),
+        api.get<CategoryResponse[]>("/v1/category/find-all", { noAuth: true, timeoutMs: 8000 }),
 
     getById: (id: number) =>
         api.get<CategoryResponse>(`/v1/category/${id}`, { noAuth: true }),

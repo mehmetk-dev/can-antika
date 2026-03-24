@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Package, FolderOpen, Tag,
   ShoppingCart, RotateCcw, CreditCard, ShoppingBasket,
   Users, MessageSquare, Inbox, Star, Ticket,
-  PenTool, FileText, HelpCircle, Monitor, Mail,
+  PenTool, FileText, HelpCircle, Monitor, Mail, Clock3,
   Bell, Settings, LogOut, Store, ChevronRight, UserCircle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -41,6 +41,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { name: "Ürünler", href: "/admin/urunler", icon: Package },
       { name: "Kategoriler", href: "/admin/kategoriler", icon: FolderOpen },
+      { name: "Dönemler", href: "/admin/donemler", icon: Clock3 },
       { name: "Markalar", href: "/admin/markalar", icon: Tag },
     ],
   },

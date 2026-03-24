@@ -42,6 +42,9 @@ public class Product {
     @Column(name = "category_id")
     private Long categoryId;
 
+    @Column(name = "period_id")
+    private Long periodId;
+
     @ElementCollection
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")

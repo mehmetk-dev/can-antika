@@ -2,20 +2,31 @@ package com.mehmetkerem.config;
 
 import com.mehmetkerem.model.Category;
 import com.mehmetkerem.model.Product;
-import com.mehmetkerem.repository.*;
+import com.mehmetkerem.repository.CartRepository;
+import com.mehmetkerem.repository.CategoryRepository;
+import com.mehmetkerem.repository.OrderRepository;
+import com.mehmetkerem.repository.OrderReturnRepository;
+import com.mehmetkerem.repository.ProductRepository;
+import com.mehmetkerem.repository.ReviewRepository;
+import com.mehmetkerem.repository.SupportTicketRepository;
+import com.mehmetkerem.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Profile("dev")
+@ConditionalOnProperty(name = "app.seed.dev-data.enabled", havingValue = "true")
 @Order(2)
 @RequiredArgsConstructor
 @Slf4j
@@ -33,13 +44,7 @@ public class DevDataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (categoryRepository.count() >= 6 && productRepository.count() >= 20) {
-            log.info("Sistemde zaten yeterli kategori ({}) ve ürün ({}) var. Atlanıyor.",
-                    categoryRepository.count(), productRepository.count());
-            return;
-        }
-
-        log.info("Mevcut veriler temizleniyor...");
+        log.info("Dev seed basliyor: mevcut kategori ve urun verileri temizlenecek.");
         try {
             supportTicketRepository.deleteAll();
             orderReturnRepository.deleteAll();
@@ -50,75 +55,84 @@ public class DevDataSeeder implements CommandLineRunner {
             productRepository.deleteAll();
             categoryRepository.deleteAll();
         } catch (Exception e) {
-            log.error("Temizlik sırasında hata: {}", e.getMessage());
+            log.error("Temizlik sirasinda hata: {}", e.getMessage());
         }
 
-        log.info("Kategoriler oluşturuluyor...");
-        Category mobilya = createCategory("Mobilya", "Dönemsel estetiği yansıtan antik mobilyalar.");
-        Category aydinlatma = createCategory("Aydınlatma", "Mekana ruh katan aydınlatma parçaları.");
-        Category saatler = createCategory("Saatler", "Mekanik harikası antika saatler.");
-        Category taki = createCategory("Takı & Aksesuar", "Nadide el yapımı aksesuarlar.");
-        Category sanat = createCategory("Sanat & Tablo", "Sanat eserleri ve tablolar.");
-        Category kitap = createCategory("Kitap & Efemera", "Nadir kitaplar ve koleksiyonluk belgeler.");
+        log.info("5 kategori olusturuluyor...");
+        Category mobilya = createCategory(
+                "Mobilya",
+                "Donemsel estetigi yansitan antika mobilyalar.",
+                "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85");
+        Category aydinlatma = createCategory(
+                "Aydinlatma",
+                "Mekana karakter katan avize ve aplikler.",
+                "https://images.unsplash.com/photo-1519710164239-da123dc03ef4");
+        Category saatler = createCategory(
+                "Saatler",
+                "Mekanik antika saat secimleri.",
+                "https://images.unsplash.com/photo-1509048191080-d2e5e4f57c0f");
+        Category aksesuar = createCategory(
+                "Aksesuar",
+                "Koleksiyonluk obje ve aksesuarlar.",
+                "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338");
+        Category sanat = createCategory(
+                "Sanat ve Tablo",
+                "Yagli boya, gravur ve dekoratif eserler.",
+                "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5");
 
-        log.info("Ürünler ekleniyor...");
-        createProduct("Louis XVI Marküteri Masa", "18.yy sonu Fransız stili.", 12500.0, 1, mobilya.getId(),
-                "Gül Ağacı, Ceviz", "1800'ler", "Çok İyi");
-        createProduct("Antika Chester Berjer", "Hakiki deri İngiliz tarzı.", 8200.0, 2, mobilya.getId(),
-                "Hakiki Deri, Ahşap", "1950'ler", "İyi");
-        createProduct("Ahşap El Oyması Sandık", "Tamamen ceviz çeyiz sandığı.", 4500.0, 3, mobilya.getId(),
-                "Ceviz Ağacı", "1920'ler", "Mükemmel");
+        log.info("10 dummy urun ekleniyor...");
+        createProduct("Ceviz Dresuar", "Masif ceviz antika dresuar.", 8750.0, 2, mobilya.getId(),
+                "Ceviz", "1940lar", "Iyi",
+                List.of(
+                        "https://images.unsplash.com/photo-1493666438817-866a91353ca9",
+                        "https://images.unsplash.com/photo-1484101403633-562f891dc89a"));
+        createProduct("Osmanli Sandik", "El oyma kapakli antika sandik.", 6200.0, 1, mobilya.getId(),
+                "Ahsap", "1900ler", "Cok Iyi",
+                List.of("https://images.unsplash.com/photo-1555041469-a586c61ea9bc"));
 
-        createProduct("Art Deco Kristal Avize", "1930'lar Fransız kristal.", 6700.0, 2, aydinlatma.getId(),
-                "Kristal, Pirinç", "1930'lar", "Çalışır Durumda");
-        createProduct("Bronz Şamdan Takımı", "19.yy Fransız 5 kollu.", 5400.0, 1, aydinlatma.getId(),
-                "Bronz Döküm", "1890'lar", "Kusursuz");
-        createProduct("Opalin Gaz Lambası", "El boyaması çiçek desenli.", 1800.0, 5, aydinlatma.getId(),
-                "Opalin Cam, Pirinç", "1940'lar", "Kullanılabilir");
+        createProduct("Kristal Avize", "6 kollu kristal avize.", 7300.0, 3, aydinlatma.getId(),
+                "Kristal", "1930lar", "Calisir",
+                List.of("https://images.unsplash.com/photo-1517991104123-1d56a6e81ed9"));
+        createProduct("Pirinc Aplik Cifti", "Duvar icin klasik aplik takimi.", 3400.0, 4, aydinlatma.getId(),
+                "Pirinc", "1950ler", "Iyi",
+                List.of("https://images.unsplash.com/photo-1513506003901-1e6a229e2d15"));
 
-        createProduct("Osmanlı Savatlı Saat", "Gümüş savatlı cep saati.", 3800.0, 1, saatler.getId(),
-                "Gümüş (900 Ayar)", "Osmanlı Dönemi", "Çalışıyor");
-        createProduct("Viktorya Duvar Saati", "Fransız mekanizmalı gotik.", 7200.0, 1, saatler.getId(),
-                "Maun, Bronz", "1880'ler", "Bakımlı");
-        createProduct("Pirinç Güneş Saati", "Denizcilik temalı dekoratif.", 2500.0, 4, saatler.getId(),
-                "Pirinç", "1960'lar", "Dekoratif");
+        createProduct("Masa Saati", "Kurmali pirinc masa saati.", 4100.0, 2, saatler.getId(),
+                "Pirinc", "1920ler", "Bakimli",
+                List.of("https://images.unsplash.com/photo-1508057198894-247b23fe5ade"));
+        createProduct("Duvar Saati", "Sarkacli antika duvar saati.", 5600.0, 1, saatler.getId(),
+                "Maun", "1890ler", "Iyi",
+                List.of("https://images.unsplash.com/photo-1464013778555-8e723c2f01f8"));
 
-        createProduct("Damla Kehribar Tesbih", "Sertifikalı ateş kehribarı.", 4200.0, 2, taki.getId(),
-                "Damla Kehribar", "Yeni", "Sıfır");
-        createProduct("Mine İşlemeli Kutu", "Rus gümüşü koleksiyonluk.", 3100.0, 1, taki.getId(), "Gümüş, Mine",
-                "1910'lar", "Koleksiyonluk");
-        createProduct("Osmanlı Gümüş Bilezik", "Trabzon telkari el yapımı.", 1950.0, 2, taki.getId(), "Gümüş",
-                "Erken Cumhuriyet", "İyi");
+        createProduct("Telkari Gumus Bileklik", "El yapimi telkari bileklik.", 2800.0, 5, aksesuar.getId(),
+                "Gumus", "Yeni", "Sifir",
+                List.of("https://images.unsplash.com/photo-1611591437281-460bfbe1220a"));
+        createProduct("Bronz Kutu", "Kapakli dekoratif bronz kutu.", 1950.0, 3, aksesuar.getId(),
+                "Bronz", "1970ler", "Iyi",
+                List.of("https://images.unsplash.com/photo-1617038220319-276d3cfab638"));
 
-        createProduct("El Yazması Hat Levha", "Sülüs yazı altın varak.", 9500.0, 1, sanat.getId(),
-                "Kağıt, Altın Varak", "19. Yüzyıl", "Çok İyi");
-        createProduct("Yağlı Boya Tablo", "1920'ler İstanbul manzarası.", 15000.0, 1, sanat.getId(),
-                "Tuval, Yağlı Boya", "1920'ler", "İyi");
-        createProduct("Murano Sanat Camı", "Venedik imzalı figür.", 2800.0, 3, sanat.getId(), "Murano Camı",
-                "1970'ler", "Kusursuz");
+        createProduct("Istanbul Yagli Boya", "Kanvas uzerine yagli boya.", 9900.0, 1, sanat.getId(),
+                "Tuval", "1950ler", "Cok Iyi",
+                List.of("https://images.unsplash.com/photo-1578301978018-3005759f48f7"));
+        createProduct("Bakir Baski Gravur", "Cerceveli bakir baski gravur.", 3600.0, 2, sanat.getId(),
+                "Kagit", "1930ler", "Iyi",
+                List.of("https://images.unsplash.com/photo-1577083552431-6e5fd01aa342"));
 
-        createProduct("Antika Avrupa Haritası", "18.yy bakır baskı gravür.", 4800.0, 1, kitap.getId(), "Kağıt",
-                "1750'ler", "Çerçeveli");
-        createProduct("Kütahya Çini Vazo", "Usta imzalı nadide parça.", 3200.0, 3, kitap.getId(),
-                "Seramik, Çini", "1950'ler", "Hatasız");
-        createProduct("Denizci Sekstantı", "Pirinç kutulu navigasyon.", 5900.0, 1, kitap.getId(), "Pirinç, Cam",
-                "1940'lar", "Tam Takım");
-        createProduct("Antika Gramofon", "His Master's Voice borulu.", 11000.0, 1, kitap.getId(),
-                "Ahşap, Metal", "1930'lar", "Plak Çalar");
-        createProduct("Singer Dikiş Makinesi", "1900 başı pedallı döküm.", 2700.0, 2, mobilya.getId(),
-                "Döküm Demir", "1910'lar", "Dekoratif");
-
-        log.info("20 ürün başarıyla oluşturuldu.");
+        log.info("5 kategori ve 10 urun basariyla olusturuldu.");
     }
 
-    private Category createCategory(String name, String description) {
-        Category category = Category.builder().name(name).description(description).build();
+    private Category createCategory(String name, String description, String coverImageUrl) {
+        Category category = Category.builder()
+                .name(name)
+                .description(description)
+                .coverImageUrl(coverImageUrl)
+                .build();
         return categoryRepository.save(category);
     }
 
     private void createProduct(String title, String description, double price, int stock, Long categoryId,
-            String material, String era, String condition) {
-        java.util.Map<String, Object> attributes = new java.util.HashMap<>();
+            String material, String era, String condition, List<String> imageUrls) {
+        Map<String, Object> attributes = new HashMap<>();
         attributes.put("material", material);
         attributes.put("era", era);
         attributes.put("condition", condition);
@@ -129,7 +143,7 @@ public class DevDataSeeder implements CommandLineRunner {
                 .price(BigDecimal.valueOf(price))
                 .stock(stock)
                 .categoryId(categoryId)
-                .imageUrls(List.of("https://images.unsplash.com/photo-1554034483-04fda0d3507b"))
+                .imageUrls(imageUrls)
                 .attributes(attributes)
                 .build();
         productRepository.save(product);

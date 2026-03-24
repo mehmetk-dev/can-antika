@@ -15,6 +15,7 @@ const navigation = [
   { name: "Ürünler", href: "/urunler", description: "Koleksiyonumuzu keşfedin" },
   { name: "Blog", href: "/blog", description: "Antika dünyasından yazılar" },
   { name: "Hakkımızda", href: "/hakkimizda", description: "35 yıllık tecrübe" },
+  { name: "İletişim", href: "/iletisim", description: "Bize ulaşın" },
   { name: "SSS", href: "/sss", description: "Sık sorulan sorular" },
 ]
 

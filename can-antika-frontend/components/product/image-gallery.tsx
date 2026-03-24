@@ -4,7 +4,8 @@ import { useState } from "react"
 import Image from "next/image"
 import { ZoomIn, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { resolveImageUrl } from "@/lib/image-url"
 
 interface ImageGalleryProps {
   images: string[]
@@ -14,37 +15,50 @@ interface ImageGalleryProps {
 export function ImageGallery({ images, productName }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
-  const mainImage = images[selectedIndex] || "/placeholder.svg"
+  const [useFallbackImage, setUseFallbackImage] = useState(false)
+
+  const safeIndex = images.length > 0 ? Math.min(selectedIndex, images.length - 1) : 0
+  const mainImage = images[safeIndex] ? resolveImageUrl(images[safeIndex]) : "/placeholder.svg"
   const isRemoteMainImage = /^https?:\/\//i.test(mainImage)
 
   const handlePrevious = () => {
+    setUseFallbackImage(false)
     setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
   }
 
   const handleNext = () => {
+    setUseFallbackImage(false)
     setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+  }
+
+  const handleImageError = () => {
+    if (selectedIndex < images.length - 1) {
+      setSelectedIndex((prev) => prev + 1)
+      return
+    }
+
+    setUseFallbackImage(true)
   }
 
   return (
     <div className="space-y-4">
-      {/* Main Image */}
       <Dialog>
         <DialogTrigger asChild>
           <div className="group relative aspect-[3/4] cursor-zoom-in overflow-hidden rounded-lg bg-muted">
             <Image
-              src={mainImage}
+              src={useFallbackImage ? "/placeholder.svg" : mainImage}
               alt={productName}
               fill
               priority
               unoptimized={isRemoteMainImage}
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
+              onError={handleImageError}
             />
             <div className="absolute inset-0 flex items-center justify-center bg-foreground/0 transition-colors group-hover:bg-foreground/10">
               <ZoomIn className="h-8 w-8 text-background opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
 
-            {/* Navigation Arrows */}
             {images.length > 1 && (
               <>
                 <Button
@@ -73,16 +87,19 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
             )}
           </div>
         </DialogTrigger>
+
         <DialogContent className="max-w-5xl bg-background p-2">
           <DialogTitle className="sr-only">{productName}</DialogTitle>
+          <DialogDescription className="sr-only">{productName} ürün görselleri galeri görünümü.</DialogDescription>
           <div className="relative aspect-[3/4] w-full max-h-[85vh]">
             <Image
-              src={mainImage}
+              src={useFallbackImage ? "/placeholder.svg" : mainImage}
               alt={productName}
               fill
               unoptimized={isRemoteMainImage}
               sizes="85vw"
               className="object-contain"
+              onError={handleImageError}
             />
             {images.length > 1 && (
               <>
@@ -108,25 +125,29 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Thumbnail Strip */}
       {images.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-2">
           {images.map((image, index) => (
             <button
               key={index}
-              onClick={() => setSelectedIndex(index)}
-              className={`relative aspect-square w-20 shrink-0 overflow-hidden rounded-md transition-all ${selectedIndex === index
-                ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                : "opacity-70 hover:opacity-100"
-                }`}
+              onClick={() => {
+                setSelectedIndex(index)
+                setUseFallbackImage(false)
+              }}
+              className={`relative aspect-square w-20 shrink-0 overflow-hidden rounded-md transition-all ${
+                selectedIndex === index ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : "opacity-70 hover:opacity-100"
+              }`}
             >
               <Image
-                src={image || "/placeholder.svg"}
+                src={resolveImageUrl(image)}
                 alt={`${productName} - ${index + 1}`}
                 fill
                 unoptimized={/^https?:\/\//i.test(image || "")}
                 sizes="80px"
-                className="object-cover"
+                className="object-cover object-center"
+                onError={(e) => {
+                  e.currentTarget.src = "/placeholder.svg"
+                }}
               />
             </button>
           ))}

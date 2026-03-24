@@ -1,4 +1,4 @@
-﻿import Link from "next/link"
+import Link from "next/link"
 import { Clock, AlertTriangle, MessageSquare, HandCoins } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -61,5 +61,3 @@ export default function PendingTasksGrid({ stats, pendingTasks }: PendingTasksGr
         </Card>
     )
 }
-
-

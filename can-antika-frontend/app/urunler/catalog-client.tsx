@@ -11,9 +11,9 @@ import { ActiveFilters } from "@/components/catalog/active-filters"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { productApi, categoryApi } from "@/lib/api"
+import { productApi, categoryApi, periodApi } from "@/lib/api"
 import { priceRanges } from "@/lib/products"
-import type { ProductResponse, CategoryResponse, CursorResponse } from "@/lib/types"
+import type { ProductResponse, CategoryResponse, CursorResponse, PeriodResponse } from "@/lib/types"
 
 type ViewMode = "grid" | "large"
 
@@ -49,6 +49,7 @@ export function CatalogClient({
   const searchParams = useSearchParams()
   const router = useRouter()
   const categoryParam = searchParams.get("category")
+  const periodParam = searchParams.get("period")
   const searchQuery = searchParams.get("q") || ""
 
   // Determine if we have server-provided data for the initial render
@@ -57,6 +58,7 @@ export function CatalogClient({
   // Data state -- seed with server data when available
   const [products, setProducts] = useState<ProductResponse[]>(initialProducts)
   const [categories, setCategories] = useState<CategoryResponse[]>(initialCategories)
+  const [periods, setPeriods] = useState<PeriodResponse[]>([])
   const [totalCount, setTotalCount] = useState(initialTotalCount)
   const [isLoading, setIsLoading] = useState(!hasInitialData)
   const [page, setPage] = useState(0)
@@ -68,6 +70,7 @@ export function CatalogClient({
   // Filter state -- categories now stores category IDs as strings
   const [selectedFilters, setSelectedFilters] = useState({
     categories: [] as string[],
+    periods: [] as string[],
     priceRanges: [] as string[],
   })
   const [sortBy, setSortBy] = useState("newest")
@@ -99,10 +102,27 @@ export function CatalogClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryParam])
 
+  useEffect(() => {
+    periodApi
+      .getAll()
+      .then((dbPeriods) => {
+        setPeriods(dbPeriods)
+        if (!periodParam) return
+        const match = dbPeriods.find(
+          (p) => p.name.toLowerCase() === periodParam.toLowerCase() || p.id.toString() === periodParam
+        )
+        if (match) {
+          setSelectedFilters((prev) => ({ ...prev, periods: [match.id.toString()] }))
+          setUserInteracted(true)
+        }
+      })
+      .catch((e) => console.error("Dönem yükleme hatası:", e))
+  }, [periodParam])
+
   // Reset page when search or category changes
   useEffect(() => {
     setPage(0)
-  }, [searchQuery, categoryParam])
+  }, [searchQuery, categoryParam, periodParam])
 
   // Fetch products when filters/sort/page change
   const fetchProducts = useCallback(async () => {
@@ -121,15 +141,75 @@ export function CatalogClient({
       maxPrice = maxVals.length > 0 ? Math.max(...maxVals) : undefined
     }
 
-    // Category: filter value is already category ID
-    const categoryId = selectedFilters.categories.length > 0
-      ? Number(selectedFilters.categories[0])
-      : undefined
+    // Category: single selection can use API category filter, multi-selection is handled client-side
+    const selectedCategoryIds = selectedFilters.categories
+      .map((v) => Number(v))
+      .filter((v) => Number.isFinite(v))
+    const categoryId = selectedCategoryIds.length === 1 ? selectedCategoryIds[0] : undefined
+    const selectedPeriodIds = selectedFilters.periods
+      .map((v) => Number(v))
+      .filter((v) => Number.isFinite(v))
+    const periodId = selectedPeriodIds.length === 1 ? selectedPeriodIds[0] : undefined
 
     try {
+      // API-side tekil filtre yerine, çoklu kategori veya dönem filtresinde
+      // tüm ürünleri çekip client-side birleşik filtre uygula.
+      if (selectedCategoryIds.length > 1 || selectedPeriodIds.length > 0) {
+        const allProducts = await productApi.findAll()
+
+        const filtered = allProducts
+          .filter((item) => {
+            const itemCategoryId = item.category?.id
+            if (selectedCategoryIds.length > 0 && (!itemCategoryId || !selectedCategoryIds.includes(itemCategoryId))) {
+              return false
+            }
+
+            const itemPeriodId = item.period?.id
+            if (selectedPeriodIds.length > 0 && (!itemPeriodId || !selectedPeriodIds.includes(itemPeriodId))) {
+              return false
+            }
+
+            if (searchQuery && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+              return false
+            }
+
+            if (typeof minPrice === "number" && item.price < minPrice) {
+              return false
+            }
+
+            if (typeof maxPrice === "number" && item.price > maxPrice) {
+              return false
+            }
+
+            return true
+          })
+          .sort((a, b) => {
+            switch (sort.sortBy) {
+              case "price":
+                return sort.direction === "desc" ? b.price - a.price : a.price - b.price
+              case "title":
+                return sort.direction === "desc"
+                  ? b.title.localeCompare(a.title, "tr")
+                  : a.title.localeCompare(b.title, "tr")
+              case "id":
+              default:
+                return sort.direction === "desc" ? (b.id ?? 0) - (a.id ?? 0) : (a.id ?? 0) - (b.id ?? 0)
+            }
+          })
+
+        const total = filtered.length
+        const start = page * PAGE_SIZE
+        const pagedItems = filtered.slice(start, start + PAGE_SIZE)
+
+        setProducts(pagedItems)
+        setTotalCount(total)
+        return
+      }
+
       const result: CursorResponse<ProductResponse> = await productApi.search({
         title: searchQuery || undefined,
         categoryId,
+        periodId,
         minPrice,
         maxPrice,
         page,
@@ -181,6 +261,7 @@ export function CatalogClient({
   const handleClearFilters = () => {
     setSelectedFilters({
       categories: [],
+      periods: [],
       priceRanges: [],
     })
     setPage(0)
@@ -202,6 +283,7 @@ export function CatalogClient({
 
   const activeFilterCount =
     selectedFilters.categories.length +
+    selectedFilters.periods.length +
     selectedFilters.priceRanges.length
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
@@ -232,6 +314,7 @@ export function CatalogClient({
               onClearFilters={handleClearFilters}
               isMobile={false}
               apiCategories={categories}
+              apiPeriods={periods}
             />
           </aside>
 
@@ -255,7 +338,7 @@ export function CatalogClient({
                   </SheetTrigger>
                   <SheetContent
                     side="left"
-                    className="w-80 bg-gradient-to-b from-background via-background to-muted/20 p-0 z-[110]"
+                    className="w-80 border-r border-border bg-background p-0 z-[110]"
                   >
                     {/* Paper texture */}
                     <div
@@ -297,6 +380,7 @@ export function CatalogClient({
                         onClearFilters={handleClearFilters}
                         isMobile={true}
                         apiCategories={categories}
+                        apiPeriods={periods}
                       />
                     </div>
                   </SheetContent>
@@ -343,7 +427,12 @@ export function CatalogClient({
               </div>
             </div>
 
-            <ActiveFilters selectedFilters={selectedFilters} onRemoveFilter={handleFilterChange} apiCategories={categories} />
+            <ActiveFilters
+              selectedFilters={selectedFilters}
+              onRemoveFilter={handleFilterChange}
+              apiCategories={categories}
+              apiPeriods={periods}
+            />
 
             <div className="relative min-h-[520px]">
               {products.length > 0 ? (

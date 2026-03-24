@@ -3,6 +3,7 @@ package com.mehmetkerem.service.impl;
 import com.mehmetkerem.dto.request.ProductRequest;
 import com.mehmetkerem.dto.response.ProductImportResponse;
 import com.mehmetkerem.dto.response.CategoryResponse;
+import com.mehmetkerem.dto.response.PeriodResponse;
 import com.mehmetkerem.dto.response.ProductResponse;
 import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.ExceptionMessages;
@@ -14,6 +15,7 @@ import com.mehmetkerem.service.ICategoryService;
 import com.mehmetkerem.service.IFileStorageService;
 import com.mehmetkerem.service.IProductService;
 import com.mehmetkerem.service.IActivityLogService;
+import com.mehmetkerem.service.IPeriodService;
 import com.mehmetkerem.enums.ActivityType;
 import com.mehmetkerem.util.SecurityUtils;
 import com.mehmetkerem.util.Messages;
@@ -45,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Slf4j
@@ -55,6 +58,7 @@ public class ProductServiceImpl implements IProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final ICategoryService categoryService;
+    private final IPeriodService periodService;
     private final IFileStorageService fileStorageService;
     private final IActivityLogService activityLogService;
         private static final Set<String> ALLOWED_PRODUCT_SORT_FIELDS = Set.of(
@@ -65,6 +69,7 @@ public class ProductServiceImpl implements IProductService {
     @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
     public ProductResponse saveProduct(ProductRequest request) {
         Product entity = productMapper.toEntity(request);
+        entity.setPeriodId(resolvePeriodId(request, null));
         entity = productRepository.save(entity);
 
         // Slug'ı ID ile benzersiz yap ve tekrar kaydet
@@ -74,8 +79,12 @@ public class ProductServiceImpl implements IProductService {
             entity = productRepository.save(entity);
         }
 
-        ProductResponse response = productMapper.toResponseWithCategory(entity,
-                categoryService.getCategoryResponseById(request.getCategoryId()));
+        ProductResponse response = mapProductWithRelations(
+                entity,
+                Map.of(request.getCategoryId(), categoryService.getCategoryResponseById(request.getCategoryId())),
+                entity.getPeriodId() == null
+                        ? Map.of()
+                        : periodService.getPeriodResponsesByIds(List.of(entity.getPeriodId())));
         activityLogService.log(ActivityType.PRODUCT_CREATED, SecurityUtils.getCurrentUserId(), "Ürün eklendi: " + request.getTitle());
         return response;
     }
@@ -107,8 +116,14 @@ public class ProductServiceImpl implements IProductService {
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = getProductById(id);
         productMapper.update(product, request);
-        ProductResponse response = productMapper.toResponseWithCategory(productRepository.save(product),
-                categoryService.getCategoryResponseById(product.getCategoryId()));
+        product.setPeriodId(resolvePeriodId(request, product.getPeriodId()));
+        Product savedProduct = productRepository.save(product);
+        ProductResponse response = mapProductWithRelations(
+                savedProduct,
+                Map.of(savedProduct.getCategoryId(), categoryService.getCategoryResponseById(savedProduct.getCategoryId())),
+                savedProduct.getPeriodId() == null
+                        ? Map.of()
+                        : periodService.getPeriodResponsesByIds(List.of(savedProduct.getPeriodId())));
         activityLogService.log(ActivityType.PRODUCT_UPDATED, SecurityUtils.getCurrentUserId(), "Ürün güncellendi: " + product.getTitle());
         return response;
     }
@@ -117,7 +132,7 @@ public class ProductServiceImpl implements IProductService {
     @Cacheable(cacheNames = "products:byId", key = "#id")
     public ProductResponse getProductResponseById(Long id) {
         Product product = getProductById(id);
-        return mapProductWithCategory(product);
+        return mapProductWithRelations(product);
     }
 
     @Override
@@ -129,27 +144,12 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public List<ProductResponse> findAllProducts() {
         List<Product> products = productRepository.findAll();
-
-        // Batch fetch categories — single query instead of N
-        List<Long> categoryIds = products.stream()
-                .map(Product::getCategoryId)
-                .filter(java.util.Objects::nonNull)
-                .distinct()
-                .toList();
-
-        java.util.Map<Long, com.mehmetkerem.dto.response.CategoryResponse> categoryMap = categoryIds.isEmpty()
-                ? java.util.Collections.emptyMap()
-                : categoryService.getCategoryResponsesByIds(categoryIds);
-
-        return products.stream()
-                .map(product -> productMapper.toResponseWithCategory(
-                        product, categoryMap.get(product.getCategoryId())))
-                .toList();
+        return mapProductsWithRelations(products);
     }
 
     @Override
     public List<ProductResponse> getProductResponsesByIds(List<Long> productIds) {
-        return mapProductsWithCategories(getProductsByIds(productIds));
+        return mapProductsWithRelations(getProductsByIds(productIds));
     }
 
     @Override
@@ -175,13 +175,13 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public List<ProductResponse> getProductsByTitle(String title) {
         List<Product> products = productRepository.findByTitleContainingIgnoreCase(title);
-        return mapProductsWithCategories(products);
+        return mapProductsWithRelations(products);
     }
 
     @Override
     public List<ProductResponse> getProductsByCategory(Long categoryId) {
         List<Product> products = productRepository.findByCategoryId(categoryId);
-        return mapProductsWithCategories(products);
+        return mapProductsWithRelations(products);
     }
 
     @Override
@@ -194,7 +194,7 @@ public class ProductServiceImpl implements IProductService {
                 .and(ProductSpecification.greaterThanRating(minRating));
 
         Page<Product> productPage = productRepository.findAll(spec, pageable);
-        return ResultHelper.toCursor(productPage.map(this::mapProductWithCategory));
+        return ResultHelper.toCursor(productPage.map(this::mapProductWithRelations));
     }
 
     // NOTE:
@@ -210,41 +210,110 @@ public class ProductServiceImpl implements IProductService {
 
         PageRequest pageable = PageRequest.of(page, size, sort);
 
-        return ResultHelper.toCursor(productRepository.findAll(pageable).map(this::mapProductWithCategory));
+        return ResultHelper.toCursor(productRepository.findAll(pageable).map(this::mapProductWithRelations));
     }
 
     /**
      * Birden fazla ürünü batch olarak kategorileriyle eşleştirir.
      * N+1 sorunu yerine tek sorguda tüm kategorileri çeker.
      */
-    private List<ProductResponse> mapProductsWithCategories(List<Product> products) {
+    private List<ProductResponse> mapProductsWithRelations(List<Product> products) {
         if (products.isEmpty()) {
             return List.of();
         }
 
         List<Long> categoryIds = products.stream()
                 .map(Product::getCategoryId)
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .distinct()
                 .toList();
 
-        java.util.Map<Long, CategoryResponse> categoryMap = categoryIds.isEmpty()
+        List<Long> periodIds = products.stream()
+                .map(Product::getPeriodId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        Map<Long, CategoryResponse> categoryMap = categoryIds.isEmpty()
                 ? java.util.Collections.emptyMap()
                 : categoryService.getCategoryResponsesByIds(categoryIds);
 
+        Map<Long, PeriodResponse> periodMap = periodIds.isEmpty()
+                ? java.util.Collections.emptyMap()
+                : periodService.getPeriodResponsesByIds(periodIds);
+
         return products.stream()
-                .map(product -> productMapper.toResponseWithCategory(
-                        product, categoryMap.get(product.getCategoryId())))
+                .map(product -> mapProductWithRelations(product, categoryMap, periodMap))
                 .toList();
     }
 
-    private ProductResponse mapProductWithCategory(Product product) {
+    private ProductResponse mapProductWithRelations(Product product) {
         CategoryResponse categoryResponse = null;
         if (product.getCategoryId() != null) {
             categoryResponse = categoryService.getCategoryResponsesByIds(List.of(product.getCategoryId()))
                     .get(product.getCategoryId());
         }
-        return productMapper.toResponseWithCategory(product, categoryResponse);
+        PeriodResponse periodResponse = null;
+        if (product.getPeriodId() != null) {
+            periodResponse = periodService.getPeriodResponsesByIds(List.of(product.getPeriodId()))
+                    .get(product.getPeriodId());
+        }
+        return mapProductWithRelations(
+                product,
+                categoryResponse == null ? Map.of() : Map.of(product.getCategoryId(), categoryResponse),
+                periodResponse == null ? Map.of() : Map.of(product.getPeriodId(), periodResponse));
+    }
+
+    private ProductResponse mapProductWithRelations(
+            Product product,
+            Map<Long, CategoryResponse> categoryMap,
+            Map<Long, PeriodResponse> periodMap) {
+        CategoryResponse categoryResponse = product.getCategoryId() == null ? null : categoryMap.get(product.getCategoryId());
+        PeriodResponse periodResponse = product.getPeriodId() == null ? null : periodMap.get(product.getPeriodId());
+        ProductResponse response = productMapper.toResponseWithCategory(product, categoryResponse);
+        response.setPeriod(periodResponse);
+        return response;
+    }
+
+    private Long resolvePeriodId(ProductRequest request, Long fallbackPeriodId) {
+        if (request.getPeriodId() != null) {
+            return periodService.getPeriodById(request.getPeriodId()).getId();
+        }
+
+        String explicitPeriodName = normalizeOptional(request.getPeriodName());
+        if (explicitPeriodName != null) {
+            return periodService.findOrCreateByName(explicitPeriodName).getId();
+        }
+
+        if (request.getPeriodName() != null) {
+            return null;
+        }
+
+        String periodFromAttributes = extractPeriodFromAttributes(request.getAttributes());
+        if (periodFromAttributes != null) {
+            return periodService.findOrCreateByName(periodFromAttributes).getId();
+        }
+
+        return fallbackPeriodId;
+    }
+
+    private String extractPeriodFromAttributes(Map<String, Object> attributes) {
+        if (attributes == null || attributes.isEmpty()) {
+            return null;
+        }
+        Object rawEra = attributes.get("era");
+        if (rawEra == null) {
+            return null;
+        }
+        return normalizeOptional(rawEra.toString());
+    }
+
+    private String normalizeOptional(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     @Override
@@ -265,7 +334,7 @@ public class ProductServiceImpl implements IProductService {
         Product product = optionalProduct
                 .orElseThrow(() -> new com.mehmetkerem.exception.NotFoundException(
                         "Ürün bulunamadı: " + slug));
-        return mapProductWithCategory(product);
+        return mapProductWithRelations(product);
     }
 
     @Transactional
@@ -313,6 +382,7 @@ public class ProductServiceImpl implements IProductService {
                     ProductRequest request = toProductRequest(row, headers);
                     categoryService.getCategoryResponseById(request.getCategoryId());
                     Product entity = productMapper.toEntity(request);
+                    entity.setPeriodId(resolvePeriodId(request, null));
                     productRepository.save(entity);
                     importedCount++;
                 } catch (Exception ex) {
@@ -360,6 +430,7 @@ public class ProductServiceImpl implements IProductService {
         request.setPrice(readBigDecimal(row, headers, "price", true));
         request.setStock(readInteger(row, headers, "stock", true));
         request.setCategoryId(readLong(row, headers, "categoryid", true));
+        request.setPeriodName(resolveExcelPeriodName(row, headers));
         request.setImageUrls(readImageUrls(row, headers, "imageurls"));
 
         Map<String, Object> attrs = new HashMap<>();
@@ -373,6 +444,15 @@ public class ProductServiceImpl implements IProductService {
         if (!attrs.isEmpty()) request.setAttributes(attrs);
 
         return request;
+    }
+
+    private String resolveExcelPeriodName(Row row, Map<String, Integer> headers) {
+        String periodName = readString(row, headers, "period", false);
+        if (periodName != null && !periodName.isBlank()) {
+            return periodName;
+        }
+        String era = readString(row, headers, "era", false);
+        return (era == null || era.isBlank()) ? null : era;
     }
 
     private List<String> readImageUrls(Row row, Map<String, Integer> headers, String key) {

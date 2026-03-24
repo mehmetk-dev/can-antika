@@ -23,6 +23,7 @@ public class ProductResponse {
     private BigDecimal price;
     private Integer stock;
     private CategoryResponse category;
+    private PeriodResponse period;
     private List<String> imageUrls;
     private Map<String, Object> attributes;
     private Double averageRating;

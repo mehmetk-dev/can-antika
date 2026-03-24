@@ -12,17 +12,18 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { productApi, categoryApi, fileApi } from "@/lib/api"
+import { productApi, categoryApi, periodApi, fileApi } from "@/lib/api"
 import { toast } from "sonner"
-import { eras, materials } from "@/lib/products"
-import type { CategoryResponse, ProductRequest } from "@/lib/types"
+import type { CategoryResponse, PeriodResponse, ProductRequest } from "@/lib/types"
 
 export default function NewProductPage() {
   const router = useRouter()
   const [images, setImages] = useState<string[]>([])
   const [categories, setCategories] = useState<CategoryResponse[]>([])
+  const [periods, setPeriods] = useState<PeriodResponse[]>([])
   const [categoryId, setCategoryId] = useState("")
-  const [era, setEra] = useState("")
+  const [selectedPeriodId, setSelectedPeriodId] = useState("")
+  const [customPeriodName, setCustomPeriodName] = useState("")
   const [material, setMaterial] = useState("")
   const [status, setStatus] = useState("active")
   const [isSaving, setIsSaving] = useState(false)
@@ -30,7 +31,12 @@ export default function NewProductPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    categoryApi.getAll().then(setCategories).catch((e) => console.error("Kategori listesi alınamadı:", e))
+    Promise.all([categoryApi.getAll(), periodApi.getAll()])
+      .then(([cats, dbPeriods]) => {
+        setCategories(cats)
+        setPeriods(dbPeriods)
+      })
+      .catch((e) => console.error("Liste verileri alinamadi:", e))
   }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -40,14 +46,17 @@ export default function NewProductPage() {
     const parsedPrice = Number(formData.get("price"))
 
     if (!Number.isFinite(parsedCategoryId) || parsedCategoryId <= 0) {
-      toast.error("Lütfen geçerli bir kategori seçin")
+      toast.error("Lutfen gecerli bir kategori secin")
       return
     }
 
     if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
-      toast.error("Lütfen geçerli bir fiyat girin")
+      toast.error("Lutfen gecerli bir fiyat girin")
       return
     }
+
+    const selectedPeriod = periods.find((p) => p.id.toString() === selectedPeriodId)
+    const resolvedPeriodName = customPeriodName.trim() || selectedPeriod?.name || ""
 
     const data: ProductRequest = {
       title: formData.get("title") as string,
@@ -55,9 +64,11 @@ export default function NewProductPage() {
       price: parsedPrice,
       stock: 1,
       categoryId: parsedCategoryId,
+      periodId: selectedPeriod ? selectedPeriod.id : undefined,
+      periodName: customPeriodName.trim() || undefined,
       imageUrls: images,
       attributes: {
-        era,
+        era: resolvedPeriodName,
         material,
         status,
         dimensions: formData.get("dimensions") as string,
@@ -70,10 +81,10 @@ export default function NewProductPage() {
     setIsSaving(true)
     try {
       await productApi.save(data)
-      toast.success("Ürün başarıyla eklendi")
+      toast.success("Urun basariyla eklendi")
       router.push("/admin/urunler")
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Ürün eklenirken hata oluştu"
+      const message = error instanceof Error ? error.message : "Urun eklenirken hata olustu"
       toast.error(message)
     } finally {
       setIsSaving(false)
@@ -89,7 +100,7 @@ export default function NewProductPage() {
 
     const oversized = selectedFiles.filter((f) => f.size > 100 * 1024 * 1024)
     if (oversized.length > 0) {
-      toast.error(`${oversized.length} dosya 100MB sınırını aşıyor, atlandı.`)
+      toast.error(`${oversized.length} dosya 100MB sinirini asiyor, atlandi.`)
     }
 
     const validFiles = selectedFiles.filter((f) => f.size <= 100 * 1024 * 1024)
@@ -108,7 +119,7 @@ export default function NewProductPage() {
           return [...prev, url]
         })
       } catch {
-        toast.error(`"${file.name}" yüklenemedi`)
+        toast.error(`"${file.name}" yuklenemedi`)
       } finally {
         setUploadingCount((prev) => prev - 1)
       }
@@ -131,48 +142,45 @@ export default function NewProductPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground">Yeni Ürün Ekle</h1>
+          <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground">Yeni Urun Ekle</h1>
           <p className="mt-1 text-muted-foreground">Koleksiyonunuza yeni bir eser ekleyin</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-3">
-        {/* Main Content */}
         <div className="space-y-6 lg:col-span-2">
-          {/* Basic Info */}
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="font-serif">Temel Bilgiler</CardTitle>
-              <CardDescription>Ürünün genel bilgilerini girin</CardDescription>
+              <CardDescription>Urunun genel bilgilerini girin</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Ürün Adı *</Label>
-                <Input id="title" name="title" placeholder="Örn: Osmanlı Dönemi Duvar Saati" required className="bg-muted/50" />
+                <Label htmlFor="title">Urun Adi *</Label>
+                <Input id="title" name="title" placeholder="Orn: Osmanli Donemi Duvar Saati" required className="bg-muted/50" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Açıklama *</Label>
-                <Textarea id="description" name="description" rows={4} placeholder="Ürün hakkında detaylı açıklama..." required className="bg-muted/50" />
+                <Label htmlFor="description">Aciklama *</Label>
+                <Textarea id="description" name="description" rows={4} placeholder="Urun hakkinda detayli aciklama..." required className="bg-muted/50" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="story">Hikaye / Köken</Label>
-                <Textarea id="story" name="story" rows={4} placeholder="Eserin tarihçesi ve köken bilgisi..." className="bg-muted/50" />
+                <Label htmlFor="story">Hikaye / Koken</Label>
+                <Textarea id="story" name="story" rows={4} placeholder="Eserin tarihcesi ve koken bilgisi..." className="bg-muted/50" />
               </div>
             </CardContent>
           </Card>
 
-          {/* Images */}
           <Card className="bg-card">
             <CardHeader>
-              <CardTitle className="font-serif">Görseller</CardTitle>
-              <CardDescription>Ürün fotoğraflarını yükleyin (maksimum 6 adet)</CardDescription>
+              <CardTitle className="font-serif">Gorseller</CardTitle>
+              <CardDescription>Urun fotograflarini yukleyin (maksimum 6 adet)</CardDescription>
             </CardHeader>
             <CardContent>
               <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
               <div className="grid gap-4 sm:grid-cols-3">
                 {images.map((image, index) => (
                   <div key={index} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                    <Image src={image} alt={`Ürün ${index + 1}`} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" unoptimized />
+                    <Image src={image} alt={`Urun ${index + 1}`} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" unoptimized />
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
@@ -192,13 +200,13 @@ export default function NewProductPage() {
                     {uploadingCount > 0 ? (
                       <>
                         <Loader2 className="h-8 w-8 animate-spin" />
-                        <span className="mt-2 text-sm">{uploadingCount} yükleniyor...</span>
+                        <span className="mt-2 text-sm">{uploadingCount} yukleniyor...</span>
                       </>
                     ) : (
                       <>
                         <Upload className="h-8 w-8" />
-                        <span className="mt-2 text-sm">Yükle</span>
-                        <span className="mt-0.5 text-xs opacity-60">Çoklu seçim yapabilirsiniz</span>
+                        <span className="mt-2 text-sm">Yukle</span>
+                        <span className="mt-0.5 text-xs opacity-60">Coklu secim yapabilirsiniz</span>
                       </>
                     )}
                   </button>
@@ -207,37 +215,34 @@ export default function NewProductPage() {
             </CardContent>
           </Card>
 
-          {/* Details */}
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="font-serif">Detaylar</CardTitle>
-              <CardDescription>Ürünün fiziksel özellikleri ve durumu</CardDescription>
+              <CardDescription>Urunun fiziksel ozellikleri ve durumu</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="dimensions">Boyutlar *</Label>
-                  <Input id="dimensions" name="dimensions" placeholder="Örn: 65cm x 35cm x 15cm" required className="bg-muted/50" />
+                  <Input id="dimensions" name="dimensions" placeholder="Orn: 65cm x 35cm x 15cm" required className="bg-muted/50" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="condition">Durum *</Label>
-                  <Input id="condition" name="condition" placeholder="Örn: Mükemmel durumda" required className="bg-muted/50" />
+                  <Input id="condition" name="condition" placeholder="Orn: Mukemmel durumda" required className="bg-muted/50" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="conditionDetails">Durum Detayları</Label>
-                <Textarea id="conditionDetails" name="conditionDetails" rows={3} placeholder="Aşınma, restorasyon vb. detaylar..." className="bg-muted/50" />
+                <Label htmlFor="conditionDetails">Durum Detaylari</Label>
+                <Textarea id="conditionDetails" name="conditionDetails" rows={3} placeholder="Asinma, restorasyon vb. detaylar..." className="bg-muted/50" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Status & Price */}
           <Card className="bg-card">
             <CardHeader>
-              <CardTitle className="font-serif">Durum & Fiyat</CardTitle>
+              <CardTitle className="font-serif">Durum ve Fiyat</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -247,30 +252,29 @@ export default function NewProductPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Aktif (Satışta)</SelectItem>
-                    <SelectItem value="sold">Satıldı</SelectItem>
+                    <SelectItem value="active">Aktif (Satista)</SelectItem>
+                    <SelectItem value="sold">Satildi</SelectItem>
                     <SelectItem value="reserved">Rezerve</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="price">Fiyat (₺) *</Label>
+                <Label htmlFor="price">Fiyat (TL) *</Label>
                 <Input id="price" name="price" type="number" placeholder="0" required className="bg-muted/50" />
               </div>
             </CardContent>
           </Card>
 
-          {/* Classification */}
           <Card className="bg-card">
             <CardHeader>
-              <CardTitle className="font-serif">Sınıflandırma</CardTitle>
+              <CardTitle className="font-serif">Siniflandirma</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Kategori *</Label>
                 <Select value={categoryId} onValueChange={setCategoryId}>
                   <SelectTrigger className="bg-muted/50">
-                    <SelectValue placeholder="Seçin" />
+                    <SelectValue placeholder="Secin" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
@@ -282,36 +286,58 @@ export default function NewProductPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Dönem *</Label>
-                <Select value={era} onValueChange={setEra}>
+                <Label>Donem</Label>
+                <Select
+                  value={selectedPeriodId}
+                  onValueChange={(value) => {
+                    setSelectedPeriodId(value)
+                    if (value) {
+                      setCustomPeriodName("")
+                    }
+                  }}
+                >
                   <SelectTrigger className="bg-muted/50">
-                    <SelectValue placeholder="Seçin" />
+                    <SelectValue placeholder="Mevcut donem secin" />
                   </SelectTrigger>
                   <SelectContent>
-                    {eras.map((e) => (
-                      <SelectItem key={e.value} value={e.value}>
-                        {e.label}
+                    {periods.map((period) => (
+                      <SelectItem key={period.id} value={period.id.toString()}>
+                        {period.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
+                <Label htmlFor="customPeriodName">Yeni Donem Ekle</Label>
+                <Input
+                  id="customPeriodName"
+                  value={customPeriodName}
+                  onChange={(e) => {
+                    setCustomPeriodName(e.target.value)
+                    if (e.target.value.trim().length > 0) {
+                      setSelectedPeriodId("")
+                    }
+                  }}
+                  placeholder="Orn: Gec Osmanli"
+                  className="bg-muted/50"
+                />
+              </div>
+              <div className="space-y-2">
                 <Label>Malzeme</Label>
                 <Input
                   value={material}
                   onChange={(e) => setMaterial(e.target.value)}
-                  placeholder="Örn: Ahşap, Pirinç, Gümüş"
+                  placeholder="Orn: Ahsap, Pirinc, Gumus"
                   className="bg-muted/50"
                 />
               </div>
             </CardContent>
           </Card>
 
-          {/* Actions */}
           <div className="flex gap-3">
             <Button type="button" variant="outline" className="flex-1 bg-transparent" onClick={() => router.back()}>
-              İptal
+              Iptal
             </Button>
             <Button type="submit" className="flex-1 bg-primary text-primary-foreground" disabled={isSaving}>
               {isSaving ? "Kaydediliyor..." : "Kaydet"}

@@ -36,15 +36,15 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
   } = useProductActions(product, maxStock)
 
   return (
-    <main>
+    <main className="overflow-x-hidden">
       {/* Breadcrumb */}
       <nav className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
-        <ol className="flex items-center gap-2 text-sm text-muted-foreground">
+        <ol className="flex min-w-0 items-center gap-2 overflow-hidden text-sm text-muted-foreground">
           <li><Link href="/" className="hover:text-primary transition-colors">Ana Sayfa</Link></li>
           <ChevronRight className="h-4 w-4" />
           <li><Link href="/urunler" className="hover:text-primary transition-colors">Ürünler</Link></li>
           <ChevronRight className="h-4 w-4" />
-          <li className="text-foreground font-medium truncate max-w-[200px]">{product.title}</li>
+          <li className="max-w-[150px] truncate font-medium text-foreground sm:max-w-[220px]">{product.title}</li>
         </ol>
       </nav>
 
@@ -53,14 +53,15 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
           <ImageGallery images={productImages} productName={product.title} />
 
-          <div className="flex flex-col">
+          <div className="min-w-0 flex flex-col">
             {/* Status Badge */}
-            <div className="mb-4">
+            <div className="mb-4 flex items-center justify-between gap-3">
               {status !== "sold" ? (
                 <Badge className="bg-primary text-primary-foreground">Tek Ürün</Badge>
               ) : (
                 <Badge variant="secondary" className="bg-muted-foreground text-muted">Satıldı</Badge>
               )}
+              <p className="text-xs font-medium tracking-wide text-muted-foreground">CAN-{product.id.toString().padStart(4, "0")}</p>
             </div>
 
             {/* Title & Era */}
@@ -95,7 +96,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
             )}
 
             {/* Quick Details */}
-            <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               {condition && (
                 <div className="rounded-lg bg-muted/50 p-4">
                   <p className="text-xs uppercase tracking-wider text-muted-foreground">Durum</p>
@@ -125,9 +126,9 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
 
             {/* CTA Buttons */}
             {status !== "sold" && !outOfStock && (
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-6 grid grid-cols-1 gap-2.5">
                 <Button
-                  className="flex-1 h-12 gap-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md shadow-sm font-medium"
+                  className="min-h-11 w-full gap-2 rounded-md bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
                   onClick={handleAddToCart}
                   disabled={addingToCart}
                 >
@@ -177,19 +178,19 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
         {/* Detailed Tabs */}
         <div className="mt-16">
           <Tabs defaultValue="details" className="w-full">
-            <TabsList className="w-full justify-start border-b border-border bg-transparent p-0 h-auto">
-              <TabsTrigger value="details" className="rounded-none border-b-2 border-transparent px-6 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-serif">
+            <TabsList className="h-auto w-full justify-start overflow-x-auto overflow-y-hidden border-b border-border bg-transparent p-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <TabsTrigger value="details" className="flex-none shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-serif data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:px-6">
                 Detaylar
               </TabsTrigger>
-              <TabsTrigger value="provenance" className="rounded-none border-b-2 border-transparent px-6 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-serif">
+              <TabsTrigger value="provenance" className="flex-none shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-serif data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:px-6">
                 Hikaye & Köken
               </TabsTrigger>
               {condition && (
-                <TabsTrigger value="condition" className="rounded-none border-b-2 border-transparent px-6 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-serif">
+                <TabsTrigger value="condition" className="flex-none shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-serif data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:px-6">
                   Durum Raporu
                 </TabsTrigger>
               )}
-              <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent px-6 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none font-serif">
+              <TabsTrigger value="reviews" className="flex-none shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-serif data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:px-6">
                 Yorumlar
               </TabsTrigger>
             </TabsList>

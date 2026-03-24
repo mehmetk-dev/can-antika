@@ -3,22 +3,31 @@
 import { X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { priceRanges } from "@/lib/products"
-import type { CategoryResponse } from "@/lib/types"
+import type { CategoryResponse, PeriodResponse } from "@/lib/types"
 
 interface ActiveFiltersProps {
   selectedFilters: {
     categories: string[]
+    periods: string[]
     priceRanges: string[]
   }
   onRemoveFilter: (filterType: string, value: string) => void
   apiCategories?: CategoryResponse[]
+  apiPeriods?: PeriodResponse[]
 }
 
-export function ActiveFilters({ selectedFilters, onRemoveFilter, apiCategories = [] }: ActiveFiltersProps) {
+export function ActiveFilters({
+  selectedFilters,
+  onRemoveFilter,
+  apiCategories = [],
+  apiPeriods = [],
+}: ActiveFiltersProps) {
   const getLabel = (type: string, value: string) => {
     switch (type) {
       case "categories":
         return apiCategories.find((c) => c.id.toString() === value)?.name || value
+      case "periods":
+        return apiPeriods.find((p) => p.id.toString() === value)?.name || value
       case "priceRanges":
         return priceRanges.find((p) => p.value === value)?.label
       default:
@@ -28,6 +37,7 @@ export function ActiveFilters({ selectedFilters, onRemoveFilter, apiCategories =
 
   const allFilters = [
     ...selectedFilters.categories.map((v) => ({ type: "categories", value: v })),
+    ...selectedFilters.periods.map((v) => ({ type: "periods", value: v })),
     ...selectedFilters.priceRanges.map((v) => ({ type: "priceRanges", value: v })),
   ]
 

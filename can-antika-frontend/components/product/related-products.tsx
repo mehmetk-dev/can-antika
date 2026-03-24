@@ -2,6 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { resolveImageUrl } from "@/lib/image-url"
 import type { ProductResponse } from "@/lib/types"
 
 interface RelatedProductsProps {
@@ -31,16 +32,16 @@ export function RelatedProducts({ products, currentProductId }: RelatedProductsP
           </Link>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
           {relatedProducts.map((product) => (
             <Link
               key={product.id}
               href={`/urun/${product.slug ?? product.id}`}
-              className="group relative overflow-hidden rounded-lg bg-card"
+              className="group relative min-w-[78%] snap-start overflow-hidden rounded-lg bg-card sm:min-w-0"
             >
               <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
-                  src={product.imageUrls?.[0] || "/placeholder.svg"}
+                  src={resolveImageUrl(product.imageUrls?.[0])}
                   alt={product.title}
                   fill
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

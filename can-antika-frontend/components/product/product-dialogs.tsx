@@ -21,9 +21,10 @@ import type { ProductResponse } from "@/lib/types"
 
 interface ProductDialogsProps {
     product: ProductResponse
+    className?: string
 }
 
-export function PurchaseDialog({ product }: ProductDialogsProps) {
+export function PurchaseDialog({ product, className = "" }: ProductDialogsProps) {
     const { isAuthenticated } = useAuth()
     const router = useRouter()
     const [isOpen, setIsOpen] = useState(false)
@@ -66,7 +67,7 @@ export function PurchaseDialog({ product }: ProductDialogsProps) {
             setIsOpen(open)
         }}>
             <button
-                className="flex flex-1 h-12 items-center justify-center gap-2 rounded-md bg-secondary text-secondary-foreground shadow-sm px-4 text-sm font-medium hover:bg-secondary/80 transition-colors"
+                className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-[#d4af37]/50 bg-[#d4af37]/15 px-4 text-sm font-medium text-[#6f4c1f] shadow-sm transition-colors hover:bg-[#d4af37]/25 ${className}`}
                 onClick={() => {
                     if (!isAuthenticated) {
                         toast.error("Satın alma talebi için giriş yapmalısınız")
@@ -114,7 +115,7 @@ export function PurchaseDialog({ product }: ProductDialogsProps) {
     )
 }
 
-export function ContactDialog({ product }: ProductDialogsProps) {
+export function ContactDialog({ product, className = "" }: ProductDialogsProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [name, setName] = useState("")
     const [phone, setPhone] = useState("")
@@ -148,7 +149,7 @@ export function ContactDialog({ product }: ProductDialogsProps) {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <button
-                className="flex flex-1 h-12 items-center justify-center gap-2 rounded-md border border-primary/20 bg-primary/5 px-4 text-sm font-medium text-primary shadow-sm hover:bg-primary/10 transition-colors"
+                className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-primary/30 bg-background px-4 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-primary/5 ${className}`}
                 onClick={() => setIsOpen(true)}
             >
                 <MessageCircle className="h-4 w-4" />

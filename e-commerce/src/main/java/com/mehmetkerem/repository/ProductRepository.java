@@ -20,7 +20,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     List<Product> findByCategoryId(Long categoryId);
 
+    List<Product> findByPeriodId(Long periodId);
+
     boolean existsByCategoryId(Long categoryId);
+
+    boolean existsByPeriodId(Long periodId);
 
     long countByStockLessThan(int threshold);
 

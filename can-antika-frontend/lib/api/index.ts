@@ -1,6 +1,7 @@
 // Re-export hub — domain API modules
 export { authApi } from "./auth";
 export { productApi } from "./product";
+export { periodApi } from "./period";
 export { categoryApi } from "./category";
 export { cartApi } from "./cart";
 export { orderApi } from "./order";

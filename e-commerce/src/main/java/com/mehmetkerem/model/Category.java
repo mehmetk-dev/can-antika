@@ -28,6 +28,9 @@ public class Category {
 
     private String description;
 
+    @Column(name = "cover_image_url", length = 1000)
+    private String coverImageUrl;
+
     @Builder.Default
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean deleted = false;

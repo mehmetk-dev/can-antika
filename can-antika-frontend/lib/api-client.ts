@@ -12,6 +12,7 @@ interface RequestOptions {
     params?: Record<string, string | number | boolean | undefined | null>;
     headers?: Record<string, string>;
     noAuth?: boolean;
+    timeoutMs?: number;
 }
 
 function stripV1Suffix(url: string): string {
@@ -29,6 +30,20 @@ function normalizeBaseUrl(baseUrl: string): string | null {
     // Relative values like /v1 are valid only if there's an explicit proxy.
     // We avoid forcing same-origin in production since many deployments use api subdomain.
     return null;
+}
+
+function isLoopbackHostname(hostname: string): boolean {
+    const h = hostname.toLowerCase();
+    return h === "localhost" || h === "127.0.0.1" || h === "::1";
+}
+
+function isLoopbackUrl(url: string): boolean {
+    try {
+        const parsed = new URL(url);
+        return isLoopbackHostname(parsed.hostname);
+    } catch {
+        return false;
+    }
 }
 
 function getCandidateBaseUrls(): string[] {
@@ -54,11 +69,20 @@ function getCandidateBaseUrls(): string[] {
     }
 
     // Explicitly configured public API URL
-    addUrl(normalizedEnvBaseUrl);
+    // If browser is opened from non-loopback host, skip localhost env URLs.
+    if (!isBrowser) {
+        addUrl(normalizedEnvBaseUrl);
+    } else if (normalizedEnvBaseUrl) {
+        const browserHost = window.location?.hostname || "";
+        if (isLoopbackHostname(browserHost) || !isLoopbackUrl(normalizedEnvBaseUrl)) {
+            addUrl(normalizedEnvBaseUrl);
+        }
+    }
 
     if (isBrowser && window.location?.origin) {
         const originBaseUrl = window.location.origin.replace(/\/$/, "");
         const hostname = window.location.hostname.toLowerCase();
+        const isLoopbackBrowser = isLoopbackHostname(hostname);
         const onCanAntikaDomain = hostname === "canantika.com" || hostname === "www.canantika.com";
 
         // Production safety net: call API domain directly on main domain.
@@ -68,11 +92,12 @@ function getCandidateBaseUrls(): string[] {
 
         // In development, keep local fallbacks and same-origin proxy option.
         if (process.env.NODE_ENV !== "production") {
-            addUrl("http://localhost:8080");
-            addUrl("http://127.0.0.1:8080");
-            addUrl("http://localhost:8085");
-            addUrl("http://127.0.0.1:8085");
-            addUrl(originBaseUrl);
+            const runtimeHostApi = `${window.location.protocol}//${window.location.hostname}:8085`;
+            addUrl(runtimeHostApi);
+            if (isLoopbackBrowser) {
+                addUrl("http://localhost:8085");
+                addUrl("http://127.0.0.1:8085");
+            }
         } else if (!normalizedEnvBaseUrl && !onCanAntikaDomain) {
             // Non-canantika production environments may use same-origin proxy.
             addUrl(originBaseUrl);
@@ -146,7 +171,8 @@ async function tryRefreshToken(baseUrl: string): Promise<boolean> {
 }
 
 async function request<T>(method: HttpMethod, path: string, options: RequestOptions = {}): Promise<T> {
-    const { body, params, headers: extraHeaders, noAuth } = options;
+    const { body, params, headers: extraHeaders, noAuth, timeoutMs } = options;
+    const effectiveTimeoutMs = timeoutMs ?? REQUEST_TIMEOUT_MS;
 
     const baseUrls = getCandidateBaseUrls();
     let lastError: Error | null = null;
@@ -167,7 +193,7 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
                 headers,
                 credentials: "include",
                 body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-                signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+                signal: AbortSignal.timeout(effectiveTimeoutMs),
             });
 
             // Auto-refresh on 401
@@ -179,7 +205,7 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
                         headers,
                         credentials: "include",
                         body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-                        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+                        signal: AbortSignal.timeout(effectiveTimeoutMs),
                     });
                 } else {
                     throw new Error("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
@@ -240,7 +266,8 @@ export const api = {
 
     /** For endpoints that return ResponseEntity directly (not wrapped in ResultData) */
     raw: async <T>(method: HttpMethod, path: string, options: RequestOptions = {}): Promise<T> => {
-        const { body, params, headers: extraHeaders } = options;
+        const { body, params, headers: extraHeaders, timeoutMs } = options;
+        const effectiveTimeoutMs = timeoutMs ?? REQUEST_TIMEOUT_MS;
         const baseUrls = getCandidateBaseUrls();
         let lastError: Error | null = null;
 
@@ -258,7 +285,7 @@ export const api = {
                     headers,
                     credentials: "include",
                     body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-                    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+                    signal: AbortSignal.timeout(effectiveTimeoutMs),
                 });
 
                 if (!res.ok) {
