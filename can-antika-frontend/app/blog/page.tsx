@@ -2,6 +2,7 @@ import { cache } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { BlogPostsClient } from "@/components/blog-posts-client"
+import { PageHero } from "@/components/page-hero"
 import { fetchApiDataWithFallback } from "@/lib/server-api-fallback"
 import type { Metadata } from "next"
 import Image from "next/image"
@@ -60,8 +61,17 @@ export default async function BlogPage() {
         <div className="min-h-screen bg-background">
             <Header />
             <main>
+                <PageHero
+                    imageSrc="/blog-hero.png"
+                    imageAlt="Blog"
+                    eyebrow="Blog"
+                    title="Antika Dünyası"
+                    description="Antika koleksiyonculuğu, restorasyon ipuçları ve tarihi eserler hakkında yazılarımız"
+                    priority
+                />
+
                 {/* Hero - Vintage Style */}
-                <section className="relative py-32 overflow-hidden flex flex-col items-center justify-center min-h-[450px]">
+                {false && <section className="hidden">
                     {/* Background */}
                     <div className="absolute inset-0">
                         <Image src="/blog-hero.png" alt="Blog" fill priority sizes="100vw" className="object-cover" />
@@ -97,7 +107,7 @@ export default async function BlogPage() {
                             <div className="w-24 h-px bg-accent/50" />
                         </div>
                     </div>
-                </section>
+                </section>}
 
                 {/* Filters & Posts */}
                 <section className="py-16">

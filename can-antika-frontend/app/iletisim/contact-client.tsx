@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { CheckCircle, Send, MessageCircle } from "lucide-react"
 import { VintageLocationIcon, VintagePhoneIcon, VintageMailIcon, VintageClockIcon } from "@/components/ui/vintage-icons"
+import { PageHero } from "@/components/page-hero"
 
 import { toast } from "sonner"
 import { supportTicketApi } from "@/lib/api"
@@ -57,8 +58,16 @@ export function ContactClient() {
     <div className="min-h-screen bg-background">
       <Header />
       <main>
+        <PageHero
+          imageSrc="/vintage-antique-shop-storefront-istanbul-sepia-ton.jpg"
+          imageAlt="İletişim"
+          eyebrow="İletişim"
+          title="İletişim"
+          description="Sorularınız için buradayız"
+        />
+
         {/* Hero */}
-        <section className="relative py-24 bg-primary overflow-hidden">
+        {false && <section className="hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-accent/30 rounded-full" />
           </div>
@@ -77,7 +86,7 @@ export function ContactClient() {
             <h1 className="font-serif text-5xl md:text-6xl font-bold text-primary-foreground">İletişim</h1>
             <p className="mt-4 text-lg text-primary-foreground/70">Sorularınız için buradayız</p>
           </div>
-        </section>
+        </section>}
 
         <section className="py-20 bg-muted/20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">

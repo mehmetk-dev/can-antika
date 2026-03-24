@@ -7,6 +7,7 @@ import { Loader2, HelpCircle, ChevronDown } from "lucide-react"
 import { faqApi } from "@/lib/api"
 import Link from "next/link"
 import Image from "next/image"
+import { PageHero } from "@/components/page-hero"
 
 interface FaqItem {
     id: number
@@ -52,8 +53,17 @@ export default function FaqPage() {
         <div className="min-h-screen bg-background">
             <Header />
             <main>
+                <PageHero
+                    imageSrc="/sss-hero.png"
+                    imageAlt="SSS"
+                    eyebrow="Yardım"
+                    title="Sıkça Sorulan Sorular"
+                    description="Merak ettikleriniz ve sıkça karşılaştığımız soruların yanıtları"
+                    priority
+                />
+
                 {/* Hero - Vintage Style */}
-                <section className="relative py-32 overflow-hidden flex flex-col items-center justify-center min-h-[450px]">
+                {false && <section className="hidden">
                     {/* Background */}
                     <div className="absolute inset-0">
                         <Image src="/sss-hero.png" alt="SSS" fill priority sizes="100vw" className="object-cover" />
@@ -89,7 +99,7 @@ export default function FaqPage() {
                             <div className="w-24 h-px bg-accent/50" />
                         </div>
                     </div>
-                </section>
+                </section>}
 
                 {/* FAQ Content */}
                 <section className="py-16">
