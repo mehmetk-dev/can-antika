@@ -67,7 +67,7 @@ export function PurchaseDialog({ product, className = "" }: ProductDialogsProps)
             setIsOpen(open)
         }}>
             <button
-                className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-[#d4af37]/50 bg-[#d4af37]/15 px-4 text-sm font-medium text-[#6f4c1f] shadow-sm transition-colors hover:bg-[#d4af37]/25 ${className}`}
+                className={`inline-flex min-h-11 w-full max-w-full items-center justify-center gap-2 whitespace-normal break-words rounded-md border border-[#d4af37]/50 bg-[#d4af37]/15 px-3 py-2 text-center text-sm font-medium text-[#6f4c1f] shadow-sm transition-colors hover:bg-[#d4af37]/25 ${className}`}
                 onClick={() => {
                     if (!isAuthenticated) {
                         toast.error("Satın alma talebi için giriş yapmalısınız")
@@ -154,7 +154,7 @@ export function ContactDialog({ product, className = "" }: ProductDialogsProps) 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <button
-                className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-primary/30 bg-background px-4 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-primary/5 ${className}`}
+                className={`inline-flex min-h-11 w-full max-w-full items-center justify-center gap-2 whitespace-normal break-words rounded-md border border-primary/30 bg-background px-3 py-2 text-center text-sm font-medium text-primary shadow-sm transition-colors hover:bg-primary/5 ${className}`}
                 onClick={() => setIsOpen(true)}
             >
                 <MessageCircle className="h-4 w-4" />

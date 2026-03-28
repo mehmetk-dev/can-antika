@@ -10,7 +10,7 @@ interface QuantitySelectorProps {
 
 export function QuantitySelector({ max, value, onChange, disabled }: QuantitySelectorProps) {
     return (
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <label className="text-sm font-medium text-foreground" htmlFor="quantity-selector">Adet:</label>
             <div className="flex items-center gap-2">
                 <Button

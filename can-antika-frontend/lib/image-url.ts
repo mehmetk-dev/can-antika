@@ -23,3 +23,35 @@ export function resolveImageUrl(raw?: string | null): string {
 
   return url
 }
+
+export function isCloudinaryImageUrl(url?: string | null): boolean {
+  return Boolean(url && url.includes("res.cloudinary.com") && url.includes("/upload/"))
+}
+
+export function toCloudinaryResponsiveUrl(rawUrl: string, width: number, quality = 75): string {
+  if (!isCloudinaryImageUrl(rawUrl)) return rawUrl
+
+  const safeWidth = Math.max(120, Math.min(2200, Math.round(width)))
+  const safeQuality = Math.max(40, Math.min(95, Math.round(quality)))
+  const transform = `f_auto,q_${safeQuality},c_limit,w_${safeWidth}`
+
+  const uploadMarker = "/upload/"
+  const uploadIndex = rawUrl.indexOf(uploadMarker)
+  if (uploadIndex === -1) return rawUrl
+
+  const prefix = rawUrl.slice(0, uploadIndex + uploadMarker.length)
+  const suffix = rawUrl.slice(uploadIndex + uploadMarker.length)
+  const firstSlashIndex = suffix.indexOf("/")
+  const firstSegment = firstSlashIndex === -1 ? suffix : suffix.slice(0, firstSlashIndex)
+  const remainingPath = firstSlashIndex === -1 ? "" : suffix.slice(firstSlashIndex + 1)
+
+  const looksLikeTransform =
+    firstSegment.includes(",") ||
+    /^(?:f_|q_|c_|w_|h_|dpr_|g_|ar_|e_|l_|fl_)/.test(firstSegment)
+
+  if (looksLikeTransform) {
+    return `${prefix}${transform}/${remainingPath}`
+  }
+
+  return `${prefix}${transform}/${suffix}`
+}

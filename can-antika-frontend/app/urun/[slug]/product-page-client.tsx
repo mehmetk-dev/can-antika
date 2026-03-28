@@ -27,14 +27,20 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   useEffect(() => {
     let isCancelled = false
 
+    if (initialProduct) {
+      return () => {
+        isCancelled = true
+      }
+    }
+
     const numericId = /^\d+$/.test(slug) ? Number.parseInt(slug, 10) : null
 
     const fetchProduct = async () => {
       if (numericId !== null) {
-        return productApi.getById(numericId, 10000)
+        return productApi.getById(numericId, 5000)
       }
 
-      return productApi.getBySlug(slug, 10000)
+      return productApi.getBySlug(slug, 5000)
     }
 
     fetchProduct()

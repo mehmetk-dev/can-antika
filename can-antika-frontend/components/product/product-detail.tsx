@@ -62,9 +62,11 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
       {/* Product Section */}
       <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-          <ImageGallery images={productImages} productName={product.title} />
+          <div className="min-w-0 w-full">
+            <ImageGallery images={productImages} productName={product.title} />
+          </div>
 
-          <div className="min-w-0 flex flex-col">
+          <div className="min-w-0 w-full flex flex-col">
             {/* Status Badge */}
             <div className="mb-4 flex items-center justify-between gap-3">
               {!isSold ? (
@@ -139,7 +141,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
             {!isSold && (
               <div className="mt-6 grid grid-cols-1 gap-2.5">
                 <Button
-                  className="min-h-11 w-full gap-2 rounded-md bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+                  className="min-h-11 w-full max-w-full gap-2 whitespace-normal break-words rounded-md bg-primary px-3 py-2 text-center text-primary-foreground shadow-sm hover:bg-primary/90"
                   onClick={handleAddToCart}
                   disabled={addingToCart}
                 >
@@ -163,18 +165,18 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
             )}
 
             {/* Secondary Actions */}
-            <div className="mt-4 flex gap-4">
+            <div className="mt-4 flex flex-wrap gap-2 sm:gap-4">
               <Button
                 variant="ghost"
                 size="sm"
-                className="gap-2 text-muted-foreground hover:text-foreground"
+                className="min-w-0 flex-1 justify-center gap-2 text-muted-foreground hover:text-foreground sm:flex-none"
                 onClick={handleAddToWishlist}
                 disabled={addingToWishlist}
               >
                 <Heart className={`h-4 w-4 ${addedToWishlist ? "fill-red-500 text-red-500" : ""}`} />
                 {addingToWishlist ? "Ekleniyor..." : addedToWishlist ? "Favorilerde" : "Favorilere Ekle"}
               </Button>
-              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground" onClick={handleShare}>
+              <Button variant="ghost" size="sm" className="min-w-0 flex-1 justify-center gap-2 text-muted-foreground hover:text-foreground sm:flex-none" onClick={handleShare}>
                 <Share2 className="h-4 w-4" />
                 Paylaş
               </Button>

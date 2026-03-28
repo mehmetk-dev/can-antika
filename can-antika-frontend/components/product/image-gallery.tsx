@@ -5,7 +5,7 @@ import Image from "next/image"
 import { ZoomIn, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { resolveImageUrl } from "@/lib/image-url"
+import { isCloudinaryImageUrl, resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/image-url"
 
 interface ImageGalleryProps {
   images: string[]
@@ -19,6 +19,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
 
   const safeIndex = images.length > 0 ? Math.min(selectedIndex, images.length - 1) : 0
   const mainImage = images[safeIndex] ? resolveImageUrl(images[safeIndex]) : "/placeholder.svg"
+  const useCloudinaryLoader = isCloudinaryImageUrl(mainImage)
 
   const handlePrevious = () => {
     setUseFallbackImage(false)
@@ -39,17 +40,22 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
     setUseFallbackImage(true)
   }
 
+  const cloudinaryLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
+    return toCloudinaryResponsiveUrl(src, width, quality ?? 75)
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 w-full space-y-4">
       <Dialog>
         <DialogTrigger asChild>
-          <div className="group relative aspect-[3/4] cursor-zoom-in overflow-hidden rounded-lg bg-muted">
+          <div className="group relative aspect-[3/4] w-full max-w-full cursor-zoom-in overflow-hidden rounded-lg bg-muted">
             <Image
               src={useFallbackImage ? "/placeholder.svg" : mainImage}
               alt={productName}
               fill
               priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
+              loader={useCloudinaryLoader ? cloudinaryLoader : undefined}
+              sizes="(max-width: 640px) 92vw, (max-width: 1024px) 52vw, 42vw"
               className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
               onError={handleImageError}
             />
@@ -62,7 +68,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
+                  className="absolute left-2 top-1/2 z-10 -translate-y-1/2 bg-background/80 hover:bg-background"
                   onClick={(e) => {
                     e.stopPropagation()
                     handlePrevious()
@@ -73,7 +79,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
+                  className="absolute right-2 top-1/2 z-10 -translate-y-1/2 bg-background/80 hover:bg-background"
                   onClick={(e) => {
                     e.stopPropagation()
                     handleNext()
@@ -96,6 +102,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
               fill
               loading="lazy"
               decoding="async"
+              loader={useCloudinaryLoader ? cloudinaryLoader : undefined}
               sizes="85vw"
               className="object-contain"
               onError={handleImageError}
@@ -125,7 +132,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
       </Dialog>
 
       {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex w-full gap-2 overflow-x-auto pb-2">
           {images.map((image, index) => (
             <button
               key={index}
@@ -143,6 +150,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                 fill
                 loading="lazy"
                 decoding="async"
+                loader={isCloudinaryImageUrl(resolveImageUrl(image)) ? cloudinaryLoader : undefined}
                 sizes="80px"
                 className="object-cover object-center"
                 onError={(e) => {

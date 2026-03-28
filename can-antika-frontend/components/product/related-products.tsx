@@ -1,8 +1,9 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
-import { resolveImageUrl } from "@/lib/image-url"
+import { isCloudinaryImageUrl, resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/image-url"
 import type { ProductResponse } from "@/lib/types"
 
 interface RelatedProductsProps {
@@ -13,79 +14,92 @@ interface RelatedProductsProps {
 export function RelatedProducts({ products, currentProductId }: RelatedProductsProps) {
   const relatedProducts = products.filter((p) => p.id !== currentProductId).slice(0, 4)
 
+  const cloudinaryLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) =>
+    toCloudinaryResponsiveUrl(src, width, quality ?? 72)
+
   if (relatedProducts.length === 0) return null
 
   return (
-    <section className="relative overflow-hidden border-t border-border/60 bg-[linear-gradient(180deg,#f5f2ec_0%,#f0ebe2_44%,#ebe4d9_100%)] py-16 lg:py-20">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 left-[-8%] h-56 w-56 rounded-full bg-accent/20 blur-3xl" />
-        <div className="absolute -bottom-20 right-[-10%] h-64 w-64 rounded-full bg-primary/15 blur-3xl" />
-        <div
-          className="absolute inset-0 opacity-[0.14]"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%237B4019' stroke-opacity='0.35' stroke-width='0.8'%3E%3Crect x='12' y='12' width='96' height='96'/%3E%3Crect x='28' y='28' width='64' height='64'/%3E%3C/g%3E%3C/svg%3E\")",
-            backgroundSize: "120px 120px",
-          }}
-        />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-end justify-between">
+    <section className="border-t border-border/60 bg-[#f6f3ed] py-12 sm:py-14 lg:py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-end justify-between sm:mb-8">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary/70">Seçki</p>
-            <h2 className="mt-2 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary/70 sm:text-xs">
+              Sizin için seçtik
+            </p>
+            <h2 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:mt-2 sm:text-3xl">
               Benzer Ürünler
             </h2>
+            <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+              Koleksiyona yakın öne çıkan parçalar
+            </p>
           </div>
           <Link href="/urunler" prefetch={false} className="hidden sm:block">
-            <Button variant="ghost" className="group gap-2 rounded-full border border-primary/20 bg-background/60 px-5 text-primary backdrop-blur-sm hover:bg-background">
+            <Button variant="outline" className="group gap-2 rounded-full border-primary/25 bg-background px-5 text-primary hover:bg-primary/5">
               Tümünü Gör
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
         </div>
 
-        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
-          {relatedProducts.map((product) => (
-            <Link
-              key={product.id}
-              href={`/urun/${product.slug ?? product.id}`}
-              prefetch={false}
-              className="group relative min-w-[78%] snap-start overflow-hidden rounded-2xl border border-primary/10 bg-[linear-gradient(180deg,#fffaf3_0%,#f7f0e4_100%)] shadow-[0_12px_30px_rgba(56,34,18,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_18px_36px_rgba(56,34,18,0.16)] sm:min-w-0"
-            >
-              <div className="relative aspect-[3/4] overflow-hidden">
-                <Image
-                  src={resolveImageUrl(product.imageUrls?.[0])}
-                  alt={product.title}
-                  fill
-                  loading="lazy"
-                  decoding="async"
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
-                <div className="absolute inset-x-4 bottom-4 rounded-full border border-white/25 bg-black/30 px-3 py-1 text-center text-[11px] font-medium uppercase tracking-wider text-white/90 backdrop-blur-sm">
-                  Tek Parça Koleksiyon
-                </div>
-              </div>
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+          {relatedProducts.map((product) => {
+            const imageUrl = resolveImageUrl(product.imageUrls?.[0])
+            const hasCloudinaryImage = isCloudinaryImageUrl(imageUrl)
 
-              <div className="p-4">
-                {product.category?.name && (
-                  <p className="inline-flex rounded-full border border-primary/15 bg-primary/5 px-2.5 py-1 text-[11px] uppercase tracking-wider text-primary/80">
-                    {product.category.name}
-                  </p>
-                )}
-                <h3 className="mt-2 line-clamp-2 font-serif text-[1.15rem] font-medium leading-snug text-foreground">
-                  {product.title}
-                </h3>
-                <div className="mt-3 flex items-center justify-between">
-                  <p className="font-serif text-xl font-semibold text-primary">₺{(product.price ?? 0).toLocaleString("tr-TR")}</p>
-                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Detayı Gör</span>
+            return (
+              <Link
+                key={product.id}
+                href={`/urun/${product.slug ?? product.id}`}
+                prefetch={false}
+                className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-background shadow-[0_6px_18px_rgba(33,24,14,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_14px_30px_rgba(33,24,14,0.14)]"
+              >
+                <div className="relative aspect-[4/5] overflow-hidden bg-muted">
+                  <Image
+                    src={imageUrl}
+                    alt={product.title}
+                    fill
+                    loading="lazy"
+                    decoding="async"
+                    loader={hasCloudinaryImage ? cloudinaryLoader : undefined}
+                    sizes="(max-width: 640px) 47vw, (max-width: 1024px) 31vw, 24vw"
+                    className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <span className="absolute left-2 top-2 rounded-md bg-background/92 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary shadow-sm sm:left-3 sm:top-3">
+                    Tek Ürün
+                  </span>
                 </div>
-              </div>
-            </Link>
-          ))}
+
+                <div className="flex grow flex-col p-3 sm:p-4">
+                  {product.category?.name && (
+                    <p className="inline-flex w-fit rounded-md border border-primary/15 bg-primary/5 px-2 py-1 text-[10px] uppercase tracking-wider text-primary/80 sm:text-[11px]">
+                      {product.category.name}
+                    </p>
+                  )}
+                  <h3 className="mt-2 min-h-[2.8rem] line-clamp-2 font-serif text-base font-medium leading-tight text-foreground sm:text-lg">
+                    {product.title}
+                  </h3>
+                  <div className="mt-3 flex items-end justify-between gap-2">
+                    <p className="font-serif text-lg font-semibold text-primary sm:text-xl">
+                      ₺{(product.price ?? 0).toLocaleString("tr-TR")}
+                    </p>
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-xs">
+                      Detayı Gör
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+
+        <div className="mt-6 sm:hidden">
+          <Link href="/urunler" prefetch={false}>
+            <Button variant="outline" className="w-full gap-2 border-primary/25 bg-background text-primary hover:bg-primary/5">
+              Tüm Ürünleri Gör
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
