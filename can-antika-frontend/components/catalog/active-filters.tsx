@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { priceRanges } from "@/lib/products"
+import { priceRanges } from "@/lib/product/products"
 import type { CategoryResponse, PeriodResponse } from "@/lib/types"
 
 interface ActiveFiltersProps {

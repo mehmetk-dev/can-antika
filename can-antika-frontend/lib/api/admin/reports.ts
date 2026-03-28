@@ -1,5 +1,5 @@
 import { api } from "../../api-client";
-import type { CursorResponse, SalesByCategoryReport, StockReport } from "../../types";
+import type { CursorResponse, SalesByCategoryReport, StockReport, RevenueReport, CustomerReport } from "../../types";
 
 export const reportApi = {
     salesByCategory: () =>
@@ -11,10 +11,10 @@ export const reportApi = {
         }),
 
     customerReport: () =>
-        api.get<Record<string, unknown>[]>("/v1/admin/reports/customers"),
+        api.get<CustomerReport[]>("/v1/admin/reports/customers"),
 
     revenueReport: (months = 12) =>
-        api.get<Record<string, unknown>[]>("/v1/admin/reports/revenue", {
+        api.get<RevenueReport[]>("/v1/admin/reports/revenue", {
             params: { months },
         }),
 

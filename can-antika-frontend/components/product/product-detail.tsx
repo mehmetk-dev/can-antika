@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback, useMemo } from "react"
 import Link from "next/link"
 import { ChevronRight, Heart, Share2, ShoppingBag, Check, Shield } from "lucide-react"
 import { ImageGallery } from "@/components/product/image-gallery"
@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useProductActions } from "@/hooks/useProductActions"
-import { getProductAttributes, eraLabels } from "@/lib/product-utils"
+import { getProductAttributes, eraLabels } from "@/lib/product/product-utils"
 import type { ProductResponse } from "@/lib/types"
 
 interface ProductDetailProps {
@@ -25,19 +25,15 @@ interface ProductDetailProps {
 
 export function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {
   const [activeTab, setActiveTab] = useState("details")
-  const [hasOpenedReviews, setHasOpenedReviews] = useState(false)
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = useCallback((tab: string) => {
     setActiveTab(tab)
-    if (tab === "reviews" && !hasOpenedReviews) {
-      setHasOpenedReviews(true)
-    }
-  }
+  }, [])
 
-  const maxStock = Math.max(product.stock ?? 0, 0)
-  const { era, condition, dimensions, provenance, status } = getProductAttributes(product)
+  const maxStock = useMemo(() => Math.max(product.stock ?? 0, 0), [product.stock])
+  const { era, condition, dimensions, provenance, status } = useMemo(() => getProductAttributes(product), [product])
   const outOfStock = maxStock <= 0
   const isSold = status === "sold" || outOfStock
-  const productImages = product.imageUrls?.length ? product.imageUrls : ["/placeholder.svg"]
+  const productImages = useMemo(() => product.imageUrls?.length ? product.imageUrls : ["/placeholder.svg"], [product.imageUrls])
 
   const {
     quantity, setQuantity,
@@ -207,7 +203,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 Yorumlar
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="details" forceMount className="mt-8 data-[state=inactive]:hidden">
+            <TabsContent value="details" className="mt-8">
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {era && (
                   <div>
@@ -233,7 +229,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 </div>
               </div>
             </TabsContent>
-            <TabsContent value="provenance" forceMount className="mt-8 data-[state=inactive]:hidden">
+            <TabsContent value="provenance" className="mt-8">
               <div className="max-w-2xl">
                 <h3 className="font-serif text-xl font-semibold text-foreground">Eserin Hikayesi</h3>
                 <p className="mt-4 leading-relaxed text-muted-foreground">
@@ -245,7 +241,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
               </div>
             </TabsContent>
             {condition && (
-              <TabsContent value="condition" forceMount className="mt-8 data-[state=inactive]:hidden">
+              <TabsContent value="condition" className="mt-8">
                 <div className="max-w-2xl">
                   <h3 className="font-serif text-xl font-semibold text-foreground">Durum Değerlendirmesi</h3>
                   <div className="mt-4 rounded-lg border border-border bg-card p-6">
@@ -264,8 +260,8 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 </div>
               </TabsContent>
             )}
-            <TabsContent value="reviews" forceMount={hasOpenedReviews} className="mt-8 data-[state=inactive]:hidden">
-              {hasOpenedReviews ? <ProductReviews productId={product.id} /> : null}
+            <TabsContent value="reviews" className="mt-8">
+              <ProductReviews productId={product.id} />
             </TabsContent>
           </Tabs>
         </div>

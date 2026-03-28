@@ -1,6 +1,6 @@
 import { Truck } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getTrackingUrl, isNoParamCarrier } from "@/lib/carrier-tracking"
+import { getTrackingUrl, isNoParamCarrier } from "@/lib/commerce/carrier-tracking"
 import type { OrderResponse } from "@/lib/types"
 import { toast } from "sonner"
 

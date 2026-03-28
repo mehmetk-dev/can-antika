@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://canantika.com"
-import { getServerApiUrl } from "@/lib/server-api-url"
+import { getServerApiUrl } from "@/lib/server/server-api-url"
 const API_URL = getServerApiUrl()
 
 interface ProductItem {

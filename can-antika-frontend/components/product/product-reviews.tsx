@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/lib/auth/auth-context"
 import { reviewApi } from "@/lib/api"
 import type { ReviewResponse } from "@/lib/types"
-import { formatDateTR } from "@/lib/utils"
+import { formatDateTR, getErrorMessage } from "@/lib/utils"
 
 interface ProductReviewsProps {
     productId: number
@@ -30,8 +30,11 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
             .then((response) => {
                 if (!isCancelled) setReviews(response)
             })
-            .catch(() => {
-                if (!isCancelled) setReviews([])
+            .catch((e) => {
+                if (!isCancelled) {
+                    console.error("Yorumlar yüklenemedi:", e)
+                    setReviews([])
+                }
             })
             .finally(() => {
                 if (!isCancelled) setLoading(false)
@@ -70,7 +73,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
             setRating(5)
             toast.success("Yorumunuz eklendi")
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Yorum eklenemedi")
+            toast.error(getErrorMessage(err, "Yorum eklenemedi"))
         } finally {
             setSubmitting(false)
         }
@@ -126,6 +129,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
                         rows={3}
+                        maxLength={1000}
                         className="resize-none"
                     />
                     <Button onClick={handleSubmit} disabled={submitting} size="sm">

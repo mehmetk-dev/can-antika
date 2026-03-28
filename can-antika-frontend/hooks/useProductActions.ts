@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
-import { useAuth } from "@/lib/auth-context"
+import { getErrorMessage } from "@/lib/utils"
+import { useAuth } from "@/lib/auth/auth-context"
 import { cartApi, wishlistApi } from "@/lib/api"
-import { guestCart } from "@/lib/guest-cart"
+import { guestCart } from "@/lib/commerce/guest-cart"
 import type { ProductResponse } from "@/lib/types"
 
 export interface ProductActionsState {
@@ -28,13 +29,17 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
     const [addedToWishlist, setAddedToWishlist] = useState(false)
 
     useEffect(() => {
+        let cancelled = false
         if (isAuthenticated) {
             cartApi.getCart().then(cart => {
+                if (cancelled) return
                 const item = cart.items?.find(i => i.product.id === product.id)
                 if (item && item.quantity >= maxStock) {
                     setAddedToCart(true)
                 }
-            }).catch((e) => console.error("Sepet kontrol hatası:", e))
+            }).catch((e) => {
+                if (!cancelled) console.error("Sepet kontrol hatası:", e)
+            })
         } else {
             const items = guestCart.getItems()
             const item = items.find(i => i.product.id === product.id)
@@ -42,9 +47,10 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
                 setAddedToCart(true)
             }
         }
+        return () => { cancelled = true }
     }, [isAuthenticated, product.id, maxStock])
 
-    const handleAddToCart = async () => {
+    const handleAddToCart = useCallback(async () => {
         if (addedToCart) {
             toast.info("Bu ürün zaten sepetinizde")
             return
@@ -63,13 +69,13 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
             toast.success(`${quantity} adet ürün sepete eklendi`)
             setAddedToCart(true)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Sepete eklenirken hata oluştu")
+            toast.error(getErrorMessage(err, "Sepete eklenirken hata oluştu"))
         } finally {
             setAddingToCart(false)
         }
-    }
+    }, [addedToCart, quantity, maxStock, isAuthenticated, product])
 
-    const handleAddToWishlist = async () => {
+    const handleAddToWishlist = useCallback(async () => {
         if (!isAuthenticated) {
             toast.info("Favorilere eklemek için giriş yapmalısınız")
             return
@@ -84,13 +90,13 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
             toast.success("Ürün favorilere eklendi")
             setAddedToWishlist(true)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Favorilere eklenirken hata oluştu")
+            toast.error(getErrorMessage(err, "Favorilere eklenirken hata oluştu"))
         } finally {
             setAddingToWishlist(false)
         }
-    }
+    }, [isAuthenticated, addedToWishlist, product.id])
 
-    const handleShare = async () => {
+    const handleShare = useCallback(async () => {
         const url = window.location.href
         const title = product.title
         if (navigator.share) {
@@ -99,7 +105,7 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
             await navigator.clipboard.writeText(url)
             toast.success("Bağlantı kopyalandı")
         }
-    }
+    }, [product.title])
 
     return {
         quantity, setQuantity,

@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2, CheckCircle, XCircle } from "lucide-react"
 import { authApi } from "@/lib/api"
-import { clearAuthSessionFlag, markAuthSessionActive } from "@/lib/auth-session"
+import { clearAuthSessionFlag, markAuthSessionActive } from "@/lib/auth/auth-session"
 
 function OAuth2RedirectContent() {
     const router = useRouter()

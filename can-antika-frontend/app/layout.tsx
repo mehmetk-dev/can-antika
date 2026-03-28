@@ -7,7 +7,7 @@ import { cache } from "react"
 import { Providers } from "./providers"
 import "./globals.css"
 
-import { fetchApiDataWithFallback } from "@/lib/server-api-fallback"
+import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { SiteSettingsResponse } from "@/lib/types"
 
 const _inter = Inter({ subsets: ["latin"], variable: "--font-inter" })

@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { priceRanges } from "@/lib/products"
+import { priceRanges } from "@/lib/product/products"
 import type { CategoryResponse, PeriodResponse } from "@/lib/types"
 
 interface FilterSidebarProps {

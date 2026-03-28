@@ -1,21 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { memo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Heart } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { resolveImageUrl } from "@/lib/image-url"
-import { eraLabels, getProductAttributes } from "@/lib/product-utils"
+import { resolveImageUrl } from "@/lib/product/image-url"
+import { eraLabels, getProductAttributes } from "@/lib/product/product-utils"
 import type { ProductResponse } from "@/lib/types"
 
 interface ProductCardProps {
   product: ProductResponse
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
   const [imageErrored, setImageErrored] = useState(false)
 
   const imageUrl = resolveImageUrl(product.imageUrls?.[0])
@@ -37,7 +37,7 @@ export function ProductCard({ product }: ProductCardProps) {
           loading="lazy"
           decoding="async"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className={`object-cover object-center transition-transform duration-500 group-hover:scale-105 ${isSold ? "grayscale opacity-60" : ""}`}
+          className={`object-cover object-center transition-transform duration-500 will-change-transform group-hover:scale-[1.03] ${isSold ? "grayscale opacity-60" : ""}`}
           onError={() => setImageErrored(true)}
         />
 
@@ -81,4 +81,4 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
     </Link>
   )
-}
+})

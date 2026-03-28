@@ -1,6 +1,7 @@
+import { memo } from "react"
 import { Shield, Truck, RotateCcw } from "lucide-react"
 
-export function TrustBadges() {
+export const TrustBadges = memo(function TrustBadges() {
     return (
         <div className="grid gap-4 sm:grid-cols-3">
             <div className="flex items-center gap-3">
@@ -32,4 +33,4 @@ export function TrustBadges() {
             </div>
         </div>
     )
-}
+})

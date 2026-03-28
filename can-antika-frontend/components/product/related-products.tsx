@@ -1,9 +1,10 @@
+import { memo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { isCloudinaryImageUrl, resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/image-url"
+import { isCloudinaryImageUrl, resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
 import type { ProductResponse } from "@/lib/types"
 
 interface RelatedProductsProps {
@@ -11,7 +12,7 @@ interface RelatedProductsProps {
   currentProductId: number
 }
 
-export function RelatedProducts({ products, currentProductId }: RelatedProductsProps) {
+function RelatedProductsInner({ products, currentProductId }: RelatedProductsProps) {
   const relatedProducts = products.filter((p) => p.id !== currentProductId).slice(0, 4)
 
   const cloudinaryLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) =>
@@ -63,7 +64,7 @@ export function RelatedProducts({ products, currentProductId }: RelatedProductsP
                     decoding="async"
                     loader={hasCloudinaryImage ? cloudinaryLoader : undefined}
                     sizes="(max-width: 640px) 47vw, (max-width: 1024px) 31vw, 24vw"
-                    className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover object-center transition-transform duration-500 will-change-transform group-hover:scale-[1.03]"
                   />
                   <span className="absolute left-2 top-2 rounded-md bg-background/92 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary shadow-sm sm:left-3 sm:top-3">
                     Tek Ürün
@@ -105,3 +106,5 @@ export function RelatedProducts({ products, currentProductId }: RelatedProductsP
     </section>
   )
 }
+
+export const RelatedProducts = memo(RelatedProductsInner)

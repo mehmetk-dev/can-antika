@@ -4,7 +4,7 @@ import {
     VintageHeart, VintageBasket, VintageUser,
     VintageLogout, VintageShield,
 } from "@/components/ui/vintage-icons"
-import { NotificationsDropdown } from "@/components/notifications-dropdown"
+import { NotificationsDropdown } from "@/components/header/notifications-dropdown"
 
 interface HeaderActionsProps {
     isAuthenticated: boolean

@@ -50,7 +50,10 @@ public class RefreshTokenService implements IRefreshTokenService {
     @Transactional
     public RefreshToken createRefreshToken(User user) {
         Optional<RefreshToken> existingToken = refreshTokenRepository.findByUser(user);
-        existingToken.ifPresent(refreshTokenRepository::delete);
+        if (existingToken.isPresent()) {
+            refreshTokenRepository.delete(existingToken.get());
+            refreshTokenRepository.flush();
+        }
 
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);

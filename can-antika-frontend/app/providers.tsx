@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthProvider } from "@/lib/auth-context";
+import { AuthProvider } from "@/lib/auth/auth-context";
 import { SiteSettingsProvider } from "@/lib/site-settings-context";
 import type { SiteSettingsResponse } from "@/lib/types";
 import { Toaster } from "sonner";

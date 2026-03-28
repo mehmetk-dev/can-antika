@@ -1,5 +1,5 @@
 import type { ResultData } from "./types";
-import { clearAuthSessionFlag, hasAuthSessionFlag } from "./auth-session";
+import { clearAuthSessionFlag, hasAuthSessionFlag } from "./auth/auth-session";
 
 const ENV_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").trim();
 const REQUEST_TIMEOUT_MS = 15000;
@@ -9,7 +9,7 @@ const CSRF_HEADER_NAME = "X-XSRF-TOKEN";
 
 // ======================== Core Fetch ========================
 
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS" | "TRACE";
 const CSRF_SAFE_METHODS = new Set<HttpMethod>(["GET", "HEAD", "OPTIONS", "TRACE"]);
 
 interface RequestOptions {
@@ -198,6 +198,20 @@ function createTimeoutHandle(timeoutMs: number): { signal: AbortSignal; cleanup:
     };
 }
 
+function buildFetchInit(method: HttpMethod, body: unknown, extraHeaders?: Record<string, string>): RequestInit {
+    const headers: Record<string, string> = { ...extraHeaders };
+    attachCsrfHeader(headers, method);
+    if (body !== undefined && !(body instanceof FormData)) {
+        headers["Content-Type"] = "application/json";
+    }
+    return {
+        method,
+        headers,
+        credentials: "include",
+        body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+    };
+}
+
 async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit, timeoutMs: number): Promise<Response> {
     const { signal, cleanup } = createTimeoutHandle(timeoutMs);
     try {
@@ -268,33 +282,15 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
     for (const baseUrl of baseUrls) {
         try {
             const url = buildUrl(baseUrl, path, params);
-            const headers: Record<string, string> = {
-                ...extraHeaders,
-            };
-            attachCsrfHeader(headers, method);
-
-            if (body !== undefined && !(body instanceof FormData)) {
-                headers["Content-Type"] = "application/json";
-            }
-
-            let res = await fetchWithTimeout(url, {
-                method,
-                headers,
-                credentials: "include",
-                body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-            }, effectiveTimeoutMs);
+            const init = buildFetchInit(method, body, extraHeaders);
+            let res = await fetchWithTimeout(url, init, effectiveTimeoutMs);
 
             // Auto-refresh on 401
             const hasSession = typeof window === "undefined" ? true : hasAuthSessionFlag();
             if (res.status === 401 && !noAuth && hasSession) {
                 const refreshed = await tryRefreshToken(baseUrl);
                 if (refreshed) {
-                    res = await fetchWithTimeout(url, {
-                        method,
-                        headers,
-                        credentials: "include",
-                        body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-                    }, effectiveTimeoutMs);
+                    res = await fetchWithTimeout(url, init, effectiveTimeoutMs);
                 } else {
                     throw new Error("Oturum sÃ¼resi doldu. LÃ¼tfen tekrar giriÅŸ yapÄ±n.");
                 }
@@ -335,7 +331,7 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
             return result.data;
         } catch (error: any) {
             lastError = error instanceof Error ? error : new Error("Ä°stek baÅŸarÄ±sÄ±z");
-            
+
             // Only continue for networking errors (down server, etc.)
             const isNetworkError = isNetworkLikeError(error);
 
@@ -369,19 +365,8 @@ export const api = {
         for (const baseUrl of baseUrls) {
             try {
                 const url = buildUrl(baseUrl, path, params);
-                const headers: Record<string, string> = { ...extraHeaders };
-                attachCsrfHeader(headers, method);
-
-                if (body !== undefined && !(body instanceof FormData)) {
-                    headers["Content-Type"] = "application/json";
-                }
-
-                const res = await fetchWithTimeout(url, {
-                    method,
-                    headers,
-                    credentials: "include",
-                    body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-                }, effectiveTimeoutMs);
+                const init = buildFetchInit(method, body, extraHeaders);
+                const res = await fetchWithTimeout(url, init, effectiveTimeoutMs);
 
                 if (!res.ok) {
                     let errorMessage = `API error: ${res.status}`;

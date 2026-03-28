@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { cartApi, wishlistApi } from "@/lib/api"
-import { guestCart } from "@/lib/guest-cart"
+import { guestCart } from "@/lib/commerce/guest-cart"
 
 export function useCartWishlistCounts(isAuthenticated: boolean) {
     const [cartCount, setCartCount] = useState(0)

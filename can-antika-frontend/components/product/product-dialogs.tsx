@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/lib/auth/auth-context"
 import { contactApi, supportTicketApi } from "@/lib/api"
 import type { ProductResponse } from "@/lib/types"
 
@@ -96,7 +96,7 @@ export function PurchaseDialog({ product, className = "" }: ProductDialogsProps)
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="purchase-name">Ad Soyad *</Label>
-                        <Input id="purchase-name" placeholder="Adınız Soyadınız" className="bg-muted/50" value={name} onChange={e => setName(e.target.value)} required />
+                        <Input id="purchase-name" placeholder="Adınız Soyadınız" className="bg-muted/50" value={name} onChange={e => setName(e.target.value)} required autoFocus />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="purchase-phone">Telefon *</Label>
@@ -174,7 +174,7 @@ export function ContactDialog({ product, className = "" }: ProductDialogsProps) 
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="contact-name">Ad Soyad *</Label>
-                        <Input id="contact-name" placeholder="Adınız Soyadınız" className="bg-muted/50" value={name} onChange={e => setName(e.target.value)} required />
+                        <Input id="contact-name" placeholder="Adınız Soyadınız" className="bg-muted/50" value={name} onChange={e => setName(e.target.value)} required autoFocus />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="contact-email">E-posta *</Label>

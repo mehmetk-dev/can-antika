@@ -9,7 +9,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/lib/auth/auth-context"
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -41,9 +41,8 @@ export default function AdminLoginPage() {
 
       toast.success("Admin paneline hoş geldiniz.", { id: "admin-login-success" })
       router.push("/admin")
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Giriş başarısız."
-      toast.error(message, { id: "admin-login-error" })
+    } catch {
+      toast.error("Giriş bilgileri hatalı.", { id: "admin-login-error" })
     } finally {
       setIsSubmitting(false)
     }

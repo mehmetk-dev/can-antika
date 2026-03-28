@@ -12,6 +12,7 @@ import RecentOrderCard from "@/components/dashboard/recent-order-card"
 import RevenueSummary from "@/components/dashboard/revenue-summary"
 import ActivityLogTimeline from "@/components/dashboard/activity-log-timeline"
 import { formatDateTR } from "@/lib/utils"
+import { CHART_RANGES } from "@/lib/constants"
 
 const RevenueChart = dynamic(() => import("@/components/dashboard/revenue-chart"), {
   ssr: false,
@@ -64,15 +65,15 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-6 flex-wrap">
-                {(["7D", "30D", "90D", "6M", "1Y"] as const).map(range => (
+                {CHART_RANGES.map(({ value, label }) => (
                   <Button
-                    key={range}
-                    variant={chartRange === range ? "default" : "outline"}
+                    key={value}
+                    variant={chartRange === value ? "default" : "outline"}
                     size="sm"
-                    className={`h-7 px-3 text-xs rounded-full ${chartRange === range ? "bg-teal-500 hover:bg-teal-600 text-white" : ""}`}
-                    onClick={() => setChartRange(range)}
+                    className={`h-7 px-3 text-xs rounded-full ${chartRange === value ? "bg-teal-500 hover:bg-teal-600 text-white" : ""}`}
+                    onClick={() => setChartRange(value)}
                   >
-                    {range === "7D" ? "7 GÜNLÜK" : range === "30D" ? "30 GÜNLÜK" : range === "90D" ? "90 GÜNLÜK" : range === "6M" ? "6 AYLIK" : "1 YILLIK"}
+                    {label}
                   </Button>
                 ))}
               </div>

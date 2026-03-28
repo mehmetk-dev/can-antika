@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import Image from "next/image"
 import { ZoomIn, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { isCloudinaryImageUrl, resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/image-url"
+import { isCloudinaryImageUrl, resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
 
 interface ImageGalleryProps {
   images: string[]
@@ -21,24 +21,24 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
   const mainImage = images[safeIndex] ? resolveImageUrl(images[safeIndex]) : "/placeholder.svg"
   const useCloudinaryLoader = isCloudinaryImageUrl(mainImage)
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     setUseFallbackImage(false)
     setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
-  }
+  }, [images.length])
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setUseFallbackImage(false)
     setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
-  }
+  }, [images.length])
 
-  const handleImageError = () => {
+  const handleImageError = useCallback(() => {
     if (selectedIndex < images.length - 1) {
       setSelectedIndex((prev) => prev + 1)
       return
     }
 
     setUseFallbackImage(true)
-  }
+  }, [selectedIndex, images.length])
 
   const cloudinaryLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
     return toCloudinaryResponsiveUrl(src, width, quality ?? 75)
@@ -56,7 +56,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
               priority
               loader={useCloudinaryLoader ? cloudinaryLoader : undefined}
               sizes="(max-width: 640px) 92vw, (max-width: 1024px) 52vw, 42vw"
-              className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
+              className="object-cover object-center transition-transform duration-300 will-change-transform group-hover:scale-[1.02]"
               onError={handleImageError}
             />
             <div className="absolute inset-0 flex items-center justify-center bg-foreground/0 transition-colors group-hover:bg-foreground/10">
@@ -73,6 +73,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                     e.stopPropagation()
                     handlePrevious()
                   }}
+                  aria-label="Önceki görsel"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
@@ -84,6 +85,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                     e.stopPropagation()
                     handleNext()
                   }}
+                  aria-label="Sonraki görsel"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </Button>
@@ -114,6 +116,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                   size="icon"
                   className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
                   onClick={handlePrevious}
+                  aria-label="Önceki görsel"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
@@ -122,6 +125,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                   size="icon"
                   className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
                   onClick={handleNext}
+                  aria-label="Sonraki görsel"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </Button>
@@ -133,32 +137,34 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
 
       {images.length > 1 && (
         <div className="flex w-full gap-2 overflow-x-auto pb-2">
-          {images.map((image, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                setSelectedIndex(index)
-                setUseFallbackImage(false)
-              }}
-              className={`relative aspect-square w-20 shrink-0 overflow-hidden rounded-md transition-all ${
-                selectedIndex === index ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : "opacity-70 hover:opacity-100"
-              }`}
-            >
-              <Image
-                src={resolveImageUrl(image)}
-                alt={`${productName} - ${index + 1}`}
-                fill
-                loading="lazy"
-                decoding="async"
-                loader={isCloudinaryImageUrl(resolveImageUrl(image)) ? cloudinaryLoader : undefined}
-                sizes="80px"
-                className="object-cover object-center"
-                onError={(e) => {
-                  e.currentTarget.src = "/placeholder.svg"
+          {images.map((image, index) => {
+            const thumbUrl = resolveImageUrl(image)
+            return (
+              <button
+                key={`thumb-${image}-${index}`}
+                onClick={() => {
+                  setSelectedIndex(index)
+                  setUseFallbackImage(false)
                 }}
-              />
-            </button>
-          ))}
+                className={`relative aspect-square w-20 shrink-0 overflow-hidden rounded-md transition-all ${selectedIndex === index ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : "opacity-70 hover:opacity-100"
+                  }`}
+              >
+                <Image
+                  src={thumbUrl}
+                  alt={`${productName} - ${index + 1}`}
+                  fill
+                  loading="lazy"
+                  decoding="async"
+                  loader={isCloudinaryImageUrl(thumbUrl) ? cloudinaryLoader : undefined}
+                  sizes="80px"
+                  className="object-cover object-center"
+                  onError={(e) => {
+                    e.currentTarget.src = "/placeholder.svg"
+                  }}
+                />
+              </button>
+            )
+          })}
         </div>
       )}
     </div>

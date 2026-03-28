@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { AdminSidebar } from "./admin-sidebar"
-import { NotificationsDropdown } from "@/components/notifications-dropdown"
+import { NotificationsDropdown } from "@/components/header/notifications-dropdown"
 
 export function AdminHeader() {
   return (

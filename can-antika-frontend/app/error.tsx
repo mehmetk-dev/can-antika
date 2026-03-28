@@ -11,7 +11,7 @@ export default function Error({
     reset: () => void
 }) {
     useEffect(() => {
-        // Error boundary caught an error — logged server-side by Next.js
+        console.error("Yakalanmamış hata:", error)
     }, [error])
 
     return (

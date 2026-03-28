@@ -83,7 +83,7 @@ export function SiteSettingsProvider({
 
         siteSettingsApi.get()
             .then(setSettings)
-            .catch(() => { /* fallback to defaults */ });
+            .catch((e) => { console.error("Site ayarları yüklenemedi:", e) });
     }, [initialSettings]);
 
     return (

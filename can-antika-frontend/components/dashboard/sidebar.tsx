@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { Heart, Package, MapPin, User, LogOut, ChevronLeft, MessageSquare, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/lib/auth/auth-context"
 
 const navigation = [
   { name: "Hesabım", href: "/hesap", icon: User },

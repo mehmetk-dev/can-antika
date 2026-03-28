@@ -1,19 +1,27 @@
 // Re-export hub — domain API modules
-export { authApi } from "./auth";
-export { productApi } from "./product";
-export { periodApi } from "./period";
-export { categoryApi } from "./category";
-export { cartApi } from "./cart";
-export { orderApi } from "./order";
-export { wishlistApi } from "./wishlist";
-export { addressApi } from "./address";
-export { reviewApi, reviewAdminApi } from "./review";
-export { paymentApi } from "./payment";
-export { orderReturnApi } from "./order-return";
-export { supportTicketApi } from "./support-ticket";
-export { fileApi } from "./file";
-export { siteSettingsApi } from "./site-settings";
-export { notificationApi } from "./notifications";
+
+// User
+export { authApi } from "./user/auth";
+export { addressApi } from "./user/address";
+export { notificationApi } from "./user/notifications";
+export { supportTicketApi } from "./user/support-ticket";
+
+// Catalog
+export { productApi } from "./catalog/product";
+export { periodApi } from "./catalog/period";
+export { categoryApi } from "./catalog/category";
+export { reviewApi, reviewAdminApi } from "./catalog/review";
+
+// Commerce
+export { cartApi } from "./commerce/cart";
+export { orderApi } from "./commerce/order";
+export { wishlistApi } from "./commerce/wishlist";
+export { paymentApi } from "./commerce/payment";
+export { orderReturnApi } from "./commerce/order-return";
+
+// Content
+export { fileApi } from "./content/file";
+export { siteSettingsApi } from "./content/site-settings";
 
 // Admin modules
 export { statsApi } from "./admin/stats";

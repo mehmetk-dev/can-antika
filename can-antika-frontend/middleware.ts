@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getServerApiUrlCandidates } from "@/lib/server-api-url";
+import { getServerApiUrlCandidates } from "@/lib/server/server-api-url";
 
 const MAINTENANCE_CACHE_TTL_MS = 60_000;
 const MAINTENANCE_TIMEOUT_MS = 400;

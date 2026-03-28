@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatDateTR(
   date: Date | string,
-  format: "full" | "short" | "month-year" | "compact" | "day-month" | "minimal" | "datetime" | "datetime-compact" | "datetime-minimal" = "short"
+  format: "full" | "short" | "month-year" | "compact" | "day-month" | "minimal" | "datetime" | "datetime-compact" | "datetime-minimal" | "time" = "short"
 ): string {
   const d = typeof date === "string" ? new Date(date) : date
   switch (format) {
@@ -27,10 +27,27 @@ export function formatDateTR(
       return d.toLocaleString("tr-TR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
     case "datetime-minimal":
       return d.toLocaleString("tr-TR")
+    case "time":
+      return d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })
     case "short":
     default:
       return d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })
   }
+}
+
+/**
+ * Safely extract a user-friendly error message from an unknown catch value.
+ * Never leaks stack traces or internal details to the UI.
+ */
+export function getErrorMessage(error: unknown, fallback = "Bir hata oluştu"): string {
+  if (error instanceof Error) {
+    // Strip anything that looks like a stack trace or internal path
+    const msg = error.message
+    if (msg.length > 200 || msg.includes("\n") || msg.includes("at ")) return fallback
+    return msg
+  }
+  if (typeof error === "string" && error.length <= 200) return error
+  return fallback
 }
 
 export function sanitizeExternalUrl(rawUrl?: string | null): string | null {
