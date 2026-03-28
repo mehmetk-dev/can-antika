@@ -114,7 +114,7 @@ export function CategoriesSection() {
 
         <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-16 sm:gap-6 lg:grid-cols-4">
           {categories.map((category) => (
-            <Link key={category.id} href={`/urunler?category=${encodeURIComponent(category.name)}`} className="group relative overflow-hidden">
+            <Link key={category.id} href={`/urunler?category=${encodeURIComponent(category.name)}`} prefetch={false} className="group relative overflow-hidden">
               <div className="relative h-full overflow-hidden border-2 border-[#7d5534]/45 bg-[#3d281a]/45 transition-all duration-300 group-hover:border-[#d1a46e]/70">
                 <div className="pointer-events-none absolute inset-2 z-10 border border-[#c39569]/30" />
 

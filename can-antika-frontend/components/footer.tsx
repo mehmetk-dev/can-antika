@@ -142,7 +142,7 @@ export function Footer({ className }: FooterProps) {
           }`}
         >
           <div>
-            <Link href="/" className="inline-block">
+            <Link href="/" prefetch={false} className="inline-block">
               <h2 className="font-serif text-3xl font-semibold tracking-tight text-primary-foreground">{settings.storeName || "Can Antika"}</h2>
             </Link>
             <div className="mt-2 flex items-center gap-2">
@@ -205,7 +205,7 @@ export function Footer({ className }: FooterProps) {
             <ul className="mt-4 space-y-2.5">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
+                  <Link href={link.href} prefetch={false} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
                     {link.name}
                   </Link>
                 </li>
@@ -221,6 +221,7 @@ export function Footer({ className }: FooterProps) {
                   <li key={cat.id}>
                     <Link
                       href={`/urunler?category=${encodeURIComponent(cat.name)}`}
+                      prefetch={false}
                       className="text-sm text-primary-foreground/70 transition-colors hover:text-accent"
                     >
                       {cat.name}
@@ -236,7 +237,7 @@ export function Footer({ className }: FooterProps) {
             <ul className="mt-4 space-y-2.5">
               {footerLinks.legal.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
+                  <Link href={link.href} prefetch={false} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
                     {link.name}
                   </Link>
                 </li>

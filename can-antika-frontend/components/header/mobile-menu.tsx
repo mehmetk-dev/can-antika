@@ -60,6 +60,7 @@ export function MobileMenu({ isOpen, onOpenChange, navigation, isAuthenticated }
                             <Link
                                 key={item.name}
                                 href={item.href}
+                                prefetch={false}
                                 onClick={() => onOpenChange(false)}
                                 className="mobile-menu-item group relative block rounded-lg border border-transparent px-4 py-4 transition-all duration-300 hover:border-primary/20 hover:bg-primary/5"
                                 style={{ animationDelay: `${0.1 + index * 0.06}s` }}
@@ -82,6 +83,7 @@ export function MobileMenu({ isOpen, onOpenChange, navigation, isAuthenticated }
                         {isAuthenticated && (
                             <Link
                                 href="/hesap/siparisler"
+                                prefetch={false}
                                 onClick={() => onOpenChange(false)}
                                 className="mobile-menu-item group relative block rounded-lg border border-transparent px-4 py-4 transition-all duration-300 hover:border-primary/20 hover:bg-primary/5"
                                 style={{ animationDelay: `${0.1 + navigation.length * 0.06}s` }}
@@ -111,6 +113,7 @@ export function MobileMenu({ isOpen, onOpenChange, navigation, isAuthenticated }
                     <div className="mobile-menu-item space-y-3" style={{ animationDelay: '0.35s' }}>
                         <Link
                             href="/hesap"
+                            prefetch={false}
                             onClick={() => onOpenChange(false)}
                             className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 transition-all hover:bg-primary/10"
                         >
@@ -122,6 +125,7 @@ export function MobileMenu({ isOpen, onOpenChange, navigation, isAuthenticated }
 
                         <Link
                             href="/iletisim"
+                            prefetch={false}
                             onClick={() => onOpenChange(false)}
                             className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 transition-all hover:bg-primary/10"
                         >

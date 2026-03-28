@@ -38,7 +38,7 @@ export function RelatedProducts({ products, currentProductId }: RelatedProductsP
               Benzer Ürünler
             </h2>
           </div>
-          <Link href="/urunler" className="hidden sm:block">
+          <Link href="/urunler" prefetch={false} className="hidden sm:block">
             <Button variant="ghost" className="group gap-2 rounded-full border border-primary/20 bg-background/60 px-5 text-primary backdrop-blur-sm hover:bg-background">
               Tümünü Gör
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -51,6 +51,7 @@ export function RelatedProducts({ products, currentProductId }: RelatedProductsP
             <Link
               key={product.id}
               href={`/urun/${product.slug ?? product.id}`}
+              prefetch={false}
               className="group relative min-w-[78%] snap-start overflow-hidden rounded-2xl border border-primary/10 bg-[linear-gradient(180deg,#fffaf3_0%,#f7f0e4_100%)] shadow-[0_12px_30px_rgba(56,34,18,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_18px_36px_rgba(56,34,18,0.16)] sm:min-w-0"
             >
               <div className="relative aspect-[3/4] overflow-hidden">

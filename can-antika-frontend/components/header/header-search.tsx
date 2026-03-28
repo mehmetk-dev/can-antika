@@ -55,6 +55,7 @@ export function HeaderSearch({ isSearchOpen, setIsSearchOpen }: HeaderSearchProp
                             <Link
                                 key={p.id}
                                 href={`/urun/${p.slug ?? p.id}`}
+                                prefetch={false}
                                 onClick={handleClose}
                                 className="flex items-center gap-3 px-3 py-2 hover:bg-muted transition-colors"
                             >
@@ -73,6 +74,7 @@ export function HeaderSearch({ isSearchOpen, setIsSearchOpen }: HeaderSearchProp
                         ))}
                         <Link
                             href={`/urunler?q=${encodeURIComponent(searchQuery.trim())}`}
+                            prefetch={false}
                             onClick={handleClose}
                             className="block border-t px-3 py-2 text-center text-xs font-medium text-primary hover:bg-muted transition-colors"
                         >

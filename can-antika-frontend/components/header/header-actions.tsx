@@ -25,7 +25,7 @@ export function HeaderActions({
 }: HeaderActionsProps) {
     // Sepet butonu — her zaman görünür (mobil dahil)
     const cartButton = (
-        <Link href="/sepet">
+        <Link href="/sepet" prefetch={false}>
             <Button variant="ghost" size="icon" className="relative text-foreground hover:text-primary transition-colors">
                 <VintageBasket className="h-5 w-5" />
                 {cartCount > 0 && (
@@ -41,7 +41,7 @@ export function HeaderActions({
     if (isAuthenticated && isAdmin) {
         return (
             <>
-                <Link href="/admin" className="hidden sm:block">
+                <Link href="/admin" prefetch={false} className="hidden sm:block">
                     <Button variant="ghost" size="sm" className="gap-2 text-foreground hover:text-primary transition-colors font-medium">
                         <VintageShield className="h-4 w-4" />
                         Admin Paneli
@@ -60,7 +60,7 @@ export function HeaderActions({
         return (
             <>
                 <NotificationsDropdown />
-                <Link href="/hesap/favoriler" className="hidden sm:block">
+                <Link href="/hesap/favoriler" prefetch={false} className="hidden sm:block">
                     <Button variant="ghost" size="icon" className="relative text-foreground hover:text-primary transition-colors">
                         <VintageHeart className="h-5 w-5" />
                         {wishlistCount > 0 && (
@@ -72,7 +72,7 @@ export function HeaderActions({
                     </Button>
                 </Link>
                 {cartButton}
-                <Link href="/hesap" className="hidden sm:block">
+                <Link href="/hesap" prefetch={false} className="hidden sm:block">
                     <Button variant="ghost" size="icon" className="text-foreground hover:text-primary transition-colors">
                         <VintageUser className="h-5 w-5" />
                         <span className="sr-only">{userName || "Hesap"}</span>
@@ -89,7 +89,7 @@ export function HeaderActions({
     return (
         <>
             {cartButton}
-            <Link href="/giris" className="hidden sm:block">
+            <Link href="/giris" prefetch={false} className="hidden sm:block">
                 <Button variant="ghost" size="icon" className="text-foreground hover:text-primary transition-colors">
                     <VintageUser className="h-5 w-5" />
                     <span className="sr-only">Giriş Yap</span>

@@ -26,6 +26,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={`/urun/${product.slug ?? product.id}`}
+      prefetch={false}
       className="group relative block overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-md"
     >
       <div className="relative aspect-[3/4] overflow-hidden bg-muted">

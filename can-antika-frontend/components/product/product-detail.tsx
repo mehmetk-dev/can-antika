@@ -205,7 +205,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 Yorumlar
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="details" forceMount className="mt-8">
+            <TabsContent value="details" forceMount className="mt-8 data-[state=inactive]:hidden">
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {era && (
                   <div>
@@ -231,7 +231,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 </div>
               </div>
             </TabsContent>
-            <TabsContent value="provenance" forceMount className="mt-8">
+            <TabsContent value="provenance" forceMount className="mt-8 data-[state=inactive]:hidden">
               <div className="max-w-2xl">
                 <h3 className="font-serif text-xl font-semibold text-foreground">Eserin Hikayesi</h3>
                 <p className="mt-4 leading-relaxed text-muted-foreground">
@@ -243,7 +243,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
               </div>
             </TabsContent>
             {condition && (
-              <TabsContent value="condition" forceMount className="mt-8">
+              <TabsContent value="condition" forceMount className="mt-8 data-[state=inactive]:hidden">
                 <div className="max-w-2xl">
                   <h3 className="font-serif text-xl font-semibold text-foreground">Durum Değerlendirmesi</h3>
                   <div className="mt-4 rounded-lg border border-border bg-card p-6">
@@ -262,7 +262,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 </div>
               </TabsContent>
             )}
-            <TabsContent value="reviews" forceMount={hasOpenedReviews} className="mt-8">
+            <TabsContent value="reviews" forceMount={hasOpenedReviews} className="mt-8 data-[state=inactive]:hidden">
               {hasOpenedReviews ? <ProductReviews productId={product.id} /> : null}
             </TabsContent>
           </Tabs>
