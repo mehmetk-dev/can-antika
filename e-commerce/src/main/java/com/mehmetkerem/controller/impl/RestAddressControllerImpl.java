@@ -45,7 +45,7 @@ public class RestAddressControllerImpl implements IRestAddressController {
     @Override
     @PutMapping("/{id}")
     public ResultData<AddressResponse> updateAddress(@PathVariable("id") Long id,
-            @RequestBody AddressRequest request) {
+            @Valid @RequestBody AddressRequest request) {
         return ResultHelper.success(addressService.updateAddressForUser(id, requireCurrentUserId(), request));
     }
 

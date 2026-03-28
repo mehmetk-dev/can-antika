@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth/auth-context"
@@ -86,7 +86,7 @@ export function useCart() {
                 setCart(updated)
             }
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Ekleyemezsiniz, stok yetersiz veya hata olu\u015Ftu")
+            toast.error(err instanceof Error ? err.message : "Ekleyemezsiniz, stok yetersiz veya hata oluştu")
         } finally {
             setUpdatingItems((prev) => {
                 const next = new Set(prev)
@@ -106,9 +106,9 @@ export function useCart() {
                 const updated = await cartApi.removeItem(productId)
                 setCart(updated)
             }
-            toast.success("\u00DCr\u00FCn sepetten kald\u0131r\u0131ld\u0131")
+            toast.success("Ürün sepetten kaldırıldı")
         } catch {
-            toast.error("\u00DCr\u00FCn kald\u0131r\u0131l\u0131rken hata olu\u015Ftu")
+            toast.error("Ürün kaldırılırken hata oluştu")
         } finally {
             setUpdatingItems((prev) => {
                 const next = new Set(prev)
@@ -119,7 +119,7 @@ export function useCart() {
     }
 
     const handleClearCart = async () => {
-        if (!confirm("Sepetinizdeki t\u00FCm \u00FCr\u00FCnleri silmek istedi\u011Finize emin misiniz?")) return
+        if (!confirm("Sepetinizdeki tüm ürünleri silmek istediğinize emin misiniz?")) return
         try {
             if (isGuest) {
                 guestCart.clear()
@@ -130,7 +130,7 @@ export function useCart() {
             }
             toast.success("Sepet temizlendi")
         } catch {
-            toast.error("Sepet temizlenirken hata olu\u015Ftu")
+            toast.error("Sepet temizlenirken hata oluştu")
         }
     }
 

@@ -43,7 +43,10 @@ public class RestNewsletterControllerImpl implements IRestNewsletterController {
     @PostMapping("/unsubscribe")
     public ResultData<Map<String, String>> unsubscribe(@RequestBody Map<String, String> body) {
         String email = body.get("email");
-        if (email != null) newsletterService.unsubscribe(email);
+        if (email == null || email.isBlank()) {
+            return new ResultData<>(false, "E-posta adresi zorunludur", "400", null);
+        }
+        newsletterService.unsubscribe(email);
         return ResultHelper.success(Map.of("message", "Abonelikten çıktınız"));
     }
 

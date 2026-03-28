@@ -15,12 +15,24 @@ interface StaticPage {
     id: number; title: string; slug: string; content: string; active: boolean; createdAt?: string; updatedAt?: string
 }
 
+function slugify(text: string): string {
+    return text.toLowerCase()
+        .replace(/[çÇ]/g, "c").replace(/[şŞ]/g, "s")
+        .replace(/[ıİ]/g, "i").replace(/[ğĞ]/g, "g")
+        .replace(/[üÜ]/g, "u").replace(/[öÖ]/g, "o")
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/(^-|-$)/g, "")
+}
+
 export default function StaticPagesPage() {
     const [pages, setPages] = useState<StaticPage[]>([])
     const [loading, setLoading] = useState(true)
     const [showForm, setShowForm] = useState(false)
     const [editItem, setEditItem] = useState<StaticPage | null>(null)
     const [form, setForm] = useState({ title: "", slug: "", content: "", active: true })
+    const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
 
     useEffect(() => { load() }, [])
 
@@ -33,12 +45,14 @@ export default function StaticPagesPage() {
     const openEdit = (p: StaticPage) => {
         setEditItem(p)
         setForm({ title: p.title, slug: p.slug, content: p.content, active: p.active })
+        setSlugManuallyEdited(true)
         setShowForm(true)
     }
 
     const openCreate = () => {
         setEditItem(null)
         setForm({ title: "", slug: "", content: "", active: true })
+        setSlugManuallyEdited(false)
         setShowForm(true)
     }
 
@@ -89,11 +103,12 @@ export default function StaticPagesPage() {
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-sm font-semibold truncate">{p.title}</p>
-                                            <p className="text-xs text-muted-foreground font-mono">/{p.slug}</p>
+                                            <a href={`/${p.slug}`} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground font-mono hover:text-primary transition-colors">/{p.slug}</a>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
                                         {!p.active && <Badge variant="outline" className="text-xs">Pasif</Badge>}
+                                        <Button size="icon" variant="ghost" asChild><a href={`/${p.slug}`} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" /></a></Button>
                                         <Button size="icon" variant="ghost" onClick={() => openEdit(p)}><Pencil className="h-4 w-4" /></Button>
                                         <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
                                     </div>
@@ -111,11 +126,21 @@ export default function StaticPagesPage() {
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
                                 <label className="text-sm font-medium">Başlık</label>
-                                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Hakkımızda" />
+                                <Input value={form.title} onChange={(e) => {
+                                    const title = e.target.value
+                                    setForm(prev => ({
+                                        ...prev,
+                                        title,
+                                        ...(!slugManuallyEdited ? { slug: slugify(title) } : {})
+                                    }))
+                                }} placeholder="Hakkımızda" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-medium">Slug (otomatik)</label>
-                                <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="hakkimizda" />
+                                <label className="text-sm font-medium">Slug {!slugManuallyEdited && <span className="text-muted-foreground">(otomatik)</span>}</label>
+                                <Input value={form.slug} onChange={(e) => {
+                                    setSlugManuallyEdited(true)
+                                    setForm({ ...form, slug: e.target.value })
+                                }} placeholder="hakkimizda" />
                             </div>
                         </div>
                         <div className="space-y-1">

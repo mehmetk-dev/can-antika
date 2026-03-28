@@ -58,14 +58,14 @@ public class RestPopupControllerImpl implements IRestPopupController {
     @Override
     @Secured("ROLE_ADMIN")
     @PostMapping("/v1/admin/popups")
-    public ResultData<PopupResponse> createPopup(@RequestBody PopupRequest req) {
+    public ResultData<PopupResponse> createPopup(@jakarta.validation.Valid @RequestBody PopupRequest req) {
         return ResultHelper.success(toResponse(popupService.savePopup(toEntity(req))));
     }
 
     @Override
     @Secured("ROLE_ADMIN")
     @PutMapping("/v1/admin/popups/{id}")
-    public ResultData<PopupResponse> updatePopup(@PathVariable Long id, @RequestBody PopupRequest req) {
+    public ResultData<PopupResponse> updatePopup(@PathVariable Long id, @jakarta.validation.Valid @RequestBody PopupRequest req) {
         return ResultHelper.success(toResponse(popupService.updatePopup(id, toEntity(req))));
     }
 

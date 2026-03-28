@@ -1,11 +1,11 @@
-"use client"
+﻿"use client"
 
 import { useState, useRef } from "react"
 import { fileApi } from "@/lib/api"
 import { toast } from "sonner"
 
 const MAX_IMAGES = 6
-const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB (backend limit)
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"])
 const ALLOWED_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp"])
 
@@ -16,7 +16,7 @@ function getFileExtension(name: string): string {
 function isAllowedFile(file: File): boolean {
     const hasAllowedType = ALLOWED_MIME_TYPES.has((file.type || "").toLowerCase())
     const hasAllowedExt = ALLOWED_EXTENSIONS.has(getFileExtension(file.name))
-    return file.size <= MAX_FILE_SIZE && (hasAllowedType || hasAllowedExt)
+    return file.size <= MAX_FILE_SIZE && hasAllowedType && hasAllowedExt
 }
 
 export function useProductImages(initialImages: string[] = []) {
@@ -33,7 +33,7 @@ export function useProductImages(initialImages: string[] = []) {
 
         const oversized = selectedFiles.filter((f) => f.size > MAX_FILE_SIZE)
         if (oversized.length > 0) {
-            toast.error(`${oversized.length} dosya 100MB s\u0131n\u0131r\u0131n\u0131 a\u015F\u0131yor, atland\u0131.`)
+            toast.error(`${oversized.length} dosya 5MB sınırını aşıyor, atlandı.`)
         }
 
         const unsupported = selectedFiles.filter((f) => {
@@ -43,7 +43,7 @@ export function useProductImages(initialImages: string[] = []) {
         })
         if (unsupported.length > 0) {
             toast.error(
-                `${unsupported.length} dosya format\u0131 desteklenmiyor. Desteklenen: JPEG, PNG, GIF, WebP (HEIC/HEIF desteklenmez).`,
+                `${unsupported.length} dosya formatı desteklenmiyor. Desteklenen: JPEG, PNG, GIF, WebP (HEIC/HEIF desteklenmez).`,
             )
         }
 
@@ -63,8 +63,8 @@ export function useProductImages(initialImages: string[] = []) {
                     return [...prev, url]
                 })
             } catch (error) {
-                const reason = error instanceof Error ? error.message : "Y\u00FCkleme hatas\u0131"
-                toast.error(`"${file.name}" y\u00FCklenemedi: ${reason}`)
+                const reason = error instanceof Error ? error.message : "Yükleme hatası"
+                toast.error(`"${file.name}" yüklenemedi: ${reason}`)
             } finally {
                 setUploadingCount((prev) => prev - 1)
             }

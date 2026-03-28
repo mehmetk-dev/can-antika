@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -42,18 +44,15 @@ public class BankTransferServiceImpl implements IBankTransferService {
     }
 
     @Override
+    @Transactional
     public BankTransfer updateTransfer(Long id, BankTransfer transfer) {
         BankTransfer existing = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Havale bildirimi bulunamadı: " + id));
         if (transfer.getStatus() != null) {
             existing.setStatus(transfer.getStatus());
             if (STATUS_APPROVED.equals(transfer.getStatus()) && existing.getOrderId() != null) {
-                try {
-                    orderService.updateOrderStatus(existing.getOrderId(), com.mehmetkerem.enums.OrderStatus.PAID);
-                    orderService.updatePaymentStatus(existing.getOrderId(), com.mehmetkerem.enums.PaymentStatus.PAID);
-                } catch (Exception e) {
-                    log.warn("Sipariş durumu güncellenirken hata oluştu: {}", e.getMessage());
-                }
+                orderService.updateOrderStatus(existing.getOrderId(), com.mehmetkerem.enums.OrderStatus.PAID);
+                orderService.updatePaymentStatus(existing.getOrderId(), com.mehmetkerem.enums.PaymentStatus.PAID);
             }
         }
         if (transfer.getAdminNote() != null) existing.setAdminNote(transfer.getAdminNote());

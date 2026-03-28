@@ -16,7 +16,7 @@ async function fetchSiteSettings() {
 }
 
 export const metadata: Metadata = {
-    title: "Bakım Çalışması | Can Antika",
+    title: "Bakım Çalışması",
     description: "Sitemiz şu anda yenilenme sürecindedir. Kısa bir süre sonra koleksiyonumuzla tekrar karşınızda olacağız.",
     robots: { index: false, follow: false },
 }

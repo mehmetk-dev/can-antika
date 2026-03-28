@@ -23,7 +23,7 @@ public class RestCouponControllerImpl implements IRestCouponController {
     @Override
     @Secured("ROLE_ADMIN")
     @PostMapping("/create")
-    public ResultData<CouponResponse> createCoupon(@RequestBody CouponRequest request) {
+    public ResultData<CouponResponse> createCoupon(@jakarta.validation.Valid @RequestBody CouponRequest request) {
         return ResultHelper.success(couponService.createCoupon(request));
     }
 
@@ -58,7 +58,7 @@ public class RestCouponControllerImpl implements IRestCouponController {
     // Admin: update coupon
     @Secured("ROLE_ADMIN")
     @PutMapping("/admin/{id}")
-    public ResultData<CouponResponse> updateCoupon(@PathVariable Long id, @RequestBody CouponRequest incoming) {
+    public ResultData<CouponResponse> updateCoupon(@PathVariable Long id, @jakarta.validation.Valid @RequestBody CouponRequest incoming) {
         return ResultHelper.success(couponService.updateCoupon(id, incoming));
     }
 }

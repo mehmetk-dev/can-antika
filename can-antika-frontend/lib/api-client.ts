@@ -51,7 +51,16 @@ function isLoopbackUrl(url: string): boolean {
     }
 }
 
+let _cachedBaseUrls: string[] | null = null;
+let _cachedBaseUrlsIsBrowser: boolean | null = null;
+
 function getCandidateBaseUrls(): string[] {
+    const isBrowser = typeof window !== "undefined";
+    // Return cached result if environment hasn't changed
+    if (_cachedBaseUrls && _cachedBaseUrlsIsBrowser === isBrowser) {
+        return _cachedBaseUrls;
+    }
+
     const urls: string[] = [];
     const seen = new Set<string>();
 
@@ -125,6 +134,8 @@ function getCandidateBaseUrls(): string[] {
         }
     }
 
+    _cachedBaseUrls = urls;
+    _cachedBaseUrlsIsBrowser = isBrowser;
     return urls;
 }
 

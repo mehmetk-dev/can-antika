@@ -33,6 +33,7 @@ public class ProductRequest {
     @Size(max = 120, message = "Donem adi 120 karakteri gecemez.")
     private String periodName;
 
+    @jakarta.validation.constraints.NotEmpty(message = "En az bir gorsel gerekli.")
     private List<@NotBlank(message = "Gorsel URL'i bos olamaz.") String> imageUrls;
 
     private Map<String, Object> attributes;

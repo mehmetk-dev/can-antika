@@ -69,11 +69,12 @@ public class ProductServiceImpl implements IProductService {
     @Transactional
     @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
     public ProductResponse saveProduct(ProductRequest request) {
+        CategoryResponse categoryResponse = categoryService.getCategoryResponseById(request.getCategoryId());
         Product entity = persistNewProduct(request);
 
         ProductResponse response = mapProductWithRelations(
                 entity,
-                Map.of(request.getCategoryId(), categoryService.getCategoryResponseById(request.getCategoryId())),
+                Map.of(request.getCategoryId(), categoryResponse),
                 entity.getPeriodId() == null
                         ? Map.of()
                         : periodService.getPeriodResponsesByIds(List.of(entity.getPeriodId())));

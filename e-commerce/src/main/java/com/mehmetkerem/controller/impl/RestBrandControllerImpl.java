@@ -50,14 +50,14 @@ public class RestBrandControllerImpl implements IRestBrandController {
     @Override
     @Secured("ROLE_ADMIN")
     @PostMapping("/v1/admin/brands")
-    public ResultData<BrandResponse> createBrand(@RequestBody BrandRequest req) {
+    public ResultData<BrandResponse> createBrand(@jakarta.validation.Valid @RequestBody BrandRequest req) {
         return ResultHelper.success(toResponse(brandService.saveBrand(toEntity(req))));
     }
 
     @Override
     @Secured("ROLE_ADMIN")
     @PutMapping("/v1/admin/brands/{id}")
-    public ResultData<BrandResponse> updateBrand(@PathVariable Long id, @RequestBody BrandRequest req) {
+    public ResultData<BrandResponse> updateBrand(@PathVariable Long id, @jakarta.validation.Valid @RequestBody BrandRequest req) {
         return ResultHelper.success(toResponse(brandService.updateBrand(id, toEntity(req))));
     }
 

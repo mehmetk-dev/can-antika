@@ -22,10 +22,18 @@ public class RestReviewControllerImpl implements IRestReviewController {
         this.reviewService = reviewService;
     }
 
+    private static long requireCurrentUserId() {
+        Long id = SecurityUtils.getCurrentUserId();
+        if (id == null) {
+            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Oturum gerekli");
+        }
+        return id;
+    }
+
     @PostMapping("/save")
     @Override
     public ResultData<ReviewResponse> saveReview(@Valid @RequestBody ReviewRequest request) {
-        Long userId = SecurityUtils.getCurrentUserId();
+        Long userId = requireCurrentUserId();
         return ResultHelper.success(reviewService.saveReview(userId, request));
     }
 
@@ -38,15 +46,15 @@ public class RestReviewControllerImpl implements IRestReviewController {
     @PutMapping("/{id}")
     @Override
     public ResultData<ReviewResponse> updateReview(@PathVariable("id") Long id,
-            @RequestBody ReviewRequest request) {
-        Long userId = SecurityUtils.getCurrentUserId();
+            @Valid @RequestBody ReviewRequest request) {
+        Long userId = requireCurrentUserId();
         return ResultHelper.success(reviewService.updateReview(userId, id, request));
     }
 
     @DeleteMapping("/{id}")
     @Override
     public ResultData<String> deleteReview(@PathVariable("id") Long id) {
-        Long userId = SecurityUtils.getCurrentUserId();
+        Long userId = requireCurrentUserId();
         return ResultHelper.success(reviewService.deleteReview(userId, id));
     }
 

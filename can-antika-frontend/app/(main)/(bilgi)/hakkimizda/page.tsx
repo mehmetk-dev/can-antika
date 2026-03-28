@@ -4,7 +4,7 @@ import { PageHero } from "@/components/layout/page-hero"
 import { Award, Clock, Heart, Quote, Shield } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Hakkımızda | Can Antika - 1990'dan Beri Antika Uzmanı",
+  title: "Hakkımızda - 1990'dan Beri Antika Uzmanı",
   description:
     "1990'dan beri İstanbul Beyoğlu'nda antika tutkunlarına hizmet veriyorum. Osmanlı döneminden Art Deco'ya kadar geniş yelpazede eşsiz eserler sunuyorum.",
   keywords: ["can antika", "hakkımızda", "antikacı istanbul", "antika uzmanı", "çukurcuma antikacısı", "mesut can"],

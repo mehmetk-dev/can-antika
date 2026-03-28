@@ -67,9 +67,8 @@ public class UserServiceImpl implements IUserService {
         }
 
         // Adresler kullanıcı oluşturulduktan sonra eklenir
+        // createdAt is set by @PrePersist in User entity
         User savedUser = userRepository.save(createUser(request));
-        savedUser.setCreatedAt(LocalDateTime.now());
-        userRepository.save(savedUser);
 
         return userMapper.toResponseWithAddresses(savedUser, Collections.emptyList());
     }

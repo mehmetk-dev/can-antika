@@ -30,7 +30,8 @@ export const guestCart = {
 
     addItem(product: ProductResponse, quantity: number) {
         const maxAllowed = Math.max(product.stock ?? 0, 0)
-        if (maxAllowed <= 0 || quantity <= 0) return
+        if (maxAllowed <= 0) throw new Error("Bu ürün şu anda stokta yok.")
+        if (quantity <= 0) throw new Error("Miktar en az 1 olmalıdır.")
 
         const items = readCart()
         const existing = items.find(i => i.product.id === product.id)

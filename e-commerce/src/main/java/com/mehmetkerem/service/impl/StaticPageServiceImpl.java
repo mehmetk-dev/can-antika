@@ -33,7 +33,7 @@ public class StaticPageServiceImpl implements IStaticPageService {
     @Override
     public StaticPage savePage(StaticPage page) {
         if (page.getSlug() == null || page.getSlug().isBlank()) {
-            page.setSlug(slugify(page.getTitle()));
+            page.setSlug(ensureUniqueSlug(slugify(page.getTitle()), null));
         }
         return pageRepository.save(page);
     }
@@ -43,7 +43,7 @@ public class StaticPageServiceImpl implements IStaticPageService {
         StaticPage existing = pageRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Sayfa bulunamadı: " + id));
         existing.setTitle(page.getTitle());
-        existing.setSlug(page.getSlug() != null && !page.getSlug().isBlank() ? page.getSlug() : slugify(page.getTitle()));
+        existing.setSlug(page.getSlug() != null && !page.getSlug().isBlank() ? page.getSlug() : ensureUniqueSlug(slugify(page.getTitle()), id));
         existing.setContent(page.getContent());
         existing.setActive(page.isActive());
         return pageRepository.save(existing);
@@ -52,6 +52,19 @@ public class StaticPageServiceImpl implements IStaticPageService {
     @Override
     public void deletePage(Long id) {
         pageRepository.deleteById(id);
+    }
+
+    private String ensureUniqueSlug(String baseSlug, Long excludeId) {
+        String slug = baseSlug;
+        int counter = 1;
+        while (pageRepository.existsBySlug(slug)) {
+            var existing = pageRepository.findBySlugAndActiveTrue(slug);
+            if (excludeId != null && existing.isPresent() && existing.get().getId().equals(excludeId)) {
+                break;
+            }
+            slug = baseSlug + "-" + counter++;
+        }
+        return slug;
     }
 
     private String slugify(String text) {

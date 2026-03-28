@@ -153,7 +153,7 @@ export default function AdminOrdersPage() {
                       </div>
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">
-                      {order.orderItems?.[0]?.title || "—"}
+                      {order.orderItems?.[0]?.title || order.orderItems?.[0]?.product?.title || "—"}
                       {(order.orderItems?.length || 0) > 1 && ` +${order.orderItems.length - 1}`}
                     </TableCell>
                     <TableCell>₺{order.totalAmount.toLocaleString("tr-TR")}</TableCell>
@@ -326,7 +326,7 @@ export default function AdminOrdersPage() {
                   {detailOrder.orderItems?.map((item, i) => (
                     <div key={i} className="flex items-center justify-between px-3 py-2 text-sm">
                       <div>
-                        <p className="font-medium">{item.title || `Ürün #${item.product?.id}`}</p>
+                        <p className="font-medium">{item.title || item.product?.title || `Ürün #${item.product?.id}`}</p>
                         <p className="text-muted-foreground">x{item.quantity}</p>
                       </div>
                       <p className="font-medium">₺{item.price?.toLocaleString("tr-TR")}</p>

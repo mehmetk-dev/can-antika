@@ -39,7 +39,7 @@ public class RestUserControllerImpl implements IRestUserController {
     @Secured("ROLE_ADMIN")
     @PutMapping("/{id}")
     @Override
-    public ResultData<UserResponse> updateUser(@PathVariable("id") Long id, @RequestBody UserRequest request) {
+    public ResultData<UserResponse> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UserRequest request) {
         return ResultHelper.success(userService.updateUser(id, request));
     }
 

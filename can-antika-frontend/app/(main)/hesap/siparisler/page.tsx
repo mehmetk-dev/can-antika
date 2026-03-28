@@ -117,7 +117,7 @@ function OrdersContent() {
                         <div className="relative h-16 w-16 overflow-hidden rounded-md bg-muted shrink-0">
                           <Image
                             src={imageUrl}
-                            alt={item.title}
+                            alt={item.title || item.product?.title || "Ürün"}
                             fill
                             sizes="64px"
                             className="object-cover"
@@ -125,7 +125,7 @@ function OrdersContent() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-foreground truncate">{item.title}</p>
+                          <p className="font-medium text-foreground truncate">{item.title || item.product?.title || "Ürün"}</p>
                           <p className="text-sm text-muted-foreground">
                             {item.quantity} adet × ₺{item.price.toLocaleString("tr-TR")}
                           </p>

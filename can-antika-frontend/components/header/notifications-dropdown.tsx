@@ -25,17 +25,24 @@ export function NotificationsDropdown() {
     const router = useRouter()
     // To prevent multiple fetches
     const hasFetchedRef = useRef(false)
+    const lastFetchRef = useRef(0)
+    const failedRef = useRef(false)
 
     useEffect(() => {
         if (!isAuthenticated) {
             hasFetchedRef.current = false
+            failedRef.current = false
             setNotifications([])
             setUnreadCount(0)
         }
     }, [isAuthenticated])
 
     const fetchNotifications = useCallback(async () => {
-        if (!isAuthenticated) return
+        if (!isAuthenticated || failedRef.current) return
+        // Throttle: skip if last fetch was less than 30s ago
+        const now = Date.now()
+        if (now - lastFetchRef.current < 30_000) return
+        lastFetchRef.current = now
         try {
             setIsLoading(true)
             const [list, countRes] = await Promise.all([
@@ -44,8 +51,10 @@ export function NotificationsDropdown() {
             ])
             setNotifications(list)
             setUnreadCount(countRes.count)
+            failedRef.current = false
         } catch {
-            // silently handle — header dropdown should not disrupt UX
+            // Mark as failed to stop retrying on focus/visibility events
+            failedRef.current = true
         } finally {
             setIsLoading(false)
         }
@@ -84,10 +93,11 @@ export function NotificationsDropdown() {
         }
     }, [authLoading, isAuthenticated, fetchNotifications])
 
-    // Refetch when opening
+    // Refetch when opening (bypass throttle but respect failure)
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open)
-        if (open) {
+        if (open && !failedRef.current) {
+            lastFetchRef.current = 0
             void fetchNotifications()
         }
     }

@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface StaticPageRepository extends JpaRepository<StaticPage, Long> {
     Optional<StaticPage> findBySlugAndActiveTrue(String slug);
+    boolean existsBySlug(String slug);
 
     List<StaticPage> findByActiveTrueOrderByTitleAsc();
 }

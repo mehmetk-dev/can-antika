@@ -25,7 +25,7 @@ public class RestCategoryControllerImpl implements IRestCategoryController {
     @Secured("ROLE_ADMIN")
     @PostMapping("/save")
     @Override
-    public ResultData<CategoryResponse> saveCategory(@RequestBody CategoryRequest request) {
+    public ResultData<CategoryResponse> saveCategory(@jakarta.validation.Valid @RequestBody CategoryRequest request) {
         return ResultHelper.success(categoryService.saveCategory(request));
     }
 
@@ -46,7 +46,7 @@ public class RestCategoryControllerImpl implements IRestCategoryController {
     @PutMapping("{id}")
     @Override
     public ResultData<CategoryResponse> updateCategory(@PathVariable("id") Long id,
-            @RequestBody CategoryRequest request) {
+            @jakarta.validation.Valid @RequestBody CategoryRequest request) {
         return ResultHelper.success(categoryService.updateCategory(id, request));
     }
 

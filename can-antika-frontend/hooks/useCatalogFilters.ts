@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { productApi, categoryApi, periodApi } from "@/lib/api"
 import { priceRanges } from "@/lib/product/products"
 import type { ProductResponse, CategoryResponse, CursorResponse, PeriodResponse } from "@/lib/types"
@@ -177,18 +178,25 @@ export function useCatalogFilters({
             setProducts(items)
             setTotalCount(total)
         } catch (searchError) {
-            console.error("Product search endpoint failed, trying getAll fallback:", searchError)
-            try {
-                const fallbackResult = await productApi.getAll(currentPage, PAGE_SIZE, sort.sortBy, sort.direction)
-                const fallbackItems = Array.isArray(fallbackResult.items) ? fallbackResult.items : []
-                const fallbackTotal =
-                    typeof fallbackResult.totalElement === "number" ? fallbackResult.totalElement : fallbackItems.length
-                setProducts(fallbackItems)
-                setTotalCount(fallbackTotal)
-            } catch (fallbackError) {
-                console.error("Product listing fallback failed:", fallbackError)
+            console.error("Product search endpoint failed:", searchError)
+            const hasActiveFilters = !!(currentSearch || categoryId || categoryIds || periodId || periodIds || minPrice || maxPrice)
+            if (hasActiveFilters) {
+                toast.error("Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.")
                 setProducts([])
                 setTotalCount(0)
+            } else {
+                try {
+                    const fallbackResult = await productApi.getAll(currentPage, PAGE_SIZE, sort.sortBy, sort.direction)
+                    const fallbackItems = Array.isArray(fallbackResult.items) ? fallbackResult.items : []
+                    const fallbackTotal =
+                        typeof fallbackResult.totalElement === "number" ? fallbackResult.totalElement : fallbackItems.length
+                    setProducts(fallbackItems)
+                    setTotalCount(fallbackTotal)
+                } catch (fallbackError) {
+                    console.error("Product listing fallback failed:", fallbackError)
+                    setProducts([])
+                    setTotalCount(0)
+                }
             }
         } finally {
             setIsLoading(false)

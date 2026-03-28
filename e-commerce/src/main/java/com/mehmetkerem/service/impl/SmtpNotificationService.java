@@ -33,6 +33,10 @@ public class SmtpNotificationService implements INotificationService {
     private final String defaultPass;
     private final String defaultFrom;
 
+    // Cached mail sender — rebuilt only when SMTP settings change
+    private volatile JavaMailSenderImpl cachedMailSender;
+    private volatile String cachedMailSenderKey;
+
     public SmtpNotificationService(
             ISiteSettingsService siteSettingsService,
             IEmailTemplateService emailTemplateService,
@@ -90,6 +94,34 @@ public class SmtpNotificationService implements INotificationService {
                 emailTemplateService.renderOrderStatusUpdate(orderCode, statusLabel));
     }
 
+    private synchronized JavaMailSenderImpl getOrCreateMailSender(String host, Integer port, String user, String pass) {
+        String key = host + ":" + port + ":" + user;
+        if (cachedMailSender != null && key.equals(cachedMailSenderKey)) {
+            return cachedMailSender;
+        }
+
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost(host);
+        mailSender.setPort(port);
+        mailSender.setUsername(user);
+        mailSender.setPassword(pass);
+
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        if (port == 465) {
+            props.put("mail.smtp.ssl.enable", "true");
+            props.put("mail.smtp.socketFactory.port", "465");
+            props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        }
+
+        cachedMailSender = mailSender;
+        cachedMailSenderKey = key;
+        return mailSender;
+    }
+
     private void sendEmail(String to, String subject, String htmlContent) {
         SiteSettings settings = siteSettingsService.get();
         NotificationConfig config = settings.getNotificationConfig();
@@ -106,23 +138,7 @@ public class SmtpNotificationService implements INotificationService {
             return;
         }
 
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(host);
-        mailSender.setPort(port);
-        mailSender.setUsername(user);
-        mailSender.setPassword(pass);
-
-        Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        
-        // Handle SSL/TLS specifically for port 465 (common for Zoho)
-        if (port == 465) {
-            props.put("mail.smtp.ssl.enable", "true");
-            props.put("mail.smtp.socketFactory.port", "465");
-            props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        }
+        JavaMailSenderImpl mailSender = getOrCreateMailSender(host, port, user, pass);
 
         try {
             MimeMessage message = mailSender.createMimeMessage();

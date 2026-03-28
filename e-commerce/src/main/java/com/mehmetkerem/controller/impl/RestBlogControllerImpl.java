@@ -91,14 +91,14 @@ public class RestBlogControllerImpl implements IRestBlogController {
     @Override
     @Secured("ROLE_ADMIN")
     @PostMapping("/v1/admin/blog/categories")
-    public ResultData<com.mehmetkerem.dto.response.BlogCategoryResponse> createCategory(@RequestBody com.mehmetkerem.dto.request.BlogCategoryRequest cat) {
+    public ResultData<com.mehmetkerem.dto.response.BlogCategoryResponse> createCategory(@Valid @RequestBody com.mehmetkerem.dto.request.BlogCategoryRequest cat) {
         return ResultHelper.success(blogMapper.toCategoryResponse(blogService.saveCategory(blogMapper.toCategoryEntity(cat))));
     }
 
     @Override
     @Secured("ROLE_ADMIN")
     @PutMapping("/v1/admin/blog/categories/{id}")
-    public ResultData<com.mehmetkerem.dto.response.BlogCategoryResponse> updateCategory(@PathVariable Long id, @RequestBody com.mehmetkerem.dto.request.BlogCategoryRequest cat) {
+    public ResultData<com.mehmetkerem.dto.response.BlogCategoryResponse> updateCategory(@PathVariable Long id, @Valid @RequestBody com.mehmetkerem.dto.request.BlogCategoryRequest cat) {
         return ResultHelper.success(blogMapper.toCategoryResponse(blogService.updateCategory(id, blogMapper.toCategoryEntity(cat))));
     }
 

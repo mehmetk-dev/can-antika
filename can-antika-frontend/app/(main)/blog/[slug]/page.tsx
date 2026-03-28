@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import { cache } from "react"
 import { BlogDetailClient } from "./blog-detail-client"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"

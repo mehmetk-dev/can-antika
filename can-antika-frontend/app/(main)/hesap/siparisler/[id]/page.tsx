@@ -110,7 +110,7 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
                                 <div key={`${item.id}-${i}`} className="flex gap-4">
                                     <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
                                         {item.product?.imageUrls?.[0] ? (
-                                            <Image src={item.product.imageUrls[0]} alt={item.title} fill sizes="80px" className="object-cover" unoptimized />
+                                            <Image src={item.product.imageUrls[0]} alt={item.title || item.product?.title || "Ürün"} fill sizes="80px" className="object-cover" unoptimized />
                                         ) : (
                                             <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                                                 <Package className="h-6 w-6" />
@@ -119,7 +119,7 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <Link href={`/urun/${item.product?.slug ?? item.product?.id ?? ""}`} className="font-medium text-foreground hover:text-primary line-clamp-1">
-                                            {item.title}
+                                            {item.title || item.product?.title || "Ürün"}
                                         </Link>
                                         <p className="text-sm text-muted-foreground">Adet: {item.quantity}</p>
                                         <p className="font-medium text-primary mt-1">₺{item.price.toLocaleString("tr-TR")}</p>

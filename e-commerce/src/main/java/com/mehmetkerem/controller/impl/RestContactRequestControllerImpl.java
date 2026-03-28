@@ -71,7 +71,7 @@ public class RestContactRequestControllerImpl implements IRestContactRequestCont
     @Override
     @Secured("ROLE_ADMIN")
     @PutMapping("/v1/admin/contact-requests/{id}")
-    public ResultData<ContactRequestResponse> updateRequest(@PathVariable Long id, @RequestBody ContactRequestDto req) {
+    public ResultData<ContactRequestResponse> updateRequest(@PathVariable Long id, @Valid @RequestBody ContactRequestDto req) {
         return ResultHelper.success(toResponse(contactRequestService.updateRequest(id, toEntity(req))));
     }
 

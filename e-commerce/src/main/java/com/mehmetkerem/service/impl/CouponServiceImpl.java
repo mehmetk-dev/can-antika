@@ -158,8 +158,12 @@ public class CouponServiceImpl implements ICouponService {
     }
 
     private BigDecimal calculateDiscountedTotal(Coupon coupon, BigDecimal cartTotal) {
-        BigDecimal newTotal = cartTotal.subtract(coupon.getDiscountAmount());
-        return newTotal.max(BigDecimal.ZERO);
+        BigDecimal discount = coupon.getDiscountAmount();
+        if ("PERCENTAGE".equalsIgnoreCase(coupon.getDiscountType())) {
+            discount = cartTotal.multiply(discount)
+                    .divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+        }
+        return cartTotal.subtract(discount).max(BigDecimal.ZERO);
     }
 
     @Override

@@ -28,12 +28,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserResponse | null>(null);
-    const [isLoading, setIsLoading] = useState(() => hasAuthSessionFlag());
+    // Always start as loading so server and client render the same initial state
+    // (hasAuthSessionFlag uses localStorage which is unavailable on the server)
+    const [isLoading, setIsLoading] = useState(true);
 
     // Sayfa yüklendiğinde cookie ile backend'e doğrulat
     // HttpOnly cookie olduğu için JS'den kontrol edemiyoruz, sessizce deneriz
     useEffect(() => {
         if (!hasAuthSessionFlag()) {
+            setIsLoading(false);
             return;
         }
 

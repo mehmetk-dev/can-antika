@@ -77,6 +77,7 @@ public class CartServiceImpl implements ICartService {
 
         cart.getItems().clear();
         cart.getItems().addAll(mergedItems.values());
+        cart.setCouponCode(null);
         cart.setUpdatedAt(LocalDateTime.now());
 
         return toResponse(cartRepository.save(cart));

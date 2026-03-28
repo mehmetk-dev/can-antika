@@ -14,6 +14,7 @@ import { toast } from "sonner"
 import Link from "next/link"
 import type { ProductResponse, CategoryResponse } from "@/lib/types"
 import { ADMIN_PAGE_SIZE } from "@/lib/constants"
+import { toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<ProductResponse[]>([])
@@ -28,7 +29,7 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     categoryApi
-      .getAll()
+      .getAllCached()
       .then(setCategories)
       .catch((e) => {
         console.error("Kategori listesi alınamadı:", e)
@@ -84,9 +85,12 @@ export default function AdminProductsPage() {
     setIsImporting(true)
     try {
       const result = await productApi.importFromExcel(file)
-      const preview = (result.errors || []).slice(0, 3).join(" | ")
+      const allErrors = result.errors || []
       if (result.failedCount > 0) {
-        toast.warning(`Aktarıldı: ${result.importedCount}, Hata: ${result.failedCount}${preview ? ` (${preview})` : ""}`)
+        toast.warning(`Aktarıldı: ${result.importedCount}, Hata: ${result.failedCount}`, {
+          description: allErrors.length > 0 ? allErrors.join("\n") : undefined,
+          duration: 10000,
+        })
       } else {
         toast.success(`${result.importedCount} ürün başarıyla aktarıldı`)
       }
@@ -165,7 +169,7 @@ export default function AdminProductsPage() {
                     <TableCell>
                       <div className="relative h-12 w-12 overflow-hidden rounded-md bg-muted">
                         <Image
-                          src={product.imageUrls?.[0] || "/placeholder.svg"}
+                          src={toCloudinaryResponsiveUrl(product.imageUrls?.[0] || "/placeholder.svg", 96, 70)}
                           alt={product.title}
                           fill
                           sizes="48px"

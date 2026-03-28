@@ -46,7 +46,7 @@ public class BlogServiceImpl implements IBlogService {
     public BlogPost savePost(BlogPost post) {
         validateCategory(post.getCategoryId());
         if (post.getSlug() == null || post.getSlug().isBlank()) {
-            post.setSlug(slugify(post.getTitle()));
+            post.setSlug(ensureUniqueSlug(slugify(post.getTitle()), null));
         }
         return postRepository.save(post);
     }
@@ -56,7 +56,7 @@ public class BlogServiceImpl implements IBlogService {
         validateCategory(post.getCategoryId());
         BlogPost existing = getPostById(id);
         existing.setTitle(post.getTitle());
-        existing.setSlug(post.getSlug() != null && !post.getSlug().isBlank() ? post.getSlug() : slugify(post.getTitle()));
+        existing.setSlug(post.getSlug() != null && !post.getSlug().isBlank() ? post.getSlug() : ensureUniqueSlug(slugify(post.getTitle()), id));
         existing.setContent(post.getContent());
         existing.setSummary(post.getSummary());
         existing.setImageUrl(post.getImageUrl());
@@ -99,6 +99,20 @@ public class BlogServiceImpl implements IBlogService {
     @Override
     public void deleteCategory(Long id) {
         categoryRepository.deleteById(id);
+    }
+
+    private String ensureUniqueSlug(String baseSlug, Long excludeId) {
+        String slug = baseSlug;
+        int counter = 1;
+        while (postRepository.existsBySlug(slug)) {
+            // If updating, the existing slug belongs to the same post — keep it
+            var existing = postRepository.findBySlug(slug);
+            if (excludeId != null && existing.isPresent() && existing.get().getId().equals(excludeId)) {
+                break;
+            }
+            slug = baseSlug + "-" + counter++;
+        }
+        return slug;
     }
 
     private String slugify(String text) {

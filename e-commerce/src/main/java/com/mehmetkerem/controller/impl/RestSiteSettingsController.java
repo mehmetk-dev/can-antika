@@ -33,7 +33,7 @@ public class RestSiteSettingsController implements IRestSiteSettingsController {
     @Override
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResultData<SiteSettingsResponse> update(@RequestBody SiteSettingsRequest req) {
+    public ResultData<SiteSettingsResponse> update(@jakarta.validation.Valid @RequestBody SiteSettingsRequest req) {
         return ResultHelper.success(service.updateSettings(req));
     }
 }

@@ -9,13 +9,17 @@ import com.mehmetkerem.repository.PeriodRepository;
 import com.mehmetkerem.repository.ProductRepository;
 import com.mehmetkerem.service.IPeriodService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PeriodServiceImpl implements IPeriodService {
@@ -100,11 +104,20 @@ public class PeriodServiceImpl implements IPeriodService {
     }
 
     @Override
+    @Transactional
     public Period findOrCreateByName(String periodName) {
         String normalizedName = normalizeRequired(periodName);
         return periodRepository.findByNameIgnoreCase(normalizedName)
-                .orElseGet(() -> periodRepository.save(
-                        Period.builder().name(normalizedName).active(true).build()));
+                .orElseGet(() -> {
+                    try {
+                        return periodRepository.save(
+                                Period.builder().name(normalizedName).active(true).build());
+                    } catch (DataIntegrityViolationException ex) {
+                        log.warn("Dönem kaydetme çakışması, mevcut kayıt aranıyor: {}", normalizedName);
+                        return periodRepository.findByNameIgnoreCase(normalizedName)
+                                .orElseThrow(() -> ex);
+                    }
+                });
     }
 
     private PeriodResponse toResponse(Period period) {

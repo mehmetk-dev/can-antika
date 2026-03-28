@@ -52,7 +52,7 @@ public class RestBankTransferControllerImpl implements IRestBankTransferControll
     @Override
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/v1/bank-transfers")
-    public ResultData<BankTransferResponse> submitTransfer(@RequestBody BankTransferRequest req) {
+    public ResultData<BankTransferResponse> submitTransfer(@jakarta.validation.Valid @RequestBody BankTransferRequest req) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         if (currentUserId == null) {
             throw new BadRequestException("Oturum açmanız gerekiyor.");
@@ -113,7 +113,7 @@ public class RestBankTransferControllerImpl implements IRestBankTransferControll
     @Override
     @Secured("ROLE_ADMIN")
     @PutMapping("/v1/admin/bank-transfers/{id}")
-    public ResultData<BankTransferResponse> updateTransfer(@PathVariable Long id, @RequestBody BankTransferRequest req) {
+    public ResultData<BankTransferResponse> updateTransfer(@PathVariable Long id, @jakarta.validation.Valid @RequestBody BankTransferRequest req) {
         return ResultHelper.success(toResponse(bankTransferService.updateTransfer(id, toEntity(req))));
     }
 }

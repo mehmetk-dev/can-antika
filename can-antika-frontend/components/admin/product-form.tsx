@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import type React from "react"
 import Image from "next/image"
@@ -13,7 +13,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { categoryApi, periodApi } from "@/lib/api"
-import { materials } from "@/lib/product/products"
 import { toast } from "sonner"
 import { useProductImages } from "@/hooks/useProductImages"
 import type { CategoryResponse, PeriodResponse, ProductResponse, ProductRequest } from "@/lib/types"
@@ -40,13 +39,13 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
     const [isSaving, setIsSaving] = useState(false)
 
     useEffect(() => {
-        Promise.all([categoryApi.getAll(), periodApi.getAll()])
+        Promise.all([categoryApi.getAllCached(), periodApi.getAll()])
             .then(([cats, dbPeriods]) => {
                 setCategories(cats)
                 setPeriods(dbPeriods)
             })
             .catch((e) => {
-                const message = e instanceof Error ? e.message : "Kategori ve d\u00F6nem verileri y\u00FCklenemedi"
+                const message = e instanceof Error ? e.message : "Kategori ve dönem verileri yüklenemedi"
                 toast.error(message)
             })
     }, [])
@@ -69,11 +68,15 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
         const parsedPrice = Number(formData.get("price"))
 
         if (!Number.isFinite(parsedCategoryId) || parsedCategoryId <= 0) {
-            toast.error("L\u00FCtfen ge\u00E7erli bir kategori se\u00E7in")
+            toast.error("Lütfen geçerli bir kategori seçin")
             return
         }
         if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
-            toast.error("L\u00FCtfen ge\u00E7erli bir fiyat girin")
+            toast.error("Lütfen geçerli bir fiyat girin")
+            return
+        }
+        if (images.length === 0) {
+            toast.error("Lütfen en az bir görsel yükleyin")
             return
         }
 
@@ -130,39 +133,39 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                         <CardHeader>
                             <CardTitle className="font-serif">Temel Bilgiler</CardTitle>
                             <CardDescription>
-                                {isEdit ? "\u00DCr\u00FCn\u00FCn genel bilgilerini d\u00FCzenleyin" : "\u00DCr\u00FCn\u00FCn genel bilgilerini girin"}
+                                {isEdit ? "Ürünün genel bilgilerini düzenleyin" : "Ürünün genel bilgilerini girin"}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="title">\u00DCr\u00FCn Ad\u0131 *</Label>
+                                <Label htmlFor="title">Ürün Adı *</Label>
                                 <Input
                                     id="title"
                                     name="title"
                                     defaultValue={product?.title}
-                                    placeholder={!isEdit ? "\u00D6rn: Osmanl\u0131 D\u00F6nemi Duvar Saati" : undefined}
+                                    placeholder={!isEdit ? "Örn: Osmanlı Dönemi Duvar Saati" : undefined}
                                     required maxLength={255} className="bg-muted/50"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="description">A\u00E7\u0131klama *</Label>
+                                <Label htmlFor="description">Açıklama *</Label>
                                 <Textarea
                                     id="description"
                                     name="description"
                                     rows={4}
                                     defaultValue={product?.description || ""}
-                                    placeholder={!isEdit ? "\u00DCr\u00FCn hakk\u0131nda detayl\u0131 a\u00E7\u0131klama..." : undefined}
+                                    placeholder={!isEdit ? "Ürün hakkında detaylı açıklama..." : undefined}
                                     required maxLength={5000} className="bg-muted/50"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="story">Hik\u00E2ye / K\u00F6ken</Label>
+                                <Label htmlFor="story">Hikâye / Köken</Label>
                                 <Textarea
                                     id="story"
                                     name="story"
                                     rows={4}
                                     defaultValue={(product?.attributes?.provenance as string) || ""}
-                                    placeholder={!isEdit ? "Eserin tarih\u00E7esi ve k\u00F6ken bilgisi..." : undefined} maxLength={5000} className="bg-muted/50"
+                                    placeholder={!isEdit ? "Eserin tarihçesi ve köken bilgisi..." : undefined} maxLength={5000} className="bg-muted/50"
                                 />
                             </div>
                         </CardContent>
@@ -170,9 +173,9 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
 
                     <Card className="bg-card">
                         <CardHeader>
-                            <CardTitle className="font-serif">G\u00F6rseller</CardTitle>
+                            <CardTitle className="font-serif">Görseller</CardTitle>
                             <CardDescription>
-                                {isEdit ? "\u00DCr\u00FCn foto\u011Fraflar\u0131n\u0131 y\u00F6netin" : "\u00DCr\u00FCn foto\u011Fraflar\u0131n\u0131 y\u00FCkleyin (maksimum 6 adet)"}
+                                {isEdit ? "Ürün fotoğraflarını yönetin" : "Ürün fotoğraflarını yükleyin (maksimum 6 adet)"}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -180,7 +183,7 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                             <div className="grid gap-4 sm:grid-cols-3">
                                 {images.map((image, index) => (
                                     <div key={index} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                                        <Image src={image} alt={`\u00DCr\u00FCn ${index + 1}`} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" unoptimized />
+                                        <Image src={image} alt={`Ürün ${index + 1}`} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" unoptimized />
                                         <button
                                             type="button"
                                             onClick={() => removeImage(index)}
@@ -200,13 +203,13 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                         {uploadingCount > 0 ? (
                                             <>
                                                 <Loader2 className="h-8 w-8 animate-spin" />
-                                                <span className="mt-2 text-sm">{uploadingCount} y\u00FCkleniyor...</span>
+                                                <span className="mt-2 text-sm">{uploadingCount} yükleniyor...</span>
                                             </>
                                         ) : (
                                             <>
                                                 <Upload className="h-8 w-8" />
-                                                <span className="mt-2 text-sm">Y\u00FCkle</span>
-                                                <span className="mt-0.5 text-xs opacity-60">\u00C7oklu se\u00E7im yapabilirsiniz</span>
+                                                <span className="mt-2 text-sm">Yükle</span>
+                                                <span className="mt-0.5 text-xs opacity-60">Çoklu seçim yapabilirsiniz</span>
                                             </>
                                         )}
                                     </button>
@@ -218,7 +221,7 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                     <Card className="bg-card">
                         <CardHeader>
                             <CardTitle className="font-serif">Detaylar</CardTitle>
-                            {!isEdit && <CardDescription>\u00DCr\u00FCn\u00FCn fiziksel \u00F6zellikleri ve durumu</CardDescription>}
+                            {!isEdit && <CardDescription>Ürünün fiziksel özellikleri ve durumu</CardDescription>}
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid gap-4 sm:grid-cols-2">
@@ -228,7 +231,7 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                         id="dimensions"
                                         name="dimensions"
                                         defaultValue={(product?.attributes?.dimensions as string) || ""}
-                                        placeholder="\u00D6rn: 65cm x 35cm x 15cm"
+                                        placeholder="Örn: 65cm x 35cm x 15cm"
                                         required={!isEdit}
                                         className="bg-muted/50"
                                     />
@@ -239,20 +242,20 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                         id="condition"
                                         name="condition"
                                         defaultValue={(product?.attributes?.condition as string) || ""}
-                                        placeholder="\u00D6rn: M\u00FCkemmel durumda"
+                                        placeholder="Örn: Mükemmel durumda"
                                         required={!isEdit}
                                         className="bg-muted/50"
                                     />
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="conditionDetails">Durum Detaylar\u0131</Label>
+                                <Label htmlFor="conditionDetails">Durum Detayları</Label>
                                 <Textarea
                                     id="conditionDetails"
                                     name="conditionDetails"
                                     rows={3}
                                     defaultValue={(product?.attributes?.conditionDetails as string) || ""}
-                                    placeholder="A\u015F\u0131nma, restorasyon vb. detaylar..."
+                                    placeholder="Aşınma, restorasyon vb. detaylar..."
                                     className="bg-muted/50"
                                 />
                             </div>
@@ -271,8 +274,8 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                 <Select value={status} onValueChange={setStatus}>
                                     <SelectTrigger className="bg-muted/50"><SelectValue /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="active">Aktif (Sat\u0131\u015Fta)</SelectItem>
-                                        <SelectItem value="sold">Sat\u0131ld\u0131</SelectItem>
+                                        <SelectItem value="active">Aktif (Satışta)</SelectItem>
+                                        <SelectItem value="sold">Satıldı</SelectItem>
                                         <SelectItem value="reserved">Rezerve</SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -289,24 +292,22 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                     className="bg-muted/50"
                                 />
                             </div>
-                            {isEdit && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="stock">Stok Adedi</Label>
-                                    <Input id="stock" name="stock" type="number" defaultValue={product?.stock ?? 1} className="bg-muted/50" />
-                                </div>
-                            )}
+                            <div className="space-y-2">
+                                <Label htmlFor="stock">Stok Adedi{!isEdit && " *"}</Label>
+                                <Input id="stock" name="stock" type="number" min={0} defaultValue={product?.stock ?? 1} className="bg-muted/50" />
+                            </div>
                         </CardContent>
                     </Card>
 
                     <Card className="bg-card">
                         <CardHeader>
-                            <CardTitle className="font-serif">S\u0131n\u0131fland\u0131rma</CardTitle>
+                            <CardTitle className="font-serif">Sınıflandırma</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
                                 <Label>Kategori{!isEdit && " *"}</Label>
                                 <Select value={categoryId} onValueChange={setCategoryId}>
-                                    <SelectTrigger className="bg-muted/50"><SelectValue placeholder="Se\u00E7in" /></SelectTrigger>
+                                    <SelectTrigger className="bg-muted/50"><SelectValue placeholder="Seçin" /></SelectTrigger>
                                     <SelectContent>
                                         {categories.map((cat) => (
                                             <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
@@ -315,7 +316,7 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label>D\u00F6nem</Label>
+                                <Label>Dönem</Label>
                                 <Select
                                     value={selectedPeriodId}
                                     onValueChange={(value) => {
@@ -323,7 +324,7 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                         if (value) setCustomPeriodName("")
                                     }}
                                 >
-                                    <SelectTrigger className="bg-muted/50"><SelectValue placeholder="Mevcut d\u00F6nem se\u00E7in" /></SelectTrigger>
+                                    <SelectTrigger className="bg-muted/50"><SelectValue placeholder="Mevcut dönem seçin" /></SelectTrigger>
                                     <SelectContent>
                                         {periods.map((period) => (
                                             <SelectItem key={period.id} value={period.id.toString()}>{period.name}</SelectItem>
@@ -332,7 +333,7 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="customPeriodName">Yeni D\u00F6nem Ekle</Label>
+                                <Label htmlFor="customPeriodName">Yeni Dönem Ekle</Label>
                                 <Input
                                     id="customPeriodName"
                                     value={customPeriodName}
@@ -340,27 +341,26 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                         setCustomPeriodName(e.target.value)
                                         if (e.target.value.trim().length > 0) setSelectedPeriodId("")
                                     }}
-                                    placeholder="\u00D6rn: Ge\u00E7 Osmanl\u0131"
+                                    placeholder="Örn: Geç Osmanlı"
                                     className="bg-muted/50"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Malzeme</Label>
-                                <Select value={material} onValueChange={setMaterial}>
-                                    <SelectTrigger className="bg-muted/50"><SelectValue placeholder="Se\u00E7in" /></SelectTrigger>
-                                    <SelectContent>
-                                        {materials.map((mat) => (
-                                            <SelectItem key={mat.value} value={mat.value}>{mat.label}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <Label htmlFor="material">Malzeme</Label>
+                                <Input
+                                    id="material"
+                                    value={material}
+                                    onChange={(e) => setMaterial(e.target.value)}
+                                    placeholder="Örn: Ahşap, Pirinç, Seramik"
+                                    className="bg-muted/50"
+                                />
                             </div>
                         </CardContent>
                     </Card>
 
                     <div className="flex gap-3">
                         <Button type="button" variant="outline" className="flex-1 bg-transparent" onClick={() => router.back()}>
-                            \u0130ptal
+                            İptal
                         </Button>
                         <Button type="submit" className="flex-1 bg-primary text-primary-foreground" disabled={isSaving}>
                             {isSaving ? "Kaydediliyor..." : "Kaydet"}

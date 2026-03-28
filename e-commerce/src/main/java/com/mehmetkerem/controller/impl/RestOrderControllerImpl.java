@@ -128,7 +128,12 @@ public class RestOrderControllerImpl implements IRestOrderController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{orderId}/status")
     public ResultData<OrderResponse> updateOrderStatus(@PathVariable Long orderId, @RequestParam String status) {
-        com.mehmetkerem.enums.OrderStatus orderStatus = com.mehmetkerem.enums.OrderStatus.valueOf(status.toUpperCase());
+        com.mehmetkerem.enums.OrderStatus orderStatus;
+        try {
+            orderStatus = com.mehmetkerem.enums.OrderStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new com.mehmetkerem.exception.BadRequestException("Geçersiz sipariş durumu: " + status);
+        }
         return ResultHelper.success(orderService.updateOrderStatus(orderId, orderStatus));
     }
 
