@@ -94,7 +94,7 @@ export function CatalogClient({
     if (initialCategories.length > 0) {
       resolveCategories(initialCategories)
     } else {
-      categoryApi.getAll().then((cats) => {
+      categoryApi.getAllCached().then((cats) => {
         setCategories(cats)
         resolveCategories(cats)
       }).catch((e) => console.error("Kategori yükleme hatası:", e))
@@ -141,75 +141,25 @@ export function CatalogClient({
       maxPrice = maxVals.length > 0 ? Math.max(...maxVals) : undefined
     }
 
-    // Category: single selection can use API category filter, multi-selection is handled client-side
+    // Category & period filters
     const selectedCategoryIds = selectedFilters.categories
       .map((v) => Number(v))
       .filter((v) => Number.isFinite(v))
     const categoryId = selectedCategoryIds.length === 1 ? selectedCategoryIds[0] : undefined
+    const categoryIds = selectedCategoryIds.length > 1 ? selectedCategoryIds.join(",") : undefined
     const selectedPeriodIds = selectedFilters.periods
       .map((v) => Number(v))
       .filter((v) => Number.isFinite(v))
     const periodId = selectedPeriodIds.length === 1 ? selectedPeriodIds[0] : undefined
+    const periodIds = selectedPeriodIds.length > 1 ? selectedPeriodIds.join(",") : undefined
 
     try {
-      // API-side tekil filtre yerine, çoklu kategori veya dönem filtresinde
-      // tüm ürünleri çekip client-side birleşik filtre uygula.
-      if (selectedCategoryIds.length > 1 || selectedPeriodIds.length > 0) {
-        const allProducts = await productApi.findAll()
-
-        const filtered = allProducts
-          .filter((item) => {
-            const itemCategoryId = item.category?.id
-            if (selectedCategoryIds.length > 0 && (!itemCategoryId || !selectedCategoryIds.includes(itemCategoryId))) {
-              return false
-            }
-
-            const itemPeriodId = item.period?.id
-            if (selectedPeriodIds.length > 0 && (!itemPeriodId || !selectedPeriodIds.includes(itemPeriodId))) {
-              return false
-            }
-
-            if (searchQuery && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) {
-              return false
-            }
-
-            if (typeof minPrice === "number" && item.price < minPrice) {
-              return false
-            }
-
-            if (typeof maxPrice === "number" && item.price > maxPrice) {
-              return false
-            }
-
-            return true
-          })
-          .sort((a, b) => {
-            switch (sort.sortBy) {
-              case "price":
-                return sort.direction === "desc" ? b.price - a.price : a.price - b.price
-              case "title":
-                return sort.direction === "desc"
-                  ? b.title.localeCompare(a.title, "tr")
-                  : a.title.localeCompare(b.title, "tr")
-              case "id":
-              default:
-                return sort.direction === "desc" ? (b.id ?? 0) - (a.id ?? 0) : (a.id ?? 0) - (b.id ?? 0)
-            }
-          })
-
-        const total = filtered.length
-        const start = page * PAGE_SIZE
-        const pagedItems = filtered.slice(start, start + PAGE_SIZE)
-
-        setProducts(pagedItems)
-        setTotalCount(total)
-        return
-      }
-
       const result: CursorResponse<ProductResponse> = await productApi.search({
         title: searchQuery || undefined,
         categoryId,
+        categoryIds,
         periodId,
+        periodIds,
         minPrice,
         maxPrice,
         page,

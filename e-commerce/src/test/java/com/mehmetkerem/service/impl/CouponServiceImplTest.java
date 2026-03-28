@@ -3,8 +3,11 @@ package com.mehmetkerem.service.impl;
 import com.mehmetkerem.dto.response.CouponResponse;
 import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.NotFoundException;
+import com.mehmetkerem.mapper.CouponMapper;
 import com.mehmetkerem.model.Coupon;
+import com.mehmetkerem.model.CouponUsage;
 import com.mehmetkerem.repository.CouponRepository;
+import com.mehmetkerem.repository.CouponUsageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,10 +31,17 @@ class CouponServiceImplTest {
     @Mock
     private CouponRepository couponRepository;
 
+    @Mock
+    private CouponUsageRepository couponUsageRepository;
+
+    @Mock
+    private CouponMapper couponMapper;
+
     @InjectMocks
     private CouponServiceImpl couponService;
 
     private Coupon coupon;
+    private CouponResponse couponResponse;
 
     @BeforeEach
     void setUp() {
@@ -43,6 +53,13 @@ class CouponServiceImplTest {
                 .expirationDate(LocalDateTime.now().plusDays(7))
                 .isActive(true)
                 .build();
+
+        couponResponse = CouponResponse.builder()
+                .id(1L)
+                .code("INDIRIM10")
+                .discountAmount(new BigDecimal("10"))
+                .minCartAmount(new BigDecimal("100"))
+                .build();
     }
 
     @Test
@@ -50,6 +67,7 @@ class CouponServiceImplTest {
     void createCoupon_WhenCodeNotExists_ShouldCreate() {
         when(couponRepository.findByCode("indirim10")).thenReturn(Optional.empty());
         when(couponRepository.save(any(Coupon.class))).thenReturn(coupon);
+        when(couponMapper.toResponse(coupon)).thenReturn(couponResponse);
 
         CouponResponse result = couponService.createCoupon("indirim10", new BigDecimal("10"),
                 new BigDecimal("100"), 7);
@@ -73,6 +91,7 @@ class CouponServiceImplTest {
     @DisplayName("getCouponByCode - kupon bulunur")
     void getCouponByCode_WhenExists_ShouldReturnCoupon() {
         when(couponRepository.findByCode("INDIRIM10")).thenReturn(Optional.of(coupon));
+        when(couponMapper.toResponse(coupon)).thenReturn(couponResponse);
 
         CouponResponse result = couponService.getCouponByCode("INDIRIM10");
 
@@ -93,7 +112,6 @@ class CouponServiceImplTest {
     @DisplayName("applyCoupon - geçerli kupon uygulanır")
     void applyCoupon_WhenValid_ShouldReturnDiscountedTotal() {
         when(couponRepository.findByCode("INDIRIM10")).thenReturn(Optional.of(coupon));
-        when(couponRepository.save(any(Coupon.class))).thenReturn(coupon);
         BigDecimal cartTotal = new BigDecimal("150");
 
         BigDecimal result = couponService.applyCoupon("INDIRIM10", cartTotal);
@@ -135,11 +153,27 @@ class CouponServiceImplTest {
     void applyCoupon_WhenDiscountExceedsTotal_ShouldReturnZero() {
         coupon.setDiscountAmount(new BigDecimal("200"));
         when(couponRepository.findByCode("INDIRIM10")).thenReturn(Optional.of(coupon));
-        when(couponRepository.save(any(Coupon.class))).thenReturn(coupon);
 
         BigDecimal result = couponService.applyCoupon("INDIRIM10", new BigDecimal("150"));
 
         assertEquals(BigDecimal.ZERO, result);
+    }
+
+    @Test
+    @DisplayName("consumeCoupon - per-user limit doluysa BadRequestException")
+    void consumeCoupon_WhenPerUserLimitReached_ShouldThrow() {
+        coupon.setPerUserLimit(1);
+        when(couponRepository.findByCode("INDIRIM10")).thenReturn(Optional.of(coupon));
+        when(couponUsageRepository.findByCouponIdAndUserId(1L, 99L))
+                .thenReturn(Optional.of(CouponUsage.builder()
+                        .couponId(1L)
+                        .userId(99L)
+                        .usageCount(1)
+                        .build()));
+
+        assertThrows(BadRequestException.class,
+                () -> couponService.consumeCoupon("INDIRIM10", new BigDecimal("150"), 99L));
+        verify(couponRepository, never()).save(any());
     }
 
     @Test

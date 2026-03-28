@@ -53,14 +53,19 @@ export const orderApi = {
         let lastError: Error | null = null;
         let res: Response | null = null;
         for (const baseUrl of baseUrls) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
             try {
                 res = await fetch(`${baseUrl.replace(/\/$/, "")}/v1/order/${orderId}/invoice/pdf`, {
                     credentials: "include",
+                    signal: controller.signal,
                 });
                 if (res.ok) break;
                 lastError = new Error(`PDF endpoint failed: ${res.status}`);
             } catch (error) {
                 lastError = error instanceof Error ? error : new Error("PDF indirilemedi");
+            } finally {
+                clearTimeout(timeoutId);
             }
         }
 

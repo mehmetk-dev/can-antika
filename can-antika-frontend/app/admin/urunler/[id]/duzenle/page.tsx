@@ -48,8 +48,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         setStatus((prod.attributes?.status as string) || "active")
         setIsLoading(false)
       })
-      .catch(() => {
-        toast.error("Ürün yüklenemedi")
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : "Ürün yüklenemedi"
+        toast.error(message)
         setIsLoading(false)
       })
   }, [id])
@@ -86,8 +87,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       await productApi.update(Number(id), data)
       toast.success("Ürün başarıyla güncellendi")
       router.push("/admin/urunler")
-    } catch {
-      toast.error("Güncelleme sırasında hata oluştu")
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Güncelleme sırasında hata oluştu"
+      toast.error(message)
     } finally {
       setIsSaving(false)
     }
@@ -99,13 +101,32 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
     const maxSlots = 6 - images.length
     const selectedFiles = Array.from(files).slice(0, maxSlots)
+    const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"])
+    const allowedExtensions = new Set(["jpg", "jpeg", "png", "gif", "webp"])
 
     const oversized = selectedFiles.filter((f) => f.size > 100 * 1024 * 1024)
     if (oversized.length > 0) {
       toast.error(`${oversized.length} dosya 100MB sınırını aşıyor, atlandı.`)
     }
 
-    const validFiles = selectedFiles.filter((f) => f.size <= 100 * 1024 * 1024)
+    const unsupported = selectedFiles.filter((f) => {
+      const ext = f.name.includes(".") ? f.name.split(".").pop()?.toLowerCase() ?? "" : ""
+      const hasAllowedType = allowedMimeTypes.has((f.type || "").toLowerCase())
+      const hasAllowedExt = allowedExtensions.has(ext)
+      return !(hasAllowedType || hasAllowedExt)
+    })
+    if (unsupported.length > 0) {
+      toast.error(
+        `${unsupported.length} dosya formatı desteklenmiyor. Desteklenen: JPEG, PNG, GIF, WebP (HEIC/HEIF desteklenmez).`,
+      )
+    }
+
+    const validFiles = selectedFiles.filter((f) => {
+      const ext = f.name.includes(".") ? f.name.split(".").pop()?.toLowerCase() ?? "" : ""
+      const hasAllowedType = allowedMimeTypes.has((f.type || "").toLowerCase())
+      const hasAllowedExt = allowedExtensions.has(ext)
+      return f.size <= 100 * 1024 * 1024 && (hasAllowedType || hasAllowedExt)
+    })
     if (validFiles.length === 0) {
       if (fileInputRef.current) fileInputRef.current.value = ""
       return
@@ -120,8 +141,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           if (prev.length >= 6) return prev
           return [...prev, url]
         })
-      } catch {
-        toast.error(`"${file.name}" yüklenemedi`)
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : "Yükleme hatası"
+        toast.error(`"${file.name}" yüklenemedi: ${reason}`)
       } finally {
         setUploadingCount((prev) => prev - 1)
       }

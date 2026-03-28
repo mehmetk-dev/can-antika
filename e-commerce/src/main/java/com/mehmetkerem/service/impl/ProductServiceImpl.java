@@ -1,8 +1,9 @@
 package com.mehmetkerem.service.impl;
 
 import com.mehmetkerem.dto.request.ProductRequest;
-import com.mehmetkerem.dto.response.ProductImportResponse;
 import com.mehmetkerem.dto.response.CategoryResponse;
+import com.mehmetkerem.dto.response.CursorResponse;
+import com.mehmetkerem.dto.response.ProductImportResponse;
 import com.mehmetkerem.dto.response.PeriodResponse;
 import com.mehmetkerem.dto.response.ProductResponse;
 import com.mehmetkerem.exception.BadRequestException;
@@ -11,44 +12,41 @@ import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.mapper.ProductMapper;
 import com.mehmetkerem.model.Product;
 import com.mehmetkerem.repository.ProductRepository;
+import com.mehmetkerem.repository.specification.ProductSpecification;
+import com.mehmetkerem.service.IActivityLogService;
 import com.mehmetkerem.service.ICategoryService;
 import com.mehmetkerem.service.IFileStorageService;
-import com.mehmetkerem.service.IProductService;
-import com.mehmetkerem.service.IActivityLogService;
 import com.mehmetkerem.service.IPeriodService;
+import com.mehmetkerem.service.IProductService;
+import com.mehmetkerem.service.product.ProductExcelParseResult;
+import com.mehmetkerem.service.product.ProductExcelParser;
+import com.mehmetkerem.service.product.ProductImportRow;
+import com.mehmetkerem.service.product.ProductSlugGenerator;
+import com.mehmetkerem.service.product.ProductSortResolver;
 import com.mehmetkerem.enums.ActivityType;
-import com.mehmetkerem.util.SecurityUtils;
 import com.mehmetkerem.util.Messages;
 import com.mehmetkerem.util.ResultHelper;
-import com.mehmetkerem.dto.response.CursorResponse;
-import org.springframework.data.domain.Page;
+import com.mehmetkerem.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import com.mehmetkerem.repository.specification.ProductSpecification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -61,23 +59,17 @@ public class ProductServiceImpl implements IProductService {
     private final IPeriodService periodService;
     private final IFileStorageService fileStorageService;
     private final IActivityLogService activityLogService;
-        private static final Set<String> ALLOWED_PRODUCT_SORT_FIELDS = Set.of(
-            "id", "title", "price", "stock", "averageRating", "reviewCount", "viewCount");
+    private final ProductSortResolver productSortResolver;
+    private final ProductExcelParser productExcelParser;
+    private final ProductSlugGenerator productSlugGenerator;
+
+    private static final int SLUG_SAVE_MAX_RETRIES = 5;
 
     @Override
     @Transactional
     @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
     public ProductResponse saveProduct(ProductRequest request) {
-        Product entity = productMapper.toEntity(request);
-        entity.setPeriodId(resolvePeriodId(request, null));
-        entity = productRepository.save(entity);
-
-        // Slug'ı ID ile benzersiz yap ve tekrar kaydet
-        if (entity.getSlug() != null && entity.getId() != null
-                && !entity.getSlug().endsWith("-" + entity.getId())) {
-            entity.setSlug(entity.getSlug() + "-" + entity.getId());
-            entity = productRepository.save(entity);
-        }
+        Product entity = persistNewProduct(request);
 
         ProductResponse response = mapProductWithRelations(
                 entity,
@@ -113,17 +105,21 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
+    @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = getProductById(id);
+        CategoryResponse categoryResponse = categoryService.getCategoryResponseById(request.getCategoryId());
         productMapper.update(product, request);
-        product.setPeriodId(resolvePeriodId(request, product.getPeriodId()));
+        Long resolvedPeriodId = resolvePeriodId(request, product.getPeriodId());
+        product.setPeriodId(resolvedPeriodId);
         Product savedProduct = productRepository.save(product);
+        Map<Long, PeriodResponse> periodMap = resolvedPeriodId == null
+                ? Map.of()
+                : periodService.getPeriodResponsesByIds(List.of(resolvedPeriodId));
         ProductResponse response = mapProductWithRelations(
                 savedProduct,
-                Map.of(savedProduct.getCategoryId(), categoryService.getCategoryResponseById(savedProduct.getCategoryId())),
-                savedProduct.getPeriodId() == null
-                        ? Map.of()
-                        : periodService.getPeriodResponsesByIds(List.of(savedProduct.getPeriodId())));
+                Map.of(savedProduct.getCategoryId(), categoryResponse),
+                periodMap);
         activityLogService.log(ActivityType.PRODUCT_UPDATED, SecurityUtils.getCurrentUserId(), "Ürün güncellendi: " + product.getTitle());
         return response;
     }
@@ -143,7 +139,7 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public List<ProductResponse> findAllProducts() {
-        List<Product> products = productRepository.findAll();
+        List<Product> products = productRepository.findTop500ByOrderByIdDesc();
         return mapProductsWithRelations(products);
     }
 
@@ -158,6 +154,8 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @Transactional
+    @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
     public List<Product> saveAllProducts(List<Product> products) {
         return productRepository.saveAll(products);
     }
@@ -174,43 +172,50 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public List<ProductResponse> getProductsByTitle(String title) {
-        List<Product> products = productRepository.findByTitleContainingIgnoreCase(title);
+        if (title == null || title.trim().length() < 2) {
+            return List.of();
+        }
+        List<Product> products = productRepository.findTop50ByTitleContainingIgnoreCase(title.trim());
         return mapProductsWithRelations(products);
     }
 
     @Override
     public List<ProductResponse> getProductsByCategory(Long categoryId) {
-        List<Product> products = productRepository.findByCategoryId(categoryId);
+        List<Product> products = productRepository.findTop200ByCategoryId(categoryId);
         return mapProductsWithRelations(products);
     }
 
     @Override
-    public com.mehmetkerem.dto.response.CursorResponse<ProductResponse> searchProducts(String title, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice,
-            Double minRating, Pageable pageable) {
+    public CursorResponse<ProductResponse> searchProducts(String title, Long categoryId, List<Long> categoryIds, Long periodId, List<Long> periodIds,
+            BigDecimal minPrice, BigDecimal maxPrice, Double minRating, Pageable pageable) {
 
         Specification<Product> spec = Specification.where(ProductSpecification.hasTitle(title))
                 .and(ProductSpecification.hasCategory(categoryId))
+                .and(ProductSpecification.hasCategories(categoryIds))
+                .and(ProductSpecification.hasPeriod(periodId))
+                .and(ProductSpecification.hasPeriods(periodIds))
                 .and(ProductSpecification.priceBetween(minPrice, maxPrice))
                 .and(ProductSpecification.greaterThanRating(minRating));
 
         Page<Product> productPage = productRepository.findAll(spec, pageable);
-        return ResultHelper.toCursor(productPage.map(this::mapProductWithRelations));
+        return toCursorWithRelations(productPage);
     }
 
     // NOTE:
     // products:list cache anahtarını versiyonlayarak eski/stale Redis kayıtlarından
     // kaynaklanan deserialization kaynaklı 500 hatalarını engeller.
     @Override
-    @Cacheable(cacheNames = "products:list", key = "'v3;p='+#page+';s='+#size+';sort='+#sortBy+';dir='+#direction")
-    public com.mehmetkerem.dto.response.CursorResponse<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction) {
-        String safeSortBy = ALLOWED_PRODUCT_SORT_FIELDS.contains(sortBy) ? sortBy : "id";
-        Sort sort = direction.equalsIgnoreCase("desc")
-            ? Sort.by(safeSortBy).descending()
-            : Sort.by(safeSortBy).ascending();
+    @Cacheable(cacheNames = "products:list", key = "#root.target.buildListCacheKey(#page, #size, #sortBy, #direction)")
+    public CursorResponse<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction) {
+        PageRequest pageable = PageRequest.of(page, size, productSortResolver.resolve(sortBy, direction));
 
-        PageRequest pageable = PageRequest.of(page, size, sort);
+        return toCursorWithRelations(productRepository.findAll(pageable));
+    }
 
-        return ResultHelper.toCursor(productRepository.findAll(pageable).map(this::mapProductWithRelations));
+    public String buildListCacheKey(int page, int size, String sortBy, String direction) {
+        String safeSortBy = productSortResolver.sanitizeSortBy(sortBy);
+        String safeDirection = "desc".equalsIgnoreCase(direction) ? "desc" : "asc";
+        return "v4;p=" + page + ";s=" + size + ";sort=" + safeSortBy + ";dir=" + safeDirection;
     }
 
     /**
@@ -271,8 +276,18 @@ public class ProductServiceImpl implements IProductService {
         CategoryResponse categoryResponse = product.getCategoryId() == null ? null : categoryMap.get(product.getCategoryId());
         PeriodResponse periodResponse = product.getPeriodId() == null ? null : periodMap.get(product.getPeriodId());
         ProductResponse response = productMapper.toResponseWithCategory(product, categoryResponse);
+        response.setStock(product.getStock() == null ? 0 : product.getStock());
         response.setPeriod(periodResponse);
         return response;
+    }
+
+    private CursorResponse<ProductResponse> toCursorWithRelations(Page<Product> productPage) {
+        List<ProductResponse> mappedItems = mapProductsWithRelations(productPage.getContent());
+        Page<ProductResponse> mappedPage = new PageImpl<>(
+                mappedItems,
+                productPage.getPageable(),
+                productPage.getTotalElements());
+        return ResultHelper.toCursor(mappedPage);
     }
 
     private Long resolvePeriodId(ProductRequest request, Long fallbackPeriodId) {
@@ -339,6 +354,7 @@ public class ProductServiceImpl implements IProductService {
 
     @Transactional
     @Override
+    @CacheEvict(cacheNames = "products:byId", key = "#productId")
     public void incrementViewCount(Long productId) {
         productRepository.incrementViewCount(productId);
     }
@@ -347,55 +363,25 @@ public class ProductServiceImpl implements IProductService {
     @Transactional
     @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
     public ProductImportResponse importProductsFromExcel(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Excel dosyası boş olamaz.");
-        }
-        String originalName = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
-        if (!originalName.endsWith(".xlsx")) {
-            throw new BadRequestException("Sadece .xlsx formatı destekleniyor.");
-        }
-
-        List<String> errors = new ArrayList<>();
+        ProductExcelParseResult parsed = productExcelParser.parse(file);
+        List<String> errors = new java.util.ArrayList<>(parsed.errors());
         int importedCount = 0;
 
-        try (InputStream inputStream = file.getInputStream(); XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
-            Sheet sheet = workbook.getNumberOfSheets() > 0 ? workbook.getSheetAt(0) : null;
-            if (sheet == null || sheet.getPhysicalNumberOfRows() == 0) {
-                throw new BadRequestException("Excel dosyası boş.");
+        for (ProductImportRow row : parsed.rows()) {
+            try {
+                categoryService.getCategoryResponseById(row.request().getCategoryId());
+                persistNewProduct(row.request());
+                importedCount++;
+            } catch (Exception ex) {
+                errors.add("Satir " + row.rowNumber() + ": " + ex.getMessage());
             }
-
-            Row headerRow = sheet.getRow(0);
-            if (headerRow == null) {
-                throw new BadRequestException("Başlık satırı bulunamadı.");
-            }
-
-            Map<String, Integer> headers = extractHeaders(headerRow);
-            validateRequiredHeaders(headers);
-
-            for (int r = 1; r <= sheet.getLastRowNum(); r++) {
-                Row row = sheet.getRow(r);
-                if (row == null || isRowEmpty(row)) {
-                    continue;
-                }
-
-                try {
-                    ProductRequest request = toProductRequest(row, headers);
-                    categoryService.getCategoryResponseById(request.getCategoryId());
-                    Product entity = productMapper.toEntity(request);
-                    entity.setPeriodId(resolvePeriodId(request, null));
-                    productRepository.save(entity);
-                    importedCount++;
-                } catch (Exception ex) {
-                    errors.add("Satır " + (r + 1) + ": " + ex.getMessage());
-                }
-            }
-        } catch (IOException ex) {
-            throw new BadRequestException("Excel dosyası okunamadı.");
         }
 
         if (importedCount > 0) {
-            activityLogService.log(ActivityType.PRODUCT_CREATED, SecurityUtils.getCurrentUserId(),
-                    "Excel ile toplu ürün içe aktarma yapıldı. Eklenen: " + importedCount);
+            activityLogService.log(
+                    ActivityType.PRODUCT_CREATED,
+                    SecurityUtils.getCurrentUserId(),
+                    "Excel ile toplu urun ice aktarma yapildi. Eklenen: " + importedCount);
         }
 
         return ProductImportResponse.builder()
@@ -405,123 +391,51 @@ public class ProductServiceImpl implements IProductService {
                 .build();
     }
 
-    private Map<String, Integer> extractHeaders(Row headerRow) {
-        Map<String, Integer> headers = new HashMap<>();
-        DataFormatter formatter = new DataFormatter();
-        for (int i = 0; i < headerRow.getLastCellNum(); i++) {
-            String key = formatter.formatCellValue(headerRow.getCell(i)).trim().toLowerCase();
-            if (!key.isEmpty()) headers.put(key, i);
-        }
-        return headers;
+    private Product persistNewProduct(ProductRequest request) {
+        Product entity = productMapper.toEntity(request);
+        entity.setPeriodId(resolvePeriodId(request, null));
+        return saveWithUniqueSlug(entity);
     }
 
-    private void validateRequiredHeaders(Map<String, Integer> headers) {
-        List<String> required = List.of("title", "price", "stock", "categoryid");
-        List<String> missing = required.stream().filter(h -> !headers.containsKey(h)).toList();
-        if (!missing.isEmpty()) {
-            throw new BadRequestException("Eksik kolon(lar): " + String.join(", ", missing));
-        }
-    }
+    private Product saveWithUniqueSlug(Product entity) {
+        String baseSlug = productSlugGenerator.toBaseSlug(entity.getTitle());
 
-    private ProductRequest toProductRequest(Row row, Map<String, Integer> headers) {
-        ProductRequest request = new ProductRequest();
-        request.setTitle(readString(row, headers, "title", true));
-        request.setDescription(readString(row, headers, "description", false));
-        request.setPrice(readBigDecimal(row, headers, "price", true));
-        request.setStock(readInteger(row, headers, "stock", true));
-        request.setCategoryId(readLong(row, headers, "categoryid", true));
-        request.setPeriodName(resolveExcelPeriodName(row, headers));
-        request.setImageUrls(readImageUrls(row, headers, "imageurls"));
-
-        Map<String, Object> attrs = new HashMap<>();
-        putIfPresent(attrs, "era", readString(row, headers, "era", false));
-        putIfPresent(attrs, "material", readString(row, headers, "material", false));
-        putIfPresent(attrs, "status", readString(row, headers, "status", false));
-        putIfPresent(attrs, "dimensions", readString(row, headers, "dimensions", false));
-        putIfPresent(attrs, "condition", readString(row, headers, "condition", false));
-        putIfPresent(attrs, "conditionDetails", readString(row, headers, "conditiondetails", false));
-        putIfPresent(attrs, "provenance", readString(row, headers, "provenance", false));
-        if (!attrs.isEmpty()) request.setAttributes(attrs);
-
-        return request;
-    }
-
-    private String resolveExcelPeriodName(Row row, Map<String, Integer> headers) {
-        String periodName = readString(row, headers, "period", false);
-        if (periodName != null && !periodName.isBlank()) {
-            return periodName;
-        }
-        String era = readString(row, headers, "era", false);
-        return (era == null || era.isBlank()) ? null : era;
-    }
-
-    private List<String> readImageUrls(Row row, Map<String, Integer> headers, String key) {
-        if (!headers.containsKey(key)) {
-            return new ArrayList<>();
-        }
-        String raw = readString(row, headers, key, false);
-        if (raw == null || raw.isBlank()) {
-            return new ArrayList<>();
-        }
-        List<String> urls = java.util.Arrays.stream(raw.split("\\|"))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .toList();
-        return new ArrayList<>(urls);
-    }
-
-    private String readString(Row row, Map<String, Integer> headers, String key, boolean required) {
-        Integer idx = headers.get(key);
-        if (idx == null) return "";
-        DataFormatter formatter = new DataFormatter();
-        String value = formatter.formatCellValue(row.getCell(idx)).trim();
-        if (required && value.isEmpty()) {
-            throw new BadRequestException(key + " alanı zorunlu.");
-        }
-        return value;
-    }
-
-    private BigDecimal readBigDecimal(Row row, Map<String, Integer> headers, String key, boolean required) {
-        String value = readString(row, headers, key, required);
-        if (value.isEmpty()) return null;
-        try {
-            return new BigDecimal(value.replace(",", "."));
-        } catch (Exception ex) {
-            throw new BadRequestException(key + " geçerli bir sayı olmalı.");
-        }
-    }
-
-    private Integer readInteger(Row row, Map<String, Integer> headers, String key, boolean required) {
-        String value = readString(row, headers, key, required);
-        if (value.isEmpty()) return null;
-        try {
-            return Integer.parseInt(value.replace(".0", ""));
-        } catch (Exception ex) {
-            throw new BadRequestException(key + " geçerli bir tam sayı olmalı.");
-        }
-    }
-
-    private Long readLong(Row row, Map<String, Integer> headers, String key, boolean required) {
-        String value = readString(row, headers, key, required);
-        if (value.isEmpty()) return null;
-        try {
-            return Long.parseLong(value.replace(".0", ""));
-        } catch (Exception ex) {
-            throw new BadRequestException(key + " geçerli bir sayı olmalı.");
-        }
-    }
-
-    private boolean isRowEmpty(Row row) {
-        for (Cell cell : row) {
-            if (cell != null && cell.getCellType() != org.apache.poi.ss.usermodel.CellType.BLANK) {
-                DataFormatter formatter = new DataFormatter();
-                if (!formatter.formatCellValue(cell).trim().isEmpty()) return false;
+        for (int attempt = 0; attempt < SLUG_SAVE_MAX_RETRIES; attempt++) {
+            entity.setSlug(createSlugCandidate(baseSlug, attempt));
+            try {
+                return productRepository.save(entity);
+            } catch (DataIntegrityViolationException ex) {
+                if (!isSlugConstraintViolation(ex) || attempt == SLUG_SAVE_MAX_RETRIES - 1) {
+                    throw ex;
+                }
+                log.warn("Slug cakismasi algilandi, yeni aday denenecek. slug={}, deneme={}",
+                        entity.getSlug(), attempt + 1);
             }
         }
-        return true;
+
+        throw new BadRequestException("Urun slug olusturulamadi. Lutfen tekrar deneyin.");
     }
 
-    private void putIfPresent(Map<String, Object> attrs, String key, String value) {
-        if (value != null && !value.isBlank()) attrs.put(key, value);
+    private String createSlugCandidate(String baseSlug, int saveAttempt) {
+        String seed = saveAttempt == 0
+                ? baseSlug
+                : baseSlug + "-" + UUID.randomUUID().toString().substring(0, 6);
+
+        for (int collisionIndex = 0; collisionIndex < 1000; collisionIndex++) {
+            String candidate = productSlugGenerator.buildCandidate(seed, collisionIndex);
+            if (!productRepository.existsBySlug(candidate)) {
+                return candidate;
+            }
+        }
+
+        throw new BadRequestException("Urun slug olusturulamadi. Lutfen tekrar deneyin.");
+    }
+
+    private boolean isSlugConstraintViolation(DataIntegrityViolationException ex) {
+        String message = ex.getMostSpecificCause() != null
+                ? ex.getMostSpecificCause().getMessage()
+                : ex.getMessage();
+        return message != null && message.toLowerCase(Locale.ROOT).contains("slug");
     }
 }
+

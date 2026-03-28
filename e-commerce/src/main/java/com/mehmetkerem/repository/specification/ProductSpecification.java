@@ -4,6 +4,7 @@ import com.mehmetkerem.model.Product;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class ProductSpecification {
 
@@ -35,6 +36,33 @@ public class ProductSpecification {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.equal(root.get("categoryId"), categoryId);
+        };
+    }
+
+    public static Specification<Product> hasCategories(List<Long> categoryIds) {
+        return (root, query, criteriaBuilder) -> {
+            if (categoryIds == null || categoryIds.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            return root.get("categoryId").in(categoryIds);
+        };
+    }
+
+    public static Specification<Product> hasPeriod(Long periodId) {
+        return (root, query, criteriaBuilder) -> {
+            if (periodId == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("periodId"), periodId);
+        };
+    }
+
+    public static Specification<Product> hasPeriods(List<Long> periodIds) {
+        return (root, query, criteriaBuilder) -> {
+            if (periodIds == null || periodIds.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            return root.get("periodId").in(periodIds);
         };
     }
 

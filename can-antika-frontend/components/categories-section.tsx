@@ -5,7 +5,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { Loader2 } from "lucide-react"
 
-import { categoryApi, productApi } from "@/lib/api"
+import { categoryApi } from "@/lib/api"
+import { resolveImageUrl } from "@/lib/image-url"
 import type { CategoryResponse } from "@/lib/types"
 
 const categoryImages: Record<string, string> = {
@@ -26,7 +27,7 @@ function getCategoryImage(name: string): string {
 }
 
 export function CategoriesSection() {
-  const [categories, setCategories] = useState<(CategoryResponse & { count: number; dynamicImage?: string })[]>([])
+  const [categories, setCategories] = useState<(CategoryResponse & { count: number | null; dynamicImage?: string })[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -34,27 +35,28 @@ export function CategoriesSection() {
 
     const loadCategories = async () => {
       try {
-        const [cats, products] = await Promise.all([categoryApi.getAll(), productApi.findAll()])
+        const [cats, countsResponse] = await Promise.all([
+          categoryApi.getAllCached(true),
+          categoryApi.getProductCounts(true).catch(() => null),
+        ])
+
         const countByCategory = new Map<number, number>()
-        const firstImageByCategory = new Map<number, string>()
-
-        for (const product of products) {
-          const categoryId = product.category?.id
-          if (typeof categoryId !== "number") continue
-
-          countByCategory.set(categoryId, (countByCategory.get(categoryId) ?? 0) + 1)
-          if (!firstImageByCategory.has(categoryId) && product.imageUrls?.[0]) {
-            firstImageByCategory.set(categoryId, product.imageUrls[0])
-          }
+        if (countsResponse) {
+          Object.entries(countsResponse).forEach(([categoryId, count]) => {
+            const parsedId = Number(categoryId)
+            if (Number.isFinite(parsedId) && parsedId > 0) {
+              countByCategory.set(parsedId, Number(count) || 0)
+            }
+          })
         }
 
         const visible = cats
           .map((cat) => ({
             ...cat,
-            count: countByCategory.get(cat.id) ?? 0,
-            dynamicImage: firstImageByCategory.get(cat.id),
+            count: countByCategory.has(cat.id) ? (countByCategory.get(cat.id) ?? 0) : null,
+            dynamicImage: cat.coverImageUrl ? resolveImageUrl(cat.coverImageUrl) : undefined,
           }))
-          .filter((c) => c.count > 0)
+          .filter((c) => c.count === null || c.count > 0)
           .slice(0, 4)
 
         if (isMounted) setCategories(visible)
@@ -147,7 +149,9 @@ export function CategoriesSection() {
                 <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
                   <div className="flex items-center gap-2">
                     <div className="h-px flex-1 bg-gradient-to-r from-[#d1a46e]/70 to-transparent" />
-                    <span className="font-serif text-[10px] uppercase tracking-widest text-[#e6c49d] sm:text-xs">{category.count} ürün</span>
+                    <span className="font-serif text-[10px] uppercase tracking-widest text-[#e6c49d] sm:text-xs">
+                      {typeof category.count === "number" ? `${category.count} ürün` : "Koleksiyon"}
+                    </span>
                   </div>
                   <h3 className="mt-1 font-serif text-base font-semibold text-[#f7ebd9] sm:mt-2 sm:text-xl lg:text-2xl">{category.name}</h3>
                 </div>

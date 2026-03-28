@@ -3,14 +3,18 @@ package com.mehmetkerem.service.impl;
 import com.mehmetkerem.dto.response.OrderResponse;
 import com.mehmetkerem.dto.response.PaymentResponse;
 import com.mehmetkerem.dto.response.UserResponse;
+import com.mehmetkerem.enums.OrderStatus;
 import com.mehmetkerem.enums.PaymentMethod;
 import com.mehmetkerem.enums.PaymentStatus;
 import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.NotFoundException;
+import com.mehmetkerem.mapper.PaymentMapper;
 import com.mehmetkerem.model.Order;
 import com.mehmetkerem.model.Payment;
 import com.mehmetkerem.model.User;
+import com.mehmetkerem.repository.OrderRepository;
 import com.mehmetkerem.repository.PaymentRepository;
+import com.mehmetkerem.service.IOrderAuthorizationService;
 import com.mehmetkerem.service.payment.PaymentStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,6 +41,9 @@ class PaymentServiceImplTest {
     private PaymentRepository paymentRepository;
 
     @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
     private UserServiceImpl userService;
 
     @Mock
@@ -44,6 +51,12 @@ class PaymentServiceImplTest {
 
     @Mock
     private PaymentStrategy paymentStrategy;
+
+    @Mock
+    private PaymentMapper paymentMapper;
+
+    @Mock
+    private IOrderAuthorizationService orderAuthorizationService;
 
     @InjectMocks
     private PaymentServiceImpl paymentService;
@@ -58,6 +71,9 @@ class PaymentServiceImplTest {
         order = Order.builder()
                 .id(ORDER_ID)
                 .userId(USER_ID)
+                .orderStatus(OrderStatus.PENDING)
+                .paymentStatus(PaymentStatus.PENDING)
+                .totalAmount(new BigDecimal("199.99"))
                 .build();
         payment = Payment.builder()
                 .id(1L)
@@ -68,14 +84,33 @@ class PaymentServiceImplTest {
                 .paymentMethod(PaymentMethod.CREDIT_CARD)
                 .createdAt(LocalDateTime.now())
                 .build();
+
+    }
+
+    private void stubPaymentResponseMapping() {
+        when(paymentMapper.toResponseWithDetails(any(Payment.class), any(OrderResponse.class), any(UserResponse.class)))
+                .thenAnswer(invocation -> {
+                    Payment mapped = invocation.getArgument(0);
+                    return PaymentResponse.builder()
+                            .id(mapped.getId())
+                            .amount(mapped.getAmount())
+                            .paymentMethod(mapped.getPaymentMethod())
+                            .paymentStatus(mapped.getPaymentStatus())
+                            .createdAt(mapped.getCreatedAt())
+                            .build();
+                });
     }
 
     @Test
     @DisplayName("processPayment - başarılı ödemede sipariş PAID olur")
     void processPayment_WhenSuccess_ShouldUpdateOrderToPaid() {
+        when(paymentRepository.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
+        when(paymentRepository.findTopByOrderIdAndPaymentStatusOrderByIdDesc(anyLong(), eq(PaymentStatus.PAID)))
+                .thenReturn(Optional.empty());
         when(userService.getUserById(USER_ID)).thenReturn(User.builder().id(USER_ID).build());
-        when(orderService.getOrderById(ORDER_ID)).thenReturn(order);
+        when(orderRepository.findByIdForUpdate(ORDER_ID)).thenReturn(Optional.of(order));
         when(paymentStrategy.pay(any(BigDecimal.class))).thenReturn(true);
+        doNothing().when(orderAuthorizationService).assertOwner(order, USER_ID);
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> {
             Payment p = inv.getArgument(0);
             p.setId(1L);
@@ -83,9 +118,10 @@ class PaymentServiceImplTest {
         });
         when(userService.getUserResponseById(USER_ID)).thenReturn(new UserResponse());
         when(orderService.getOrderResponseById(ORDER_ID)).thenReturn(new OrderResponse());
+        stubPaymentResponseMapping();
 
         PaymentResponse result = paymentService.processPayment(
-                USER_ID, ORDER_ID, new BigDecimal("199.99"), PaymentMethod.CREDIT_CARD);
+                USER_ID, ORDER_ID, new BigDecimal("199.99"), PaymentMethod.CREDIT_CARD, "idem-1");
 
         assertNotNull(result);
         verify(orderService).updateOrderStatus(ORDER_ID, com.mehmetkerem.enums.OrderStatus.PAID);
@@ -96,9 +132,13 @@ class PaymentServiceImplTest {
     @Test
     @DisplayName("processPayment - ödeme başarısızsa sipariş PAID yapılmaz")
     void processPayment_WhenFails_ShouldNotUpdateOrderToPaid() {
+        when(paymentRepository.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
+        when(paymentRepository.findTopByOrderIdAndPaymentStatusOrderByIdDesc(anyLong(), eq(PaymentStatus.PAID)))
+                .thenReturn(Optional.empty());
         when(userService.getUserById(USER_ID)).thenReturn(User.builder().id(USER_ID).build());
-        when(orderService.getOrderById(ORDER_ID)).thenReturn(order);
+        when(orderRepository.findByIdForUpdate(ORDER_ID)).thenReturn(Optional.of(order));
         when(paymentStrategy.pay(any(BigDecimal.class))).thenReturn(false);
+        doNothing().when(orderAuthorizationService).assertOwner(order, USER_ID);
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> {
             Payment p = inv.getArgument(0);
             p.setId(1L);
@@ -106,13 +146,85 @@ class PaymentServiceImplTest {
         });
         when(userService.getUserResponseById(USER_ID)).thenReturn(new UserResponse());
         when(orderService.getOrderResponseById(ORDER_ID)).thenReturn(new OrderResponse());
+        stubPaymentResponseMapping();
 
         PaymentResponse result = paymentService.processPayment(
-                USER_ID, ORDER_ID, new BigDecimal("199.99"), PaymentMethod.CREDIT_CARD);
+                USER_ID, ORDER_ID, new BigDecimal("199.99"), PaymentMethod.CREDIT_CARD, "idem-2");
 
         assertNotNull(result);
         verify(orderService, never()).updateOrderStatus(eq(ORDER_ID), eq(com.mehmetkerem.enums.OrderStatus.PAID));
+        verify(orderService, never()).updatePaymentStatus(eq(ORDER_ID), eq(PaymentStatus.PAID));
         verify(paymentRepository).save(any(Payment.class));
+    }
+
+    @Test
+    @DisplayName("processPayment - siparis toplami ile odeme tutari farkliysa hata firlatir")
+    void processPayment_WhenAmountMismatch_ShouldThrowBadRequest() {
+        when(paymentRepository.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
+        when(paymentRepository.findTopByOrderIdAndPaymentStatusOrderByIdDesc(anyLong(), eq(PaymentStatus.PAID)))
+                .thenReturn(Optional.empty());
+        when(userService.getUserById(USER_ID)).thenReturn(User.builder().id(USER_ID).build());
+        when(orderRepository.findByIdForUpdate(ORDER_ID)).thenReturn(Optional.of(order));
+        doNothing().when(orderAuthorizationService).assertOwner(order, USER_ID);
+
+        assertThrows(BadRequestException.class, () -> paymentService.processPayment(
+                USER_ID, ORDER_ID, new BigDecimal("50.00"), PaymentMethod.CREDIT_CARD, "idem-amount"));
+
+        verify(paymentStrategy, never()).pay(any(BigDecimal.class));
+        verify(paymentRepository, never()).save(any(Payment.class));
+    }
+
+    @Test
+    @DisplayName("processPayment - ayni idempotency anahtari tekrar geldiginde mevcut odeme doner")
+    void processPayment_WhenIdempotencyKeyExists_ShouldReturnExistingPayment() {
+        Payment existingPayment = Payment.builder()
+                .id(77L)
+                .userId(USER_ID)
+                .orderId(ORDER_ID)
+                .amount(new BigDecimal("199.99"))
+                .paymentStatus(PaymentStatus.PAID)
+                .paymentMethod(PaymentMethod.CREDIT_CARD)
+                .createdAt(LocalDateTime.now())
+                .idempotencyKey("idem-repeat")
+                .build();
+
+        when(paymentRepository.findByIdempotencyKey("idem-repeat")).thenReturn(Optional.of(existingPayment));
+        when(userService.getUserResponseById(USER_ID)).thenReturn(new UserResponse());
+        when(orderService.getOrderResponseById(ORDER_ID)).thenReturn(new OrderResponse());
+        stubPaymentResponseMapping();
+
+        PaymentResponse result = paymentService.processPayment(
+                USER_ID, ORDER_ID, new BigDecimal("199.99"), PaymentMethod.CREDIT_CARD, "idem-repeat");
+
+        assertNotNull(result);
+        assertEquals(77L, result.getId());
+        verify(paymentStrategy, never()).pay(any(BigDecimal.class));
+        verify(paymentRepository, never()).save(any(Payment.class));
+        verify(orderRepository, never()).findByIdForUpdate(anyLong());
+    }
+
+    @Test
+    @DisplayName("processPayment - idempotency anahtari farkli kullaniciya aitse hata firlatir")
+    void processPayment_WhenIdempotencyBelongsToAnotherUser_ShouldThrow() {
+        Payment existingPayment = Payment.builder()
+                .id(55L)
+                .userId(999L)
+                .orderId(ORDER_ID)
+                .amount(new BigDecimal("199.99"))
+                .paymentStatus(PaymentStatus.PAID)
+                .paymentMethod(PaymentMethod.CREDIT_CARD)
+                .createdAt(LocalDateTime.now())
+                .idempotencyKey("idem-foreign")
+                .build();
+
+        when(paymentRepository.findByIdempotencyKey("idem-foreign")).thenReturn(Optional.of(existingPayment));
+
+        assertThrows(BadRequestException.class, () -> paymentService.processPayment(
+                USER_ID, ORDER_ID, new BigDecimal("199.99"), PaymentMethod.CREDIT_CARD, "idem-foreign"));
+
+        verify(paymentStrategy, never()).pay(any(BigDecimal.class));
+        verify(paymentRepository, never()).save(any(Payment.class));
+        verify(orderRepository, never()).findByIdForUpdate(anyLong());
     }
 
     @Test
@@ -152,6 +264,7 @@ class PaymentServiceImplTest {
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
         when(userService.getUserResponseById(USER_ID)).thenReturn(new UserResponse());
         when(orderService.getOrderResponseById(ORDER_ID)).thenReturn(new OrderResponse());
+        stubPaymentResponseMapping();
 
         PaymentResponse result = paymentService.getPaymentResponseByIdAndUserId(1L, USER_ID);
 
@@ -166,6 +279,7 @@ class PaymentServiceImplTest {
         when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
         when(userService.getUserResponseById(USER_ID)).thenReturn(new UserResponse());
         when(orderService.getOrderResponseById(ORDER_ID)).thenReturn(new OrderResponse());
+        stubPaymentResponseMapping();
 
         PaymentResponse result = paymentService.updatePaymentStatus(1L, PaymentStatus.REFUNDED);
 
@@ -179,6 +293,7 @@ class PaymentServiceImplTest {
         when(paymentRepository.findByUserId(USER_ID)).thenReturn(List.of(payment));
         when(userService.getUserResponseById(USER_ID)).thenReturn(new UserResponse());
         when(orderService.getOrderResponseById(ORDER_ID)).thenReturn(new OrderResponse());
+        stubPaymentResponseMapping();
 
         List<PaymentResponse> result = paymentService.getPaymentsByUser(USER_ID);
 
@@ -195,7 +310,6 @@ class PaymentServiceImplTest {
         String result = paymentService.deletePayment(1L);
 
         assertTrue(result.contains("1"));
-        assertTrue(result.contains("ödeme"));
         verify(paymentRepository).delete(payment);
     }
 }

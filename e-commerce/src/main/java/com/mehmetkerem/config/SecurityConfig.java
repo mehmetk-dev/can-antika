@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import com.mehmetkerem.security.CustomOAuth2UserService;
 import com.mehmetkerem.security.OAuth2LoginSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -28,6 +30,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -42,16 +46,39 @@ public class SecurityConfig {
         private final PasswordEncoder passwordEncoder;
         private final CustomOAuth2UserService customOAuth2UserService;
         private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+        private final Environment environment;
 
         @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
         private String allowedOrigins;
 
+        @Value("${app.cors.require-https-on-prod:true}")
+        private boolean requireHttpsOnProd;
+
+        @Value("${app.security.csrf.enabled:true}")
+        private boolean csrfEnabled;
+
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
+                List<String> configuredOrigins = Arrays.stream(allowedOrigins.split(","))
+                                .map(String::trim)
+                                .filter(origin -> !origin.isBlank())
+                                .collect(Collectors.toList());
+
+                if (isProductionProfileActive() && requireHttpsOnProd) {
+                        configuredOrigins = configuredOrigins.stream()
+                                        .filter(this::isAllowedProdOrigin)
+                                        .toList();
+                        if (configuredOrigins.isEmpty()) {
+                                throw new IllegalStateException(
+                                                "Production profile active but no valid HTTPS CORS origin configured.");
+                        }
+                }
+
                 CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+                config.setAllowedOrigins(configuredOrigins);
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                 config.setAllowedHeaders(List.of("*"));
+                config.setExposedHeaders(List.of("X-Correlation-Id"));
                 config.setAllowCredentials(true);
                 config.setMaxAge(3600L);
 
@@ -60,11 +87,52 @@ public class SecurityConfig {
                 return source;
         }
 
+        private boolean isProductionProfileActive() {
+                return Arrays.stream(environment.getActiveProfiles())
+                                .map(profile -> profile.toLowerCase(Locale.ROOT))
+                                .anyMatch(profile -> profile.equals("prod") || profile.equals("production"));
+        }
+
+        private boolean isAllowedProdOrigin(String origin) {
+                String lowered = origin.toLowerCase(Locale.ROOT);
+                if (lowered.startsWith("https://")) {
+                        return true;
+                }
+                return lowered.startsWith("http://localhost")
+                                || lowered.startsWith("http://127.0.0.1")
+                                || lowered.startsWith("http://[::1]");
+        }
+
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 return http
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                                .csrf(csrf -> csrf.disable())
+                                .csrf(csrf -> {
+                                        if (!csrfEnabled) {
+                                                csrf.disable();
+                                                return;
+                                        }
+
+                                        CookieCsrfTokenRepository csrfTokenRepository =
+                                                        CookieCsrfTokenRepository.withHttpOnlyFalse();
+                                        csrfTokenRepository.setCookiePath("/");
+
+                                        csrf.csrfTokenRepository(csrfTokenRepository)
+                                                        .ignoringRequestMatchers(
+                                                                        "/v1/auth/login",
+                                                                        "/v1/auth/register",
+                                                                        "/v1/auth/refresh-token",
+                                                                        "/v1/auth/forgot-password",
+                                                                        "/v1/auth/reset-password",
+                                                                        "/v1/auth/logout",
+                                                                        "/v1/contact",
+                                                                        "/v1/newsletter/subscribe",
+                                                                        "/v1/newsletter/unsubscribe",
+                                                                        "/v1/product/*/view",
+                                                                        "/oauth2/**",
+                                                                        "/login/oauth2/**",
+                                                                        "/actuator/**");
+                                })
                                 .headers(headers -> headers
                                                 .contentSecurityPolicy(csp -> csp.policyDirectives(
                                                                 "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net; style-src 'self' 'unsafe-inline'; connect-src 'self' http: https: ws: wss:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'"))

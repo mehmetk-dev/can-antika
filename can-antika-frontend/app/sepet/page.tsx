@@ -167,6 +167,7 @@ function CartContent() {
                 {items.map((item) => {
                     const imageUrl = item.product.imageUrls?.[0] || "/placeholder.svg"
                     const isUpdating = updatingItems.has(item.product.id)
+                    const maxStock = Math.max(item.product.stock ?? 0, 0)
 
                     return (
                         <div
@@ -215,7 +216,7 @@ function CartContent() {
                                             variant="outline"
                                             size="icon"
                                             className="h-8 w-8"
-                                            disabled={isUpdating || item.quantity >= (item.product.stock ?? 1)}
+                                            disabled={isUpdating || maxStock <= 0 || item.quantity >= maxStock}
                                             onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
                                         >
                                             <Plus className="h-3 w-3" />

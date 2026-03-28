@@ -14,7 +14,8 @@ public interface IRestPaymentController {
     ResultData<PaymentResponse> processPayment(
             Long orderId,
             BigDecimal amount,
-            PaymentMethod paymentMethod);
+            PaymentMethod paymentMethod,
+            String idempotencyKey);
 
     ResultData<PaymentResponse> getPaymentById(Long paymentId);
 

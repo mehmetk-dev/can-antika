@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Bell, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -26,7 +26,15 @@ export function NotificationsDropdown() {
     // To prevent multiple fetches
     const hasFetchedRef = useRef(false)
 
-    const fetchNotifications = async () => {
+    useEffect(() => {
+        if (!isAuthenticated) {
+            hasFetchedRef.current = false
+            setNotifications([])
+            setUnreadCount(0)
+        }
+    }, [isAuthenticated])
+
+    const fetchNotifications = useCallback(async () => {
         if (!isAuthenticated) return
         try {
             setIsLoading(true)
@@ -41,29 +49,46 @@ export function NotificationsDropdown() {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [isAuthenticated])
 
     // Initial fetch
     useEffect(() => {
         if (authLoading || !isAuthenticated) return
+
         if (!hasFetchedRef.current) {
-            fetchNotifications()
+            void fetchNotifications()
             hasFetchedRef.current = true
         }
 
-        const interval = setInterval(fetchNotifications, 60000) // 60 saniye (AUDIT M6)
-        window.addEventListener("notification-updated", fetchNotifications)
-        return () => {
-            clearInterval(interval)
-            window.removeEventListener("notification-updated", fetchNotifications)
+        const handleUpdated = () => {
+            void fetchNotifications()
         }
-    }, [authLoading, isAuthenticated])
+
+        const handleFocus = () => {
+            void fetchNotifications()
+        }
+
+        const handleVisibility = () => {
+            if (document.visibilityState === "visible") {
+                void fetchNotifications()
+            }
+        }
+
+        window.addEventListener("notification-updated", handleUpdated)
+        window.addEventListener("focus", handleFocus)
+        document.addEventListener("visibilitychange", handleVisibility)
+        return () => {
+            window.removeEventListener("notification-updated", handleUpdated)
+            window.removeEventListener("focus", handleFocus)
+            document.removeEventListener("visibilitychange", handleVisibility)
+        }
+    }, [authLoading, isAuthenticated, fetchNotifications])
 
     // Refetch when opening
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open)
         if (open) {
-            fetchNotifications()
+            void fetchNotifications()
         }
     }
 

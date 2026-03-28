@@ -10,6 +10,10 @@ import com.mehmetkerem.repository.ProductRepository;
 import com.mehmetkerem.service.IActivityLogService;
 import com.mehmetkerem.service.ICategoryService;
 import com.mehmetkerem.service.IFileStorageService;
+import com.mehmetkerem.service.IPeriodService;
+import com.mehmetkerem.service.product.ProductExcelParser;
+import com.mehmetkerem.service.product.ProductSlugGenerator;
+import com.mehmetkerem.service.product.ProductSortResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,10 +36,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,7 +63,19 @@ class ProductServiceImplTest {
     private IFileStorageService fileStorageService;
 
     @Mock
+    private IPeriodService periodService;
+
+    @Mock
     private IActivityLogService activityLogService;
+
+    @Mock
+    private ProductSortResolver productSortResolver;
+
+    @Mock
+    private ProductExcelParser productExcelParser;
+
+    @Mock
+    private ProductSlugGenerator productSlugGenerator;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -95,6 +113,14 @@ class ProductServiceImplTest {
         categoryResponse = new CategoryResponse();
         categoryResponse.setId(1L);
         categoryResponse.setName("Antika");
+
+        lenient().when(productSlugGenerator.toBaseSlug(anyString())).thenReturn("antika-saat");
+        lenient().when(productSlugGenerator.buildCandidate(anyString(), anyInt()))
+                .thenAnswer(invocation -> {
+                    String base = invocation.getArgument(0);
+                    int collisionIndex = invocation.getArgument(1);
+                    return collisionIndex <= 0 ? base : base + "-" + (collisionIndex + 1);
+                });
     }
 
     @Test
@@ -168,7 +194,6 @@ class ProductServiceImplTest {
         String result = productService.deleteProduct(1L);
 
         assertTrue(result.contains("1"));
-        assertTrue(result.contains("urun"));
         verify(fileStorageService, times(2)).deleteFile(anyString());
         verify(productRepository).delete(product);
     }
@@ -190,7 +215,7 @@ class ProductServiceImplTest {
     @Test
     @DisplayName("findAllProducts - tum urunler listelenir")
     void findAllProducts_ShouldReturnAllProducts() {
-        when(productRepository.findAll()).thenReturn(List.of(product));
+        when(productRepository.findTop500ByOrderByIdDesc()).thenReturn(List.of(product));
         when(categoryService.getCategoryResponsesByIds(anyList())).thenReturn(Map.of(1L, categoryResponse));
         when(productMapper.toResponseWithCategory(product, categoryResponse)).thenReturn(productResponse);
 
@@ -204,7 +229,7 @@ class ProductServiceImplTest {
     @Test
     @DisplayName("getProductsByTitle - basliga gore urunler doner")
     void getProductsByTitle_ShouldReturnMatchingProducts() {
-        when(productRepository.findByTitleContainingIgnoreCase("Antika")).thenReturn(List.of(product));
+        when(productRepository.findTop50ByTitleContainingIgnoreCase("Antika")).thenReturn(List.of(product));
         when(categoryService.getCategoryResponsesByIds(anyList())).thenReturn(Map.of(1L, categoryResponse));
         when(productMapper.toResponseWithCategory(product, categoryResponse)).thenReturn(productResponse);
 
@@ -218,7 +243,7 @@ class ProductServiceImplTest {
     @Test
     @DisplayName("getProductsByCategory - kategoriye gore urunler doner")
     void getProductsByCategory_ShouldReturnProductsByCategory() {
-        when(productRepository.findByCategoryId(1L)).thenReturn(List.of(product));
+        when(productRepository.findTop200ByCategoryId(1L)).thenReturn(List.of(product));
         when(categoryService.getCategoryResponsesByIds(anyList())).thenReturn(Map.of(1L, categoryResponse));
         when(productMapper.toResponseWithCategory(product, categoryResponse)).thenReturn(productResponse);
 

@@ -11,6 +11,7 @@ import {
 import type { UserResponse, LoginRequest, RegisterRequest } from "./types";
 import { authApi, cartApi } from "./api";
 import { guestCart } from "./guest-cart";
+import { clearAuthSessionFlag, hasAuthSessionFlag, markAuthSessionActive } from "./auth-session";
 
 interface AuthContextType {
     user: UserResponse | null;
@@ -27,15 +28,27 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserResponse | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(() => hasAuthSessionFlag());
 
     // Sayfa yüklendiğinde cookie ile backend'e doğrulat
     // HttpOnly cookie olduğu için JS'den kontrol edemiyoruz, sessizce deneriz
     useEffect(() => {
+        if (!hasAuthSessionFlag()) {
+            return;
+        }
+
         authApi.getProfile()
-            .then((profile) => setUser(profile ?? null))
+            .then((profile) => {
+                setUser(profile ?? null);
+                if (profile) {
+                    markAuthSessionActive();
+                } else {
+                    clearAuthSessionFlag();
+                }
+            })
             .catch(() => {
                 setUser(null);
+                clearAuthSessionFlag();
             })
             .finally(() => setIsLoading(false));
     }, []);
@@ -44,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Backend cookie set eder, response body sadece user döner
         const user = await authApi.login(data);
         setUser(user);
+        markAuthSessionActive();
 
         // Guest sepetindeki ürünleri backend'e senkronize et
         const guestItems = guestCart.toSyncPayload();
@@ -64,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authApi.logout().catch(() => {
             // Backend logout başarısız olsa bile local cleanup devam eder
         });
+        clearAuthSessionFlag();
         setUser(null);
     }, []);
 
@@ -71,7 +86,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const freshUser = await authApi.getProfile();
             setUser(freshUser);
+            markAuthSessionActive();
         } catch {
+            clearAuthSessionFlag();
             // Sessiz yakala — mevcut user kalır
         }
     }, []);

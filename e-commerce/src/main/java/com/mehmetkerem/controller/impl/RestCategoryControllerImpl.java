@@ -10,6 +10,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/category")
@@ -53,5 +54,12 @@ public class RestCategoryControllerImpl implements IRestCategoryController {
     @Override
     public ResultData<List<CategoryResponse>> findAllCategories() {
         return ResultHelper.success(categoryService.findAllCategories());
+    }
+
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/product-counts")
+    @Override
+    public ResultData<Map<Long, Long>> getProductCountsByCategory() {
+        return ResultHelper.success(categoryService.getProductCountsByCategory());
     }
 }

@@ -24,23 +24,23 @@ export async function fetchApiDataWithFallback<T>(
 
   if (baseUrls.length === 0) return null
 
-  const attempts = baseUrls.map(async (baseUrl) => {
-    const res = await fetch(buildApiUrl(baseUrl, path), {
-      next: { revalidate },
-      signal: AbortSignal.timeout(timeoutMs),
-    })
+  for (const baseUrl of baseUrls) {
+    try {
+      const res = await fetch(buildApiUrl(baseUrl, path), {
+        next: { revalidate },
+        signal: AbortSignal.timeout(timeoutMs),
+      })
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      if (!res.ok) continue
 
-    const json = (await res.json()) as ApiEnvelope<T>
-    if (!json?.data) throw new Error("Missing data payload")
-
-    return json.data
-  })
-
-  try {
-    return await Promise.any(attempts)
-  } catch {
-    return null
+      const json = (await res.json()) as ApiEnvelope<T>
+      if (json?.data) {
+        return json.data
+      }
+    } catch {
+      // Try next candidate
+    }
   }
+
+  return null
 }

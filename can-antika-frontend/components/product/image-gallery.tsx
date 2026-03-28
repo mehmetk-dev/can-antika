@@ -19,7 +19,6 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
 
   const safeIndex = images.length > 0 ? Math.min(selectedIndex, images.length - 1) : 0
   const mainImage = images[safeIndex] ? resolveImageUrl(images[safeIndex]) : "/placeholder.svg"
-  const isRemoteMainImage = /^https?:\/\//i.test(mainImage)
 
   const handlePrevious = () => {
     setUseFallbackImage(false)
@@ -50,7 +49,6 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
               alt={productName}
               fill
               priority
-              unoptimized={isRemoteMainImage}
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
               onError={handleImageError}
@@ -96,7 +94,8 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
               src={useFallbackImage ? "/placeholder.svg" : mainImage}
               alt={productName}
               fill
-              unoptimized={isRemoteMainImage}
+              loading="lazy"
+              decoding="async"
               sizes="85vw"
               className="object-contain"
               onError={handleImageError}
@@ -142,7 +141,8 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                 src={resolveImageUrl(image)}
                 alt={`${productName} - ${index + 1}`}
                 fill
-                unoptimized={/^https?:\/\//i.test(image || "")}
+                loading="lazy"
+                decoding="async"
                 sizes="80px"
                 className="object-cover object-center"
                 onError={(e) => {

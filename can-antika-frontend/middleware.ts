@@ -40,19 +40,21 @@ async function readMaintenanceMode(): Promise<boolean> {
         return false;
     }
 
-    try {
-        const maintenanceMode = await Promise.any(
-            apiBases.map((apiBase) => fetchMaintenanceModeFromBase(apiBase))
-        );
-        maintenanceModeCache = {
-            value: maintenanceMode,
-            expiresAt: now + MAINTENANCE_CACHE_TTL_MS,
-        };
-        return maintenanceMode;
-    } catch {
-        // Fail-open: upstream yavas/erisilemez oldugunda siteyi bakim moduna kilitleme.
-        return false;
+    for (const apiBase of apiBases) {
+        try {
+            const maintenanceMode = await fetchMaintenanceModeFromBase(apiBase);
+            maintenanceModeCache = {
+                value: maintenanceMode,
+                expiresAt: now + MAINTENANCE_CACHE_TTL_MS,
+            };
+            return maintenanceMode;
+        } catch {
+            // Try next candidate
+        }
     }
+
+    // Fail-open: upstream yavas/erisilemez oldugunda siteyi bakim moduna kilitleme.
+    return false;
 }
 
 /**

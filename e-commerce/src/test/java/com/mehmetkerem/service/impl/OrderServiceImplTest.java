@@ -10,9 +10,9 @@ import com.mehmetkerem.enums.PaymentStatus;
 import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.mapper.AddressMapper;
+import com.mehmetkerem.mapper.OrderMapper;
 import com.mehmetkerem.model.*;
 import com.mehmetkerem.repository.OrderRepository;
-import com.mehmetkerem.service.INotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,6 +30,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -52,16 +56,34 @@ class OrderServiceImplTest {
     private UserServiceImpl userService;
 
     @Mock
+    private CouponServiceImpl couponService;
+
+    @Mock
+    private OrderMapper orderMapper;
+
+    @Mock
     private AddressMapper addressMapper;
 
     @Mock
-    private com.mehmetkerem.service.INotificationService notificationService;
-
-    @Mock
-    private InAppNotificationService inAppNotificationService;
+    private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private org.springframework.transaction.support.TransactionTemplate transactionTemplate;
+
+    @Mock
+    private com.mehmetkerem.service.IActivityLogService activityLogService;
+
+    @Mock
+    private com.mehmetkerem.service.IStockService stockService;
+
+    @Mock
+    private com.mehmetkerem.service.IOrderInvoiceService orderInvoiceService;
+
+    @Mock
+    private com.mehmetkerem.service.IOrderTimelineService orderTimelineService;
+
+    @Mock
+    private com.mehmetkerem.service.IOrderAuthorizationService orderAuthorizationService;
 
     @InjectMocks
     private OrderServiceImpl orderService;
@@ -75,6 +97,7 @@ class OrderServiceImplTest {
     private Address address;
     private Order order;
     private Product product;
+    private OrderItem mappedOrderItem;
 
     @BeforeEach
     void setUp() {
@@ -117,6 +140,14 @@ class OrderServiceImplTest {
                 .stock(10)
                 .price(new BigDecimal("50"))
                 .build();
+
+        mappedOrderItem = OrderItem.builder()
+                .productId(PRODUCT_ID)
+                .title("Ürün")
+                .quantity(2)
+                .price(new BigDecimal("50"))
+                .build();
+
     }
 
     @Test
@@ -145,7 +176,8 @@ class OrderServiceImplTest {
     void saveOrder_WhenValid_ShouldSaveOrderClearCartAndUpdateStock() {
         when(cartService.getCartByUserId(USER_ID)).thenReturn(cartWithItems);
         when(addressService.getAddressByIdAndUserId(ADDRESS_ID, USER_ID)).thenReturn(address);
-        when(cartService.calculateTotal(USER_ID)).thenReturn(new BigDecimal("100"));
+        when(orderMapper.cartItemsToOrderItems(anyList(), anyMap())).thenReturn(List.of(mappedOrderItem));
+        when(stockService.validateAndDeductStock(anyList())).thenReturn(List.of());
 
         ProductResponse productResponse = ProductResponse.builder()
                 .id(PRODUCT_ID)
@@ -160,16 +192,26 @@ class OrderServiceImplTest {
             return o;
         });
 
-        when(productService.getProductsByIds(List.of(PRODUCT_ID))).thenReturn(List.of(product));
-        when(productService.saveAllProducts(anyList())).thenAnswer(inv -> inv.getArgument(0));
-
         User user = User.builder().id(USER_ID).email("u@test.com").build();
         when(userService.getUserById(USER_ID)).thenReturn(user);
         UserResponse userResponse = new UserResponse();
         userResponse.setId(USER_ID);
+        userResponse.setEmail("u@test.com");
         when(userService.getUserResponseById(USER_ID)).thenReturn(userResponse);
         AddressResponse addressResponse = new AddressResponse();
         when(addressMapper.toResponse(address)).thenReturn(addressResponse);
+        when(orderMapper.toResponse(any(Order.class))).thenAnswer(invocation -> {
+            Order savedOrder = invocation.getArgument(0);
+            return OrderResponse.builder()
+                    .id(savedOrder.getId())
+                    .orderStatus(savedOrder.getOrderStatus())
+                    .paymentStatus(savedOrder.getPaymentStatus())
+                    .totalAmount(savedOrder.getTotalAmount())
+                    .orderItems(new ArrayList<>())
+                    .build();
+        });
+        when(orderMapper.orderItemsToResponses(anyList())).thenReturn(List.of());
+        doNothing().when(orderTimelineService).recordCreation(anyLong(), anyLong());
 
         // TransactionTemplate'in execute metodunun içeriği doğrudan çalıştırmasını
         // sağla
@@ -182,30 +224,23 @@ class OrderServiceImplTest {
 
         assertNotNull(result);
         verify(cartService).clearCart(USER_ID);
-        verify(productService).saveAllProducts(anyList());
+        verify(stockService).validateAndDeductStock(anyList());
         verify(orderRepository).save(any(Order.class));
-        verify(notificationService).sendOrderConfirmation(eq("u@test.com"), anyString());
+        verify(eventPublisher).publishEvent(any(com.mehmetkerem.event.OrderEvent.class));
     }
 
     @Test
     @DisplayName("saveOrder - yetersiz stokta BadRequestException ve sipariş kaydedilmez")
     void saveOrder_WhenInsufficientStock_ShouldThrowBadRequestException() {
         when(cartService.getCartByUserId(USER_ID)).thenReturn(cartWithItems);
-        when(addressService.getAddressByIdAndUserId(ADDRESS_ID, USER_ID)).thenReturn(address);
-        when(cartService.calculateTotal(USER_ID)).thenReturn(new BigDecimal("100"));
+        when(orderMapper.cartItemsToOrderItems(anyList(), anyMap())).thenReturn(List.of(mappedOrderItem));
         ProductResponse productResponse = ProductResponse.builder()
                 .id(PRODUCT_ID)
                 .title("Ürün")
                 .price(new BigDecimal("50"))
                 .build();
         when(productService.getProductResponsesByIds(List.of(PRODUCT_ID))).thenReturn(List.of(productResponse));
-        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
-            Order o = inv.getArgument(0);
-            o.setId(1L);
-            return o;
-        });
-        product.setStock(1);
-        when(productService.getProductsByIds(List.of(PRODUCT_ID))).thenReturn(List.of(product));
+        when(stockService.validateAndDeductStock(anyList())).thenThrow(new BadRequestException("Yetersiz stok"));
 
         // TransactionTemplate mock
         when(transactionTemplate.execute(any())).thenAnswer(invocation -> {
@@ -265,15 +300,22 @@ class OrderServiceImplTest {
         order.setOrderItems(List.of(orderItem));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(productService.getProductsByIds(List.of(PRODUCT_ID))).thenReturn(List.of(product));
-        when(productService.saveAllProducts(anyList())).thenAnswer(inv -> inv.getArgument(0));
         when(userService.getUserResponseById(USER_ID)).thenReturn(new UserResponse());
         when(addressMapper.toResponse(any())).thenReturn(new AddressResponse());
+        when(orderMapper.toResponse(any(Order.class))).thenReturn(OrderResponse.builder()
+                .id(1L)
+                .orderStatus(OrderStatus.CANCELLED)
+                .paymentStatus(order.getPaymentStatus())
+                .totalAmount(order.getTotalAmount())
+                .orderItems(new ArrayList<>())
+                .build());
+        when(orderMapper.orderItemsToResponses(anyList())).thenReturn(List.of());
+        doNothing().when(stockService).revertStockLevels(anyList());
 
         OrderResponse result = orderService.updateOrderStatus(1L, OrderStatus.CANCELLED);
 
         assertEquals(OrderStatus.CANCELLED, result.getOrderStatus());
-        verify(productService).saveAllProducts(anyList());
+        verify(stockService).revertStockLevels(anyList());
     }
 
     @Test

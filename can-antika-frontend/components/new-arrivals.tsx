@@ -18,7 +18,7 @@ export function NewArrivals() {
 
     const loadProducts = async () => {
       try {
-        const data = await productApi.getAll(0, 4, "createdAt", "desc")
+        const data = await productApi.getAll(0, 4, "id", "desc")
         if (isMounted && (data.items?.length ?? 0) > 0) {
           setProducts((data.items ?? []).slice(0, 4))
           setIsLoading(false)
@@ -29,9 +29,8 @@ export function NewArrivals() {
       }
 
       try {
-        const all = await productApi.findAll()
-        const latest = [...all].sort((a, b) => (b.id ?? 0) - (a.id ?? 0)).slice(0, 4)
-        if (isMounted) setProducts(latest)
+        const fallback = await productApi.getAll(0, 4, "id", "desc")
+        if (isMounted) setProducts((fallback.items ?? []).slice(0, 4))
       } catch {
         if (isMounted) setProducts([])
       } finally {
@@ -117,7 +116,8 @@ export function NewArrivals() {
                           src={imageUrl}
                           alt={item.title}
                           fill
-                          unoptimized
+                          loading="lazy"
+                          decoding="async"
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                           className="object-cover transition-transform duration-700 group-hover:scale-110"
                         />

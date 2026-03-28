@@ -15,10 +15,10 @@ import com.mehmetkerem.model.RefreshToken;
 import com.mehmetkerem.model.User;
 import com.mehmetkerem.repository.PasswordResetTokenRepository;
 import com.mehmetkerem.repository.UserRepository;
-import com.mehmetkerem.service.INotificationService;
 import com.mehmetkerem.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -68,12 +68,19 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
     @Override
     public LoginResponse login(LoginRequest req) {
         String email = req.getEmail().trim().toLowerCase();
-        authManager.authenticate(new UsernamePasswordAuthenticationToken(email, req.getPassword()));
-        var user = userRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new NotFoundException(String.format(ExceptionMessages.NOT_FOUND, email, "kullanıcı")));
+        Authentication authentication = authManager
+                .authenticate(new UsernamePasswordAuthenticationToken(email, req.getPassword()));
+        Object principal = authentication != null ? authentication.getPrincipal() : null;
+        User user;
+        if (principal instanceof User authenticatedUser) {
+            user = authenticatedUser;
+        } else {
+            user = userRepository.findByEmail(email)
+                    .orElseThrow(
+                            () -> new NotFoundException(String.format(ExceptionMessages.NOT_FOUND, email, "kullanıcı")));
+        }
         String token = jwtService.generateToken(user);
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         return LoginResponse.builder()
                 .accessToken(token)
@@ -85,22 +92,23 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
     @Override
     public LoginResponse refreshToken(TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
+        refreshTokenService.detectReplayAndRevokeIfNeeded(requestRefreshToken);
 
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
-                .map(RefreshToken::getUser)
-                .map(user -> {
+                .map(existingToken -> {
+                    refreshTokenService.markTokenAsRotated(existingToken);
+                    User user = existingToken.getUser();
                     String token = jwtService.generateToken(user);
-                    // Rotate refresh token — invalidate old, issue new
-                    refreshTokenService.deleteByUserId(user.getId());
-                    RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getId());
+                    RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);
                     return LoginResponse.builder()
                             .accessToken(token)
                             .refreshToken(newRefreshToken.getToken())
                             .user(userService.getUserResponseById(user.getId()))
                             .build();
                 })
-                .orElseThrow(() -> new BadRequestException("Refresh token is not in database!"));
+                .orElseThrow(() -> new com.mehmetkerem.exception.UnauthorizedException(
+                        "Oturum yenilenemedi. Lutfen tekrar giris yapin."));
     }
 
     @Override

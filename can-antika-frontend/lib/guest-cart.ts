@@ -29,12 +29,15 @@ export const guestCart = {
     },
 
     addItem(product: ProductResponse, quantity: number) {
+        const maxAllowed = Math.max(product.stock ?? 0, 0)
+        if (maxAllowed <= 0 || quantity <= 0) return
+
         const items = readCart()
         const existing = items.find(i => i.product.id === product.id)
         if (existing) {
-            existing.quantity = Math.min(existing.quantity + quantity, product.stock ?? 99)
+            existing.quantity = Math.min(existing.quantity + quantity, maxAllowed)
         } else {
-            items.push({ product, quantity })
+            items.push({ product, quantity: Math.min(quantity, maxAllowed) })
         }
         writeCart(items)
     },
@@ -43,7 +46,13 @@ export const guestCart = {
         const items = readCart()
         const item = items.find(i => i.product.id === productId)
         if (item) {
-            item.quantity = quantity
+            const maxAllowed = Math.max(item.product.stock ?? 0, 0)
+            if (maxAllowed <= 0 || quantity <= 0) {
+                const nextItems = items.filter(i => i.product.id !== productId)
+                writeCart(nextItems)
+                return
+            }
+            item.quantity = Math.min(quantity, maxAllowed)
             writeCart(items)
         }
     },

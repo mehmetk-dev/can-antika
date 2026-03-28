@@ -4,6 +4,7 @@ import com.mehmetkerem.controller.IRestAuthController;
 import com.mehmetkerem.dto.request.*;
 import com.mehmetkerem.dto.response.LoginResponse;
 import com.mehmetkerem.dto.response.UserResponse;
+import com.mehmetkerem.exception.UnauthorizedException;
 import com.mehmetkerem.model.User;
 import com.mehmetkerem.service.IAuthService;
 import com.mehmetkerem.service.IUserService;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,38 +31,56 @@ public class RestAuthControllerImpl implements IRestAuthController {
     private final IUserService userService;
     private final CookieUtil cookieUtil;
 
+    @Value("${app.auth.include-tokens-in-response:false}")
+    private boolean includeTokensInResponse;
+
     @Override
     @PostMapping("/register")
     public ResultData<Map<String, String>> register(@RequestBody @Valid RegisterRequest req) {
-        return ResultHelper.success(authService.register(req));
+        Map<String, String> registerResponse = authService.register(req);
+        if (includeTokensInResponse) {
+            return ResultHelper.success(registerResponse);
+        }
+        return ResultHelper.success(Map.of("message", "Kayit basariyla tamamlandi."));
     }
 
     @Override
     @PostMapping("/login")
-    public ResultData<UserResponse> login(@RequestBody @Valid LoginRequest req, HttpServletResponse response) {
+    public ResultData<LoginResponse> login(@RequestBody @Valid LoginRequest req, HttpServletResponse response) {
         LoginResponse loginResponse = authService.login(req);
         cookieUtil.addAccessTokenCookie(response, loginResponse.getAccessToken());
         cookieUtil.addRefreshTokenCookie(response, loginResponse.getRefreshToken());
-        return ResultHelper.success(loginResponse.getUser());
+        return ResultHelper.success(sanitizeLoginResponse(loginResponse));
     }
 
     @Override
     @PostMapping("/refresh-token")
-    public ResultData<UserResponse> refreshToken(@RequestBody(required = false) TokenRefreshRequest request,
+    public ResultData<LoginResponse> refreshToken(@RequestBody(required = false) TokenRefreshRequest request,
             HttpServletRequest httpRequest, HttpServletResponse response) {
         // Cookie'den refresh token oku (body boşsa)
         if (request == null || request.getRefreshToken() == null || request.getRefreshToken().isBlank()) {
             request = new TokenRefreshRequest();
             String cookieToken = extractRefreshTokenFromCookie(httpRequest);
             if (cookieToken == null) {
-                throw new RuntimeException("Refresh token bulunamadı.");
+                throw new UnauthorizedException("Oturum bulunamadı. Lütfen tekrar giriş yapın.");
             }
             request.setRefreshToken(cookieToken);
         }
         LoginResponse loginResponse = authService.refreshToken(request);
         cookieUtil.addAccessTokenCookie(response, loginResponse.getAccessToken());
         cookieUtil.addRefreshTokenCookie(response, loginResponse.getRefreshToken());
-        return ResultHelper.success(loginResponse.getUser());
+        return ResultHelper.success(sanitizeLoginResponse(loginResponse));
+    }
+
+    private LoginResponse sanitizeLoginResponse(LoginResponse loginResponse) {
+        if (includeTokensInResponse) {
+            return loginResponse;
+        }
+
+        return LoginResponse.builder()
+                .tokenType(loginResponse.getTokenType())
+                .user(loginResponse.getUser())
+                .build();
     }
 
     private String extractRefreshTokenFromCookie(HttpServletRequest request) {

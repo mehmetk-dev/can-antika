@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -177,7 +178,8 @@ class UserServiceImplTest {
     @DisplayName("findAllUsers - tüm kullanıcılar listelenir")
     void findAllUsers_ShouldReturnAllUsers() {
         when(userRepository.findAll()).thenReturn(List.of(user));
-        when(addressService.getAddressesByUserId(1L)).thenReturn(Collections.emptyList());
+        when(addressService.getAddressesByUserIds(List.of(1L)))
+                .thenReturn(Map.of(1L, Collections.emptyList()));
         when(userMapper.toResponseWithAddresses(user, Collections.emptyList())).thenReturn(userResponse);
 
         List<UserResponse> result = userService.findAllUsers();

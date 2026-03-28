@@ -14,7 +14,7 @@ import { VintageLocationIcon, VintagePhoneIcon, VintageMailIcon, VintageClockIco
 import { PageHero } from "@/components/page-hero"
 
 import { toast } from "sonner"
-import { supportTicketApi } from "@/lib/api"
+import { contactApi } from "@/lib/api"
 import { useSiteSettings } from "@/lib/site-settings-context"
 
 export function ContactClient() {
@@ -32,9 +32,12 @@ export function ContactClient() {
 
     setIsSubmitting(true)
     try {
-      await supportTicketApi.create({
+      await contactApi.submit({
+        name,
+        email,
+        phone,
         subject: "İletişim Formu",
-        message: `Ad Soyad: ${name}\nE-posta: ${email}\nTelefon: ${phone}\n\nMesaj:\n${message}`,
+        message,
       })
       setIsSubmitted(true)
       toast.success("Mesajınız başarıyla gönderildi")

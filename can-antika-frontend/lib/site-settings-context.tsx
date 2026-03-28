@@ -69,14 +69,22 @@ const DEFAULTS: SiteSettingsResponse = {
 
 const SiteSettingsContext = createContext<SiteSettingsResponse>(DEFAULTS);
 
-export function SiteSettingsProvider({ children }: { children: ReactNode }) {
-    const [settings, setSettings] = useState<SiteSettingsResponse>(DEFAULTS);
+export function SiteSettingsProvider({
+    children,
+    initialSettings,
+}: {
+    children: ReactNode;
+    initialSettings?: SiteSettingsResponse | null;
+}) {
+    const [settings, setSettings] = useState<SiteSettingsResponse>(initialSettings ?? DEFAULTS);
 
     useEffect(() => {
+        if (initialSettings) return;
+
         siteSettingsApi.get()
             .then(setSettings)
             .catch(() => { /* fallback to defaults */ });
-    }, []);
+    }, [initialSettings]);
 
     return (
         <SiteSettingsContext.Provider value={settings}>

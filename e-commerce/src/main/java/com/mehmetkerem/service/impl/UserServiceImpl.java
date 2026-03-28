@@ -107,6 +107,31 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public java.util.Map<Long, UserResponse> getUserResponsesByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return java.util.Collections.emptyMap();
+        }
+
+        List<Long> uniqueIds = ids.stream()
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+        if (uniqueIds.isEmpty()) {
+            return java.util.Collections.emptyMap();
+        }
+
+        List<User> users = userRepository.findAllById(uniqueIds);
+        java.util.Map<Long, List<com.mehmetkerem.dto.response.AddressResponse>> addressMap =
+                addressService.getAddressesByUserIds(uniqueIds);
+
+        return users.stream().collect(java.util.stream.Collectors.toMap(
+                User::getId,
+                user -> userMapper.toResponseWithAddresses(
+                        user,
+                        addressMap.getOrDefault(user.getId(), java.util.Collections.emptyList()))));
+    }
+
+    @Override
     public List<UserResponse> findAllUsers() {
         List<User> allUsers = userRepository.findAll();
         // Tüm kullanıcı ID'lerini topla ve adresleri tek sorguda çek (N+1 çözümü)

@@ -36,7 +36,11 @@ export default function NewProductPage() {
         setCategories(cats)
         setPeriods(dbPeriods)
       })
-      .catch((e) => console.error("Liste verileri alinamadi:", e))
+      .catch((e) => {
+        console.error("Liste verileri alınamadı:", e)
+        const message = e instanceof Error ? e.message : "Kategori ve dönem verileri yüklenemedi"
+        toast.error(message)
+      })
   }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -46,12 +50,12 @@ export default function NewProductPage() {
     const parsedPrice = Number(formData.get("price"))
 
     if (!Number.isFinite(parsedCategoryId) || parsedCategoryId <= 0) {
-      toast.error("Lutfen gecerli bir kategori secin")
+      toast.error("Lütfen geçerli bir kategori seçin")
       return
     }
 
     if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
-      toast.error("Lutfen gecerli bir fiyat girin")
+      toast.error("Lütfen geçerli bir fiyat girin")
       return
     }
 
@@ -81,10 +85,10 @@ export default function NewProductPage() {
     setIsSaving(true)
     try {
       await productApi.save(data)
-      toast.success("Urun basariyla eklendi")
+      toast.success("Ürün başarıyla eklendi")
       router.push("/admin/urunler")
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Urun eklenirken hata olustu"
+      const message = error instanceof Error ? error.message : "Ürün eklenirken hata oluştu"
       toast.error(message)
     } finally {
       setIsSaving(false)
@@ -97,13 +101,32 @@ export default function NewProductPage() {
 
     const maxSlots = 6 - images.length
     const selectedFiles = Array.from(files).slice(0, maxSlots)
+    const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"])
+    const allowedExtensions = new Set(["jpg", "jpeg", "png", "gif", "webp"])
 
     const oversized = selectedFiles.filter((f) => f.size > 100 * 1024 * 1024)
     if (oversized.length > 0) {
-      toast.error(`${oversized.length} dosya 100MB sinirini asiyor, atlandi.`)
+      toast.error(`${oversized.length} dosya 100MB sınırını aşıyor, atlandı.`)
     }
 
-    const validFiles = selectedFiles.filter((f) => f.size <= 100 * 1024 * 1024)
+    const unsupported = selectedFiles.filter((f) => {
+      const ext = f.name.includes(".") ? f.name.split(".").pop()?.toLowerCase() ?? "" : ""
+      const hasAllowedType = allowedMimeTypes.has((f.type || "").toLowerCase())
+      const hasAllowedExt = allowedExtensions.has(ext)
+      return !(hasAllowedType || hasAllowedExt)
+    })
+    if (unsupported.length > 0) {
+      toast.error(
+        `${unsupported.length} dosya formatı desteklenmiyor. Desteklenen: JPEG, PNG, GIF, WebP (HEIC/HEIF desteklenmez).`,
+      )
+    }
+
+    const validFiles = selectedFiles.filter((f) => {
+      const ext = f.name.includes(".") ? f.name.split(".").pop()?.toLowerCase() ?? "" : ""
+      const hasAllowedType = allowedMimeTypes.has((f.type || "").toLowerCase())
+      const hasAllowedExt = allowedExtensions.has(ext)
+      return f.size <= 100 * 1024 * 1024 && (hasAllowedType || hasAllowedExt)
+    })
     if (validFiles.length === 0) {
       if (fileInputRef.current) fileInputRef.current.value = ""
       return
@@ -118,8 +141,9 @@ export default function NewProductPage() {
           if (prev.length >= 6) return prev
           return [...prev, url]
         })
-      } catch {
-        toast.error(`"${file.name}" yuklenemedi`)
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : "Yükleme hatası"
+        toast.error(`"${file.name}" yüklenemedi: ${reason}`)
       } finally {
         setUploadingCount((prev) => prev - 1)
       }
@@ -142,7 +166,7 @@ export default function NewProductPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground">Yeni Urun Ekle</h1>
+          <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground">Yeni Ürün Ekle</h1>
           <p className="mt-1 text-muted-foreground">Koleksiyonunuza yeni bir eser ekleyin</p>
         </div>
       </div>
@@ -152,35 +176,35 @@ export default function NewProductPage() {
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="font-serif">Temel Bilgiler</CardTitle>
-              <CardDescription>Urunun genel bilgilerini girin</CardDescription>
+              <CardDescription>Ürünün genel bilgilerini girin</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Urun Adi *</Label>
-                <Input id="title" name="title" placeholder="Orn: Osmanli Donemi Duvar Saati" required className="bg-muted/50" />
+                <Label htmlFor="title">Ürün Adı *</Label>
+                <Input id="title" name="title" placeholder="Örn: Osmanlı Dönemi Duvar Saati" required className="bg-muted/50" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Aciklama *</Label>
-                <Textarea id="description" name="description" rows={4} placeholder="Urun hakkinda detayli aciklama..." required className="bg-muted/50" />
+                <Label htmlFor="description">Açıklama *</Label>
+                <Textarea id="description" name="description" rows={4} placeholder="Ürün hakkında detaylı açıklama..." required className="bg-muted/50" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="story">Hikaye / Koken</Label>
-                <Textarea id="story" name="story" rows={4} placeholder="Eserin tarihcesi ve koken bilgisi..." className="bg-muted/50" />
+                <Label htmlFor="story">Hikaye / Köken</Label>
+                <Textarea id="story" name="story" rows={4} placeholder="Eserin tarihçesi ve köken bilgisi..." className="bg-muted/50" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-card">
             <CardHeader>
-              <CardTitle className="font-serif">Gorseller</CardTitle>
-              <CardDescription>Urun fotograflarini yukleyin (maksimum 6 adet)</CardDescription>
+              <CardTitle className="font-serif">Görseller</CardTitle>
+              <CardDescription>Ürün fotoğraflarını yükleyin (maksimum 6 adet)</CardDescription>
             </CardHeader>
             <CardContent>
               <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
               <div className="grid gap-4 sm:grid-cols-3">
                 {images.map((image, index) => (
                   <div key={index} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                    <Image src={image} alt={`Urun ${index + 1}`} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" unoptimized />
+                    <Image src={image} alt={`Ürün ${index + 1}`} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" unoptimized />
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
@@ -200,13 +224,13 @@ export default function NewProductPage() {
                     {uploadingCount > 0 ? (
                       <>
                         <Loader2 className="h-8 w-8 animate-spin" />
-                        <span className="mt-2 text-sm">{uploadingCount} yukleniyor...</span>
+                        <span className="mt-2 text-sm">{uploadingCount} yükleniyor...</span>
                       </>
                     ) : (
                       <>
                         <Upload className="h-8 w-8" />
-                        <span className="mt-2 text-sm">Yukle</span>
-                        <span className="mt-0.5 text-xs opacity-60">Coklu secim yapabilirsiniz</span>
+                        <span className="mt-2 text-sm">Yükle</span>
+                        <span className="mt-0.5 text-xs opacity-60">Çoklu seçim yapabilirsiniz</span>
                       </>
                     )}
                   </button>
@@ -218,22 +242,22 @@ export default function NewProductPage() {
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="font-serif">Detaylar</CardTitle>
-              <CardDescription>Urunun fiziksel ozellikleri ve durumu</CardDescription>
+              <CardDescription>Ürünün fiziksel özellikleri ve durumu</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="dimensions">Boyutlar *</Label>
-                  <Input id="dimensions" name="dimensions" placeholder="Orn: 65cm x 35cm x 15cm" required className="bg-muted/50" />
+                  <Input id="dimensions" name="dimensions" placeholder="Örn: 65cm x 35cm x 15cm" required className="bg-muted/50" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="condition">Durum *</Label>
-                  <Input id="condition" name="condition" placeholder="Orn: Mukemmel durumda" required className="bg-muted/50" />
+                  <Input id="condition" name="condition" placeholder="Örn: Mükemmel durumda" required className="bg-muted/50" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="conditionDetails">Durum Detaylari</Label>
-                <Textarea id="conditionDetails" name="conditionDetails" rows={3} placeholder="Asinma, restorasyon vb. detaylar..." className="bg-muted/50" />
+                <Label htmlFor="conditionDetails">Durum Detayları</Label>
+                <Textarea id="conditionDetails" name="conditionDetails" rows={3} placeholder="Aşınma, restorasyon vb. detaylar..." className="bg-muted/50" />
               </div>
             </CardContent>
           </Card>
@@ -252,8 +276,8 @@ export default function NewProductPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Aktif (Satista)</SelectItem>
-                    <SelectItem value="sold">Satildi</SelectItem>
+                    <SelectItem value="active">Aktif (Satışta)</SelectItem>
+                    <SelectItem value="sold">Satıldı</SelectItem>
                     <SelectItem value="reserved">Rezerve</SelectItem>
                   </SelectContent>
                 </Select>
@@ -267,14 +291,14 @@ export default function NewProductPage() {
 
           <Card className="bg-card">
             <CardHeader>
-              <CardTitle className="font-serif">Siniflandirma</CardTitle>
+              <CardTitle className="font-serif">Sınıflandırma</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Kategori *</Label>
                 <Select value={categoryId} onValueChange={setCategoryId}>
                   <SelectTrigger className="bg-muted/50">
-                    <SelectValue placeholder="Secin" />
+                    <SelectValue placeholder="Seçin" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
@@ -286,7 +310,7 @@ export default function NewProductPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Donem</Label>
+                <Label>Dönem</Label>
                 <Select
                   value={selectedPeriodId}
                   onValueChange={(value) => {
@@ -297,7 +321,7 @@ export default function NewProductPage() {
                   }}
                 >
                   <SelectTrigger className="bg-muted/50">
-                    <SelectValue placeholder="Mevcut donem secin" />
+                    <SelectValue placeholder="Mevcut dönem seçin" />
                   </SelectTrigger>
                   <SelectContent>
                     {periods.map((period) => (
@@ -309,7 +333,7 @@ export default function NewProductPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customPeriodName">Yeni Donem Ekle</Label>
+                <Label htmlFor="customPeriodName">Yeni Dönem Ekle</Label>
                 <Input
                   id="customPeriodName"
                   value={customPeriodName}
@@ -319,7 +343,7 @@ export default function NewProductPage() {
                       setSelectedPeriodId("")
                     }
                   }}
-                  placeholder="Orn: Gec Osmanli"
+                  placeholder="Örn: Geç Osmanlı"
                   className="bg-muted/50"
                 />
               </div>
@@ -328,7 +352,7 @@ export default function NewProductPage() {
                 <Input
                   value={material}
                   onChange={(e) => setMaterial(e.target.value)}
-                  placeholder="Orn: Ahsap, Pirinc, Gumus"
+                  placeholder="Örn: Ahşap, Pirinç, Gümüş"
                   className="bg-muted/50"
                 />
               </div>
@@ -337,7 +361,7 @@ export default function NewProductPage() {
 
           <div className="flex gap-3">
             <Button type="button" variant="outline" className="flex-1 bg-transparent" onClick={() => router.back()}>
-              Iptal
+              İptal
             </Button>
             <Button type="submit" className="flex-1 bg-primary text-primary-foreground" disabled={isSaving}>
               {isSaving ? "Kaydediliyor..." : "Kaydet"}

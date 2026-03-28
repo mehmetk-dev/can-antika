@@ -24,13 +24,33 @@ interface CategoryItem {
 }
 
 async function fetchProducts(): Promise<ProductItem[]> {
+    const pageSize = 100
+    const maxPages = 100
+    const allProducts: ProductItem[] = []
+    let page = 0
+    let total = Number.POSITIVE_INFINITY
+
     try {
-        const res = await fetch(`${API_URL}/v1/product?page=0&size=1000`, {
-            next: { revalidate: 3600 },
-        })
-        if (!res.ok) return []
-        const json = await res.json()
-        return json.data?.items ?? []
+        while (page < maxPages && allProducts.length < total) {
+            const res = await fetch(`${API_URL}/v1/product?page=${page}&size=${pageSize}`, {
+                next: { revalidate: 3600 },
+            })
+            if (!res.ok) break
+
+            const json = await res.json()
+            const items = Array.isArray(json?.data?.items) ? (json.data.items as ProductItem[]) : []
+            const totalElement = Number(json?.data?.totalElement)
+
+            if (Number.isFinite(totalElement) && totalElement > 0) {
+                total = totalElement
+            }
+            if (items.length === 0) break
+
+            allProducts.push(...items)
+            page += 1
+        }
+
+        return allProducts
     } catch {
         return []
     }

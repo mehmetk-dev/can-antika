@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { Star, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -25,13 +25,39 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
     const [submitting, setSubmitting] = useState(false)
 
     useEffect(() => {
+        let isCancelled = false
         reviewApi.getByProductId(productId)
-            .then(setReviews)
-            .catch(() => setReviews([]))
-            .finally(() => setLoading(false))
+            .then((response) => {
+                if (!isCancelled) setReviews(response)
+            })
+            .catch(() => {
+                if (!isCancelled) setReviews([])
+            })
+            .finally(() => {
+                if (!isCancelled) setLoading(false)
+            })
+
+        return () => {
+            isCancelled = true
+        }
     }, [productId])
 
-    const avgRating = reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0
+    const { avgRating, ratingCounts } = useMemo(() => {
+        if (reviews.length === 0) {
+            return { avgRating: 0, ratingCounts: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } }
+        }
+
+        let total = 0
+        const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+
+        for (const review of reviews) {
+            const normalized = Math.min(5, Math.max(1, review.rating)) as 1 | 2 | 3 | 4 | 5
+            total += normalized
+            counts[normalized] += 1
+        }
+
+        return { avgRating: total / reviews.length, ratingCounts: counts }
+    }, [reviews])
 
     const handleSubmit = async () => {
         if (!user) return
@@ -66,7 +92,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
                 <Separator orientation="vertical" className="h-16" />
                 <div className="flex-1 space-y-1">
                     {[5, 4, 3, 2, 1].map((star) => {
-                        const count = reviews.filter((r) => r.rating === star).length
+                        const count = ratingCounts[star as 1 | 2 | 3 | 4 | 5]
                         const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0
                         return (
                             <div key={star} className="flex items-center gap-2 text-sm">

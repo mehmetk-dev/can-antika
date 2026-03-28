@@ -140,6 +140,7 @@ public class RestOrderControllerImpl implements IRestOrderController {
     @GetMapping("/{orderId}/timeline")
     public ResultData<java.util.List<com.mehmetkerem.dto.response.OrderStatusHistoryResponse>> getOrderTimeline(
             @PathVariable Long orderId) {
+        orderAuthorizationService.assertOwnerOrAdmin(orderService.getOrderById(orderId));
         return ResultHelper.success(orderService.getOrderTimeline(orderId));
     }
 

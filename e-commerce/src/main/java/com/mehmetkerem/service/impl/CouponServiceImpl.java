@@ -6,7 +6,9 @@ import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.mapper.CouponMapper;
 import com.mehmetkerem.model.Coupon;
+import com.mehmetkerem.model.CouponUsage;
 import com.mehmetkerem.repository.CouponRepository;
+import com.mehmetkerem.repository.CouponUsageRepository;
 import com.mehmetkerem.service.ICouponService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,8 +23,8 @@ import java.util.List;
 public class CouponServiceImpl implements ICouponService {
 
     private final CouponRepository couponRepository;
+    private final CouponUsageRepository couponUsageRepository;
     private final CouponMapper couponMapper;
-
 
     @Override
     public CouponResponse createCoupon(String code, BigDecimal discountAmount, BigDecimal minCartAmount, int daysValid) {
@@ -67,7 +69,7 @@ public class CouponServiceImpl implements ICouponService {
     @Override
     public CouponResponse getCouponByCode(String code) {
         Coupon coupon = couponRepository.findByCode(code)
-                .orElseThrow(() -> new NotFoundException("Kupon bulunamadı!"));
+                .orElseThrow(() -> new NotFoundException("Kupon bulunamadi!"));
         return couponMapper.toResponse(coupon);
     }
 
@@ -79,7 +81,7 @@ public class CouponServiceImpl implements ICouponService {
     @Override
     public CouponResponse updateCoupon(Long id, CouponRequest request) {
         Coupon existing = couponRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Kupon bulunamadı id: " + id));
+                .orElseThrow(() -> new NotFoundException("Kupon bulunamadi id: " + id));
 
         existing.setCode(request.getCode() != null ? request.getCode().toUpperCase() : existing.getCode());
         existing.setDiscountAmount(request.getDiscountAmount());
@@ -97,42 +99,59 @@ public class CouponServiceImpl implements ICouponService {
     @Transactional
     @Override
     public BigDecimal applyCoupon(String code, BigDecimal cartTotal) {
-        Coupon coupon = getValidatedCoupon(code, cartTotal);
+        Coupon coupon = getValidatedCoupon(code, cartTotal, null);
         return calculateDiscountedTotal(coupon, cartTotal);
     }
 
     @Transactional
     @Override
-    public void consumeCoupon(String code, BigDecimal cartTotal) {
-        Coupon coupon = getValidatedCoupon(code, cartTotal);
+    public void consumeCoupon(String code, BigDecimal cartTotal, Long userId) {
+        Coupon coupon = getValidatedCoupon(code, cartTotal, userId);
         coupon.setUsageCount(coupon.getUsageCount() + 1);
         couponRepository.save(coupon);
+
+        if (userId != null) {
+            CouponUsage usage = couponUsageRepository.findByCouponIdAndUserId(coupon.getId(), userId)
+                    .orElseGet(() -> CouponUsage.builder()
+                            .couponId(coupon.getId())
+                            .userId(userId)
+                            .usageCount(0)
+                            .build());
+            usage.setUsageCount(usage.getUsageCount() + 1);
+            couponUsageRepository.save(usage);
+        }
     }
 
-    private Coupon getValidatedCoupon(String code, BigDecimal cartTotal) {
+    private Coupon getValidatedCoupon(String code, BigDecimal cartTotal, Long userId) {
         Coupon coupon = couponRepository.findByCode(code)
-                .orElseThrow(() -> new NotFoundException("Kupon bulunamadı!"));
+                .orElseThrow(() -> new NotFoundException("Kupon bulunamadi!"));
 
         if (!coupon.isActive()) {
             throw new BadRequestException("Bu kupon pasif durumda.");
         }
 
         if (LocalDateTime.now().isAfter(coupon.getExpirationDate())) {
-            throw new BadRequestException("Bu kuponun süresi dolmuş.");
+            throw new BadRequestException("Bu kuponun suresi dolmus.");
         }
 
-        Integer usageLimit = coupon.getMaxUsageCount();
-        if (usageLimit == null) {
-            usageLimit = 0; // Check DB model for fallback
-        }
-
+        int usageLimit = coupon.getMaxUsageCount() == null ? 0 : coupon.getMaxUsageCount();
         if (usageLimit > 0 && coupon.getUsageCount() >= usageLimit) {
-            throw new BadRequestException("Bu kuponun kullanım limiti dolmuştur.");
+            throw new BadRequestException("Bu kuponun kullanim limiti dolmustur.");
+        }
+
+        Integer perUserLimit = coupon.getPerUserLimit();
+        if (userId != null && perUserLimit != null && perUserLimit > 0) {
+            int usedByUser = couponUsageRepository.findByCouponIdAndUserId(coupon.getId(), userId)
+                    .map(CouponUsage::getUsageCount)
+                    .orElse(0);
+            if (usedByUser >= perUserLimit) {
+                throw new BadRequestException("Bu kuponu kullanma limitinize ulastiniz.");
+            }
         }
 
         if (cartTotal.compareTo(coupon.getMinCartAmount()) < 0) {
             throw new BadRequestException(
-                    "Sepet tutarı bu kupon için yetersiz. Minimum tutar: " + coupon.getMinCartAmount());
+                    "Sepet tutari bu kupon icin yetersiz. Minimum tutar: " + coupon.getMinCartAmount());
         }
 
         return coupon;
@@ -146,7 +165,7 @@ public class CouponServiceImpl implements ICouponService {
     @Override
     public void deleteCoupon(Long couponId) {
         if (!couponRepository.existsById(couponId)) {
-            throw new NotFoundException("Kupon bulunamadı id: " + couponId);
+            throw new NotFoundException("Kupon bulunamadi id: " + couponId);
         }
         couponRepository.deleteById(couponId);
     }

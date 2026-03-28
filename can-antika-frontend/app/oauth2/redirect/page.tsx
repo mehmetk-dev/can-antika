@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2, CheckCircle, XCircle } from "lucide-react"
 import { authApi } from "@/lib/api"
+import { clearAuthSessionFlag, markAuthSessionActive } from "@/lib/auth-session"
 
 function OAuth2RedirectContent() {
     const router = useRouter()
@@ -12,6 +13,7 @@ function OAuth2RedirectContent() {
 
     useEffect(() => {
         // Cookie'ler backend tarafından zaten set edildi, sadece user bilgisini çek
+        markAuthSessionActive()
         authApi.getProfile()
             .then((user) => {
                 setStatus("success")
@@ -19,6 +21,7 @@ function OAuth2RedirectContent() {
                 setTimeout(() => router.push("/hesap"), 1500)
             })
             .catch(() => {
+                clearAuthSessionFlag()
                 setStatus("error")
                 setMessage("Giriş doğrulanamadı. Lütfen tekrar deneyin.")
                 setTimeout(() => router.push("/giris"), 3000)

@@ -5,6 +5,7 @@ import com.mehmetkerem.dto.response.CategoryResponse;
 import com.mehmetkerem.util.ResultData;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IRestCategoryController {
 
@@ -17,4 +18,6 @@ public interface IRestCategoryController {
     ResultData<CategoryResponse> updateCategory(Long id, CategoryRequest request);
 
     ResultData<List<CategoryResponse>> findAllCategories();
+
+    ResultData<Map<Long, Long>> getProductCountsByCategory();
 }

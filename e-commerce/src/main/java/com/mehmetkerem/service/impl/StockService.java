@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -42,9 +43,23 @@ public class StockService implements IStockService {
      */
     @Override
     public List<OrderEvent.StockAlertInfo> validateAndDeductStock(List<OrderItem> orderItems) {
-        List<Long> productIds = orderItems.stream()
-                .map(OrderItem::getProductId)
-                .toList();
+        if (orderItems == null || orderItems.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, Integer> requestedQuantities = new LinkedHashMap<>();
+        for (OrderItem item : orderItems) {
+            if (item == null || item.getProductId() == null || item.getQuantity() <= 0) {
+                continue;
+            }
+            requestedQuantities.merge(item.getProductId(), item.getQuantity(), Integer::sum);
+        }
+
+        if (requestedQuantities.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> productIds = new ArrayList<>(requestedQuantities.keySet());
 
         List<Product> products = productService.getProductsByIds(productIds);
 
@@ -52,12 +67,12 @@ public class StockService implements IStockService {
                 .collect(Collectors.toMap(Product::getId, p -> p));
 
         // 1. Önce TÜM ürünlerin stok yeterliliğini kontrol et
-        for (OrderItem item : orderItems) {
-            Product product = productMap.get(item.getProductId());
+        for (Map.Entry<Long, Integer> requested : requestedQuantities.entrySet()) {
+            Product product = productMap.get(requested.getKey());
             if (product == null) {
-                throw new NotFoundException("Ürün bulunamadı. ID: " + item.getProductId());
+                throw new NotFoundException("Ürün bulunamadı. ID: " + requested.getKey());
             }
-            if (safeStock(product) < item.getQuantity()) {
+            if (!isSellable(product.getAttributes()) || safeStock(product) < requested.getValue()) {
                 throw new BadRequestException(
                         String.format(ExceptionMessages.INSUFFICIENT_STOCK, product.getTitle()));
             }
@@ -65,10 +80,11 @@ public class StockService implements IStockService {
 
         // 2. Kontrol geçtiyse stokları düşür ve düşük stok uyarılarını topla
         List<OrderEvent.StockAlertInfo> stockAlerts = new ArrayList<>();
-        for (OrderItem item : orderItems) {
-            Product product = productMap.get(item.getProductId());
-            int newStock = safeStock(product) - item.getQuantity();
+        for (Map.Entry<Long, Integer> requested : requestedQuantities.entrySet()) {
+            Product product = productMap.get(requested.getKey());
+            int newStock = safeStock(product) - requested.getValue();
             product.setStock(newStock);
+            syncStatusWithStock(product, newStock);
 
             if (newStock <= stockAlertThreshold) {
                 stockAlerts.add(OrderEvent.StockAlertInfo.builder()
@@ -101,6 +117,7 @@ public class StockService implements IStockService {
             Product product = productMap.get(item.getProductId());
             int newStock = safeStock(product) + item.getQuantity();
             product.setStock(newStock);
+            syncStatusWithStock(product, newStock);
             log.debug("Stok iade edildi. Ürün: {}, Yeni Stok: {}", product.getTitle(), newStock);
         }
 
@@ -143,7 +160,7 @@ public class StockService implements IStockService {
 
         for (var entry : wanted.entrySet()) {
             ProductResponse p = map.get(entry.getKey());
-            if (entry.getValue() > (p.getStock() == null ? 0 : p.getStock())) {
+            if (!isSellable(p.getAttributes()) || entry.getValue() > (p.getStock() == null ? 0 : p.getStock())) {
                 throw new BadRequestException(
                         String.format(ExceptionMessages.INSUFFICIENT_STOCK, p.getTitle()));
             }
@@ -152,8 +169,36 @@ public class StockService implements IStockService {
 
     @Override
     public void validateCartItemStock(int quantity, Product product) {
-        if (quantity <= 0 || safeStock(product) < quantity) {
+        if (!isSellable(product.getAttributes()) || quantity <= 0 || safeStock(product) < quantity) {
             throw new BadRequestException(ExceptionMessages.UNKNOW_STOCK);
         }
+    }
+
+    private void syncStatusWithStock(Product product, int currentStock) {
+        Map<String, Object> attributes = product.getAttributes();
+        Map<String, Object> mutableAttributes = attributes == null ? new HashMap<>() : new HashMap<>(attributes);
+
+        Object rawStatus = mutableAttributes.get("status");
+        String normalizedStatus = rawStatus == null ? "" : rawStatus.toString().trim().toLowerCase(Locale.ROOT);
+
+        if (currentStock <= 0) {
+            mutableAttributes.put("status", "sold");
+        } else if (normalizedStatus.isEmpty() || "sold".equals(normalizedStatus)) {
+            mutableAttributes.put("status", "active");
+        }
+
+        product.setAttributes(mutableAttributes);
+    }
+
+    private boolean isSellable(Map<String, Object> attributes) {
+        if (attributes == null || attributes.isEmpty()) {
+            return true;
+        }
+        Object rawStatus = attributes.get("status");
+        if (rawStatus == null) {
+            return true;
+        }
+        String normalizedStatus = rawStatus.toString().trim().toLowerCase(Locale.ROOT);
+        return !"sold".equals(normalizedStatus) && !"reserved".equals(normalizedStatus);
     }
 }

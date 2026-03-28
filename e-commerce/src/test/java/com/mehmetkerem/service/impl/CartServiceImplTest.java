@@ -14,6 +14,7 @@ import com.mehmetkerem.model.Product;
 import com.mehmetkerem.repository.CartRepository;
 import com.mehmetkerem.service.ICouponService;
 import com.mehmetkerem.service.IProductService;
+import com.mehmetkerem.service.IStockService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,9 @@ class CartServiceImplTest {
 
     @Mock
     private ICouponService couponService;
+
+    @Mock
+    private IStockService stockService;
 
     @InjectMocks
     private CartServiceImpl cartService;
@@ -125,6 +129,7 @@ class CartServiceImplTest {
     void addItem_WhenValid_ShouldAddItemAndReturnResponse() {
         when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.of(cart));
         when(productService.getProductById(PRODUCT_ID)).thenReturn(product);
+        doNothing().when(stockService).validateCartItemStock(anyInt(), eq(product));
         CartItem newItem = CartItem.builder()
                 .productId(PRODUCT_ID)
                 .quantity(2)
@@ -155,6 +160,8 @@ class CartServiceImplTest {
         product.setStock(1);
         when(productService.getProductById(PRODUCT_ID)).thenReturn(product);
         cartItemRequest.setQuantity(10);
+        doThrow(new BadRequestException("Yetersiz stok")).when(stockService)
+                .validateCartItemStock(anyInt(), eq(product));
 
         assertThrows(BadRequestException.class, () -> cartService.addItem(USER_ID, cartItemRequest));
         verify(cartRepository, never()).save(any());

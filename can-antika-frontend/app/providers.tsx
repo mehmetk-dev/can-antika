@@ -2,11 +2,18 @@
 
 import { AuthProvider } from "@/lib/auth-context";
 import { SiteSettingsProvider } from "@/lib/site-settings-context";
+import type { SiteSettingsResponse } from "@/lib/types";
 import { Toaster } from "sonner";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+    children,
+    initialSiteSettings,
+}: {
+    children: React.ReactNode;
+    initialSiteSettings?: SiteSettingsResponse | null;
+}) {
     return (
-        <SiteSettingsProvider>
+        <SiteSettingsProvider initialSettings={initialSiteSettings}>
             <AuthProvider>
                 {children}
                 <Toaster

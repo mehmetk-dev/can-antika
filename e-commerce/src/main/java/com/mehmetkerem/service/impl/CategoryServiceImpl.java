@@ -14,6 +14,8 @@ import com.mehmetkerem.service.IActivityLogService;
 import com.mehmetkerem.enums.ActivityType;
 import com.mehmetkerem.util.SecurityUtils;
 import com.mehmetkerem.util.Messages;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +33,7 @@ public class CategoryServiceImpl implements ICategoryService {
     private final IActivityLogService activityLogService;
 
     @Override
+    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "products:list", "products:byId" }, allEntries = true)
     public CategoryResponse saveCategory(CategoryRequest request) {
         String normalizedName = normalizeRequired(request.getName(), "Kategori adı boş olamaz.");
 
@@ -50,6 +53,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
+    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "products:list", "products:byId" }, allEntries = true)
     public String deleteCategory(Long id) {
         Category category = getCategoryById(id);
         if (productRepository.existsByCategoryId(id)) {
@@ -61,6 +65,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
+    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "products:list", "products:byId" }, allEntries = true)
     public CategoryResponse updateCategory(Long id, CategoryRequest request) {
         Category category = getCategoryById(id);
 
@@ -74,6 +79,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
+    @Cacheable(cacheNames = "categories:byId", key = "#id")
     public CategoryResponse getCategoryResponseById(Long id) {
         return categoryMapper.toResponse(getCategoryById(id));
     }
@@ -85,6 +91,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
+    @Cacheable(cacheNames = "categories:list")
     public List<CategoryResponse> findAllCategories() {
         List<Category> categories = categoryRepository.findAll();
         return categories.stream()
@@ -96,6 +103,15 @@ public class CategoryServiceImpl implements ICategoryService {
     public Map<Long, CategoryResponse> getCategoryResponsesByIds(List<Long> ids) {
         return categoryRepository.findAllById(ids).stream()
                 .collect(Collectors.toMap(Category::getId, categoryMapper::toResponse));
+    }
+
+    @Override
+    public Map<Long, Long> getProductCountsByCategory() {
+        return productRepository.countProductsByCategoryId().stream()
+                .filter(row -> row.length >= 2 && row[0] != null && row[1] != null)
+                .collect(Collectors.toMap(
+                        row -> ((Number) row[0]).longValue(),
+                        row -> ((Number) row[1]).longValue()));
     }
 
     private String normalizeRequired(String value, String errorMessage) {

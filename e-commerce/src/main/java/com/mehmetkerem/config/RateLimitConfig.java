@@ -10,14 +10,7 @@ import java.util.List;
 
 /**
  * Merkezi rate limit konfigürasyonu.
- * Tüm limitler application.properties'ten yönetilir.
- *
- * Örnek:
- * rate-limit.global-max-requests=60
- * rate-limit.buckets[0].name=auth
- * rate-limit.buckets[0].path-prefix=/v1/auth/
- * rate-limit.buckets[0].max-requests=5
- * rate-limit.buckets[0].window-minutes=1
+ * Tüm limitler application.properties üzerinden yönetilir.
  */
 @Data
 @Component
@@ -28,43 +21,60 @@ public class RateLimitConfig {
     private int globalMaxRequests = 60;
     private long globalWindowMinutes = 1;
 
-    /** Endpoint bazlı özel limitler. Sıra önemli — ilk eşleşen bucket uygulanır. */
+    /** Redis erişilemezse fail-open/fail-closed davranışı. */
+    private boolean failOpenOnRedisError = true;
+
+    /** Endpoint bazlı özel limitler. Sıra önemli, ilk eşleşen bucket uygulanır. */
     private List<BucketConfig> buckets = new ArrayList<>();
 
     @Data
     public static class BucketConfig {
-        /** Bucket adı (loglarda görünür). */
         private String name;
-        /** Path prefix — bu prefix ile başlayan istekler bu bucket'a düşer. */
         private String pathPrefix;
-        /** Bu bucket için dakikada max istek sayısı (IP başına). */
         private int maxRequests;
-        /** Sliding window süresi (dakika). */
         private long windowMinutes = 1;
-        /** Limit aşıldığında döndürülecek mesaj. */
-        private String message = "İstek limiti aşıldı. Lütfen daha sonra tekrar deneyin.";
+        /** true ise key: ip + subject (email/refresh/principal) olarak üretilir. */
+        private boolean userScoped = false;
+        private String message = "Istek limiti asildi. Lutfen daha sonra tekrar deneyin.";
     }
 
-    /**
-     * Hiç bucket tanımlanmamışsa varsayılan auth ve payment bucket'larını ekler.
-     */
     @PostConstruct
     public void initDefaults() {
         if (buckets.isEmpty()) {
-            BucketConfig auth = new BucketConfig();
-            auth.setName("auth");
-            auth.setPathPrefix("/v1/auth/");
-            auth.setMaxRequests(5);
-            auth.setWindowMinutes(1);
-            auth.setMessage("Çok fazla deneme. Lütfen daha sonra tekrar deneyin.");
-            buckets.add(auth);
+            BucketConfig authLogin = new BucketConfig();
+            authLogin.setName("auth-login");
+            authLogin.setPathPrefix("/v1/auth/login");
+            authLogin.setMaxRequests(5);
+            authLogin.setWindowMinutes(1);
+            authLogin.setUserScoped(true);
+            authLogin.setMessage("Cok fazla giris denemesi. Lutfen daha sonra tekrar deneyin.");
+            buckets.add(authLogin);
+
+            BucketConfig authRefresh = new BucketConfig();
+            authRefresh.setName("auth-refresh");
+            authRefresh.setPathPrefix("/v1/auth/refresh-token");
+            authRefresh.setMaxRequests(20);
+            authRefresh.setWindowMinutes(1);
+            authRefresh.setUserScoped(true);
+            authRefresh.setMessage("Cok fazla token yenileme denemesi. Lutfen daha sonra tekrar deneyin.");
+            buckets.add(authRefresh);
+
+            BucketConfig contact = new BucketConfig();
+            contact.setName("contact");
+            contact.setPathPrefix("/v1/contact");
+            contact.setMaxRequests(6);
+            contact.setWindowMinutes(1);
+            contact.setUserScoped(true);
+            contact.setMessage("Cok fazla iletisim denemesi. Lutfen biraz bekleyin.");
+            buckets.add(contact);
 
             BucketConfig payment = new BucketConfig();
             payment.setName("payment");
             payment.setPathPrefix("/v1/payment/");
             payment.setMaxRequests(10);
             payment.setWindowMinutes(1);
-            payment.setMessage("Ödeme isteği limiti aşıldı. Lütfen kısa süre sonra tekrar deneyin.");
+            payment.setUserScoped(true);
+            payment.setMessage("Odeme istegi limiti asildi. Lutfen kisa sure sonra tekrar deneyin.");
             buckets.add(payment);
         }
     }

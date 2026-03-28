@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { categoryApi, fileApi, productApi } from "@/lib/api"
+import { categoryApi, fileApi } from "@/lib/api"
 import { resolveImageUrl } from "@/lib/image-url"
 import { toast } from "sonner"
 import type { CategoryResponse } from "@/lib/types"
@@ -51,32 +51,36 @@ export default function AdminCategoriesPage() {
   const loadCategories = async () => {
     setIsLoading(true)
     try {
-      const cats = await categoryApi.getAll()
+      const [cats, countsFromApi] = await Promise.all([
+        categoryApi.getAll(),
+        categoryApi.getProductCounts().catch(() => ({} as Record<string, number>)),
+      ])
       setCategories(cats)
-
       const counts: Record<number, number> = {}
-      await Promise.all(
-        cats.map(async (cat) => {
-          try {
-            const result = await productApi.search({ categoryId: cat.id, page: 0, size: 1 })
-            counts[cat.id] = result.totalElement
-          } catch {
-            counts[cat.id] = 0
-          }
-        })
-      )
+      Object.entries(countsFromApi).forEach(([categoryId, count]) => {
+        const parsedId = Number(categoryId)
+        if (Number.isFinite(parsedId) && parsedId > 0) {
+          counts[parsedId] = Number(count) || 0
+        }
+      })
       setProductCounts(counts)
-    } catch {
-      setCategories([])
-      setProductCounts({})
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Kategoriler yüklenemedi"
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }
   }
 
   const uploadCoverImage = async (file: File, mode: "create" | "edit") => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Lütfen görsel bir dosya seçin")
+    const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"])
+    const allowedExtensions = new Set(["jpg", "jpeg", "png", "gif", "webp"])
+    const ext = file.name.includes(".") ? file.name.split(".").pop()?.toLowerCase() ?? "" : ""
+    const hasAllowedType = allowedMimeTypes.has((file.type || "").toLowerCase())
+    const hasAllowedExt = allowedExtensions.has(ext)
+
+    if (!(hasAllowedType || hasAllowedExt)) {
+      toast.error("Desteklenmeyen görsel formatı. Lütfen JPEG, PNG, GIF veya WebP seçin.")
       return
     }
 

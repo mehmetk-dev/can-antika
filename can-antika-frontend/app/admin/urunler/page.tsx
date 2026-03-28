@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Plus, MoreHorizontal, Pencil, Trash2, Eye, Loader2, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -26,10 +26,17 @@ export default function AdminProductsPage() {
   const PAGE_SIZE = 20
 
   useEffect(() => {
-    categoryApi.getAll().then(setCategories).catch((e) => console.error("Kategori listesi alınamadı:", e))
+    categoryApi
+      .getAll()
+      .then(setCategories)
+      .catch((e) => {
+        console.error("Kategori listesi alınamadı:", e)
+        const message = e instanceof Error ? e.message : "Kategori listesi alınamadı"
+        toast.error(message)
+      })
   }, [])
 
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     setIsLoading(true)
     try {
       const params: Record<string, unknown> = { page, size: PAGE_SIZE }
@@ -37,16 +44,17 @@ export default function AdminProductsPage() {
       const data = await productApi.search(params as Parameters<typeof productApi.search>[0])
       setProducts(data.items)
       setTotalCount(data.totalElement)
-    } catch {
-      setProducts([])
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Ürünler yüklenemedi"
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [categoryFilter, page])
 
   useEffect(() => {
     void loadProducts()
-  }, [page, categoryFilter])
+  }, [loadProducts])
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
@@ -101,7 +109,7 @@ export default function AdminProductsPage() {
           <input ref={excelInputRef} type="file" accept=".xlsx" className="hidden" onChange={handleImportExcel} />
           <Button variant="outline" className="gap-2" onClick={() => excelInputRef.current?.click()} disabled={isImporting}>
             {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            Excel'den Yükle
+            Excel’den Yükle
           </Button>
           <Link href="/admin/urunler/yeni">
             <Button className="gap-2 bg-primary text-primary-foreground">

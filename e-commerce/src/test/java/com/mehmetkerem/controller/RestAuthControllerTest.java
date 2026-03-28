@@ -5,6 +5,8 @@ import com.mehmetkerem.dto.request.*;
 import com.mehmetkerem.dto.response.LoginResponse;
 import com.mehmetkerem.model.User;
 import com.mehmetkerem.service.impl.AuthService;
+import com.mehmetkerem.service.impl.UserServiceImpl;
+import com.mehmetkerem.util.CookieUtil;
 import com.mehmetkerem.util.ResultData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.mehmetkerem.dto.response.UserResponse;
 
 import java.util.Map;
 
@@ -29,6 +30,12 @@ class RestAuthControllerTest {
 
     @Mock
     private AuthService authService;
+
+    @Mock
+    private UserServiceImpl userService;
+
+    @Mock
+    private CookieUtil cookieUtil;
 
     @InjectMocks
     private RestAuthControllerImpl controller;
@@ -72,30 +79,36 @@ class RestAuthControllerTest {
     }
 
     @Test
-    @DisplayName("login - ResultData ile UserResponse döner")
-    void login_ShouldReturnSuccessWithUserResponse() {
+    @DisplayName("login - ResultData ile LoginResponse döner")
+    void login_ShouldReturnSuccessWithLoginResponse() {
         when(authService.login(any(LoginRequest.class))).thenReturn(loginResponse);
 
-        ResultData<UserResponse> result = controller.login(loginRequest, response);
+        ResultData<LoginResponse> result = controller.login(loginRequest, response);
 
         assertTrue(result.isStatus());
         assertNotNull(result.getData());
+        assertEquals("token", result.getData().getAccessToken());
+        assertNotNull(result.getData().getUser());
         verify(authService).login(loginRequest);
-        verify(response, atLeastOnce()).addCookie(any());
+        verify(cookieUtil).addAccessTokenCookie(response, "token");
+        verify(cookieUtil).addRefreshTokenCookie(response, "refresh");
     }
 
     @Test
     @DisplayName("refreshToken - yeni token döner")
-    void refreshToken_ShouldReturnUserResponse() {
+    void refreshToken_ShouldReturnLoginResponse() {
         TokenRefreshRequest req = new TokenRefreshRequest();
         req.setRefreshToken("old-refresh");
         when(authService.refreshToken(any(TokenRefreshRequest.class))).thenReturn(loginResponse);
 
-        ResultData<UserResponse> result = controller.refreshToken(req, request, response);
+        ResultData<LoginResponse> result = controller.refreshToken(req, request, response);
 
         assertTrue(result.isStatus());
         assertNotNull(result.getData());
+        assertEquals("refresh", result.getData().getRefreshToken());
         verify(authService).refreshToken(req);
+        verify(cookieUtil).addAccessTokenCookie(response, "token");
+        verify(cookieUtil).addRefreshTokenCookie(response, "refresh");
     }
 
     @Test

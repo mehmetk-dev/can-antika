@@ -1,20 +1,38 @@
-import { api } from "../api-client";
+﻿import { api } from "../api-client";
 import type {
+    LoginResponse,
     LoginRequest,
     RegisterRequest,
     ChangePasswordRequest,
     UserResponse,
 } from "../types";
 
+function normalizeAuthUser(payload: UserResponse | LoginResponse): UserResponse {
+    if ("user" in payload && payload.user) {
+        return payload.user;
+    }
+    return payload as UserResponse;
+}
+
 export const authApi = {
-    login: (data: LoginRequest) =>
-        api.post<UserResponse>("/v1/auth/login", { body: data, noAuth: true }),
+    login: async (data: LoginRequest) => {
+        const payload = await api.post<UserResponse | LoginResponse>("/v1/auth/login", {
+            body: data,
+            noAuth: true,
+            headers: {
+                "X-RateLimit-Subject": data.email?.trim().toLowerCase() || "anonymous",
+            },
+        });
+        return normalizeAuthUser(payload);
+    },
 
     register: (data: RegisterRequest) =>
         api.post<Record<string, string>>("/v1/auth/register", { body: data, noAuth: true }),
 
-    refreshToken: () =>
-        api.post<UserResponse>("/v1/auth/refresh-token", { noAuth: true }),
+    refreshToken: async () => {
+        const payload = await api.post<UserResponse | LoginResponse>("/v1/auth/refresh-token", { noAuth: true });
+        return normalizeAuthUser(payload);
+    },
 
     forgotPassword: (email: string) =>
         api.post<string>("/v1/auth/forgot-password", { params: { email }, noAuth: true }),
@@ -29,7 +47,7 @@ export const authApi = {
         api.put<UserResponse>("/v1/auth/profile", { body: data }),
 
     getProfile: () =>
-        api.get<UserResponse>("/v1/auth/me", { noAuth: true }),
+        api.get<UserResponse>("/v1/auth/me"),
 
     logout: () =>
         api.post<string>("/v1/auth/logout"),
@@ -37,3 +55,4 @@ export const authApi = {
     deactivateMyAccount: () =>
         api.delete<string>("/v1/user/me"),
 };
+

@@ -32,3 +32,18 @@ export function formatDateTR(
       return d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })
   }
 }
+
+export function sanitizeExternalUrl(rawUrl?: string | null): string | null {
+  const value = (rawUrl || "").trim()
+  if (!value) return null
+
+  try {
+    const parsed = new URL(value)
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return parsed.toString()
+    }
+    return null
+  } catch {
+    return null
+  }
+}

@@ -40,12 +40,15 @@ export function resolvePeriodLabel(product: ProductResponse): string {
 }
 
 export function getProductAttributes(product: ProductResponse) {
+  const rawStatus = asText((product.attributes as Record<string, unknown> | undefined)?.status).toLowerCase()
+  const inferredStatus = (product.stock ?? 0) <= 0 ? "sold" : "active"
+
   return {
     era: resolvePeriodLabel(product),
     condition: asText((product.attributes as Record<string, unknown> | undefined)?.condition),
     dimensions: asText((product.attributes as Record<string, unknown> | undefined)?.dimensions),
     provenance: asText((product.attributes as Record<string, unknown> | undefined)?.provenance),
-    status: asText((product.attributes as Record<string, unknown> | undefined)?.status) || "active",
+    status: rawStatus || inferredStatus,
   }
 }
 

@@ -10,7 +10,8 @@ import java.util.List;
 
 public interface IPaymentService {
 
-    PaymentResponse processPayment(Long userId, Long orderId, BigDecimal amount, PaymentMethod paymentMethod);
+    PaymentResponse processPayment(Long userId, Long orderId, BigDecimal amount, PaymentMethod paymentMethod,
+            String idempotencyKey);
 
     PaymentResponse getPaymentResponseById(Long id);
 

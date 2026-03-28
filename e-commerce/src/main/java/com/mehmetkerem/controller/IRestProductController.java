@@ -30,6 +30,9 @@ public interface IRestProductController {
     ResultData<CursorResponse<ProductResponse>> searchProducts(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) Long periodId,
+            @RequestParam(required = false) List<Long> periodIds,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) Double minRating,

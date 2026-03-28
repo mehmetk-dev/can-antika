@@ -51,6 +51,7 @@ public class CloudinaryStorageService implements IFileStorageService {
                             "public_id", publicId,
                             "upload_preset", uploadPreset,
                             "resource_type", "image",
+                            "format", "webp",
                             "overwrite", false));
 
             String url = (String) result.get("secure_url");

@@ -38,8 +38,10 @@ public class RestPaymentControllerImpl implements IRestPaymentController {
     public ResultData<PaymentResponse> processPayment(
             @RequestParam Long orderId,
             @RequestParam BigDecimal amount,
-            @RequestParam PaymentMethod paymentMethod) {
-        return ResultHelper.success(paymentService.processPayment(requireCurrentUserId(), orderId, amount, paymentMethod));
+            @RequestParam PaymentMethod paymentMethod,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+        return ResultHelper.success(
+                paymentService.processPayment(requireCurrentUserId(), orderId, amount, paymentMethod, idempotencyKey));
     }
 
     @Override

@@ -1,9 +1,15 @@
-import { api } from "../../api-client";
+﻿import { api } from "../../api-client";
 import type { ContactRequestResponse, CursorResponse } from "../../types";
 
 export const contactApi = {
     submit: (data: { name: string; email: string; phone?: string; subject: string; message: string }) =>
-        api.post<ContactRequestResponse>("/v1/contact", { body: data, noAuth: true }),
+        api.post<ContactRequestResponse>("/v1/contact", {
+            body: data,
+            noAuth: true,
+            headers: {
+                "X-RateLimit-Subject": (data.email || data.phone || "anonymous").toString().trim().toLowerCase(),
+            },
+        }),
     getAll: (page = 0, size = 20) =>
         api.get<CursorResponse<ContactRequestResponse>>("/v1/admin/contact-requests", { params: { page, size } }),
     getUnreadCount: () =>
@@ -13,3 +19,4 @@ export const contactApi = {
     delete: (id: number) =>
         api.delete<void>(`/v1/admin/contact-requests/${id}`),
 };
+

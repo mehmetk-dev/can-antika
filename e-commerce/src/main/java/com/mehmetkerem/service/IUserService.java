@@ -22,6 +22,8 @@ public interface IUserService {
 
     UserResponse getUserResponseById(Long id);
 
+    java.util.Map<Long, UserResponse> getUserResponsesByIds(List<Long> ids);
+
     List<UserResponse> findAllUsers();
 
     UserResponse getUserByEmail(String email);

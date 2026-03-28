@@ -19,7 +19,6 @@ export function ProductCard({ product }: ProductCardProps) {
   const [imageErrored, setImageErrored] = useState(false)
 
   const imageUrl = resolveImageUrl(product.imageUrls?.[0])
-  const isRemoteImage = /^https?:\/\//i.test(imageUrl)
   const { era, condition, status } = getProductAttributes(product)
   const outOfStock = (product.stock ?? 0) <= 0
   const isSold = status === "sold" || outOfStock
@@ -34,7 +33,8 @@ export function ProductCard({ product }: ProductCardProps) {
           src={imageErrored ? "/placeholder.svg" : imageUrl}
           alt={product.title}
           fill
-          unoptimized={isRemoteImage}
+          loading="lazy"
+          decoding="async"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className={`object-cover object-center transition-transform duration-500 group-hover:scale-105 ${isSold ? "grayscale opacity-60" : ""}`}
           onError={() => setImageErrored(true)}

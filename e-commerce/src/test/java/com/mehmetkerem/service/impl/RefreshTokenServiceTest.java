@@ -1,7 +1,7 @@
 package com.mehmetkerem.service.impl;
 
-import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.NotFoundException;
+import com.mehmetkerem.exception.UnauthorizedException;
 import com.mehmetkerem.model.RefreshToken;
 import com.mehmetkerem.model.User;
 import com.mehmetkerem.repository.RefreshTokenRepository;
@@ -100,14 +100,14 @@ class RefreshTokenServiceTest {
     }
 
     @Test
-    @DisplayName("verifyExpiration - süresi dolmuş token BadRequestException")
+    @DisplayName("verifyExpiration - suresi dolmus token UnauthorizedException")
     void verifyExpiration_WhenExpired_ShouldThrowAndDeleteToken() {
         doNothing().when(refreshTokenRepository).delete(expiredToken);
 
-        BadRequestException ex = assertThrows(BadRequestException.class,
+        UnauthorizedException ex = assertThrows(UnauthorizedException.class,
                 () -> refreshTokenService.verifyExpiration(expiredToken));
 
-        assertTrue(ex.getMessage().toLowerCase().contains("expired"));
+        assertTrue(ex.getMessage().toLowerCase().contains("oturum"));
         verify(refreshTokenRepository).delete(expiredToken);
     }
 

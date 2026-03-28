@@ -18,7 +18,7 @@ public interface ICouponService {
 
     BigDecimal applyCoupon(String code, BigDecimal cartTotal);
 
-    void consumeCoupon(String code, BigDecimal cartTotal);
+    void consumeCoupon(String code, BigDecimal cartTotal, Long userId);
 
     void deleteCoupon(Long couponId);
 }

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -49,11 +50,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            var user = userDetailsService.loadUserByUsername(username);
-            if (jwtService.isValid(token, user)) {
-                var authToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            try {
+                var user = userDetailsService.loadUserByUsername(username);
+                if (jwtService.isValid(token, user)) {
+                    var authToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (UsernameNotFoundException ex) {
+                SecurityContextHolder.clearContext();
             }
         }
         chain.doFilter(req, res);
@@ -62,7 +67,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private String extractFromHeader(HttpServletRequest req) {
         String auth = req.getHeader("Authorization");
         if (auth != null && auth.startsWith("Bearer ")) {
-            return auth.substring(7);
+            String token = auth.substring(7).trim();
+            return token.isEmpty() ? null : token;
         }
         return null;
     }
@@ -71,7 +77,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (req.getCookies() == null) return null;
         for (Cookie cookie : req.getCookies()) {
             if (CookieUtil.ACCESS_TOKEN_COOKIE.equals(cookie.getName())) {
-                return cookie.getValue();
+                String token = cookie.getValue();
+                if (token == null) return null;
+                token = token.trim();
+                return token.isEmpty() ? null : token;
             }
         }
         return null;

@@ -140,7 +140,7 @@ public class WishlistIntegrationTest {
                 .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.items", hasSize(1)))
-                .andExpect(jsonPath("$.data.items[0].id", is(prodId.intValue())));
+                .andExpect(jsonPath("$.data.items[0].product.id", is(prodId.intValue())));
 
         // 3. Get Wishlist
         mockMvc.perform(get("/v1/wishlist")

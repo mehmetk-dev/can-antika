@@ -3,6 +3,8 @@ package com.mehmetkerem.controller;
 import com.mehmetkerem.controller.impl.RestOrderControllerImpl;
 import com.mehmetkerem.dto.request.OrderRequest;
 import com.mehmetkerem.dto.response.OrderResponse;
+import com.mehmetkerem.model.Order;
+import com.mehmetkerem.service.IOrderAuthorizationService;
 import com.mehmetkerem.service.IOrderService;
 import com.mehmetkerem.util.ResultData;
 import com.mehmetkerem.util.SecurityTestUtils;
@@ -29,6 +31,12 @@ class RestOrderControllerTest {
 
     @Mock
     private IOrderService orderService;
+
+    @Mock
+    private com.mehmetkerem.service.IInvoicePdfService invoicePdfService;
+
+    @Mock
+    private IOrderAuthorizationService orderAuthorizationService;
 
     @InjectMocks
     private RestOrderControllerImpl controller;
@@ -103,5 +111,19 @@ class RestOrderControllerTest {
         assertTrue(result.isStatus());
         assertEquals("TRK123", result.getData().getTrackingNumber());
         verify(orderService).updateOrderTracking(1L, "TRK123", "Kargo A");
+    }
+
+    @Test
+    @DisplayName("getOrderTimeline - owner/admin kontrolu yapar ve timeline dondurur")
+    void getOrderTimeline_ShouldAuthorizeBeforeReturningTimeline() {
+        Order order = Order.builder().id(1L).userId(SecurityTestUtils.DEFAULT_USER_ID).build();
+        when(orderService.getOrderById(1L)).thenReturn(order);
+        when(orderService.getOrderTimeline(1L)).thenReturn(List.of());
+
+        var result = controller.getOrderTimeline(1L);
+
+        assertTrue(result.isStatus());
+        verify(orderAuthorizationService).assertOwnerOrAdmin(order);
+        verify(orderService).getOrderTimeline(1L);
     }
 }

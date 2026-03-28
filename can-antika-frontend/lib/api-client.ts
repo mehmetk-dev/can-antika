@@ -1,11 +1,16 @@
 import type { ResultData } from "./types";
+import { clearAuthSessionFlag, hasAuthSessionFlag } from "./auth-session";
 
 const ENV_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").trim();
-const REQUEST_TIMEOUT_MS = 120000;
+const REQUEST_TIMEOUT_MS = 15000;
+const REFRESH_TIMEOUT_MS = 8000;
+const CSRF_COOKIE_NAME = "XSRF-TOKEN";
+const CSRF_HEADER_NAME = "X-XSRF-TOKEN";
 
 // ======================== Core Fetch ========================
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+const CSRF_SAFE_METHODS = new Set<HttpMethod>(["GET", "HEAD", "OPTIONS", "TRACE"]);
 
 interface RequestOptions {
     body?: unknown;
@@ -141,23 +146,105 @@ function buildUrl(baseUrl: string, path: string, params?: Record<string, string 
     return url.toString();
 }
 
+function readCookie(name: string): string | null {
+    if (typeof document === "undefined") return null;
+
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${escapedName}=([^;]*)`));
+    if (!match) return null;
+
+    try {
+        return decodeURIComponent(match[1]);
+    } catch {
+        return match[1];
+    }
+}
+
+function attachCsrfHeader(headers: Record<string, string>, method: HttpMethod): void {
+    if (CSRF_SAFE_METHODS.has(method)) {
+        return;
+    }
+
+    const csrfToken = readCookie(CSRF_COOKIE_NAME);
+    if (!csrfToken) {
+        return;
+    }
+
+    headers[CSRF_HEADER_NAME] = csrfToken;
+}
+
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
+function createTimeoutHandle(timeoutMs: number): { signal: AbortSignal; cleanup: () => void } {
+    const timeoutFactory = (AbortSignal as unknown as { timeout?: (ms: number) => AbortSignal }).timeout;
+    if (typeof timeoutFactory === "function") {
+        return {
+            signal: timeoutFactory(timeoutMs),
+            cleanup: () => {
+                // Native AbortSignal.timeout cleans itself up.
+            },
+        };
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    return {
+        signal: controller.signal,
+        cleanup: () => {
+            clearTimeout(timeoutId);
+        },
+    };
+}
+
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit, timeoutMs: number): Promise<Response> {
+    const { signal, cleanup } = createTimeoutHandle(timeoutMs);
+    try {
+        return await fetch(input, { ...init, signal });
+    } finally {
+        cleanup();
+    }
+}
+
+function isNetworkLikeError(error: unknown): boolean {
+    if (error instanceof TypeError) return true;
+    if (!(error instanceof Error)) return false;
+
+    const normalizedName = error.name.toLowerCase();
+    const normalizedMessage = error.message.toLowerCase();
+
+    return (
+        normalizedName === "aborterror" ||
+        normalizedName === "timeouterror" ||
+        normalizedMessage.includes("failed to fetch") ||
+        normalizedMessage.includes("networkerror") ||
+        normalizedMessage.includes("network request failed") ||
+        normalizedMessage.includes("load failed") ||
+        normalizedMessage.includes("timed out")
+    );
+}
+
 async function tryRefreshToken(baseUrl: string): Promise<boolean> {
-    // Yalnızca tek bir refresh isteği olsun (race condition önleme)
+    if (typeof window !== "undefined" && !hasAuthSessionFlag()) {
+        return false;
+    }
+
+    // YalnÄ±zca tek bir refresh isteÄŸi olsun (race condition Ã¶nleme)
     if (isRefreshing && refreshPromise) return refreshPromise;
 
     isRefreshing = true;
     refreshPromise = (async () => {
         try {
-            const res = await fetch(`${baseUrl}/v1/auth/refresh-token`, {
+            const res = await fetchWithTimeout(`${baseUrl}/v1/auth/refresh-token`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                credentials: "include", // Cookie'den refresh token gönderilir
-                body: JSON.stringify({}), // Body boş - backend cookie'den okur
-                signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-            });
+                credentials: "include", // Cookie'den refresh token gÃ¶nderilir
+                body: JSON.stringify({}), // Body boÅŸ - backend cookie'den okur
+            }, REFRESH_TIMEOUT_MS);
+
+            if (res.status === 401 || res.status === 400) {
+                clearAuthSessionFlag();
+            }
             return res.ok;
         } catch {
             return false;
@@ -183,32 +270,32 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
             const headers: Record<string, string> = {
                 ...extraHeaders,
             };
+            attachCsrfHeader(headers, method);
 
             if (body !== undefined && !(body instanceof FormData)) {
                 headers["Content-Type"] = "application/json";
             }
 
-            let res = await fetch(url, {
+            let res = await fetchWithTimeout(url, {
                 method,
                 headers,
                 credentials: "include",
                 body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-                signal: AbortSignal.timeout(effectiveTimeoutMs),
-            });
+            }, effectiveTimeoutMs);
 
             // Auto-refresh on 401
-            if (res.status === 401 && !noAuth) {
+            const hasSession = typeof window === "undefined" ? true : hasAuthSessionFlag();
+            if (res.status === 401 && !noAuth && hasSession) {
                 const refreshed = await tryRefreshToken(baseUrl);
                 if (refreshed) {
-                    res = await fetch(url, {
+                    res = await fetchWithTimeout(url, {
                         method,
                         headers,
                         credentials: "include",
                         body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-                        signal: AbortSignal.timeout(effectiveTimeoutMs),
-                    });
+                    }, effectiveTimeoutMs);
                 } else {
-                    throw new Error("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
+                    throw new Error("Oturum sÃ¼resi doldu. LÃ¼tfen tekrar giriÅŸ yapÄ±n.");
                 }
             }
 
@@ -218,11 +305,22 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
                     console.error(`Fetch failed for URL: ${url}, Status: ${res.status}`);
                 }
                 let errorMessage = `API error: ${res.status}`;
+                const correlationId = res.headers.get("X-Correlation-Id");
                 try {
                     const errorBody = await res.json();
                     if (errorBody.message) errorMessage = errorBody.message;
                 } catch {
                     // ignore parse error
+                }
+                if (res.status === 403) {
+                    errorMessage = "Bu islem icin yetkiniz bulunmuyor.";
+                } else if (res.status === 429) {
+                    errorMessage = "Cok fazla deneme yaptiniz. Lutfen biraz bekleyip tekrar deneyin.";
+                } else if (!noAuth && res.status === 401 && !hasSession) {
+                    errorMessage = "Bu islem icin giris yapmaniz gerekiyor.";
+                }
+                if (correlationId) {
+                    errorMessage = `${errorMessage} (Ref: ${correlationId})`;
                 }
                 throw new Error(errorMessage);
             }
@@ -230,19 +328,15 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
             const result: ResultData<T> = await res.json();
 
             if (!result.status) {
-                throw new Error(result.message || "İşlem başarısız");
+                throw new Error(result.message || "Ä°ÅŸlem baÅŸarÄ±sÄ±z");
             }
 
             return result.data;
         } catch (error: any) {
-            lastError = error instanceof Error ? error : new Error("İstek başarısız");
+            lastError = error instanceof Error ? error : new Error("Ä°stek baÅŸarÄ±sÄ±z");
             
             // Only continue for networking errors (down server, etc.)
-            const isNetworkError = 
-                error instanceof TypeError || 
-                error?.message === "AbortError" || 
-                (error?.message && error.message.includes("NetworkError")) ||
-                error?.message === "Failed to fetch";
+            const isNetworkError = isNetworkLikeError(error);
 
             if (isNetworkError) {
                 continue;
@@ -252,7 +346,7 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
         }
     }
 
-    throw lastError ?? new Error("API bağlantısı kurulamadı");
+    throw lastError ?? new Error("API baÄŸlantÄ±sÄ± kurulamadÄ±");
 }
 
 // ======================== Convenience Methods ========================
@@ -275,18 +369,18 @@ export const api = {
             try {
                 const url = buildUrl(baseUrl, path, params);
                 const headers: Record<string, string> = { ...extraHeaders };
+                attachCsrfHeader(headers, method);
 
                 if (body !== undefined && !(body instanceof FormData)) {
                     headers["Content-Type"] = "application/json";
                 }
 
-                const res = await fetch(url, {
+                const res = await fetchWithTimeout(url, {
                     method,
                     headers,
                     credentials: "include",
                     body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-                    signal: AbortSignal.timeout(effectiveTimeoutMs),
-                });
+                }, effectiveTimeoutMs);
 
                 if (!res.ok) {
                     let errorMessage = `API error: ${res.status}`;
@@ -296,11 +390,11 @@ export const api = {
 
                 return res.json();
             } catch (error) {
-                lastError = error instanceof Error ? error : new Error("İstek başarısız");
+                lastError = error instanceof Error ? error : new Error("Ä°stek baÅŸarÄ±sÄ±z");
                 continue;
             }
         }
 
-        throw lastError ?? new Error("API bağlantısı kurulamadı");
+        throw lastError ?? new Error("API baÄŸlantÄ±sÄ± kurulamadÄ±");
     },
 };

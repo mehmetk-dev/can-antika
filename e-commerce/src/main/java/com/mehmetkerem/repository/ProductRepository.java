@@ -17,10 +17,13 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     List<Product> findByIdIn(List<Long> ids);
 
     List<Product> findByTitleContainingIgnoreCase(String title);
+    List<Product> findTop50ByTitleContainingIgnoreCase(String title);
 
     List<Product> findByCategoryId(Long categoryId);
+    List<Product> findTop200ByCategoryId(Long categoryId);
 
     List<Product> findByPeriodId(Long periodId);
+    List<Product> findTop500ByOrderByIdDesc();
 
     boolean existsByCategoryId(Long categoryId);
 
@@ -32,7 +35,12 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Optional<Product> findBySlug(String slug);
 
+    boolean existsBySlug(String slug);
+
     @Modifying
     @Query("UPDATE Product p SET p.viewCount = COALESCE(p.viewCount, 0) + 1 WHERE p.id = :id")
     void incrementViewCount(@Param("id") Long id);
+
+    @Query("SELECT p.categoryId, COUNT(p.id) FROM Product p WHERE p.categoryId IS NOT NULL GROUP BY p.categoryId")
+    List<Object[]> countProductsByCategoryId();
 }

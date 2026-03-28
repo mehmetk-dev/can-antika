@@ -40,7 +40,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         User user = userRepository.findByEmail(email).orElseThrow();
 
         String token = jwtService.generateToken(user);
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         // Token'ları HttpOnly cookie olarak set et (AUDIT M2)
         cookieUtil.addAccessTokenCookie(response, token);

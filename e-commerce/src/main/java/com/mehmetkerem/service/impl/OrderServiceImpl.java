@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -34,6 +35,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -131,7 +133,7 @@ public class OrderServiceImpl implements IOrderService {
         BigDecimal finalTotal = rawTotal;
         if (cart.getCouponCode() != null && !cart.getCouponCode().isBlank()) {
             finalTotal = couponService.applyCoupon(cart.getCouponCode(), rawTotal);
-            couponService.consumeCoupon(cart.getCouponCode(), rawTotal);
+            couponService.consumeCoupon(cart.getCouponCode(), rawTotal, userId);
         }
 
         Order order = Order.builder()
@@ -185,14 +187,12 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     public Page<OrderResponse> getOrdersByUserId(Long userId, Pageable pageable) {
-        return orderRepository.findByUserId(userId, pageable)
-                .map(this::toOrderResponse);
+        return toOrderResponsePage(orderRepository.findByUserId(userId, pageable));
     }
 
     @Override
     public Page<OrderResponse> getAllOrders(Pageable pageable) {
-        return orderRepository.findAll(pageable)
-                .map(this::toOrderResponse);
+        return toOrderResponsePage(orderRepository.findAll(pageable));
     }
 
     @Override
@@ -207,7 +207,7 @@ public class OrderServiceImpl implements IOrderService {
                 .and(com.mehmetkerem.repository.specification.OrderSpecification.dateBetween(from, to))
                 .and(com.mehmetkerem.repository.specification.OrderSpecification.searchByOrderCode(query));
 
-        return orderRepository.findAll(spec, pageable).map(this::toOrderResponse);
+        return toOrderResponsePage(orderRepository.findAll(spec, pageable));
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -332,15 +332,41 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     public List<com.mehmetkerem.dto.response.OrderStatusHistoryResponse> getOrderTimeline(Long orderId) {
-        return orderTimelineService.getTimeline(getOrderById(orderId));
+        Order order = getOrderById(orderId);
+        orderAuthorizationService.assertOwnerOrAdmin(order);
+        return orderTimelineService.getTimeline(order);
     }
 
     // ══════════════════════════════════════════════════════════════════════════
     // Private Helper
     // ══════════════════════════════════════════════════════════════════════════
 
+    private Page<OrderResponse> toOrderResponsePage(Page<Order> orders) {
+        List<Order> content = orders.getContent();
+        if (content.isEmpty()) {
+            return new PageImpl<>(List.of(), orders.getPageable(), orders.getTotalElements());
+        }
+
+        List<Long> userIds = content.stream()
+                .map(Order::getUserId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        Map<Long, UserResponse> userMap = userService.getUserResponsesByIds(userIds);
+
+        List<OrderResponse> mapped = content.stream()
+                .map(order -> toOrderResponse(order, userMap.get(order.getUserId())))
+                .toList();
+
+        return new PageImpl<>(mapped, orders.getPageable(), orders.getTotalElements());
+    }
+
     private OrderResponse toOrderResponse(Order order) {
-        UserResponse user = userService.getUserResponseById(order.getUserId());
+        return toOrderResponse(order, null);
+    }
+
+    private OrderResponse toOrderResponse(Order order, UserResponse preloadedUser) {
+        UserResponse user = preloadedUser != null ? preloadedUser : userService.getUserResponseById(order.getUserId());
         OrderResponse resp = orderMapper.toResponse(order);
         resp.setUser(user);
         resp.setShippingAddress(addressMapper.toResponse(order.getShippingAddress()));

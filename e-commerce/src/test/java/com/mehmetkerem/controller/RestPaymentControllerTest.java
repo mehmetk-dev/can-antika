@@ -51,17 +51,17 @@ class RestPaymentControllerTest {
     @Test
     @DisplayName("processPayment - ödeme yanıtı döner")
     void processPayment_ShouldReturnPaymentResponse() {
-        when(paymentService.processPayment(anyLong(), anyLong(), any(), any())).thenReturn(paymentResponse);
+        when(paymentService.processPayment(anyLong(), anyLong(), any(), any(), any())).thenReturn(paymentResponse);
 
         ResultData<PaymentResponse> response = controller.processPayment(10L,
-                new BigDecimal("99.99"), PaymentMethod.CREDIT_CARD);
+                new BigDecimal("99.99"), PaymentMethod.CREDIT_CARD, "pay-1");
 
         assertTrue(response.isStatus());
         PaymentResponse body = response.getData();
         assertNotNull(body);
         assertEquals(1L, body.getId());
         verify(paymentService).processPayment(eq(SecurityTestUtils.DEFAULT_USER_ID), eq(10L), eq(new BigDecimal("99.99")),
-                eq(PaymentMethod.CREDIT_CARD));
+                eq(PaymentMethod.CREDIT_CARD), eq("pay-1"));
     }
 
     @Test

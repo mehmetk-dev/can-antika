@@ -1,10 +1,10 @@
 package com.mehmetkerem.service;
 
 import com.mehmetkerem.dto.request.ProductRequest;
+import com.mehmetkerem.dto.response.CursorResponse;
 import com.mehmetkerem.dto.response.ProductImportResponse;
 import com.mehmetkerem.dto.response.ProductResponse;
 import com.mehmetkerem.model.Product;
-import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
@@ -32,10 +32,10 @@ public interface IProductService {
 
     List<ProductResponse> getProductsByCategory(Long categoryId);
 
-    com.mehmetkerem.dto.response.CursorResponse<ProductResponse> searchProducts(String title, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice,
-            Double minRating, org.springframework.data.domain.Pageable pageable);
+    CursorResponse<ProductResponse> searchProducts(String title, Long categoryId, List<Long> categoryIds, Long periodId, List<Long> periodIds,
+            BigDecimal minPrice, BigDecimal maxPrice, Double minRating, Pageable pageable);
 
-    com.mehmetkerem.dto.response.CursorResponse<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction);
+    CursorResponse<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction);
 
     void updateProductRating(Long productId, double averageRating, int reviewCount);
 

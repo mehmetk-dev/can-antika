@@ -21,4 +21,6 @@ public interface ICategoryService {
     List<CategoryResponse> findAllCategories();
 
     Map<Long, CategoryResponse> getCategoryResponsesByIds(List<Long> ids);
+
+    Map<Long, Long> getProductCountsByCategory();
 }

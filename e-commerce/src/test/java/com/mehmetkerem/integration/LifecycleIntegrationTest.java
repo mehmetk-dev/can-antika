@@ -123,12 +123,18 @@ public class LifecycleIntegrationTest {
     @Test
     void shouldCompleteCouponLifecycle() throws Exception {
         // 1. Admin creates coupon
+        CouponRequest couponRequest = CouponRequest.builder()
+                .code("SAVE20")
+                .discountAmount(new BigDecimal("20"))
+                .minCartAmount(new BigDecimal("100"))
+                .expirationDate(java.time.LocalDateTime.now().plusDays(7))
+                .active(true)
+                .build();
+
         mockMvc.perform(post("/v1/coupons/create")
                 .header("Authorization", "Bearer " + adminToken)
-                .param("code", "SAVE20")
-                .param("discount", "20")
-                .param("minAmount", "100")
-                .param("days", "7"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(couponRequest)))
                 .andExpect(status().isOk());
 
         // 2. Setup Order context

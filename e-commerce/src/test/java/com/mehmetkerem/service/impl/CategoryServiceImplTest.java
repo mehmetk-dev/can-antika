@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -134,15 +134,26 @@ class CategoryServiceImplTest {
     void updateCategory_WhenExists_ShouldUpdateAndReturn() {
         CategoryRequest updateRequest = new CategoryRequest();
         updateRequest.setName("Antika Saatler");
+        updateRequest.setDescription("Aciklama");
+        updateRequest.setCoverImageUrl("https://example.com/cat.jpg");
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(categoryRepository.save(any(Category.class))).thenReturn(category);
-        when(categoryMapper.toResponse(category)).thenReturn(categoryResponse);
+        when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(categoryMapper.toResponse(any(Category.class))).thenAnswer(invocation -> {
+            Category saved = invocation.getArgument(0);
+            CategoryResponse response = new CategoryResponse();
+            response.setId(saved.getId());
+            response.setName(saved.getName());
+            return response;
+        });
 
-        categoryService.updateCategory(1L, updateRequest);
+        CategoryResponse result = categoryService.updateCategory(1L, updateRequest);
 
-        verify(categoryMapper).update(eq(category), eq(updateRequest));
-        verify(categoryRepository).save(category);
+        assertEquals("Antika Saatler", result.getName());
+        verify(categoryRepository).save(argThat(saved ->
+                "Antika Saatler".equals(saved.getName())
+                        && "Aciklama".equals(saved.getDescription())
+                        && "https://example.com/cat.jpg".equals(saved.getCoverImageUrl())));
     }
 
     @Test

@@ -27,19 +27,14 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   useEffect(() => {
     let isCancelled = false
 
-    if (initialProduct) return () => { isCancelled = true }
-
     const numericId = /^\d+$/.test(slug) ? Number.parseInt(slug, 10) : null
 
     const fetchProduct = async () => {
-      try {
-        return await productApi.getBySlug(slug)
-      } catch {
-        if (numericId !== null) {
-          return productApi.getById(numericId)
-        }
-        throw new Error("product-not-found")
+      if (numericId !== null) {
+        return productApi.getById(numericId, 10000)
       }
+
+      return productApi.getBySlug(slug, 10000)
     }
 
     fetchProduct()
@@ -49,7 +44,7 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
         }
       })
       .catch(() => {
-        if (!isCancelled) {
+        if (!isCancelled && !initialProduct) {
           setProduct(null)
         }
       })
@@ -70,13 +65,21 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   }, [product, slug, router])
 
   useEffect(() => {
+    const productId = product?.id
+    if (!productId) return
+    void productApi.incrementViewCount(productId).catch(() => {
+      // Best-effort metric update
+    })
+  }, [product?.id])
+
+  useEffect(() => {
     if (!product) return
     let isCancelled = false
 
     const loadRelatedProducts = async () => {
       try {
         const sameCategoryItems = product.category?.id
-          ? (await productApi.search({ categoryId: product.category.id, size: 12 })).items
+          ? (await productApi.search({ categoryId: product.category.id, size: 12 }, 4000)).items
           : []
 
         const sameCategoryFiltered = (sameCategoryItems || []).filter((item) => item.id !== product.id)
@@ -86,8 +89,8 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
           return
         }
 
-        const allProducts = await productApi.findAll()
-        const fallbackProducts = allProducts.filter(
+        const latestProducts = await productApi.getAll(0, 20, "id", "desc")
+        const fallbackProducts = (latestProducts.items ?? []).filter(
           (item) =>
             item.id !== product.id &&
             !sameCategoryFiltered.some((same) => same.id === item.id)
@@ -110,11 +113,11 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header sticky={false} />
         <div className="flex items-center justify-center py-32">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-        <Footer />
+        <Footer className="mt-0" />
       </div>
     )
   }
@@ -122,7 +125,7 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   if (!product) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header sticky={false} />
         <div className="flex flex-col items-center justify-center py-32 text-center px-4">
           <PackageSearch className="h-16 w-16 text-muted-foreground/40 mb-6" />
           <h1 className="font-serif text-3xl font-bold text-foreground">Urun bulunamadi</h1>
@@ -133,16 +136,16 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
             <Link href="/urunler">Urunlere don</Link>
           </Button>
         </div>
-        <Footer />
+        <Footer className="mt-0" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background">
-      <Header />
+    <div className="min-h-screen bg-background">
+      <Header sticky={false} />
       <ProductDetail product={product} relatedProducts={relatedProducts} />
-      <Footer />
+      <Footer className="mt-0" />
     </div>
   )
 }

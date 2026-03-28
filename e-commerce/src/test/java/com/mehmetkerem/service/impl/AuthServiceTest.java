@@ -2,16 +2,18 @@ package com.mehmetkerem.service.impl;
 
 import com.mehmetkerem.dto.request.LoginRequest;
 import com.mehmetkerem.dto.request.RegisterRequest;
+import com.mehmetkerem.dto.request.TokenRefreshRequest;
 import com.mehmetkerem.dto.response.LoginResponse;
 import com.mehmetkerem.dto.response.UserResponse;
 import com.mehmetkerem.enums.Role;
 import com.mehmetkerem.exception.BadRequestException;
+import com.mehmetkerem.exception.UnauthorizedException;
 import com.mehmetkerem.jwt.JwtService;
 import com.mehmetkerem.model.RefreshToken;
 import com.mehmetkerem.model.User;
 import com.mehmetkerem.repository.PasswordResetTokenRepository;
 import com.mehmetkerem.repository.UserRepository;
-import com.mehmetkerem.service.INotificationService;
+import com.mehmetkerem.service.IRefreshTokenService;
 import com.mehmetkerem.service.IUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +25,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Map;
 import java.util.Optional;
@@ -48,9 +51,9 @@ class AuthServiceTest {
     @Mock
     private PasswordResetTokenRepository passwordResetTokenRepository;
     @Mock
-    private INotificationService notificationService;
+    private ApplicationEventPublisher eventPublisher;
     @Mock
-    private RefreshTokenService refreshTokenService;
+    private IRefreshTokenService refreshTokenService;
 
     @InjectMocks
     private AuthService authService;
@@ -74,7 +77,7 @@ class AuthServiceTest {
         Map<String, String> result = authService.register(request);
 
         verify(userRepository, times(1)).save(any(User.class));
-        verify(notificationService, times(1)).sendWelcomeEmail(eq("test@test.com"), eq("Test User"));
+        verify(eventPublisher, times(1)).publishEvent(any(com.mehmetkerem.event.UserRegisteredEvent.class));
         assertEquals("testToken", result.get("token"));
     }
 
@@ -113,7 +116,7 @@ class AuthServiceTest {
         userResponse.setName("Test");
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
         when(jwtService.generateToken(user)).thenReturn("accessToken");
-        when(refreshTokenService.createRefreshToken(1L)).thenReturn(RefreshToken.builder().token("refreshToken").build());
+        when(refreshTokenService.createRefreshToken(user)).thenReturn(RefreshToken.builder().token("refreshToken").build());
         when(userService.getUserResponseById(1L)).thenReturn(userResponse);
 
         LoginResponse result = authService.login(request);
@@ -122,5 +125,52 @@ class AuthServiceTest {
         assertEquals("accessToken", result.getAccessToken());
         assertNotNull(result.getRefreshToken());
         verify(authManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+    }
+
+    @Test
+    @DisplayName("refreshToken - replay tespitinde UnauthorizedException")
+    void refreshToken_WhenReplayDetected_ShouldThrowUnauthorized() {
+        TokenRefreshRequest request = new TokenRefreshRequest();
+        request.setRefreshToken("replayed-token");
+
+        doThrow(new UnauthorizedException("replay")).when(refreshTokenService)
+                .detectReplayAndRevokeIfNeeded("replayed-token");
+
+        assertThrows(UnauthorizedException.class, () -> authService.refreshToken(request));
+        verify(refreshTokenService, never()).findByToken(any());
+    }
+
+    @Test
+    @DisplayName("refreshToken - gecerli token rotate edilir ve yeni token doner")
+    void refreshToken_WhenValid_ShouldRotateAndReturnNewTokens() {
+        TokenRefreshRequest request = new TokenRefreshRequest();
+        request.setRefreshToken("old-refresh");
+
+        User user = User.builder()
+                .id(7L)
+                .email("refresh@test.com")
+                .name("Refresh User")
+                .passwordHash("hash")
+                .role(Role.USER)
+                .build();
+        RefreshToken oldToken = RefreshToken.builder().token("old-refresh").user(user).build();
+        RefreshToken newToken = RefreshToken.builder().token("new-refresh").user(user).build();
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(7L);
+        userResponse.setEmail("refresh@test.com");
+
+        when(refreshTokenService.findByToken("old-refresh")).thenReturn(Optional.of(oldToken));
+        when(refreshTokenService.verifyExpiration(oldToken)).thenReturn(oldToken);
+        when(jwtService.generateToken(user)).thenReturn("new-access");
+        when(refreshTokenService.createRefreshToken(user)).thenReturn(newToken);
+        when(userService.getUserResponseById(7L)).thenReturn(userResponse);
+
+        LoginResponse result = authService.refreshToken(request);
+
+        assertNotNull(result);
+        assertEquals("new-access", result.getAccessToken());
+        assertEquals("new-refresh", result.getRefreshToken());
+        verify(refreshTokenService).detectReplayAndRevokeIfNeeded("old-refresh");
+        verify(refreshTokenService).markTokenAsRotated(oldToken);
     }
 }

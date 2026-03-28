@@ -5,16 +5,15 @@ import com.mehmetkerem.dto.request.ProductRequest;
 import com.mehmetkerem.dto.response.CursorResponse;
 import com.mehmetkerem.dto.response.ProductResponse;
 import com.mehmetkerem.service.IProductService;
+import com.mehmetkerem.service.product.ProductSortResolver;
 import com.mehmetkerem.util.ResultData;
 import com.mehmetkerem.util.ResultHelper;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Set;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.data.domain.PageRequest;
@@ -26,16 +25,15 @@ import org.springframework.data.domain.Pageable;
 public class RestProductControllerImpl implements IRestProductController {
 
     private final IProductService productService;
-        private static final Set<String> ALLOWED_PRODUCT_SORT_FIELDS = Set.of(
-            "id", "title", "price", "stock", "averageRating", "reviewCount", "viewCount");
+    private final ProductSortResolver productSortResolver;
 
-    public RestProductControllerImpl(IProductService productService) {
+    public RestProductControllerImpl(IProductService productService, ProductSortResolver productSortResolver) {
         this.productService = productService;
+        this.productSortResolver = productSortResolver;
     }
 
     private Sort resolveProductSort(String sortBy, String direction) {
-        String safeSortBy = ALLOWED_PRODUCT_SORT_FIELDS.contains(sortBy) ? sortBy : "id";
-        return direction.equalsIgnoreCase("desc") ? Sort.by(safeSortBy).descending() : Sort.by(safeSortBy).ascending();
+        return productSortResolver.resolve(sortBy, direction);
     }
 
     @Secured("ROLE_ADMIN")
@@ -76,6 +74,9 @@ public class RestProductControllerImpl implements IRestProductController {
     public ResultData<CursorResponse<ProductResponse>> searchProducts(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) Long periodId,
+            @RequestParam(required = false) List<Long> periodIds,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) Double minRating,
@@ -87,8 +88,16 @@ public class RestProductControllerImpl implements IRestProductController {
         Sort sort = resolveProductSort(sortBy, direction);
         int cappedSize = Math.min(Math.max(size, 1), 100);
         Pageable pageable = PageRequest.of(page, cappedSize, sort);
-        CursorResponse<ProductResponse> cursorResult = productService.searchProducts(title, categoryId, minPrice, maxPrice,
-                minRating, pageable);
+        CursorResponse<ProductResponse> cursorResult = productService.searchProducts(
+                title,
+                categoryId,
+                categoryIds,
+                periodId,
+                periodIds,
+                minPrice,
+                maxPrice,
+                minRating,
+                pageable);
         return ResultHelper.success(cursorResult);
     }
 

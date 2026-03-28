@@ -13,6 +13,10 @@ backups/
 # Runtime logs
 logs/
 e-commerce/logs/
+hs_err_pid*.log
+replay_pid*.log
+backend_logs.txt
+e-commerce/startup_output.txt
 
 # SQL dump dosyaları (hassas veri içerebilir)
 *.sql

@@ -5,6 +5,7 @@ import Link from "next/link"
 
 import { categoryApi } from "@/lib/api"
 import { useSiteSettings } from "@/lib/site-settings-context"
+import { cn, sanitizeExternalUrl } from "@/lib/utils"
 import type { CategoryResponse } from "@/lib/types"
 
 const footerLinks = {
@@ -81,14 +82,18 @@ function CornerOrnament({ className }: { className?: string }) {
   )
 }
 
-export function Footer() {
+interface FooterProps {
+  className?: string
+}
+
+export function Footer({ className }: FooterProps) {
   const settings = useSiteSettings()
   const [categories, setCategories] = useState<CategoryResponse[]>([])
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(true)
 
   useEffect(() => {
     categoryApi
-      .getAll()
+      .getAllCached()
       .then((items) => setCategories(items.slice(0, 6)))
       .catch(() => setCategories([]))
       .finally(() => setIsCategoriesLoading(false))
@@ -96,12 +101,12 @@ export function Footer() {
 
   const socialLinks = useMemo(
     () => [
-      { key: "facebook" as const, href: settings.facebook },
-      { key: "instagram" as const, href: settings.instagram },
-      { key: "twitter" as const, href: settings.twitter },
-      { key: "youtube" as const, href: settings.youtube },
-      { key: "tiktok" as const, href: settings.tiktok },
-    ].filter((item) => Boolean(item.href)),
+      { key: "facebook" as const, href: sanitizeExternalUrl(settings.facebook) },
+      { key: "instagram" as const, href: sanitizeExternalUrl(settings.instagram) },
+      { key: "twitter" as const, href: sanitizeExternalUrl(settings.twitter) },
+      { key: "youtube" as const, href: sanitizeExternalUrl(settings.youtube) },
+      { key: "tiktok" as const, href: sanitizeExternalUrl(settings.tiktok) },
+    ].filter((item): item is { key: "facebook" | "instagram" | "twitter" | "youtube" | "tiktok"; href: string } => Boolean(item.href)),
     [settings.facebook, settings.instagram, settings.twitter, settings.youtube, settings.tiktok]
   )
 
@@ -111,7 +116,7 @@ export function Footer() {
   const hasCategories = categories.length > 0
 
   return (
-    <footer className="relative mt-20 overflow-hidden border-t border-primary-foreground/10 bg-primary text-primary-foreground">
+    <footer className={cn("relative mt-20 overflow-hidden border-t border-primary-foreground/10 bg-primary text-primary-foreground", className)}>
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.22]"
         style={{

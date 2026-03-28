@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { ChevronRight, Heart, Share2, ShoppingBag, Check, Shield } from "lucide-react"
 import { ImageGallery } from "@/components/product/image-gallery"
@@ -23,9 +24,19 @@ interface ProductDetailProps {
 }
 
 export function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {
-  const maxStock = product.stock ?? 1
+  const [activeTab, setActiveTab] = useState("details")
+  const [hasOpenedReviews, setHasOpenedReviews] = useState(false)
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab)
+    if (tab === "reviews" && !hasOpenedReviews) {
+      setHasOpenedReviews(true)
+    }
+  }
+
+  const maxStock = Math.max(product.stock ?? 0, 0)
   const { era, condition, dimensions, provenance, status } = getProductAttributes(product)
   const outOfStock = maxStock <= 0
+  const isSold = status === "sold" || outOfStock
   const productImages = product.imageUrls?.length ? product.imageUrls : ["/placeholder.svg"]
 
   const {
@@ -56,7 +67,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
           <div className="min-w-0 flex flex-col">
             {/* Status Badge */}
             <div className="mb-4 flex items-center justify-between gap-3">
-              {status !== "sold" ? (
+              {!isSold ? (
                 <Badge className="bg-primary text-primary-foreground">Tek Ürün</Badge>
               ) : (
                 <Badge variant="secondary" className="bg-muted-foreground text-muted">Satıldı</Badge>
@@ -80,7 +91,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
 
             {/* Price */}
             <div className="mt-6">
-              {status === "sold" ? (
+              {isSold ? (
                 <p className="font-serif text-2xl font-semibold text-muted-foreground line-through">
                   ₺{(product.price ?? 0).toLocaleString("tr-TR")}
                 </p>
@@ -112,7 +123,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
             </div>
 
             {/* Stock Info & Quantity Selector */}
-            {status !== "sold" && !outOfStock && (
+            {!isSold && (
               <div className="mt-6 space-y-4">
                 <div className="flex items-center gap-2 text-sm">
                   <div className={`h-2 w-2 rounded-full ${maxStock > 5 ? "bg-emerald-500" : maxStock > 0 ? "bg-amber-500" : "bg-red-500"}`} />
@@ -125,7 +136,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
             )}
 
             {/* CTA Buttons */}
-            {status !== "sold" && !outOfStock && (
+            {!isSold && (
               <div className="mt-6 grid grid-cols-1 gap-2.5">
                 <Button
                   className="min-h-11 w-full gap-2 rounded-md bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
@@ -142,7 +153,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
               </div>
             )}
 
-            {(status === "sold" || outOfStock) && (
+            {isSold && (
               <div className="mt-8 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-center">
                 <p className="font-serif text-lg font-semibold text-destructive">Tükendi</p>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -177,7 +188,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
 
         {/* Detailed Tabs */}
         <div className="mt-16">
-          <Tabs defaultValue="details" className="w-full">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className="h-auto w-full justify-start overflow-x-auto overflow-y-hidden border-b border-border bg-transparent p-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               <TabsTrigger value="details" className="flex-none shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-serif data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none sm:px-6">
                 Detaylar
@@ -194,7 +205,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 Yorumlar
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="details" className="mt-8">
+            <TabsContent value="details" forceMount className="mt-8">
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {era && (
                   <div>
@@ -220,7 +231,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 </div>
               </div>
             </TabsContent>
-            <TabsContent value="provenance" className="mt-8">
+            <TabsContent value="provenance" forceMount className="mt-8">
               <div className="max-w-2xl">
                 <h3 className="font-serif text-xl font-semibold text-foreground">Eserin Hikayesi</h3>
                 <p className="mt-4 leading-relaxed text-muted-foreground">
@@ -232,7 +243,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
               </div>
             </TabsContent>
             {condition && (
-              <TabsContent value="condition" className="mt-8">
+              <TabsContent value="condition" forceMount className="mt-8">
                 <div className="max-w-2xl">
                   <h3 className="font-serif text-xl font-semibold text-foreground">Durum Değerlendirmesi</h3>
                   <div className="mt-4 rounded-lg border border-border bg-card p-6">
@@ -251,8 +262,8 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 </div>
               </TabsContent>
             )}
-            <TabsContent value="reviews" className="mt-8">
-              <ProductReviews productId={product.id} />
+            <TabsContent value="reviews" forceMount={hasOpenedReviews} className="mt-8">
+              {hasOpenedReviews ? <ProductReviews productId={product.id} /> : null}
             </TabsContent>
           </Tabs>
         </div>

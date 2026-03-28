@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useAuth } from "@/lib/auth-context"
 import { cartApi, wishlistApi } from "@/lib/api"
@@ -22,7 +21,6 @@ export interface ProductActionsState {
 
 export function useProductActions(product: ProductResponse, maxStock: number): ProductActionsState {
     const { isAuthenticated } = useAuth()
-    const router = useRouter()
     const [quantity, setQuantity] = useState(1)
     const [addingToCart, setAddingToCart] = useState(false)
     const [addedToCart, setAddedToCart] = useState(false)
@@ -73,8 +71,7 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
 
     const handleAddToWishlist = async () => {
         if (!isAuthenticated) {
-            toast.error("Favorilere eklemek için giriş yapmalısınız")
-            router.push("/giris")
+            toast.info("Favorilere eklemek için giriş yapmalısınız")
             return
         }
         if (addedToWishlist) {

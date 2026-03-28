@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { cache } from "react"
 
 import { ProductPageClient } from "./product-page-client"
 import { fetchApiDataWithFallback } from "@/lib/server-api-fallback"
@@ -29,32 +28,30 @@ function slugToTitle(slug: string): string {
     .join(" ")
 }
 
-const fetchProductBySlug = cache(async (slug: string) => {
+async function fetchProductBySlug(slug: string) {
   const safeSlug = encodeURIComponent(slug)
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/slug/${safeSlug}`, {
     revalidate: 60,
-    timeoutMs: 900,
+    timeoutMs: 1800,
   })
-})
+}
 
-const fetchProductById = cache(async (id: number) => {
+async function fetchProductById(id: number) {
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/${id}`, {
     revalidate: 60,
-    timeoutMs: 900,
+    timeoutMs: 1800,
   })
-})
+}
 
-const fetchProduct = cache(async (slug: string) => {
-  const productFromSlug = await fetchProductBySlug(slug)
-  if (productFromSlug) return productFromSlug
-
+async function fetchProduct(slug: string) {
   const numericId = parseNumericProductId(slug)
   if (numericId !== null) {
-    return fetchProductById(numericId)
+    const productFromId = await fetchProductById(numericId)
+    if (productFromId) return productFromId
   }
 
-  return null
-})
+  return fetchProductBySlug(slug)
+}
 
 export async function generateMetadata({
   params,

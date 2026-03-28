@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
-import { supportTicketApi } from "@/lib/api"
+import { contactApi, supportTicketApi } from "@/lib/api"
 import type { ProductResponse } from "@/lib/types"
 
 interface ProductDialogsProps {
@@ -118,25 +118,30 @@ export function PurchaseDialog({ product, className = "" }: ProductDialogsProps)
 export function ContactDialog({ product, className = "" }: ProductDialogsProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
     const [phone, setPhone] = useState("")
     const [message, setMessage] = useState("")
     const [submitting, setSubmitting] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!name.trim() || !message.trim()) {
-            toast.error("Ad Soyad ve Mesaj alanları zorunludur")
+        if (!name.trim() || !email.trim() || !message.trim()) {
+            toast.error("Ad Soyad, E-posta ve Mesaj alanları zorunludur")
             return
         }
         setSubmitting(true)
         try {
-            await supportTicketApi.create({
+            await contactApi.submit({
+                name: name.trim(),
+                email: email.trim(),
+                phone: phone.trim() || undefined,
                 subject: `Ürün Sorusu: ${product.title}`,
-                message: `Ad Soyad: ${name}\nTelefon: ${phone}\nÜrün: ${product.title} (CAN-${product.id.toString().padStart(4, "0")})\nMesaj: ${message}`,
+                message: `Ürün: ${product.title} (CAN-${product.id.toString().padStart(4, "0")})\nMesaj: ${message.trim()}`,
             })
             toast.success("Mesajınız iletildi, en kısa sürede dönüş yapacağız")
             setIsOpen(false)
             setName("")
+            setEmail("")
             setPhone("")
             setMessage("")
         } catch (err) {
@@ -170,6 +175,10 @@ export function ContactDialog({ product, className = "" }: ProductDialogsProps) 
                     <div className="space-y-2">
                         <Label htmlFor="contact-name">Ad Soyad *</Label>
                         <Input id="contact-name" placeholder="Adınız Soyadınız" className="bg-muted/50" value={name} onChange={e => setName(e.target.value)} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="contact-email">E-posta *</Label>
+                        <Input id="contact-email" type="email" placeholder="ornek@email.com" className="bg-muted/50" value={email} onChange={e => setEmail(e.target.value)} required />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="contact-phone">Telefon</Label>

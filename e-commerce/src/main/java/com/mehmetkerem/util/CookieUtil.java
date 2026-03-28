@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
+
 /**
  * JWT token'ları HttpOnly + Secure + SameSite=Strict cookie olarak yönetir. (AUDIT M1)
  */
@@ -22,6 +24,9 @@ public class CookieUtil {
 
     @Value("${app.cookie.secure:true}")
     private boolean secure;
+
+    @Value("${app.cookie.same-site:Strict}")
+    private String sameSite;
 
     public void addAccessTokenCookie(HttpServletResponse response, String token) {
         addCookie(response, ACCESS_TOKEN_COOKIE, token, accessTokenExpiry / 1000);
@@ -42,7 +47,20 @@ public class CookieUtil {
         cookie.setSecure(secure);
         cookie.setPath("/");
         cookie.setMaxAge(maxAge);
-        cookie.setAttribute("SameSite", "Lax");
+        cookie.setAttribute("SameSite", resolveSameSite());
         response.addCookie(cookie);
+    }
+
+    private String resolveSameSite() {
+        if (sameSite == null) {
+            return "Strict";
+        }
+
+        String normalized = sameSite.trim().toLowerCase(Locale.ROOT);
+        return switch (normalized) {
+            case "lax" -> "Lax";
+            case "none" -> "None";
+            default -> "Strict";
+        };
     }
 }

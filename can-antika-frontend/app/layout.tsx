@@ -20,6 +20,19 @@ const fetchSiteSettings = cache(async () => {
   })
 })
 
+const GA_ID_PATTERN = /^(G-[A-Z0-9]+|GTM-[A-Z0-9]+|UA-\d+-\d+)$/i
+const FB_PIXEL_ID_PATTERN = /^\d{5,20}$/
+
+function sanitizeGoogleAnalyticsId(value?: string | null): string {
+  const normalized = (value || "").trim()
+  return GA_ID_PATTERN.test(normalized) ? normalized : ""
+}
+
+function sanitizeFacebookPixelId(value?: string | null): string {
+  const normalized = (value || "").trim()
+  return FB_PIXEL_ID_PATTERN.test(normalized) ? normalized : ""
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const s = await fetchSiteSettings()
 
@@ -61,10 +74,11 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
       googleBot: { index: true, follow: true, "max-image-preview": "large" },
     },
+    manifest: "/manifest.json",
     icons: {
       icon: [
-        { url: "/icon-light-32x32.png", media: "(prefers-color-scheme: light)" },
-        { url: "/icon-dark-32x32.png", media: "(prefers-color-scheme: dark)" },
+        { url: "/favicon.ico", sizes: "any" },
+        { url: "/icon.png", type: "image/png" },
         { url: "/icon.svg", type: "image/svg+xml" },
       ],
       apple: "/apple-icon.png",
@@ -78,15 +92,15 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const s = await fetchSiteSettings()
-  const gaId = s?.googleAnalyticsId || ""
-  const fbPixelId = s?.facebookPixelId || ""
+  const gaId = sanitizeGoogleAnalyticsId(s?.googleAnalyticsId)
+  const fbPixelId = sanitizeFacebookPixelId(s?.facebookPixelId)
 
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
         {gaId && (
           <>
-            <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`} strategy="afterInteractive" />
             <Script id="google-analytics" strategy="afterInteractive">
               {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
             </Script>
@@ -100,7 +114,7 @@ export default async function RootLayout({
         )}
       </head>
       <body className={`${_inter.variable} ${_playfair.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers initialSiteSettings={s}>{children}</Providers>
       </body>
     </html>
   )
