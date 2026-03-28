@@ -22,6 +22,16 @@ public class CacheErrorConfig implements CachingConfigurer {
             @Override
             public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
                 log.warn("Cache GET failed. cache={}, key={}, reason={}", cacheName(cache), key, exception.getMessage());
+                // Self-heal stale/incompatible entries so next read can repopulate cache from DB.
+                if (cache != null && key != null) {
+                    try {
+                        cache.evict(key);
+                        log.info("Evicted stale cache entry. cache={}, key={}", cacheName(cache), key);
+                    } catch (RuntimeException evictException) {
+                        log.warn("Cache EVICT-after-GET-failure failed. cache={}, key={}, reason={}",
+                                cacheName(cache), key, evictException.getMessage());
+                    }
+                }
             }
 
             @Override

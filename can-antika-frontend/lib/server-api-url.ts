@@ -16,24 +16,30 @@ function toAbsoluteUrl(value?: string): string | null {
 export function getServerApiUrlCandidates(): string[] {
   const urls = new Set<string>()
 
+  const addUrl = (value?: string | null) => {
+    const url = toAbsoluteUrl(value || "")
+    if (url) urls.add(url)
+  }
+
   const internalApiUrl = toAbsoluteUrl(process.env.INTERNAL_API_URL)
   const publicApiUrl = toAbsoluteUrl(process.env.NEXT_PUBLIC_API_URL)
 
-  if (internalApiUrl) urls.add(internalApiUrl)
-  if (publicApiUrl) urls.add(publicApiUrl)
+  if (process.env.NODE_ENV === "production") {
+    // Prefer private/internal routes on the server (avoid external API hop/timeouts).
+    addUrl(internalApiUrl)
+    addUrl("http://backend:8080")
+    addUrl("http://127.0.0.1:8080")
+    addUrl("http://localhost:8080")
+  } else {
+    addUrl(internalApiUrl)
+    addUrl(publicApiUrl)
+    addUrl("http://localhost:8080")
+    addUrl("http://127.0.0.1:8080")
+    addUrl("http://localhost:8085")
+    addUrl("http://127.0.0.1:8085")
+    addUrl("http://backend:8080")
+  }
 
-  const defaults =
-    process.env.NODE_ENV === "production"
-      ? ["http://backend:8080", "https://api.canantika.com", "https://canantika.com"]
-      : [
-          "http://localhost:8080",
-          "http://127.0.0.1:8080",
-          "http://localhost:8085",
-          "http://127.0.0.1:8085",
-          "http://backend:8080",
-        ]
-
-  defaults.forEach((url) => urls.add(url))
   return Array.from(urls)
 }
 

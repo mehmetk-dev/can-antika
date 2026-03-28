@@ -68,9 +68,10 @@ function getCandidateBaseUrls(): string[] {
 
     const isBrowser = typeof window !== "undefined";
 
-    // Server-side: Always use INTERNAL_API_URL first
-    if (!isBrowser && internalApiUrl) {
+    // Server-side: prefer private/internal routes first
+    if (!isBrowser) {
         addUrl(internalApiUrl);
+        addUrl("http://backend:8080");
     }
 
     // Explicitly configured public API URL
@@ -114,10 +115,10 @@ function getCandidateBaseUrls(): string[] {
             addUrl("http://127.0.0.1:8080");
             addUrl("http://localhost:8085");
             addUrl("http://127.0.0.1:8085");
+        } else {
+            addUrl("http://127.0.0.1:8080");
+            addUrl("http://localhost:8080");
         }
-        addUrl("http://backend:8080");
-        addUrl("https://api.canantika.com");
-
         // Fallback for Node.js if internalApiUrl was not set
         if (!internalApiUrl && process.env.INTERNAL_API_URL) {
             addUrl(process.env.INTERNAL_API_URL);
