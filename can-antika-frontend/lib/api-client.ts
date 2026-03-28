@@ -75,8 +75,6 @@ function getCandidateBaseUrls(): string[] {
     const normalizedEnvBaseUrl = normalizeBaseUrl(ENV_BASE_URL);
     const internalApiUrl = normalizeBaseUrl(process.env.INTERNAL_API_URL || "");
 
-    const isBrowser = typeof window !== "undefined";
-
     // Server-side: prefer private/internal routes first
     if (!isBrowser) {
         addUrl(internalApiUrl);
