@@ -376,11 +376,11 @@ export const api = {
 
                 return res.json();
             } catch (error) {
-                lastError = error instanceof Error ? error : new Error("Ä°stek baÅŸarÄ±sÄ±z");
+                lastError = error instanceof Error ? error : new Error("İstek başarısız");
                 continue;
             }
         }
 
-        throw lastError ?? new Error("API baÄŸlantÄ±sÄ± kurulamadÄ±");
+        throw lastError ?? new Error("API bağlantısı kurulamadı");
     },
 };

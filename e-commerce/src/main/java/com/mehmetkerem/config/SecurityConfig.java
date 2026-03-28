@@ -54,7 +54,7 @@ public class SecurityConfig {
         @Value("${app.cors.require-https-on-prod:true}")
         private boolean requireHttpsOnProd;
 
-        @Value("${app.security.csrf.enabled:true}")
+        @Value("${app.security.csrf.enabled:false}")
         private boolean csrfEnabled;
 
         @Bean

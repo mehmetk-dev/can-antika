@@ -46,6 +46,7 @@ public class Order {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "order_id")
+    @org.hibernate.annotations.BatchSize(size = 20)
     private List<OrderItem> orderItems;
 
     @ManyToOne

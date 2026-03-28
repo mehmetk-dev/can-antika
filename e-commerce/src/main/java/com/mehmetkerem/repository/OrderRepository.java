@@ -21,15 +21,12 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
         List<Order> findByUserId(Long userId);
 
-        @EntityGraph(attributePaths = { "orderItems", "shippingAddress" })
         Page<Order> findByUserId(Long userId, Pageable pageable);
 
         @Override
-        @EntityGraph(attributePaths = { "orderItems", "shippingAddress" })
         Page<Order> findAll(Pageable pageable);
 
         @Override
-        @EntityGraph(attributePaths = { "orderItems", "shippingAddress" })
         Page<Order> findAll(Specification<Order> spec, Pageable pageable);
 
         boolean existsByUserIdAndOrderItemsProductId(Long userId, Long productId);

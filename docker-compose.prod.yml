@@ -84,6 +84,8 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:?REDIS_PASSWORD is required}
       - COOKIE_SECURE=true
+      - COOKIE_SAME_SITE=Lax
+      - APP_SECURITY_CSRF_ENABLED=false
       - SPRINGDOC_ENABLED=false
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-disabled}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-disabled}
