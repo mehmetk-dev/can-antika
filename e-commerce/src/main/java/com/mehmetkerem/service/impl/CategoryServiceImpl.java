@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -93,10 +94,25 @@ public class CategoryServiceImpl implements ICategoryService {
     @Override
     @Cacheable(cacheNames = "categories:list")
     public List<CategoryResponse> findAllCategories() {
-        List<Category> categories = categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findAllByOrderByDisplayOrderAscIdAsc();
         return categories.stream()
                 .map(categoryMapper::toResponse)
                 .toList();
+    }
+
+    @Override
+    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "products:list", "products:byId" }, allEntries = true)
+    public void reorderCategories(List<Long> orderedIds) {
+        List<Category> categories = categoryRepository.findAllById(orderedIds);
+        Map<Long, Category> categoryMap = categories.stream()
+                .collect(Collectors.toMap(Category::getId, c -> c));
+        IntStream.range(0, orderedIds.size()).forEach(i -> {
+            Category category = categoryMap.get(orderedIds.get(i));
+            if (category != null) {
+                category.setDisplayOrder(i);
+            }
+        });
+        categoryRepository.saveAll(categories);
     }
 
     @Override

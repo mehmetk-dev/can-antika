@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // HttpOnly cookie olduğu için JS'den kontrol edemiyoruz, sessizce deneriz
     useEffect(() => {
         if (!hasAuthSessionFlag()) {
-            setIsLoading(false);
+            queueMicrotask(() => setIsLoading(false));
             return;
         }
 

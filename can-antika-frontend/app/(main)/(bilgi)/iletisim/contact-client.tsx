@@ -77,7 +77,7 @@ export function ContactClient() {
         <PageHero
           imageSrc="/vintage-antique-shop-storefront-istanbul-sepia-ton.jpg"
           imageAlt="İletişim"
-          eyebrow="İletişim"
+          eyebrow="Bize Ulaşın"
           title="İletişim"
           description="Sorularınız için buradayız"
         />

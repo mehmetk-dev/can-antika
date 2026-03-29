@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage() {
 
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">1. Veri Sorumlusu</h2>
-            <p className="leading-7">6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca kişisel verileriniz, veri sorumlusu sıfatıyla aşağıdaki kişi/işletme tarafından işlenmektedir:</p>
+            <p className="leading-7">6698 sayılı Kişisel Verilerin Korunması Kanunu (&ldquo;KVKK&rdquo;) uyarınca kişisel verileriniz, veri sorumlusu sıfatıyla aşağıdaki kişi/işletme tarafından işlenmektedir:</p>
             <ul className="list-disc space-y-1 pl-6 leading-7">
               <li>Veri Sorumlusu: Mesut Can (Şahıs İşletmesi)</li>
               <li>Faaliyet Konusu: Antika Perakende Ticareti</li>

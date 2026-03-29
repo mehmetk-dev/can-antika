@@ -57,4 +57,10 @@ export const categoryApi = {
         invalidateCategoriesCache();
         return result;
     },
+
+    reorder: async (orderedIds: number[]) => {
+        const result = await api.put<string>("/v1/category/reorder", { body: orderedIds });
+        invalidateCategoriesCache();
+        return result;
+    },
 };

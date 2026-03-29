@@ -81,7 +81,7 @@ export function NewArrivals() {
           </div>
           <Link href="/urunler" prefetch={false} className="hidden sm:block">
             <Button variant="ghost" className="group gap-2 font-serif text-amber-800 hover:bg-amber-200/50 hover:text-amber-950">
-              Tumunu Gor
+              Tümünü Gör
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
@@ -93,7 +93,7 @@ export function NewArrivals() {
           </div>
         ) : products.length === 0 ? (
           <div className="mt-14 py-16 text-center">
-            <p className="font-serif text-amber-700">Henuz urun eklenmemis</p>
+            <p className="font-serif text-amber-700">Henüz ürün eklenmemiş</p>
           </div>
         ) : (
           <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-6 lg:grid-cols-4">
@@ -131,11 +131,11 @@ export function NewArrivals() {
                           <svg className="h-2 w-2 text-amber-700 sm:h-3 sm:w-3" viewBox="0 0 12 12">
                             <polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9 3,11 3.5,7.5 1,5 4.5,4.5" fill="currentColor" />
                           </svg>
-                          <span className="font-serif text-[9px] font-medium text-amber-800 sm:text-xs">Tek Urun</span>
+                          <span className="font-serif text-[9px] font-medium text-amber-800 sm:text-xs">Tek Ürün</span>
                         </div>
                       ) : (
                         <div className="rounded-sm border border-stone-400 bg-stone-100 px-1.5 py-0.5 sm:px-2.5 sm:py-1">
-                          <span className="font-serif text-[9px] font-medium text-stone-600 sm:text-xs">Satildi</span>
+                          <span className="font-serif text-[9px] font-medium text-stone-600 sm:text-xs">Satıldı</span>
                         </div>
                       )}
                     </div>
@@ -164,7 +164,7 @@ export function NewArrivals() {
         <div className="mt-10 text-center sm:hidden">
           <Link href="/urunler" prefetch={false}>
             <Button className="gap-2 bg-amber-800 font-serif text-amber-50 hover:bg-amber-900">
-              Tumunu Gor
+              Tümünü Gör
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>

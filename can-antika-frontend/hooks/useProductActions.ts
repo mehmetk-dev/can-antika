@@ -37,8 +37,8 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
                 if (item && item.quantity >= maxStock) {
                     setAddedToCart(true)
                 }
-            }).catch((e) => {
-                if (!cancelled) console.error("Sepet kontrol hatası:", e)
+            }).catch(() => {
+                // Sepet kontrol hatası sessizce görmezden gelinir
             })
         } else {
             const items = guestCart.getItems()

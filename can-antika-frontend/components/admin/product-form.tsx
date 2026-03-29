@@ -4,7 +4,7 @@ import type React from "react"
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Upload, X, Loader2 } from "lucide-react"
+import { ArrowLeft, Upload, X, Loader2, Star, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,7 +26,7 @@ interface ProductFormProps {
 
 export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormProps) {
     const router = useRouter()
-    const { images, uploadingCount, fileInputRef, handleImageUpload, removeImage, setImages } =
+    const { images, uploadingCount, fileInputRef, handleImageUpload, removeImage, moveImage, setCoverImage, setImages } =
         useProductImages(product?.imageUrls || [])
 
     const [categories, setCategories] = useState<CategoryResponse[]>([])
@@ -175,22 +175,59 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                         <CardHeader>
                             <CardTitle className="font-serif">Görseller</CardTitle>
                             <CardDescription>
-                                {isEdit ? "Ürün fotoğraflarını yönetin" : "Ürün fotoğraflarını yükleyin (maksimum 6 adet)"}
+                                {isEdit ? "Ürün fotoğraflarını yönetin" : "Ürün fotoğraflarını yükleyin (maksimum 6 adet)"} · İlk fotoğraf kapak görseli olarak kullanılır.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
-                            <div className="grid gap-4 sm:grid-cols-3">
+                            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
                                 {images.map((image, index) => (
-                                    <div key={index} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                                        <Image src={image} alt={`Ürün ${index + 1}`} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" unoptimized />
+                                    <div key={image} className="relative overflow-hidden rounded-lg bg-muted">
+                                        <div className="relative aspect-[4/3]">
+                                            <Image src={image} alt={`Ürün ${index + 1}`} fill sizes="20vw" className="object-cover" unoptimized />
+                                        </div>
+                                        {index === 0 && (
+                                            <div className="absolute left-1 top-1 flex items-center gap-0.5 rounded bg-amber-500 px-1 py-0.5 text-[10px] font-bold leading-none text-white shadow">
+                                                <Star className="h-2.5 w-2.5 fill-current" />
+                                                <span>Kapak</span>
+                                            </div>
+                                        )}
                                         <button
                                             type="button"
                                             onClick={() => removeImage(index)}
-                                            className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground"
+                                            className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white hover:bg-red-500"
                                         >
-                                            <X className="h-4 w-4" />
+                                            <X className="h-3 w-3" />
                                         </button>
+                                        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/50 px-1 py-0.5">
+                                            <div className="flex gap-0.5">
+                                                <button
+                                                    type="button"
+                                                    disabled={index === 0}
+                                                    onClick={() => moveImage(index, index - 1)}
+                                                    className="flex h-5 w-5 items-center justify-center rounded bg-white/20 text-white hover:bg-white/40 disabled:opacity-30"
+                                                >
+                                                    <ChevronLeft className="h-3 w-3" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    disabled={index === images.length - 1}
+                                                    onClick={() => moveImage(index, index + 1)}
+                                                    className="flex h-5 w-5 items-center justify-center rounded bg-white/20 text-white hover:bg-white/40 disabled:opacity-30"
+                                                >
+                                                    <ChevronRight className="h-3 w-3" />
+                                                </button>
+                                            </div>
+                                            {index !== 0 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setCoverImage(index)}
+                                                    className="flex h-5 items-center justify-center rounded bg-amber-500/90 px-1.5 text-[10px] font-semibold text-white hover:bg-amber-500"
+                                                >
+                                                    Kapak Yap
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                                 {images.length < 6 && (
@@ -198,18 +235,18 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
                                         disabled={uploadingCount > 0}
-                                        className="flex aspect-square flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
+                                        className="flex aspect-[4/3] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
                                     >
                                         {uploadingCount > 0 ? (
                                             <>
-                                                <Loader2 className="h-8 w-8 animate-spin" />
-                                                <span className="mt-2 text-sm">{uploadingCount} yükleniyor...</span>
+                                                <Loader2 className="h-6 w-6 animate-spin" />
+                                                <span className="mt-1 text-xs">{uploadingCount} yükleniyor...</span>
                                             </>
                                         ) : (
                                             <>
-                                                <Upload className="h-8 w-8" />
-                                                <span className="mt-2 text-sm">Yükle</span>
-                                                <span className="mt-0.5 text-xs opacity-60">Çoklu seçim yapabilirsiniz</span>
+                                                <Upload className="h-6 w-6" />
+                                                <span className="mt-1 text-xs">Yükle</span>
+                                                <span className="mt-0.5 text-[10px] opacity-60">Çoklu seçim</span>
                                             </>
                                         )}
                                     </button>

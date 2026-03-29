@@ -49,7 +49,7 @@ export default function AdminOrdersPage() {
       })
       .catch(() => setOrders([]))
       .finally(() => setIsLoading(false))
-  }, [page])
+  }, [page]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const openTrackingDialog = (order: OrderResponse) => {
     setTrackingDialog({

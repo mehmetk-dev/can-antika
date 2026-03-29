@@ -23,10 +23,15 @@ async function tryFetch<T>(
   path: string,
   revalidate: number,
   timeoutMs: number,
+  cancelSignal?: AbortSignal,
 ): Promise<T | null> {
+  const timeoutSignal = AbortSignal.timeout(timeoutMs)
+  const signal = cancelSignal
+    ? AbortSignal.any([timeoutSignal, cancelSignal])
+    : timeoutSignal
   const res = await fetch(buildApiUrl(baseUrl, path), {
     next: { revalidate },
-    signal: AbortSignal.timeout(timeoutMs),
+    signal,
   })
 
   if (!res.ok) return null
@@ -54,21 +59,24 @@ export async function fetchApiDataWithFallback<T>(
     }
   }
 
-  // Sequential fallback through candidates with a shorter per-candidate timeout
-  const perCandidateTimeout = Math.min(timeoutMs, 1500)
+  // Try all remaining candidates in parallel — first success wins, losers get aborted
+  const candidates = baseUrls.filter((u) => u !== lastWorkingBaseUrl)
+  if (candidates.length === 0) return null
 
-  for (const baseUrl of baseUrls) {
-    if (baseUrl === lastWorkingBaseUrl) continue  // Already tried
-    try {
-      const result = await tryFetch<T>(baseUrl, path, revalidate, perCandidateTimeout)
-      if (result) {
-        lastWorkingBaseUrl = baseUrl
-        return result
-      }
-    } catch {
-      // Try next candidate
-    }
+  const abort = new AbortController()
+
+  try {
+    const { result, baseUrl } = await Promise.any(
+      candidates.map(async (baseUrl) => {
+        const result = await tryFetch<T>(baseUrl, path, revalidate, timeoutMs, abort.signal)
+        if (result === null) throw new Error("no data")
+        return { result, baseUrl }
+      })
+    )
+    abort.abort() // cancel still-running losers
+    lastWorkingBaseUrl = baseUrl
+    return result
+  } catch {
+    return null
   }
-
-  return null
 }

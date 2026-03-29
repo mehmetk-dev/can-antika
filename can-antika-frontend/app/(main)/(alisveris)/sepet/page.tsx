@@ -95,6 +95,9 @@ function CartContent() {
                                     {item.product.category && (
                                         <p className="text-xs text-muted-foreground mt-1">{item.product.category.name}</p>
                                     )}
+                                    {item.product.description && (
+                                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.product.description}</p>
+                                    )}
                                 </div>
 
                                 <div className="flex items-center justify-between mt-3">
@@ -124,7 +127,7 @@ function CartContent() {
                                     {/* Price & Remove */}
                                     <div className="flex items-center gap-4">
                                         <p className="font-semibold text-primary">
-                                            â‚º{item.total.toLocaleString("tr-TR")}
+                                            ₺{item.total.toLocaleString("tr-TR")}
                                         </p>
                                         <Button
                                             variant="ghost"
@@ -151,7 +154,7 @@ function CartContent() {
                     <div className="space-y-3">
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Ara Toplam</span>
-                            <span className="text-foreground">â‚º{cartTotal.toLocaleString("tr-TR")}</span>
+                            <span className="text-foreground">₺{cartTotal.toLocaleString("tr-TR")}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Kargo</span>

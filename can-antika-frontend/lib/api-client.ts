@@ -306,10 +306,6 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
             }
 
             if (!res.ok) {
-                const isExpectedGuestAuthCheck = noAuth && res.status === 401 && path === "/v1/auth/me";
-                if (!isExpectedGuestAuthCheck && process.env.NODE_ENV !== "production") {
-                    console.error(`Fetch failed for URL: ${url}, Status: ${res.status}`);
-                }
                 let errorMessage = `API error: ${res.status}`;
                 const correlationId = res.headers.get("X-Correlation-Id");
                 try {
@@ -325,7 +321,7 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
                 } else if (!noAuth && res.status === 401 && !hasSession) {
                     errorMessage = "Bu islem icin giris yapmaniz gerekiyor.";
                 }
-                if (correlationId) {
+                if (correlationId && res.status >= 500) {
                     errorMessage = `${errorMessage} (Ref: ${correlationId})`;
                 }
                 throw new Error(errorMessage);

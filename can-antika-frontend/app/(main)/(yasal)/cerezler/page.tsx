@@ -15,7 +15,7 @@ export default function CookiePolicyPage() {
           <p className="mt-3 text-sm text-muted-foreground">Son Güncelleme: 23 Mart 2026</p>
 
           <p className="mt-6 leading-7">Bu Çerez Politikası, www.canantika.com internet sitesini ziyaret eden kullanıcılarının cihazlarında kullanılan çerezler ve benzeri teknolojiler hakkında bilgilendirme amacıyla hazırlanmıştır.</p>
-          <p className="leading-7">Çerezler yoluyla gerçekleştirilen kişisel veri işleme faaliyetleri bakımından, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") ve ilgili mevzuat hükümleri uygulanır.</p>
+          <p className="leading-7">Çerezler yoluyla gerçekleştirilen kişisel veri işleme faaliyetleri bakımından, 6698 sayılı Kişisel Verilerin Korunması Kanunu (&ldquo;KVKK&rdquo;) ve ilgili mevzuat hükümleri uygulanır.</p>
 
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">1. Veri Sorumlusu</h2>
@@ -70,7 +70,7 @@ export default function CookiePolicyPage() {
 
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">7. Açık Rıza ve Tercih Yönetimi</h2>
-            <p className="leading-7">Zorunlu olmayan çerezler yalnızca açık rızanızla etkinleştirilir. Tercihlerinizi çerez banner’ı üzerinden belirleyebilir ve sonradan güncelleyebilirsiniz. Kullanıcıya "Hepsini Kabul Et", "Hepsini Reddet" ve "Tercihleri Yönet" seçenekleri sunulur.</p>
+            <p className="leading-7">Zorunlu olmayan çerezler yalnızca açık rızanızla etkinleştirilir. Tercihlerinizi çerez banner&apos;ı üzerinden belirleyebilir ve sonradan güncelleyebilirsiniz. Kullanıcıya &ldquo;Hepsini Kabul Et&rdquo;, &ldquo;Hepsini Reddet&rdquo; ve &ldquo;Tercihleri Yönet&rdquo; seçenekleri sunulur.</p>
           </section>
 
           <section className="mt-8 space-y-3">

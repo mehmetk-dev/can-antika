@@ -62,4 +62,11 @@ public class RestCategoryControllerImpl implements IRestCategoryController {
     public ResultData<Map<Long, Long>> getProductCountsByCategory() {
         return ResultHelper.success(categoryService.getProductCountsByCategory());
     }
+
+    @Secured("ROLE_ADMIN")
+    @PutMapping("/reorder")
+    public ResultData<String> reorderCategories(@RequestBody List<Long> orderedIds) {
+        categoryService.reorderCategories(orderedIds);
+        return ResultHelper.success("Sıralama güncellendi");
+    }
 }

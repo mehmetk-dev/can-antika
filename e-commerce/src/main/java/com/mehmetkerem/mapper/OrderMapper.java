@@ -63,15 +63,25 @@ public interface OrderMapper {
 
     /**
      * OrderItem listesini OrderItemResponse listesine dönüştürür.
+     * Eğer productMap verilmişse ürün bilgileri (resim, slug vb.) zenginleştirilir.
      */
     default List<OrderItemResponse> orderItemsToResponses(List<OrderItem> orderItems) {
+        return orderItemsToResponses(orderItems, Map.of());
+    }
+
+    default List<OrderItemResponse> orderItemsToResponses(List<OrderItem> orderItems, Map<Long, ProductResponse> productMap) {
         return orderItems.stream()
-                .map(orderItem -> OrderItemResponse.builder()
-                        .product(new ProductResponse(orderItem.getProductId(), orderItem.getTitle(),
-                                orderItem.getPrice()))
-                        .quantity(orderItem.getQuantity())
-                        .price(orderItem.getPrice())
-                        .build())
+                .map(orderItem -> {
+                    ProductResponse fullProduct = productMap.get(orderItem.getProductId());
+                    ProductResponse product = fullProduct != null
+                            ? fullProduct
+                            : new ProductResponse(orderItem.getProductId(), orderItem.getTitle(), orderItem.getPrice());
+                    return OrderItemResponse.builder()
+                            .product(product)
+                            .quantity(orderItem.getQuantity())
+                            .price(orderItem.getPrice())
+                            .build();
+                })
                 .toList();
     }
 }

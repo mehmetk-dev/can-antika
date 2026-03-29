@@ -44,6 +44,8 @@ function CheckoutContent() {
                 note: note || undefined,
                 paymentStatus: paymentMethod === "CREDIT_CARD" ? "PAID" : "PENDING",
             })
+            // Sipariş sonrası sepet badge'ini sıfırla
+            if (typeof window !== "undefined") window.dispatchEvent(new Event("cart-updated"))
             setOrderPlaced(true)
             setOrderId(order.id)
             toast.success("Siparişiniz başarıyla oluşturuldu!")

@@ -30,9 +30,8 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
             .then((response) => {
                 if (!isCancelled) setReviews(response)
             })
-            .catch((e) => {
+            .catch(() => {
                 if (!isCancelled) {
-                    console.error("Yorumlar yüklenemedi:", e)
                     setReviews([])
                 }
             })

@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import { cache } from "react"
+import { notFound } from "next/navigation"
 
 import { ProductPageClient } from "./product-page-client"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
@@ -43,7 +45,9 @@ async function fetchProductById(id: number) {
   })
 }
 
-async function fetchProduct(slug: string) {
+// React cache() deduplicates calls within a single request —
+// generateMetadata ve ProductPage aynı fetch'i paylaşır, iki kez API'ye gitmez
+const fetchProduct = cache(async (slug: string) => {
   const numericId = parseNumericProductId(slug)
   if (numericId !== null) {
     const productFromId = await fetchProductById(numericId)
@@ -51,7 +55,7 @@ async function fetchProduct(slug: string) {
   }
 
   return fetchProductBySlug(slug)
-}
+})
 
 export async function generateMetadata({
   params,
@@ -92,6 +96,10 @@ export default async function ProductPage({
 }) {
   const { slug } = await params
   const product = await fetchProduct(slug)
+
+  if (!product) {
+    notFound()
+  }
 
   const jsonLd = product
     ? {

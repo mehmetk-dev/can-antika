@@ -32,7 +32,7 @@ export default function ExchangeRateTicker() {
         // Try cache first
         const cached = getCachedRates()
         if (cached) {
-            setExchangeRates(cached.rates)
+            queueMicrotask(() => setExchangeRates(cached.rates))
             return
         }
 

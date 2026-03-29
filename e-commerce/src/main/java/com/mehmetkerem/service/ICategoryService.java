@@ -23,4 +23,6 @@ public interface ICategoryService {
     Map<Long, CategoryResponse> getCategoryResponsesByIds(List<Long> ids);
 
     Map<Long, Long> getProductCountsByCategory();
+
+    void reorderCategories(List<Long> orderedIds);
 }

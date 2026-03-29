@@ -8,7 +8,6 @@ import { PurchaseDialog, ContactDialog } from "@/components/product/product-dial
 import { ProductReviews } from "@/components/product/product-reviews"
 import { RelatedProducts } from "@/components/product/related-products"
 import { WhatsAppButton } from "@/components/product/whatsapp-button"
-import { TrustBadges } from "@/components/product/trust-badges"
 import { QuantitySelector } from "@/components/product/quantity-selector"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -178,9 +177,6 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
               </Button>
             </div>
 
-            <Separator className="my-8" />
-
-            <TrustBadges />
           </div>
         </div>
 

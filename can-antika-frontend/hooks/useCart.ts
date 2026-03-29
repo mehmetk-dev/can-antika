@@ -29,8 +29,7 @@ export function useCart() {
         if (isAuthenticated) {
             cartApi.getCart()
                 .then(setCart)
-                .catch((err) => {
-                    console.error("Sepet yüklenemedi:", err)
+                .catch(() => {
                     setCart(null)
                 })
                 .finally(() => setIsLoading(false))

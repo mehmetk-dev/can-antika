@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { useState, useEffect } from "react"
-import { Plus, Pencil, Trash2, Loader2, FolderOpen, Save, X, ImagePlus } from "lucide-react"
+import { Plus, Pencil, Trash2, Loader2, FolderOpen, Save, X, ImagePlus, ChevronUp, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -18,6 +18,7 @@ export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<CategoryResponse[]>([])
   const [productCounts, setProductCounts] = useState<Record<number, number>>({})
   const [isLoading, setIsLoading] = useState(true)
+  const [isReordering, setIsReordering] = useState(false)
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [createForm, setCreateForm] = useState({ name: "", desc: "", coverImageUrl: "", isSaving: false, isUploading: false })
@@ -143,6 +144,24 @@ export default function AdminCategoriesPage() {
       toast.error("Güncelleme başarısız")
     } finally {
       setEditForm(prev => ({ ...prev, isSaving: false }))
+    }
+  }
+
+  const handleMove = async (index: number, direction: "up" | "down") => {
+    const newCategories = [...categories]
+    const targetIndex = direction === "up" ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= newCategories.length) return
+      ;[newCategories[index], newCategories[targetIndex]] = [newCategories[targetIndex], newCategories[index]]
+    setCategories(newCategories)
+    setIsReordering(true)
+    try {
+      await categoryApi.reorder(newCategories.map((c) => c.id))
+      toast.success("Sıralama güncellendi")
+    } catch {
+      setCategories(categories)
+      toast.error("Sıralama güncellenemedi")
+    } finally {
+      setIsReordering(false)
     }
   }
 
@@ -420,6 +439,24 @@ export default function AdminCategoriesPage() {
 
                         <TableCell>
                           <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              disabled={isReordering || categories.indexOf(cat) === 0}
+                              onClick={() => handleMove(categories.indexOf(cat), "up")}
+                            >
+                              <ChevronUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              disabled={isReordering || categories.indexOf(cat) === categories.length - 1}
+                              onClick={() => handleMove(categories.indexOf(cat), "down")}
+                            >
+                              <ChevronDown className="h-4 w-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"

@@ -370,7 +370,19 @@ public class OrderServiceImpl implements IOrderService {
         OrderResponse resp = orderMapper.toResponse(order);
         resp.setUser(user);
         resp.setShippingAddress(addressMapper.toResponse(order.getShippingAddress()));
-        resp.setOrderItems(orderMapper.orderItemsToResponses(order.getOrderItems()));
+
+        // Ürün bilgilerini (resim, slug vb.) zenginleştir
+        List<Long> productIds = order.getOrderItems().stream()
+                .map(OrderItem::getProductId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        Map<Long, ProductResponse> productMap = Map.of();
+        if (!productIds.isEmpty()) {
+            productMap = productService.getProductResponsesByIds(productIds).stream()
+                    .collect(Collectors.toMap(ProductResponse::getId, p -> p, (a, b) -> a));
+        }
+        resp.setOrderItems(orderMapper.orderItemsToResponses(order.getOrderItems(), productMap));
         return resp;
     }
 }

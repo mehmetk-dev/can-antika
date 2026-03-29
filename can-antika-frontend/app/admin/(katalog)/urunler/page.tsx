@@ -52,7 +52,7 @@ export default function AdminProductsPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [categoryFilter, page])
+  }, [categoryFilter, page]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     void loadProducts()

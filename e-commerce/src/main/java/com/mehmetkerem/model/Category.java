@@ -32,6 +32,10 @@ public class Category {
     private String coverImageUrl;
 
     @Builder.Default
+    @Column(name = "display_order", nullable = false, columnDefinition = "int default 0")
+    private int displayOrder = 0;
+
+    @Builder.Default
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean deleted = false;
 }

@@ -38,7 +38,7 @@ export function Header({ sticky = true, className }: HeaderProps) {
   return (
     <header
       className={cn(
-        "z-40 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        "z-40 w-full border-b border-border/50 bg-background",
         sticky ? "sticky top-0" : "relative",
         className
       )}

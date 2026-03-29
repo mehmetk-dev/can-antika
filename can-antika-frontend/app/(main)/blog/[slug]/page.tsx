@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from "next"
 import { cache } from "react"
+import { notFound } from "next/navigation"
 import { BlogDetailClient } from "./blog-detail-client"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { BlogPost, BlogCategory } from "@/lib/types"
@@ -17,14 +18,14 @@ const fetchBlogPost = cache(async (slug: string) => {
   const safeSlug = encodeURIComponent(slug)
   return fetchApiDataWithFallback<BlogPost>(`/v1/blog/${safeSlug}`, {
     revalidate: 60,
-    timeoutMs: 2500,
+    timeoutMs: 1800,
   })
 })
 
 const fetchBlogCategories = cache(async () => {
   return fetchApiDataWithFallback<BlogCategory[]>("/v1/blog/categories", {
     revalidate: 300,
-    timeoutMs: 2500,
+    timeoutMs: 1200,
   })
 })
 
@@ -84,6 +85,10 @@ export default async function BlogDetailPage({
   const categories = categoriesResult.status === "fulfilled" && Array.isArray(categoriesResult.value)
     ? categoriesResult.value
     : []
+
+  if (!post) {
+    notFound()
+  }
 
   const jsonLd = post
     ? {

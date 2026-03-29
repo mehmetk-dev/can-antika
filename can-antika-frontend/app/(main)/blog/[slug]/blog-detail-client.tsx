@@ -71,7 +71,7 @@ export function BlogDetailClient({ initialPost, slug, initialCategories = [] }: 
                         className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
                     >
                         <ArrowLeft className="h-4 w-4" />
-                        Blog'a Dön
+                        Blog&apos;a Dön
                     </Link>
                 </div>
             </div>
@@ -108,7 +108,7 @@ export function BlogDetailClient({ initialPost, slug, initialCategories = [] }: 
                             id="blog-detail-back"
                         >
                             <ArrowLeft className="h-4 w-4" />
-                            Blog&apos;a DÃ¶n
+                            Blog&apos;a Dön
                         </Link>
                         {getCategoryName(post.categoryId) && (
                             <Badge variant="outline">
@@ -166,16 +166,16 @@ export function BlogDetailClient({ initialPost, slug, initialCategories = [] }: 
                     {/* Bottom CTA */}
                     <div className="mt-16 p-8 bg-muted/30 rounded-xl border border-border/50 text-center">
                         <h3 className="font-serif text-xl font-semibold text-foreground">
-                            Koleksiyonumuza GÃ¶z AtÄ±n
+                            Koleksiyonumuza Göz Atın
                         </h3>
                         <p className="mt-2 text-muted-foreground">
-                            YazÄ±larÄ±mÄ±zda bahsettiÄŸimiz eserler ve daha fazlasÄ± maÄŸazamÄ±zda sizleri bekliyor.
+                            Yazılarımızda bahsettiğimiz eserler ve daha fazlası mağazamızda sizleri bekliyor.
                         </p>
                         <Link
                             href="/urunler"
                             className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
                         >
-                            ÃœrÃ¼nleri Ä°ncele
+                            Ürünleri İncele
                         </Link>
                     </div>
                 </article>

@@ -19,7 +19,7 @@ export default function KvkkPage() {
           <p className="mt-6 leading-7">
             Mesut Can (Şahıs İşletmesi) olarak, canantika.com üzerinden sunduğumuz ürün ve hizmetler kapsamında
             kişisel verilerinizin güvenliğine önem veriyoruz. İşbu Aydınlatma Metni, 6698 sayılı Kişisel Verilerin
-            Korunması Kanunu'nun ("KVKK") 10. maddesi ile Aydınlatma Yükümlülüğünün Yerine Getirilmesinde Uyulacak
+            Korunması Kanunu&apos;nun (&ldquo;KVKK&rdquo;) 10. maddesi ile Aydınlatma Yükümlülüğünün Yerine Getirilmesinde Uyulacak
             Usul ve Esaslar Hakkında Tebliğ kapsamında hazırlanmıştır.
           </p>
 

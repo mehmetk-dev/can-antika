@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Image from "next/image"
+import Link from "next/link"
 import { PageHero } from "@/components/layout/page-hero"
 import { Award, Clock, Heart, Quote, Shield } from "lucide-react"
 
@@ -189,18 +190,18 @@ export default function AboutPage() {
               Her biri özenle seçilmiş, eşsiz antika parçalarımı incelemek için mağazamızı ziyaret edin
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <a
+              <Link
                 href="/urunler"
                 className="inline-flex items-center justify-center rounded-lg bg-accent px-8 py-4 font-medium text-accent-foreground transition-colors hover:bg-accent/90"
               >
                 Ürünleri İncele
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/iletisim"
                 className="inline-flex items-center justify-center rounded-lg border border-primary-foreground/20 bg-primary-foreground/10 px-8 py-4 font-medium text-primary-foreground transition-colors hover:bg-primary-foreground/20"
               >
                 İletişime Geç
-              </a>
+              </Link>
             </div>
           </div>
         </section>

@@ -78,5 +78,24 @@ export function useProductImages(initialImages: string[] = []) {
         setImages((prev) => prev.filter((_, i) => i !== index))
     }
 
-    return { images, setImages, uploadingCount, fileInputRef, handleImageUpload, removeImage }
+    const moveImage = (from: number, to: number) => {
+        setImages((prev) => {
+            if (to < 0 || to >= prev.length) return prev
+            const next = [...prev]
+                ;[next[from], next[to]] = [next[to], next[from]]
+            return next
+        })
+    }
+
+    const setCoverImage = (index: number) => {
+        setImages((prev) => {
+            if (index === 0) return prev
+            const next = [...prev]
+            const [item] = next.splice(index, 1)
+            next.unshift(item)
+            return next
+        })
+    }
+
+    return { images, setImages, uploadingCount, fileInputRef, handleImageUpload, removeImage, moveImage, setCoverImage }
 }

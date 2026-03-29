@@ -1,11 +1,17 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { useState, useCallback } from "react"
 import Image from "next/image"
 import { ZoomIn, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogTrigger } from "@/components/ui/dialog"
 import { isCloudinaryImageUrl, resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
+
+const ImageGalleryLightbox = dynamic(
+  () => import("./image-gallery-lightbox").then((m) => m.ImageGalleryLightbox),
+  { ssr: false }
+)
 
 interface ImageGalleryProps {
   images: string[]
@@ -94,49 +100,17 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
           </div>
         </DialogTrigger>
 
-        <DialogContent className="max-w-5xl bg-background p-2">
-          <DialogTitle className="sr-only">{productName}</DialogTitle>
-          <DialogDescription className="sr-only">{productName} ürün görselleri galeri görünümü.</DialogDescription>
-          <div className="relative aspect-[3/4] w-full max-h-[85vh]">
-            <Image
-              src={useFallbackImage ? "/placeholder.svg" : mainImage}
-              alt={productName}
-              fill
-              loading="lazy"
-              decoding="async"
-              loader={useCloudinaryLoader ? cloudinaryLoader : undefined}
-              sizes="85vw"
-              className="object-contain"
-              onError={handleImageError}
-            />
-            {images.length > 1 && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
-                  onClick={handlePrevious}
-                  aria-label="Önceki görsel"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
-                  onClick={handleNext}
-                  aria-label="Sonraki görsel"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </Button>
-              </>
-            )}
-          </div>
-        </DialogContent>
+        <ImageGalleryLightbox
+          image={useFallbackImage ? "/placeholder.svg" : mainImage}
+          productName={productName}
+          hasMultiple={images.length > 1}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+        />
       </Dialog>
 
       {images.length > 1 && (
-        <div className="flex w-full gap-2 overflow-x-auto pb-2">
+        <div className="grid w-full gap-2" style={{ gridTemplateColumns: `repeat(${images.length}, minmax(0, 1fr))` }}>
           {images.map((image, index) => {
             const thumbUrl = resolveImageUrl(image)
             return (
@@ -146,7 +120,9 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                   setSelectedIndex(index)
                   setUseFallbackImage(false)
                 }}
-                className={`relative aspect-square w-20 shrink-0 overflow-hidden rounded-md transition-all ${selectedIndex === index ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : "opacity-70 hover:opacity-100"
+                className={`relative aspect-square w-full overflow-hidden rounded-md transition-all ${selectedIndex === index
+                  ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
+                  : "opacity-70 hover:opacity-100"
                   }`}
               >
                 <Image
@@ -156,7 +132,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                   loading="lazy"
                   decoding="async"
                   loader={isCloudinaryImageUrl(thumbUrl) ? cloudinaryLoader : undefined}
-                  sizes="80px"
+                  sizes="(max-width: 640px) 15vw, 10vw"
                   className="object-cover object-center"
                   onError={(e) => {
                     e.currentTarget.src = "/placeholder.svg"

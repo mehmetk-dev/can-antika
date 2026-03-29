@@ -3,6 +3,7 @@ export interface CategoryResponse {
     name: string;
     description?: string;
     coverImageUrl?: string;
+    displayOrder?: number;
 }
 
 export interface PeriodResponse {
