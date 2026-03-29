@@ -15,7 +15,6 @@ interface ImageGalleryProps {
 
 export function ImageGallery({ images, productName }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [isZoomed, setIsZoomed] = useState(false)
   const [useFallbackImage, setUseFallbackImage] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
 
@@ -43,57 +42,57 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
 
   return (
     <div className="min-w-0 w-full space-y-4">
-      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <div
-          className="group relative aspect-[3/4] w-full max-w-full cursor-zoom-in overflow-hidden rounded-lg bg-muted"
+      {/* Main image area */}
+      <div className="group relative aspect-[3/4] w-full max-w-full overflow-hidden rounded-lg bg-muted">
+        <Image
+          src={useFallbackImage ? "/placeholder.svg" : mainImage}
+          alt={productName}
+          fill
+          priority
+          fetchPriority="high"
+          sizes="(max-width: 640px) 92vw, (max-width: 1024px) 52vw, 42vw"
+          className="object-cover object-center transition-transform duration-300 will-change-transform group-hover:scale-[1.02]"
+          onError={handleImageError}
+        />
+
+        {/* Clickable overlay to open lightbox */}
+        <button
+          type="button"
+          className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
           onClick={() => setLightboxOpen(true)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setLightboxOpen(true) }}
+          aria-label={`${productName} görselini büyüt`}
         >
-          <Image
-            src={useFallbackImage ? "/placeholder.svg" : mainImage}
-            alt={productName}
-            fill
-            priority
-            sizes="(max-width: 640px) 92vw, (max-width: 1024px) 52vw, 42vw"
-            className="object-cover object-center transition-transform duration-300 will-change-transform group-hover:scale-[1.02]"
-            onError={handleImageError}
-          />
-          <div className="absolute inset-0 flex items-center justify-center bg-foreground/0 transition-colors group-hover:bg-foreground/10">
+          <span className="absolute inset-0 flex items-center justify-center bg-foreground/0 transition-colors group-hover:bg-foreground/10">
             <ZoomIn className="h-8 w-8 text-background opacity-0 transition-opacity group-hover:opacity-100" />
-          </div>
+          </span>
+        </button>
 
-          {images.length > 1 && (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute left-2 top-1/2 z-10 -translate-y-1/2 bg-background/80 hover:bg-background"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handlePrevious()
-                }}
-                aria-label="Önceki görsel"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-2 top-1/2 z-10 -translate-y-1/2 bg-background/80 hover:bg-background"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleNext()
-                }}
-                aria-label="Sonraki görsel"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </Button>
-            </>
-          )}
-        </div>
+        {images.length > 1 && (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute left-2 top-1/2 z-20 -translate-y-1/2 bg-background/80 hover:bg-background"
+              onClick={handlePrevious}
+              aria-label="Önceki görsel"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-1/2 z-20 -translate-y-1/2 bg-background/80 hover:bg-background"
+              onClick={handleNext}
+              aria-label="Sonraki görsel"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </>
+        )}
+      </div>
 
+      {/* Lightbox dialog — completely separate from image area */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
         <ImageGalleryLightbox
           image={useFallbackImage ? "/placeholder.svg" : mainImage}
           productName={productName}

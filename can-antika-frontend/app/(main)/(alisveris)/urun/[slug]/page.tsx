@@ -4,6 +4,7 @@ import { cache, Suspense } from "react"
 import { ProductPageClient } from "./product-page-client"
 import ProductLoading from "./loading"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
+import { resolveImageUrl } from "@/lib/product/image-url"
 import type { ProductResponse } from "@/lib/types"
 
 function parseNumericProductId(slug: string): number | null {
@@ -55,27 +56,41 @@ const fetchProduct = cache(async (slug: string) => {
   return fetchProductBySlug(slug)
 })
 
-// Metadata slug'dan anında üretilir — API beklenmez, sayfa bloklanmaz.
-// Bot'lar revalidate sonrası zaten tam metadata alır.
+// Metadata'da ürünü fetch ediyoruz — cache() sayesinde ProductResolver tekrar fetch yapmaz.
+// Bu sayede: 1) gerçek SEO metadata  2) OG image  3) Suspense anında çözülür (iskelet gösterilmez)
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const safeTitle = slugToTitle(slug)
-  const description = `${safeTitle} - Can Antika koleksiyonundan antika eser.`
+  const product = await fetchProduct(slug)
 
+  if (product) {
+    const title = product.title
+    const description = product.description
+      ? product.description.slice(0, 160)
+      : `${title} - Can Antika koleksiyonundan antika eser.`
+    const imageUrl = product.imageUrls?.[0] ? resolveImageUrl(product.imageUrls[0]) : undefined
+
+    return {
+      title,
+      description,
+      keywords: [title, product.category?.name, "antika", "koleksiyon", "can antika"].filter(Boolean) as string[],
+      openGraph: {
+        title: `${title} | Can Antika`,
+        description,
+        type: "website",
+        locale: "tr_TR",
+        ...(imageUrl && imageUrl !== "/placeholder.svg" && { images: [imageUrl] }),
+      },
+    }
+  }
+
+  const safeTitle = slugToTitle(slug)
   return {
     title: safeTitle,
-    description,
-    keywords: [safeTitle, "antika", "koleksiyon", "can antika"],
-    openGraph: {
-      title: `${safeTitle} | Can Antika`,
-      description,
-      type: "website",
-      locale: "tr_TR",
-    },
+    description: `${safeTitle} - Can Antika koleksiyonundan antika eser.`,
   }
 }
 
