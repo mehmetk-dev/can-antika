@@ -160,6 +160,7 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.GET, "/v1/site-settings").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/v1/faq").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/v1/brands").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/v1/period/**").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/v1/popups/active").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/v1/blog").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/v1/blog/{slug}").permitAll()
