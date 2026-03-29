@@ -363,7 +363,7 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
+    @CacheEvict(cacheNames = { "products:list", "products:byId", "products:bySlug" }, allEntries = true)
     public ProductImportResponse importProductsFromExcel(MultipartFile file) {
         ProductExcelParseResult parsed = productExcelParser.parse(file);
         List<String> errors = new java.util.ArrayList<>(parsed.errors());

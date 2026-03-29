@@ -32,15 +32,15 @@ function slugToTitle(slug: string): string {
 async function fetchProductBySlug(slug: string) {
   const safeSlug = encodeURIComponent(slug)
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/slug/${safeSlug}`, {
-    revalidate: 60,
-    timeoutMs: 2000,
+    revalidate: 300,
+    timeoutMs: 1500,
   })
 }
 
 async function fetchProductById(id: number) {
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/${id}`, {
-    revalidate: 60,
-    timeoutMs: 2000,
+    revalidate: 300,
+    timeoutMs: 1500,
   })
 }
 
