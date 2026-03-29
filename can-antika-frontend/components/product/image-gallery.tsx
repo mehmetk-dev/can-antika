@@ -51,49 +51,49 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
           tabIndex={0}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setLightboxOpen(true) }}
         >
-            <Image
-              src={useFallbackImage ? "/placeholder.svg" : mainImage}
-              alt={productName}
-              fill
-              priority
-              sizes="(max-width: 640px) 92vw, (max-width: 1024px) 52vw, 42vw"
-              className="object-cover object-center transition-transform duration-300 will-change-transform group-hover:scale-[1.02]"
-              onError={handleImageError}
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-foreground/0 transition-colors group-hover:bg-foreground/10">
-              <ZoomIn className="h-8 w-8 text-background opacity-0 transition-opacity group-hover:opacity-100" />
-            </div>
-
-            {images.length > 1 && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute left-2 top-1/2 z-10 -translate-y-1/2 bg-background/80 hover:bg-background"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handlePrevious()
-                  }}
-                  aria-label="Önceki görsel"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-1/2 z-10 -translate-y-1/2 bg-background/80 hover:bg-background"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleNext()
-                  }}
-                  aria-label="Sonraki görsel"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </Button>
-              </>
-            )}
+          <Image
+            src={useFallbackImage ? "/placeholder.svg" : mainImage}
+            alt={productName}
+            fill
+            priority
+            sizes="(max-width: 640px) 92vw, (max-width: 1024px) 52vw, 42vw"
+            className="object-cover object-center transition-transform duration-300 will-change-transform group-hover:scale-[1.02]"
+            onError={handleImageError}
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-foreground/0 transition-colors group-hover:bg-foreground/10">
+            <ZoomIn className="h-8 w-8 text-background opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
-        
+
+          {images.length > 1 && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-2 top-1/2 z-10 -translate-y-1/2 bg-background/80 hover:bg-background"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handlePrevious()
+                }}
+                aria-label="Önceki görsel"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 z-10 -translate-y-1/2 bg-background/80 hover:bg-background"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleNext()
+                }}
+                aria-label="Sonraki görsel"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            </>
+          )}
+        </div>
+
         <ImageGalleryLightbox
           image={useFallbackImage ? "/placeholder.svg" : mainImage}
           productName={productName}

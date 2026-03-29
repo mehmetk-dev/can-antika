@@ -137,9 +137,8 @@ export function Footer({ className }: FooterProps) {
 
       <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
         <div
-          className={`grid gap-10 border-b border-primary-foreground/10 pb-10 md:grid-cols-2 xl:gap-8 ${
-            hasCategories ? "xl:grid-cols-4" : "xl:grid-cols-3"
-          }`}
+          className={`grid gap-10 border-b border-primary-foreground/10 pb-10 md:grid-cols-2 xl:gap-8 ${hasCategories ? "xl:grid-cols-4" : "xl:grid-cols-3"
+            }`}
         >
           <div>
             <Link href="/" className="inline-block">
@@ -221,7 +220,7 @@ export function Footer({ className }: FooterProps) {
                   <li key={cat.id}>
                     <Link
                       href={`/urunler?category=${encodeURIComponent(cat.name)}`}
-                     
+
                       className="text-sm text-primary-foreground/70 transition-colors hover:text-accent"
                     >
                       {cat.name}
