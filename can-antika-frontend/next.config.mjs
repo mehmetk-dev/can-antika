@@ -16,6 +16,9 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,
   },
+  experimental: {
+    cssChunking: "loose",
+  },
   turbopack: {},
   webpack: (config) => {
     config.watchOptions = {
