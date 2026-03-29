@@ -36,8 +36,7 @@ export function ImageGalleryLightbox({
                     src={image}
                     alt={productName}
                     fill
-                    loading="lazy"
-                    decoding="async"
+                    priority
                     loader={useCloudinaryLoader ? cloudinaryLoader : undefined}
                     sizes="(max-width: 640px) 96vw, 90vw"
                     className="object-contain"

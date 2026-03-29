@@ -10,8 +10,8 @@ import "./globals.css"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { SiteSettingsResponse } from "@/lib/types"
 
-const _inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
-const _playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" })
+const _inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
+const _playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair", display: "swap" })
 
 const fetchSiteSettings = cache(async () => {
   return fetchApiDataWithFallback<SiteSettingsResponse>("/v1/site-settings", {

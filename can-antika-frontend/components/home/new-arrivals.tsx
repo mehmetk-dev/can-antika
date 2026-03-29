@@ -1,49 +1,28 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, Loader2 } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { productApi } from "@/lib/api"
-import type { ProductResponse } from "@/lib/types"
+import { resolveImageUrl, isCloudinaryImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
+import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
+import type { ProductResponse, CursorResponse } from "@/lib/types"
 
-export function NewArrivals() {
-  const [products, setProducts] = useState<ProductResponse[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+function cloudinaryLoader({ src, width, quality }: { src: string; width: number; quality?: number }) {
+  return toCloudinaryResponsiveUrl(src, width, quality ?? 75)
+}
 
-  useEffect(() => {
-    let isMounted = true
+export async function NewArrivals() {
+  let products: ProductResponse[] = []
 
-    const loadProducts = async () => {
-      try {
-        const data = await productApi.getAll(0, 4, "id", "desc")
-        if (isMounted && (data.items?.length ?? 0) > 0) {
-          setProducts((data.items ?? []).slice(0, 4))
-          setIsLoading(false)
-          return
-        }
-      } catch {
-        // continue with fallback
-      }
-
-      try {
-        const fallback = await productApi.getAll(0, 4, "id", "desc")
-        if (isMounted) setProducts((fallback.items ?? []).slice(0, 4))
-      } catch {
-        if (isMounted) setProducts([])
-      } finally {
-        if (isMounted) setIsLoading(false)
-      }
-    }
-
-    loadProducts()
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
+  try {
+    const data = await fetchApiDataWithFallback<CursorResponse<ProductResponse>>(
+      "/v1/product?page=0&size=4&sortBy=id&direction=desc",
+      { revalidate: 120, timeoutMs: 1500 }
+    )
+    products = (data?.items ?? []).slice(0, 4)
+  } catch {
+    // fail silently — Suspense boundary in page.tsx handles the skeleton
+  }
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-amber-50 to-amber-100/50 py-24 lg:py-32">
@@ -79,7 +58,7 @@ export function NewArrivals() {
               <circle cx="80" cy="8" r="3" fill="currentColor" />
             </svg>
           </div>
-          <Link href="/urunler" prefetch={false} className="hidden sm:block">
+          <Link href="/urunler" className="hidden sm:block">
             <Button variant="ghost" className="group gap-2 font-serif text-amber-800 hover:bg-amber-200/50 hover:text-amber-950">
               Tümünü Gör
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -87,11 +66,7 @@ export function NewArrivals() {
           </Link>
         </div>
 
-        {isLoading ? (
-          <div className="mt-14 flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
-          </div>
-        ) : products.length === 0 ? (
+        {products.length === 0 ? (
           <div className="mt-14 py-16 text-center">
             <p className="font-serif text-amber-700">Henüz ürün eklenmemiş</p>
           </div>
@@ -99,11 +74,12 @@ export function NewArrivals() {
           <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-6 lg:grid-cols-4">
             {products.map((item) => {
               const era = (item.attributes?.era as string) || ""
-              const imageUrl = item.imageUrls?.[0] || "/placeholder.svg"
+              const imageUrl = resolveImageUrl(item.imageUrls?.[0])
+              const useCloudinaryLoader = isCloudinaryImageUrl(imageUrl)
               const isSold = (item.stock ?? 0) <= 0
 
               return (
-                <Link key={item.id} href={`/urun/${item.slug ?? item.id}`} prefetch={false} className="group relative">
+                <Link key={item.id} href={`/urun/${item.slug ?? item.id}`} className="group relative">
                   <div className="relative overflow-hidden rounded-sm border-2 border-amber-300/50 bg-white shadow-lg transition-all duration-300 group-hover:border-amber-500 group-hover:shadow-xl group-hover:shadow-amber-200/50">
                     <div className="absolute left-2 top-2 h-6 w-6 border-l-2 border-t-2 border-amber-400/60" />
                     <div className="absolute right-2 top-2 h-6 w-6 border-r-2 border-t-2 border-amber-400/60" />
@@ -118,6 +94,7 @@ export function NewArrivals() {
                           fill
                           loading="lazy"
                           decoding="async"
+                          loader={useCloudinaryLoader ? ({ src, width, quality }) => toCloudinaryResponsiveUrl(src, width, quality ?? 75) : undefined}
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                           className="object-cover transition-transform duration-700 group-hover:scale-110"
                         />
@@ -162,7 +139,7 @@ export function NewArrivals() {
         )}
 
         <div className="mt-10 text-center sm:hidden">
-          <Link href="/urunler" prefetch={false}>
+          <Link href="/urunler">
             <Button className="gap-2 bg-amber-800 font-serif text-amber-50 hover:bg-amber-900">
               Tümünü Gör
               <ArrowRight className="h-4 w-4" />

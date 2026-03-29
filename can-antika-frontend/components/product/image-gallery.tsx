@@ -4,7 +4,7 @@ import { useState, useCallback } from "react"
 import Image from "next/image"
 import { ZoomIn, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog } from "@/components/ui/dialog"
 import { isCloudinaryImageUrl, resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
 import { ImageGalleryLightbox } from "./image-gallery-lightbox"
 
@@ -49,12 +49,13 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
   return (
     <div className="min-w-0 w-full space-y-4">
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogTrigger asChild>
-          <button
-            type="button"
-            className="group relative aspect-[3/4] w-full max-w-full cursor-zoom-in overflow-hidden rounded-lg bg-muted block"
-            onClick={() => setLightboxOpen(true)}
-          >
+        <div
+          className="group relative aspect-[3/4] w-full max-w-full cursor-zoom-in overflow-hidden rounded-lg bg-muted"
+          onClick={() => setLightboxOpen(true)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setLightboxOpen(true) }}
+        >
             <Image
               src={useFallbackImage ? "/placeholder.svg" : mainImage}
               alt={productName}
@@ -97,9 +98,8 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                 </Button>
               </>
             )}
-          </button>
-        </DialogTrigger>
-
+          </div>
+        
         <ImageGalleryLightbox
           image={useFallbackImage ? "/placeholder.svg" : mainImage}
           productName={productName}

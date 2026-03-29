@@ -7,7 +7,7 @@ import { Heart } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { resolveImageUrl } from "@/lib/product/image-url"
+import { resolveImageUrl, isCloudinaryImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
 import { eraLabels, getProductAttributes } from "@/lib/product/product-utils"
 import type { ProductResponse } from "@/lib/types"
 
@@ -19,6 +19,7 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
   const [imageErrored, setImageErrored] = useState(false)
 
   const imageUrl = resolveImageUrl(product.imageUrls?.[0])
+  const useCloudinaryLoader = isCloudinaryImageUrl(imageUrl)
   const { era, condition, status } = getProductAttributes(product)
   const outOfStock = (product.stock ?? 0) <= 0
   const isSold = status === "sold" || outOfStock
@@ -35,6 +36,7 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
           fill
           loading="lazy"
           decoding="async"
+          loader={useCloudinaryLoader ? ({ src, width, quality }) => toCloudinaryResponsiveUrl(src, width, quality ?? 75) : undefined}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className={`object-cover object-center transition-transform duration-500 will-change-transform group-hover:scale-[1.03] ${isSold ? "grayscale opacity-60" : ""}`}
           onError={() => setImageErrored(true)}

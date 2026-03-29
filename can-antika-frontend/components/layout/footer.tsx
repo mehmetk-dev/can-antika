@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
@@ -10,20 +10,20 @@ import type { CategoryResponse } from "@/lib/types"
 
 const footerLinks = {
   company: [
-    { name: "Ürünler", href: "/urunler" },
-    { name: "Hakkımızda", href: "/hakkimizda" },
+    { name: "�r�nler", href: "/urunler" },
+    { name: "Hakk�m�zda", href: "/hakkimizda" },
     { name: "Blog", href: "/blog" },
     { name: "SSS", href: "/sss" },
-    { name: "İletişim", href: "/iletisim" },
+    { name: "�leti�im", href: "/iletisim" },
     { name: "Teslimat / Kargo", href: "/teslimat" },
-    { name: "İade / İptal / Cayma", href: "/iade" },
+    { name: "�ade / �ptal / Cayma", href: "/iade" },
   ],
   legal: [
-    { name: "KVKK Aydınlatma Metni", href: "/kvkk" },
-    { name: "Gizlilik Politikası", href: "/gizlilik" },
-    { name: "Çerez Politikası", href: "/cerezler" },
-    { name: "Kullanım Koşulları", href: "/kullanim-kosullari" },
-    { name: "Mesafeli Satış Sözleşmesi", href: "/mesafeli-satis-sozlesmesi" },
+    { name: "KVKK Ayd�nlatma Metni", href: "/kvkk" },
+    { name: "Gizlilik Politikas�", href: "/gizlilik" },
+    { name: "�erez Politikas�", href: "/cerezler" },
+    { name: "Kullan�m Ko�ullar�", href: "/kullanim-kosullari" },
+    { name: "Mesafeli Sat�� S�zle�mesi", href: "/mesafeli-satis-sozlesmesi" },
   ],
 }
 
@@ -127,8 +127,8 @@ export function Footer({ className }: FooterProps) {
         }}
       />
       <div className="pointer-events-none absolute inset-0 opacity-20">
-        <div className="absolute -top-32 left-[-10%] h-80 w-80 rounded-full bg-accent/10 blur-3xl" />
-        <div className="absolute -bottom-32 right-[-10%] h-80 w-80 rounded-full bg-accent/10 blur-3xl" />
+        <div className="absolute -top-32 left-[-10%] h-80 w-80 rounded-full bg-accent/10" />
+        <div className="absolute -bottom-32 right-[-10%] h-80 w-80 rounded-full bg-accent/10" />
       </div>
       <CornerOrnament className="pointer-events-none absolute left-5 top-5 h-20 w-20 text-accent/30" />
       <CornerOrnament className="pointer-events-none absolute right-5 top-5 h-20 w-20 -scale-x-100 text-accent/30" />
@@ -142,16 +142,16 @@ export function Footer({ className }: FooterProps) {
           }`}
         >
           <div>
-            <Link href="/" prefetch={false} className="inline-block">
+            <Link href="/" className="inline-block">
               <h2 className="font-serif text-3xl font-semibold tracking-tight text-primary-foreground">{settings.storeName || "Can Antika"}</h2>
             </Link>
             <div className="mt-2 flex items-center gap-2">
               <span className="h-px w-8 bg-gradient-to-r from-accent/60 to-transparent" />
-              <span className="text-[10px] uppercase tracking-[0.24em] text-accent">{settings.businessType || "Antika Eşya Satışı"}</span>
+              <span className="text-[10px] uppercase tracking-[0.24em] text-accent">{settings.businessType || "Antika E�ya Sat���"}</span>
               <span className="h-px w-8 bg-gradient-to-l from-accent/60 to-transparent" />
             </div>
             <p className="mt-5 max-w-md text-sm leading-7 text-primary-foreground/75">
-              {settings.storeDescription || settings.footerAbout || "Nadir parçaları güvenli alışveriş deneyimiyle koleksiyonerlerle buluşturuyoruz."}
+              {settings.storeDescription || settings.footerAbout || "Nadir par�alar� g�venli al��veri� deneyimiyle koleksiyonerlerle bulu�turuyoruz."}
             </p>
 
             <div className="mt-6 space-y-2 text-sm text-primary-foreground/75">
@@ -160,14 +160,14 @@ export function Footer({ className }: FooterProps) {
                   {settings.phone}
                 </a>
               ) : (
-                <p>—</p>
+                <p>�</p>
               )}
               {settings.email ? (
                 <a href={mailHref} className="block transition-colors hover:text-accent">
                   {settings.email}
                 </a>
               ) : (
-                <p>—</p>
+                <p>�</p>
               )}
               {settings.address ? (
                 <a
@@ -179,7 +179,7 @@ export function Footer({ className }: FooterProps) {
                   {settings.address}
                 </a>
               ) : (
-                <p className="max-w-md">—</p>
+                <p className="max-w-md">�</p>
               )}
             </div>
 
@@ -205,7 +205,7 @@ export function Footer({ className }: FooterProps) {
             <ul className="mt-4 space-y-2.5">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} prefetch={false} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
+                  <Link href={link.href} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
                     {link.name}
                   </Link>
                 </li>
@@ -221,7 +221,7 @@ export function Footer({ className }: FooterProps) {
                   <li key={cat.id}>
                     <Link
                       href={`/urunler?category=${encodeURIComponent(cat.name)}`}
-                      prefetch={false}
+                     
                       className="text-sm text-primary-foreground/70 transition-colors hover:text-accent"
                     >
                       {cat.name}
@@ -237,22 +237,22 @@ export function Footer({ className }: FooterProps) {
             <ul className="mt-4 space-y-2.5">
               {footerLinks.legal.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} prefetch={false} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
+                  <Link href={link.href} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
                     {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
             {!hasCategories && isCategoriesLoading && (
-              <p className="mt-4 text-xs text-primary-foreground/45">Kategoriler yükleniyor...</p>
+              <p className="mt-4 text-xs text-primary-foreground/45">Kategoriler y�kleniyor...</p>
             )}
           </div>
         </div>
 
         <div className="mt-6 flex items-center justify-between gap-4">
-          <p className="text-sm text-primary-foreground/60">© 2026 Can Antika</p>
+          <p className="text-sm text-primary-foreground/60">� 2026 Can Antika</p>
           <p className="text-sm text-primary-foreground/50">
-            Dijital altyapı ve geliştirme:{" "}
+            Dijital altyap� ve geli�tirme:{" "}
             <a
               href="https://fogistanbul.com"
               target="_blank"

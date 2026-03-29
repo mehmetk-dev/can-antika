@@ -5,8 +5,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    // Cloudinary handles transformations/CDN; skip Next.js optimizer to avoid upstream timeouts.
-    unoptimized: true,
+    unoptimized: false,
     remotePatterns: [
       {
         protocol: 'https',
