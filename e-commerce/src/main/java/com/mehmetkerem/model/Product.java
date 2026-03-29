@@ -8,7 +8,8 @@ import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -46,10 +47,10 @@ public class Product {
     @Column(name = "period_id")
     private Long periodId;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
-    @BatchSize(size = 20)
+    @Fetch(FetchMode.SUBSELECT)
     private List<String> imageUrls;
 
     @JdbcTypeCode(SqlTypes.JSON)

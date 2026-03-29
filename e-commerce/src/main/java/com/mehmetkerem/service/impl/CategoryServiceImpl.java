@@ -34,7 +34,7 @@ public class CategoryServiceImpl implements ICategoryService {
     private final IActivityLogService activityLogService;
 
     @Override
-    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "products:list", "products:byId" }, allEntries = true)
+    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "categories:byIds", "products:list", "products:byId" }, allEntries = true)
     public CategoryResponse saveCategory(CategoryRequest request) {
         String normalizedName = normalizeRequired(request.getName(), "Kategori adı boş olamaz.");
 
@@ -54,7 +54,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "products:list", "products:byId" }, allEntries = true)
+    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "categories:byIds", "products:list", "products:byId" }, allEntries = true)
     public String deleteCategory(Long id) {
         Category category = getCategoryById(id);
         if (productRepository.existsByCategoryId(id)) {
@@ -66,7 +66,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "products:list", "products:byId" }, allEntries = true)
+    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "categories:byIds", "products:list", "products:byId" }, allEntries = true)
     public CategoryResponse updateCategory(Long id, CategoryRequest request) {
         Category category = getCategoryById(id);
 
@@ -101,7 +101,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "products:list", "products:byId" }, allEntries = true)
+    @CacheEvict(cacheNames = { "categories:list", "categories:byId", "categories:byIds", "products:list", "products:byId" }, allEntries = true)
     public void reorderCategories(List<Long> orderedIds) {
         List<Category> categories = categoryRepository.findAllById(orderedIds);
         Map<Long, Category> categoryMap = categories.stream()
@@ -116,6 +116,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
+    @Cacheable(cacheNames = "categories:byIds", key = "#ids.stream().sorted().toList().toString()")
     public Map<Long, CategoryResponse> getCategoryResponsesByIds(List<Long> ids) {
         return categoryRepository.findAllById(ids).stream()
                 .collect(Collectors.toMap(Category::getId, categoryMapper::toResponse));

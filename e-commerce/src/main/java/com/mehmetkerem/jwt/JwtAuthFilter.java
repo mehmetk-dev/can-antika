@@ -25,6 +25,24 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        // Public GET endpoints — JWT processing is unnecessary
+        if ("GET".equals(method) && (
+                path.startsWith("/v1/product/") ||
+                path.startsWith("/v1/category/") ||
+                path.startsWith("/v1/period/") ||
+                path.startsWith("/v1/blog") ||
+                path.startsWith("/v1/faq") ||
+                path.startsWith("/v1/site-settings") ||
+                path.startsWith("/v1/pages"))) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
 

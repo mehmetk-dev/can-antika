@@ -1,17 +1,12 @@
 "use client"
 
-import dynamic from "next/dynamic"
 import { useState, useCallback } from "react"
 import Image from "next/image"
 import { ZoomIn, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/dialog"
 import { isCloudinaryImageUrl, resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
-
-const ImageGalleryLightbox = dynamic(
-  () => import("./image-gallery-lightbox").then((m) => m.ImageGalleryLightbox),
-  { ssr: false }
-)
+import { ImageGalleryLightbox } from "./image-gallery-lightbox"
 
 interface ImageGalleryProps {
   images: string[]
@@ -22,6 +17,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
   const [useFallbackImage, setUseFallbackImage] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   const safeIndex = images.length > 0 ? Math.min(selectedIndex, images.length - 1) : 0
   const mainImage = images[safeIndex] ? resolveImageUrl(images[safeIndex]) : "/placeholder.svg"
@@ -52,9 +48,13 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
 
   return (
     <div className="min-w-0 w-full space-y-4">
-      <Dialog>
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
         <DialogTrigger asChild>
-          <div className="group relative aspect-[3/4] w-full max-w-full cursor-zoom-in overflow-hidden rounded-lg bg-muted">
+          <button
+            type="button"
+            className="group relative aspect-[3/4] w-full max-w-full cursor-zoom-in overflow-hidden rounded-lg bg-muted block"
+            onClick={() => setLightboxOpen(true)}
+          >
             <Image
               src={useFallbackImage ? "/placeholder.svg" : mainImage}
               alt={productName}
@@ -97,7 +97,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                 </Button>
               </>
             )}
-          </div>
+          </button>
         </DialogTrigger>
 
         <ImageGalleryLightbox

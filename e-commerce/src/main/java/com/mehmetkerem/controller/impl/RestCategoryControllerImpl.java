@@ -56,7 +56,6 @@ public class RestCategoryControllerImpl implements IRestCategoryController {
         return ResultHelper.success(categoryService.findAllCategories());
     }
 
-    @Secured("ROLE_ADMIN")
     @GetMapping("/product-counts")
     @Override
     public ResultData<Map<Long, Long>> getProductCountsByCategory() {

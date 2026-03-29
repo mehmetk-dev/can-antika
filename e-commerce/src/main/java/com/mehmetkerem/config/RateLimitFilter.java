@@ -59,6 +59,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
             Long.class);
 
     @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        // Skip rate limiting for read-only public catalog endpoints (high-traffic, low-risk)
+        if (!"GET".equals(request.getMethod())) return false;
+        String path = request.getRequestURI();
+        return path.startsWith("/v1/product/") || path.startsWith("/v1/category/") || path.startsWith("/v1/period/");
+    }
+
+    @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {

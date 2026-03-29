@@ -10,6 +10,8 @@ import com.mehmetkerem.repository.ProductRepository;
 import com.mehmetkerem.service.IPeriodService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ public class PeriodServiceImpl implements IPeriodService {
     private final ProductRepository productRepository;
 
     @Override
+    @CacheEvict(cacheNames = "periods:byIds", allEntries = true)
     public PeriodResponse savePeriod(PeriodRequest request) {
         String normalizedName = normalizeRequired(request.getName());
         if (periodRepository.findByNameIgnoreCase(normalizedName).isPresent()) {
@@ -42,6 +45,7 @@ public class PeriodServiceImpl implements IPeriodService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "periods:byIds", allEntries = true)
     public PeriodResponse updatePeriod(Long id, PeriodRequest request) {
         Period period = getPeriodById(id);
         String normalizedName = normalizeRequired(request.getName());
@@ -60,6 +64,7 @@ public class PeriodServiceImpl implements IPeriodService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "periods:byIds", allEntries = true)
     public String deletePeriod(Long id) {
         if (productRepository.existsByPeriodId(id)) {
             throw new BadRequestException("Bu döneme bağlı ürünler var. Önce ürünlerde dönemi güncelleyin.");
@@ -95,6 +100,7 @@ public class PeriodServiceImpl implements IPeriodService {
     }
 
     @Override
+    @Cacheable(cacheNames = "periods:byIds", key = "#ids.stream().sorted().toList().toString()")
     public Map<Long, PeriodResponse> getPeriodResponsesByIds(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyMap();

@@ -11,7 +11,7 @@ async function fetchMaintenanceModeFromBase(apiBase: string): Promise<boolean> {
     const settingsRes = await fetch(settingsUrl, {
         method: "GET",
         headers: { Accept: "application/json" },
-        cache: "no-store",
+        next: { revalidate: 60 },
         signal: AbortSignal.timeout(MAINTENANCE_TIMEOUT_MS),
     });
 

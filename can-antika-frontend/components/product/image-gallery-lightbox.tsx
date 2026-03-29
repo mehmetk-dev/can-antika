@@ -48,7 +48,7 @@ export function ImageGalleryLightbox({
                             variant="ghost"
                             size="icon"
                             className="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 bg-background/80 hover:bg-background sm:left-2 sm:h-10 sm:w-10"
-                            onClick={onPrevious}
+                            onClick={(e) => { e.stopPropagation(); onPrevious() }}
                             aria-label="Önceki görsel"
                         >
                             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -57,7 +57,7 @@ export function ImageGalleryLightbox({
                             variant="ghost"
                             size="icon"
                             className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 bg-background/80 hover:bg-background sm:right-2 sm:h-10 sm:w-10"
-                            onClick={onNext}
+                            onClick={(e) => { e.stopPropagation(); onNext() }}
                             aria-label="Sonraki görsel"
                         >
                             <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
