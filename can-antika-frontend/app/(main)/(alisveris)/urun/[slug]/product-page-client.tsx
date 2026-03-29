@@ -35,10 +35,10 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
 
     const fetchProduct = async () => {
       if (numericId !== null) {
-        return productApi.getById(numericId, 5000)
+        return productApi.getById(numericId, 3000)
       }
 
-      return productApi.getBySlug(slug, 5000)
+      return productApi.getBySlug(slug, 3000)
     }
 
     fetchProduct()
@@ -87,7 +87,7 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
     const loadRelatedProducts = async () => {
       try {
         const sameCategoryResult = categoryId
-          ? await productApi.search({ categoryId, size: 12 }, 4000)
+          ? await productApi.search({ categoryId, size: 12 }, 2000)
           : { items: [] as ProductResponse[] }
 
         const sameCategoryFiltered = (sameCategoryResult.items || []).filter((item) => item.id !== productId)

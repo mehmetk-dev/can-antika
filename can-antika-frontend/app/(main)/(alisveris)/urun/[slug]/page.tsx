@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
-import { cache } from "react"
+import { cache, Suspense } from "react"
 
 import { ProductPageClient } from "./product-page-client"
+import ProductLoading from "./loading"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { ProductResponse } from "@/lib/types"
 
@@ -44,8 +45,6 @@ async function fetchProductById(id: number) {
   })
 }
 
-// React cache() deduplicates calls within a single request —
-// generateMetadata ve ProductPage aynı fetch'i paylaşır, iki kez API'ye gitmez
 const fetchProduct = cache(async (slug: string) => {
   const numericId = parseNumericProductId(slug)
   if (numericId !== null) {
@@ -56,44 +55,47 @@ const fetchProduct = cache(async (slug: string) => {
   return fetchProductBySlug(slug)
 })
 
+// Metadata slug'dan anında üretilir — API beklenmez, sayfa bloklanmaz.
+// Bot'lar revalidate sonrası zaten tam metadata alır.
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const product = await fetchProduct(slug)
-  const safeTitle = product?.title || slugToTitle(slug)
-  const description = product?.description
-    ? product.description.slice(0, 160)
-    : `${safeTitle} - Can Antika koleksiyonundan antika eser.`
-
-  const images = product?.imageUrls?.[0]
-    ? [{ url: product.imageUrls[0], alt: safeTitle }]
-    : []
+  const safeTitle = slugToTitle(slug)
+  const description = `${safeTitle} - Can Antika koleksiyonundan antika eser.`
 
   return {
     title: safeTitle,
     description,
-    keywords: [safeTitle, "antika", "koleksiyon", "can antika"].filter(
-      (keyword): keyword is string => Boolean(keyword)
-    ),
+    keywords: [safeTitle, "antika", "koleksiyon", "can antika"],
     openGraph: {
       title: `${safeTitle} | Can Antika`,
       description,
       type: "website",
       locale: "tr_TR",
-      images,
     },
   }
 }
 
+// Suspense streaming: sayfa iskeleti anında gönderilir,
+// ürün verisi hazır olunca stream edilir.
 export default async function ProductPage({
   params,
 }: {
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+
+  return (
+    <Suspense fallback={<ProductLoading />}>
+      <ProductResolver slug={slug} />
+    </Suspense>
+  )
+}
+
+async function ProductResolver({ slug }: { slug: string }) {
   const product = await fetchProduct(slug)
 
   const jsonLd = product
