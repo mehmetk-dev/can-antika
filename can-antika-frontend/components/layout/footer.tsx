@@ -10,20 +10,20 @@ import type { CategoryResponse } from "@/lib/types"
 
 const footerLinks = {
   company: [
-    { name: "�r�nler", href: "/urunler" },
-    { name: "Hakk�m�zda", href: "/hakkimizda" },
+    { name: "Ürünler", href: "/urunler" },
+    { name: "Hakkımızda", href: "/hakkimizda" },
     { name: "Blog", href: "/blog" },
     { name: "SSS", href: "/sss" },
-    { name: "�leti�im", href: "/iletisim" },
+    { name: "İletişim", href: "/iletisim" },
     { name: "Teslimat / Kargo", href: "/teslimat" },
-    { name: "�ade / �ptal / Cayma", href: "/iade" },
+    { name: "İade / İptal / Cayma", href: "/iade" },
   ],
   legal: [
-    { name: "KVKK Ayd�nlatma Metni", href: "/kvkk" },
-    { name: "Gizlilik Politikas�", href: "/gizlilik" },
-    { name: "�erez Politikas�", href: "/cerezler" },
-    { name: "Kullan�m Ko�ullar�", href: "/kullanim-kosullari" },
-    { name: "Mesafeli Sat�� S�zle�mesi", href: "/mesafeli-satis-sozlesmesi" },
+    { name: "KVKK Aydınlatma Metni", href: "/kvkk" },
+    { name: "Gizlilik Politikası", href: "/gizlilik" },
+    { name: "Çerez Politikası", href: "/cerezler" },
+    { name: "Kullanım Koşulları", href: "/kullanim-kosullari" },
+    { name: "Mesafeli Satış Sözleşmesi", href: "/mesafeli-satis-sozlesmesi" },
   ],
 }
 
@@ -146,11 +146,11 @@ export function Footer({ className }: FooterProps) {
             </Link>
             <div className="mt-2 flex items-center gap-2">
               <span className="h-px w-8 bg-gradient-to-r from-accent/60 to-transparent" />
-              <span className="text-[10px] uppercase tracking-[0.24em] text-accent">{settings.businessType || "Antika E�ya Sat���"}</span>
+              <span className="text-[10px] uppercase tracking-[0.24em] text-accent">{settings.businessType || "Antika Eşya Satışı"}</span>
               <span className="h-px w-8 bg-gradient-to-l from-accent/60 to-transparent" />
             </div>
             <p className="mt-5 max-w-md text-sm leading-7 text-primary-foreground/75">
-              {settings.storeDescription || settings.footerAbout || "Nadir par�alar� g�venli al��veri� deneyimiyle koleksiyonerlerle bulu�turuyoruz."}
+              {settings.storeDescription || settings.footerAbout || "Nadir parçaları güvenli alışveriş deneyimiyle koleksiyonerlerle buluşturuyoruz."}
             </p>
 
             <div className="mt-6 space-y-2 text-sm text-primary-foreground/75">
@@ -158,16 +158,12 @@ export function Footer({ className }: FooterProps) {
                 <a href={phoneHref} className="block transition-colors hover:text-accent">
                   {settings.phone}
                 </a>
-              ) : (
-                <p>�</p>
-              )}
+              ) : null}
               {settings.email ? (
                 <a href={mailHref} className="block transition-colors hover:text-accent">
                   {settings.email}
                 </a>
-              ) : (
-                <p>�</p>
-              )}
+              ) : null}
               {settings.address ? (
                 <a
                   href={mapHref}
@@ -177,9 +173,7 @@ export function Footer({ className }: FooterProps) {
                 >
                   {settings.address}
                 </a>
-              ) : (
-                <p className="max-w-md">�</p>
-              )}
+              ) : null}
             </div>
 
             {socialLinks.length > 0 && (
@@ -243,15 +237,15 @@ export function Footer({ className }: FooterProps) {
               ))}
             </ul>
             {!hasCategories && isCategoriesLoading && (
-              <p className="mt-4 text-xs text-primary-foreground/45">Kategoriler y�kleniyor...</p>
+              <p className="mt-4 text-xs text-primary-foreground/45">Kategoriler yükleniyor...</p>
             )}
           </div>
         </div>
 
         <div className="mt-6 flex items-center justify-between gap-4">
-          <p className="text-sm text-primary-foreground/60">� 2026 Can Antika</p>
+          <p className="text-sm text-primary-foreground/60">© 2026 Can Antika</p>
           <p className="text-sm text-primary-foreground/50">
-            Dijital altyap� ve geli�tirme:{" "}
+            Dijital altyapı ve geliştirme:{" "}
             <a
               href="https://fogistanbul.com"
               target="_blank"
