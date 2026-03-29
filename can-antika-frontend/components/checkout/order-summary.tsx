@@ -42,7 +42,6 @@ export function OrderSummary({
                                 width={48}
                                 height={48}
                                 className="h-12 w-12 rounded-md object-cover"
-                                unoptimized
                             />
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-foreground truncate">{item.product.title}</p>

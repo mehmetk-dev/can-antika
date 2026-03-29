@@ -4,7 +4,7 @@ import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
-import { isCloudinaryImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
+
 
 interface ImageGalleryLightboxProps {
     image: string
@@ -21,12 +21,6 @@ export function ImageGalleryLightbox({
     onPrevious,
     onNext,
 }: ImageGalleryLightboxProps) {
-    const useCloudinaryLoader = isCloudinaryImageUrl(image)
-
-    const cloudinaryLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
-        return toCloudinaryResponsiveUrl(src, width, quality ?? 75)
-    }
-
     return (
         <DialogContent className="max-w-5xl bg-background p-2 sm:p-2 w-[96vw] sm:w-auto">
             <DialogTitle className="sr-only">{productName}</DialogTitle>
@@ -37,7 +31,6 @@ export function ImageGalleryLightbox({
                     alt={productName}
                     fill
                     priority
-                    loader={useCloudinaryLoader ? cloudinaryLoader : undefined}
                     sizes="(max-width: 640px) 96vw, 90vw"
                     className="object-contain"
                 />

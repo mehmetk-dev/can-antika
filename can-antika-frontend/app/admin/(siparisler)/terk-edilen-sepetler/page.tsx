@@ -86,7 +86,7 @@ export default function AbandonedCartsPage() {
                                         {cart.items.map((item, i) => (
                                             <div key={i} className="flex items-center gap-3">
                                                 {item.productImage ? (
-                                                    <Image src={item.productImage} alt={item.productTitle || "Ürün"} width={32} height={32} className="h-8 w-8 rounded object-cover" unoptimized />
+                                                    <Image src={item.productImage} alt={item.productTitle || "Ürün"} width={32} height={32} className="h-8 w-8 rounded object-cover" />
                                                 ) : (
                                                     <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
                                                         <Package className="h-3 w-3 text-muted-foreground" />

@@ -120,7 +120,7 @@ export default function BlogPage() {
                                 <Card key={p.id} className={!p.published ? "opacity-60" : ""}>
                                     <CardContent className="p-4">
                                         <div className="flex items-center gap-4">
-                                            {p.imageUrl ? <Image src={p.imageUrl} alt={p.title} width={80} height={56} className="h-14 w-20 rounded-lg object-cover shrink-0" unoptimized /> : <div className="h-14 w-20 rounded-lg bg-muted flex items-center justify-center shrink-0"><PenTool className="h-5 w-5 text-muted-foreground" /></div>}
+                                            {p.imageUrl ? <Image src={p.imageUrl} alt={p.title} width={80} height={56} className="h-14 w-20 rounded-lg object-cover shrink-0" /> : <div className="h-14 w-20 rounded-lg bg-muted flex items-center justify-center shrink-0"><PenTool className="h-5 w-5 text-muted-foreground" /></div>}
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-semibold truncate">{p.title}</p>
                                                 <p className="text-xs text-muted-foreground">{getCatName(p.categoryId)} · {p.author || "—"} · {p.createdAt ? formatDateTR(p.createdAt, "minimal") : "—"}</p>

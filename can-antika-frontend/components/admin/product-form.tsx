@@ -184,7 +184,7 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                 {images.map((image, index) => (
                                     <div key={image} className="relative overflow-hidden rounded-lg bg-muted">
                                         <div className="relative aspect-[4/3]">
-                                            <Image src={image} alt={`Ürün ${index + 1}`} fill sizes="20vw" className="object-cover" unoptimized />
+                                            <Image src={image} alt={`Ürün ${index + 1}`} fill sizes="20vw" className="object-cover" />
                                         </div>
                                         {index === 0 && (
                                             <div className="absolute left-1 top-1 flex items-center gap-0.5 rounded bg-amber-500 px-1 py-0.5 text-[10px] font-bold leading-none text-white shadow">

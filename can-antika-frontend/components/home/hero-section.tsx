@@ -26,7 +26,6 @@ export function HeroSection() {
           alt="Can Antika mağaza içi"
           fill
           priority
-          unoptimized
           sizes="100vw"
           className="object-cover"
         />

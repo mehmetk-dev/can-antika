@@ -81,7 +81,7 @@ export default function BrandsPage() {
                             <CardContent className="p-4">
                                 <div className="flex items-center gap-3">
                                     {b.logoUrl ? (
-                                        <Image src={b.logoUrl} alt={b.name} width={48} height={48} className="h-12 w-12 rounded-lg object-contain border bg-white" unoptimized />
+                                        <Image src={b.logoUrl} alt={b.name} width={48} height={48} className="h-12 w-12 rounded-lg object-contain border bg-white" />
                                     ) : (
                                         <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                                             <Tag className="h-5 w-5 text-primary" />

@@ -243,7 +243,7 @@ export default function AdminCategoriesPage() {
                       src={resolveImageUrl(createForm.coverImageUrl)}
                       alt="Kategori kapak önizleme"
                       fill
-                      unoptimized
+
                       className="object-cover"
                     />
                   ) : (
@@ -359,7 +359,6 @@ export default function AdminCategoriesPage() {
                                 src={resolveImageUrl(editForm.coverImageUrl)}
                                 alt={`${cat.name} kapak`}
                                 fill
-                                unoptimized
                                 sizes="80px"
                                 className="object-cover"
                               />
@@ -421,7 +420,6 @@ export default function AdminCategoriesPage() {
                               src={resolveImageUrl(cat.coverImageUrl)}
                               alt={`${cat.name} kapak`}
                               fill
-                              unoptimized
                               sizes="80px"
                               className="object-cover"
                             />

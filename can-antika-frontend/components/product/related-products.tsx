@@ -4,7 +4,7 @@ import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { isCloudinaryImageUrl, resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
+import { resolveImageUrl } from "@/lib/product/image-url"
 import type { ProductResponse } from "@/lib/types"
 
 interface RelatedProductsProps {
@@ -14,9 +14,6 @@ interface RelatedProductsProps {
 
 function RelatedProductsInner({ products, currentProductId }: RelatedProductsProps) {
   const relatedProducts = products.filter((p) => p.id !== currentProductId).slice(0, 4)
-
-  const cloudinaryLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) =>
-    toCloudinaryResponsiveUrl(src, width, quality ?? 72)
 
   if (relatedProducts.length === 0) return null
 
@@ -46,7 +43,6 @@ function RelatedProductsInner({ products, currentProductId }: RelatedProductsPro
         <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {relatedProducts.map((product) => {
             const imageUrl = resolveImageUrl(product.imageUrls?.[0])
-            const hasCloudinaryImage = isCloudinaryImageUrl(imageUrl)
 
             return (
               <Link
@@ -62,7 +58,6 @@ function RelatedProductsInner({ products, currentProductId }: RelatedProductsPro
                     fill
                     loading="lazy"
                     decoding="async"
-                    loader={hasCloudinaryImage ? cloudinaryLoader : undefined}
                     sizes="(max-width: 640px) 47vw, (max-width: 1024px) 31vw, 24vw"
                     className="object-cover object-center transition-transform duration-500 will-change-transform group-hover:scale-[1.03]"
                   />

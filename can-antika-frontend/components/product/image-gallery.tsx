@@ -5,7 +5,7 @@ import Image from "next/image"
 import { ZoomIn, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog } from "@/components/ui/dialog"
-import { isCloudinaryImageUrl, resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
+import { resolveImageUrl } from "@/lib/product/image-url"
 import { ImageGalleryLightbox } from "./image-gallery-lightbox"
 
 interface ImageGalleryProps {
@@ -21,7 +21,6 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
 
   const safeIndex = images.length > 0 ? Math.min(selectedIndex, images.length - 1) : 0
   const mainImage = images[safeIndex] ? resolveImageUrl(images[safeIndex]) : "/placeholder.svg"
-  const useCloudinaryLoader = isCloudinaryImageUrl(mainImage)
 
   const handlePrevious = useCallback(() => {
     setUseFallbackImage(false)
@@ -42,10 +41,6 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
     setUseFallbackImage(true)
   }, [selectedIndex, images.length])
 
-  const cloudinaryLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
-    return toCloudinaryResponsiveUrl(src, width, quality ?? 75)
-  }
-
   return (
     <div className="min-w-0 w-full space-y-4">
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
@@ -61,7 +56,6 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
               alt={productName}
               fill
               priority
-              loader={useCloudinaryLoader ? cloudinaryLoader : undefined}
               sizes="(max-width: 640px) 92vw, (max-width: 1024px) 52vw, 42vw"
               className="object-cover object-center transition-transform duration-300 will-change-transform group-hover:scale-[1.02]"
               onError={handleImageError}
@@ -131,7 +125,6 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                   fill
                   loading="lazy"
                   decoding="async"
-                  loader={isCloudinaryImageUrl(thumbUrl) ? cloudinaryLoader : undefined}
                   sizes="(max-width: 640px) 15vw, 10vw"
                   className="object-cover object-center"
                   onError={(e) => {

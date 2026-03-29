@@ -3,13 +3,9 @@ import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { resolveImageUrl, isCloudinaryImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
+import { resolveImageUrl } from "@/lib/product/image-url"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { ProductResponse, CursorResponse } from "@/lib/types"
-
-function cloudinaryLoader({ src, width, quality }: { src: string; width: number; quality?: number }) {
-  return toCloudinaryResponsiveUrl(src, width, quality ?? 75)
-}
 
 export async function NewArrivals() {
   let products: ProductResponse[] = []
@@ -75,7 +71,6 @@ export async function NewArrivals() {
             {products.map((item) => {
               const era = (item.attributes?.era as string) || ""
               const imageUrl = resolveImageUrl(item.imageUrls?.[0])
-              const useCloudinaryLoader = isCloudinaryImageUrl(imageUrl)
               const isSold = (item.stock ?? 0) <= 0
 
               return (
@@ -94,7 +89,6 @@ export async function NewArrivals() {
                           fill
                           loading="lazy"
                           decoding="async"
-                          loader={useCloudinaryLoader ? ({ src, width, quality }) => toCloudinaryResponsiveUrl(src, width, quality ?? 75) : undefined}
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                           className="object-cover transition-transform duration-700 group-hover:scale-110"
                         />

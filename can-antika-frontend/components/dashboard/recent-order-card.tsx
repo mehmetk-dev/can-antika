@@ -32,7 +32,7 @@ export default function RecentOrderCard({ recentOrders }: RecentOrderCardProps) 
                         <div className="flex items-center gap-3 p-3 border rounded-md">
                             <div className="h-10 w-10 bg-muted/50 rounded flex items-center justify-center overflow-hidden">
                                 {recentOrders[0].orderItems?.[0]?.product?.imageUrls?.[0] ? (
-                                    <Image src={recentOrders[0].orderItems[0].product.imageUrls[0]} alt="ürün resmi" width={40} height={40} className="h-full w-full object-cover" unoptimized />
+                                    <Image src={recentOrders[0].orderItems[0].product.imageUrls[0]} alt="ürün resmi" width={40} height={40} className="h-full w-full object-cover" />
                                 ) : (
                                     <Package className="h-5 w-5 text-muted-foreground" />
                                 )}

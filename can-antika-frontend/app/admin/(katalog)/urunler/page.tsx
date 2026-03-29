@@ -14,7 +14,7 @@ import { toast } from "sonner"
 import Link from "next/link"
 import type { ProductResponse, CategoryResponse } from "@/lib/types"
 import { ADMIN_PAGE_SIZE } from "@/lib/constants"
-import { toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
+import { resolveImageUrl } from "@/lib/product/image-url"
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<ProductResponse[]>([])
@@ -169,12 +169,11 @@ export default function AdminProductsPage() {
                     <TableCell>
                       <div className="relative h-12 w-12 overflow-hidden rounded-md bg-muted">
                         <Image
-                          src={toCloudinaryResponsiveUrl(product.imageUrls?.[0] || "/placeholder.svg", 96, 70)}
+                          src={resolveImageUrl(product.imageUrls?.[0])}
                           alt={product.title}
                           fill
                           sizes="48px"
                           className="object-cover"
-                          unoptimized
                         />
                       </div>
                     </TableCell>

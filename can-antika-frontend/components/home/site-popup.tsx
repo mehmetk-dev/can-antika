@@ -89,7 +89,6 @@ export function SitePopup() {
                             alt={popup.title}
                             fill
                             className="object-cover"
-                            unoptimized
                         />
                     </div>
                 )}

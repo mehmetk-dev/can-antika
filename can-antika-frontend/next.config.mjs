@@ -5,7 +5,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: false,
+    loader: "custom",
+    loaderFile: "./lib/cloudinary-image-loader.ts",
     remotePatterns: [
       {
         protocol: 'https',
