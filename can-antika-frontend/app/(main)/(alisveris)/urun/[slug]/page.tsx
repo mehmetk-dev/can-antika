@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { cache } from "react"
-import { notFound } from "next/navigation"
 
 import { ProductPageClient } from "./product-page-client"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
@@ -34,14 +33,14 @@ async function fetchProductBySlug(slug: string) {
   const safeSlug = encodeURIComponent(slug)
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/slug/${safeSlug}`, {
     revalidate: 60,
-    timeoutMs: 1800,
+    timeoutMs: 2000,
   })
 }
 
 async function fetchProductById(id: number) {
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/${id}`, {
     revalidate: 60,
-    timeoutMs: 1800,
+    timeoutMs: 2000,
   })
 }
 
@@ -96,10 +95,6 @@ export default async function ProductPage({
 }) {
   const { slug } = await params
   const product = await fetchProduct(slug)
-
-  if (!product) {
-    notFound()
-  }
 
   const jsonLd = product
     ? {

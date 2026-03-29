@@ -67,7 +67,7 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
+    @CacheEvict(cacheNames = { "products:list", "products:byId", "products:bySlug" }, allEntries = true)
     public ProductResponse saveProduct(ProductRequest request) {
         CategoryResponse categoryResponse = categoryService.getCategoryResponseById(request.getCategoryId());
         Product entity = persistNewProduct(request);
@@ -83,7 +83,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Transactional
-    @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
+    @CacheEvict(cacheNames = { "products:list", "products:byId", "products:bySlug" }, allEntries = true)
     @Override
     public String deleteProduct(Long id) {
         Product product = getProductById(id);
@@ -105,7 +105,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
+    @CacheEvict(cacheNames = { "products:list", "products:byId", "products:bySlug" }, allEntries = true)
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = getProductById(id);
@@ -156,14 +156,14 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
+    @CacheEvict(cacheNames = { "products:list", "products:byId", "products:bySlug" }, allEntries = true)
     public List<Product> saveAllProducts(List<Product> products) {
         return productRepository.saveAll(products);
     }
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = { "products:list", "products:byId" }, allEntries = true)
+    @CacheEvict(cacheNames = { "products:list", "products:byId", "products:bySlug" }, allEntries = true)
     public void updateProductRating(Long productId, double averageRating, int reviewCount) {
         Product product = getProductById(productId);
         product.setAverageRating(averageRating);
@@ -333,6 +333,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @Cacheable(cacheNames = "products:bySlug", key = "#slug")
     public ProductResponse getProductBySlug(String slug) {
         // Önce slug ile ara
         var optionalProduct = productRepository.findBySlug(slug);
