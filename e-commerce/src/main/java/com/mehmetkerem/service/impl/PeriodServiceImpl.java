@@ -30,7 +30,7 @@ public class PeriodServiceImpl implements IPeriodService {
     private final ProductRepository productRepository;
 
     @Override
-    @CacheEvict(cacheNames = "periods:byIds", allEntries = true)
+    @CacheEvict(cacheNames = { "periods:byIds", "periods:all" }, allEntries = true)
     public PeriodResponse savePeriod(PeriodRequest request) {
         String normalizedName = normalizeRequired(request.getName());
         if (periodRepository.findByNameIgnoreCase(normalizedName).isPresent()) {
@@ -45,7 +45,7 @@ public class PeriodServiceImpl implements IPeriodService {
     }
 
     @Override
-    @CacheEvict(cacheNames = "periods:byIds", allEntries = true)
+    @CacheEvict(cacheNames = { "periods:byIds", "periods:all" }, allEntries = true)
     public PeriodResponse updatePeriod(Long id, PeriodRequest request) {
         Period period = getPeriodById(id);
         String normalizedName = normalizeRequired(request.getName());
@@ -64,7 +64,7 @@ public class PeriodServiceImpl implements IPeriodService {
     }
 
     @Override
-    @CacheEvict(cacheNames = "periods:byIds", allEntries = true)
+    @CacheEvict(cacheNames = { "periods:byIds", "periods:all" }, allEntries = true)
     public String deletePeriod(Long id) {
         if (productRepository.existsByPeriodId(id)) {
             throw new BadRequestException("Bu döneme bağlı ürünler var. Önce ürünlerde dönemi güncelleyin.");
@@ -86,6 +86,7 @@ public class PeriodServiceImpl implements IPeriodService {
     }
 
     @Override
+    @Cacheable(cacheNames = "periods:all", key = "'all'")
     public List<PeriodResponse> findAllPeriods() {
         return periodRepository.findAll().stream()
                 .map(this::toResponse)
@@ -93,6 +94,7 @@ public class PeriodServiceImpl implements IPeriodService {
     }
 
     @Override
+    @Cacheable(cacheNames = "periods:all", key = "'active'")
     public List<PeriodResponse> findActivePeriods() {
         return periodRepository.findByActiveTrueOrderByNameAsc().stream()
                 .map(this::toResponse)

@@ -13,9 +13,10 @@ import type { ProductResponse } from "@/lib/types"
 
 interface ProductCardProps {
   product: ProductResponse
+  isPriority?: boolean
 }
 
-export const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product, isPriority = false }: ProductCardProps) {
   const [imageErrored, setImageErrored] = useState(false)
 
   const imageUrl = resolveImageUrl(product.imageUrls?.[0])
@@ -33,7 +34,9 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
           src={imageErrored ? "/placeholder.svg" : imageUrl}
           alt={product.title}
           fill
-          loading="lazy"
+          priority={isPriority}
+          loading={isPriority ? "eager" : "lazy"}
+          fetchPriority={isPriority ? "high" : "auto"}
           decoding="async"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className={`object-cover object-center transition-transform duration-500 will-change-transform group-hover:scale-[1.03] ${isSold ? "grayscale opacity-60" : ""}`}

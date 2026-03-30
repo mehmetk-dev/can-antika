@@ -1,11 +1,11 @@
-﻿"use client"
+"use client"
 
 import { useState, useRef } from "react"
 import { fileApi } from "@/lib/api"
 import { toast } from "sonner"
 
 const MAX_IMAGES = 6
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB (backend limit)
+const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"])
 const ALLOWED_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp"])
 
@@ -33,7 +33,7 @@ export function useProductImages(initialImages: string[] = []) {
 
         const oversized = selectedFiles.filter((f) => f.size > MAX_FILE_SIZE)
         if (oversized.length > 0) {
-            toast.error(`${oversized.length} dosya 5MB sınırını aşıyor, atlandı.`)
+            toast.error(`${oversized.length} dosya 20MB sınırını aşıyor, atlandı.`)
         }
 
         const unsupported = selectedFiles.filter((f) => {

@@ -28,8 +28,6 @@ export function getServerApiUrlCandidates(): string[] {
     // Prefer private/internal routes on the server (avoid external API hop/timeouts).
     addUrl(internalApiUrl)
     addUrl("http://backend:8080")
-    addUrl("http://127.0.0.1:8080")
-    addUrl("http://localhost:8080")
     // Public URL as last resort — if all internal routes fail, still get data
     addUrl(publicApiUrl)
   } else {

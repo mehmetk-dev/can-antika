@@ -194,8 +194,8 @@ export function CatalogClient({
                     className={`grid gap-6 transition-opacity ${isLoading ? "opacity-60" : "opacity-100"} ${viewMode === "large" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3"
                       }`}
                   >
-                    {products.map((product) => (
-                      <ProductCard key={product.id} product={product} />
+                    {products.map((product, index) => (
+                      <ProductCard key={product.id} product={product} isPriority={index < 2} />
                     ))}
                   </div>
 

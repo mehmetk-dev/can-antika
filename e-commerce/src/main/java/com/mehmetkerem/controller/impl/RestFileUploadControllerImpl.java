@@ -35,8 +35,8 @@ public class RestFileUploadControllerImpl implements IRestFileUploadController {
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "image/jpeg", "image/png", "image/gif", "image/webp");
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "webp");
-    private static final long MAX_FILE_SIZE_BYTES = 5L * 1024 * 1024;
-    private static final long MAX_BATCH_SIZE_BYTES = 20L * 1024 * 1024;
+    private static final long MAX_FILE_SIZE_BYTES = 20L * 1024 * 1024;
+    private static final long MAX_BATCH_SIZE_BYTES = 120L * 1024 * 1024;
 
     public RestFileUploadControllerImpl(IFileStorageService storageService) {
         this.storageService = storageService;
@@ -64,7 +64,7 @@ public class RestFileUploadControllerImpl implements IRestFileUploadController {
 
         long totalSize = files.stream().mapToLong(MultipartFile::getSize).sum();
         if (totalSize > MAX_BATCH_SIZE_BYTES) {
-            throw new BadRequestException("Toplam dosya boyutu en fazla 20 MB olabilir.");
+            throw new BadRequestException("Toplam dosya boyutu en fazla 120 MB olabilir.");
         }
 
         List<String> urls = new ArrayList<>();
@@ -87,7 +87,7 @@ public class RestFileUploadControllerImpl implements IRestFileUploadController {
             throw new BadRequestException("Dosya bos olamaz.");
         }
         if (file.getSize() > MAX_FILE_SIZE_BYTES) {
-            throw new BadRequestException("Dosya boyutu en fazla 5 MB olabilir.");
+            throw new BadRequestException("Dosya boyutu en fazla 20 MB olabilir.");
         }
 
         String originalFilename = file.getOriginalFilename();

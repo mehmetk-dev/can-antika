@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { resolveImageUrl } from "@/lib/product/image-url"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { ProductResponse, CursorResponse } from "@/lib/types"
+import { NewArrivalsClientFallback } from "./new-arrivals-client-fallback"
 
 export async function NewArrivals() {
   let products: ProductResponse[] = []
@@ -13,13 +14,22 @@ export async function NewArrivals() {
   try {
     const data = await fetchApiDataWithFallback<CursorResponse<ProductResponse>>(
       "/v1/product?page=0&size=4&sortBy=id&direction=desc",
-      { revalidate: 120, timeoutMs: 1500 }
+      { revalidate: 120, timeoutMs: 3000 }
     )
     products = (data?.items ?? []).slice(0, 4)
   } catch {
-    // fail silently — Suspense boundary in page.tsx handles the skeleton
+    // Server-side fetch failed — client fallback will handle it
   }
 
+  // Server-side veri gelemediyse client-side fallback kullan
+  if (products.length === 0) {
+    return <NewArrivalsClientFallback />
+  }
+
+  return <NewArrivalsUI products={products} />
+}
+
+export function NewArrivalsUI({ products }: { products: ProductResponse[] }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-amber-50 to-amber-100/50 py-24 lg:py-32">
       <div
@@ -62,75 +72,69 @@ export async function NewArrivals() {
           </Link>
         </div>
 
-        {products.length === 0 ? (
-          <div className="mt-14 py-16 text-center">
-            <p className="font-serif text-amber-700">Henüz ürün eklenmemiş</p>
-          </div>
-        ) : (
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-6 lg:grid-cols-4">
-            {products.map((item) => {
-              const era = (item.attributes?.era as string) || ""
-              const imageUrl = resolveImageUrl(item.imageUrls?.[0])
-              const isSold = (item.stock ?? 0) <= 0
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-6 lg:grid-cols-4">
+          {products.map((item) => {
+            const era = (item.attributes?.era as string) || ""
+            const imageUrl = resolveImageUrl(item.imageUrls?.[0])
+            const isSold = (item.stock ?? 0) <= 0
 
-              return (
-                <Link key={item.id} href={`/urun/${item.slug ?? item.id}`} className="group relative">
-                  <div className="relative overflow-hidden rounded-sm border-2 border-amber-300/50 bg-white shadow-lg transition-all duration-300 group-hover:border-amber-500 group-hover:shadow-xl group-hover:shadow-amber-200/50">
-                    <div className="absolute left-2 top-2 h-6 w-6 border-l-2 border-t-2 border-amber-400/60" />
-                    <div className="absolute right-2 top-2 h-6 w-6 border-r-2 border-t-2 border-amber-400/60" />
-                    <div className="absolute bottom-2 left-2 h-6 w-6 border-b-2 border-l-2 border-amber-400/60" />
-                    <div className="absolute bottom-2 right-2 h-6 w-6 border-b-2 border-r-2 border-amber-400/60" />
+            return (
+              <Link key={item.id} href={`/urun/${item.slug ?? item.id}`} className="group relative">
+                <div className="relative overflow-hidden rounded-sm border-2 border-amber-300/50 bg-white shadow-lg transition-all duration-300 group-hover:border-amber-500 group-hover:shadow-xl group-hover:shadow-amber-200/50">
+                  <div className="absolute left-2 top-2 h-6 w-6 border-l-2 border-t-2 border-amber-400/60" />
+                  <div className="absolute right-2 top-2 h-6 w-6 border-r-2 border-t-2 border-amber-400/60" />
+                  <div className="absolute bottom-2 left-2 h-6 w-6 border-b-2 border-l-2 border-amber-400/60" />
+                  <div className="absolute bottom-2 right-2 h-6 w-6 border-b-2 border-r-2 border-amber-400/60" />
 
-                    <div className="aspect-[4/5] overflow-hidden p-3">
-                      <div className="relative h-full w-full overflow-hidden rounded-sm">
-                        <Image
-                          src={imageUrl}
-                          alt={item.title}
-                          fill
-                          loading="lazy"
-                          decoding="async"
-                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                          className="object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-amber-900/40 via-transparent to-amber-50/10 mix-blend-multiply" />
-                      </div>
+                  <div className="aspect-[4/5] overflow-hidden p-3">
+                    <div className="relative h-full w-full overflow-hidden rounded-sm">
+                      <Image
+                        src={imageUrl}
+                        alt={item.title}
+                        fill
+                        loading="lazy"
+                        decoding="async"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-amber-900/40 via-transparent to-amber-50/10 mix-blend-multiply" />
                     </div>
+                  </div>
 
-                    <div className="absolute left-5 top-5">
-                      {!isSold ? (
-                        <div className="flex items-center gap-1 rounded-sm border border-amber-600 bg-amber-50 px-1.5 py-0.5 shadow-sm sm:gap-1.5 sm:px-2.5 sm:py-1">
-                          <svg className="h-2 w-2 text-amber-700 sm:h-3 sm:w-3" viewBox="0 0 12 12">
-                            <polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9 3,11 3.5,7.5 1,5 4.5,4.5" fill="currentColor" />
-                          </svg>
-                          <span className="font-serif text-[9px] font-medium text-amber-800 sm:text-xs">Tek Ürün</span>
-                        </div>
-                      ) : (
-                        <div className="rounded-sm border border-stone-400 bg-stone-100 px-1.5 py-0.5 sm:px-2.5 sm:py-1">
-                          <span className="font-serif text-[9px] font-medium text-stone-600 sm:text-xs">Satıldı</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex h-full flex-col justify-between border-t border-amber-200/50 bg-gradient-to-b from-amber-50/80 to-white p-3 sm:p-4">
-                      <div>
-                        {era && <p className="font-serif text-[9px] uppercase tracking-[0.2em] text-amber-600 sm:text-xs">{era}</p>}
-                        <h3 className="mt-1 line-clamp-2 font-serif text-xs font-medium text-amber-950 sm:mt-1.5 sm:line-clamp-1 sm:text-lg">{item.title}</h3>
+                  <div className="absolute left-5 top-5">
+                    {!isSold ? (
+                      <div className="flex items-center gap-1 rounded-sm border border-amber-600 bg-amber-50 px-1.5 py-0.5 shadow-sm sm:gap-1.5 sm:px-2.5 sm:py-1">
+                        <svg className="h-2 w-2 text-amber-700 sm:h-3 sm:w-3" viewBox="0 0 12 12">
+                          <polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9 3,11 3.5,7.5 1,5 4.5,4.5" fill="currentColor" />
+                        </svg>
+                        <span className="font-serif text-[9px] font-medium text-amber-800 sm:text-xs">Tek Ürün</span>
                       </div>
-                      <div className="mt-2 flex items-center justify-between sm:mt-3">
-                        <p className="font-serif text-sm font-bold text-amber-800 sm:text-xl">
-                          {isSold ? <span className="text-stone-400 line-through">₺{item.price.toLocaleString("tr-TR")}</span> : `₺${item.price.toLocaleString("tr-TR")}`}
-                        </p>
-                        <div className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full border border-amber-300 bg-amber-50 text-amber-700 transition-colors group-hover:bg-amber-600 group-hover:text-white sm:flex">
-                          <ArrowRight className="h-4 w-4" />
-                        </div>
+                    ) : (
+                      <div className="rounded-sm border border-stone-400 bg-stone-100 px-1.5 py-0.5 sm:px-2.5 sm:py-1">
+                        <span className="font-serif text-[9px] font-medium text-stone-600 sm:text-xs">Satıldı</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex h-full flex-col justify-between border-t border-amber-200/50 bg-gradient-to-b from-amber-50/80 to-white p-3 sm:p-4">
+                    <div>
+                      {era && <p className="font-serif text-[9px] uppercase tracking-[0.2em] text-amber-600 sm:text-xs">{era}</p>}
+                      <h3 className="mt-1 line-clamp-2 font-serif text-xs font-medium text-amber-950 sm:mt-1.5 sm:line-clamp-1 sm:text-lg">{item.title}</h3>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between sm:mt-3">
+                      <p className="font-serif text-sm font-bold text-amber-800 sm:text-xl">
+                        {isSold ? <span className="text-stone-400 line-through">₺{item.price.toLocaleString("tr-TR")}</span> : `₺${item.price.toLocaleString("tr-TR")}`}
+                      </p>
+                      <div className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full border border-amber-300 bg-amber-50 text-amber-700 transition-colors group-hover:bg-amber-600 group-hover:text-white sm:flex">
+                        <ArrowRight className="h-4 w-4" />
                       </div>
                     </div>
                   </div>
-                </Link>
-              )
-            })}
-          </div>
-        )}
+                </div>
+              </Link>
+            )
+          })}
+        </div>
 
         <div className="mt-10 text-center sm:hidden">
           <Link href="/urunler">
