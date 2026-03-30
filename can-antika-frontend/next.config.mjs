@@ -17,7 +17,8 @@ const nextConfig = {
     minimumCacheTTL: 86400,
   },
   experimental: {
-    cssChunking: "loose",
+    cssChunking: "strict",
+    optimizePackageImports: ["lucide-react"],
   },
   turbopack: {},
   webpack: (config) => {

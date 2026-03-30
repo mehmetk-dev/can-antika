@@ -114,39 +114,44 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
 
             {/* Write review */}
             {isAuthenticated ? (
-                <div className="space-y-4 rounded-lg border border-border bg-card p-6">
-                    <h4 className="font-serif font-semibold text-foreground">Yorum Yaz</h4>
+                <div className="space-y-6 rounded-xl border border-border bg-transparent p-6 sm:p-8">
+                    <h4 className="font-serif text-xl tracking-wide text-[#5c4a3d]">Değerlendirmenizi Bırakın</h4>
                     <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((s) => (
-                            <button key={s} type="button" onClick={() => setRating(s)} className="p-0.5" aria-label={`${s} yıldız`}>
+                            <button key={s} type="button" onClick={() => setRating(s)} className="p-0.5 transition-transform hover:scale-110" aria-label={`${s} yıldız`}>
                                 <Star className={`h-6 w-6 transition-colors ${s <= rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30 hover:text-amber-300"}`} />
                             </button>
                         ))}
                     </div>
                     <Textarea
-                        placeholder="Bu ürün hakkında düşüncelerinizi paylaşın..."
+                        placeholder="Bu eşsiz eser hakkındaki düşüncelerinizi kelimelere dökün..."
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
-                        rows={3}
+                        rows={4}
                         maxLength={1000}
-                        className="resize-none"
+                        className="resize-none font-light bg-transparent border-border/60 focus:border-[#d4af37] transition-colors"
                     />
-                    <Button onClick={handleSubmit} disabled={submitting} size="sm">
+                    <Button onClick={handleSubmit} disabled={submitting} className="h-12 px-8 rounded-none bg-[#4a3424] text-white font-serif tracking-widest hover:bg-[#362519] transition-all uppercase text-xs">
                         {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         Gönder
                     </Button>
                 </div>
             ) : (
-                <div className="rounded-lg border border-border bg-muted/30 p-6 text-center">
-                    <p className="text-muted-foreground">Yorum yapmak için <Link href="/giris" className="text-primary hover:underline">giriş yapın</Link>.</p>
+                <div className="rounded-xl border border-[#d4af37]/20 bg-[#fbf9f6] p-8 text-center flex flex-col items-center justify-center gap-3">
+                    <p className="text-muted-foreground font-light text-sm">
+                      Bu nadide eser hakkında görüşlerinizi paylaşmak için <Link href="/giris" className="text-[#6f4c1f] font-medium transition-all hover:text-[#d4af37] hover:underline">giriş yapın</Link>.
+                    </p>
                 </div>
             )}
 
             {/* Review list */}
             {loading ? (
-                <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+                <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-[#d4af37]" /></div>
             ) : reviews.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
+                <div className="py-12 text-center">
+                    <p className="font-serif text-2xl font-light text-[#5c4a3d] opacity-50 mb-3">Sessiz Sular</p>
+                    <p className="font-light text-sm text-muted-foreground">Koleksiyonumuzdaki bu eser için ilk yorumu siz bırakın.</p>
+                </div>
             ) : (
                 <div className="space-y-4">
                     {reviews.map((review) => (

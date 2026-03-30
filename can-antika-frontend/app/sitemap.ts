@@ -1,82 +1,40 @@
 import type { MetadataRoute } from "next"
+import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
+import type { ProductResponse, CursorResponse, CategoryResponse, BlogPost } from "@/lib/types"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://canantika.com"
-import { getServerApiUrl } from "@/lib/server/server-api-url"
-const API_URL = getServerApiUrl()
 
-interface ProductItem {
-    id: number
-    slug: string
-    updatedAt?: string
-    createdAt?: string
-}
-
-interface BlogItem {
-    id: number
-    slug: string
-    createdAt?: string
-}
-
-interface CategoryItem {
-    id: number
-    name: string
-    slug?: string
-}
-
-async function fetchProducts(): Promise<ProductItem[]> {
-    const pageSize = 100
-    const maxPages = 100
-    const allProducts: ProductItem[] = []
-    let page = 0
-    let total = Number.POSITIVE_INFINITY
-
+async function fetchProducts(): Promise<ProductResponse[]> {
     try {
-        while (page < maxPages && allProducts.length < total) {
-            const res = await fetch(`${API_URL}/v1/product?page=${page}&size=${pageSize}`, {
-                next: { revalidate: 3600 },
-            })
-            if (!res.ok) break
-
-            const json = await res.json()
-            const items = Array.isArray(json?.data?.items) ? (json.data.items as ProductItem[]) : []
-            const totalElement = Number(json?.data?.totalElement)
-
-            if (Number.isFinite(totalElement) && totalElement > 0) {
-                total = totalElement
-            }
-            if (items.length === 0) break
-
-            allProducts.push(...items)
-            page += 1
-        }
-
-        return allProducts
+        const data = await fetchApiDataWithFallback<CursorResponse<ProductResponse>>(
+            "/v1/product?page=0&size=100&sortBy=id&direction=desc",
+            { revalidate: 300, timeoutMs: 5000 }
+        )
+        return data?.items ?? []
     } catch {
         return []
     }
 }
 
-async function fetchBlogPosts(): Promise<BlogItem[]> {
+async function fetchBlogPosts(): Promise<BlogPost[]> {
     try {
-        const res = await fetch(`${API_URL}/v1/blog?page=0&size=500`, {
-            next: { revalidate: 3600 },
-        })
-        if (!res.ok) return []
-        const json = await res.json()
-        return json.data?.items ?? json.data ?? []
+        const data = await fetchApiDataWithFallback<CursorResponse<BlogPost>>(
+            "/v1/blog?page=0&size=100",
+            { revalidate: 300, timeoutMs: 3000 }
+        )
+        return data?.items ?? []
     } catch {
         return []
     }
 }
 
-async function fetchCategories(): Promise<CategoryItem[]> {
+async function fetchCategories(): Promise<CategoryResponse[]> {
     try {
-        const res = await fetch(`${API_URL}/v1/category`, {
-            next: { revalidate: 3600 },
-        })
-        if (!res.ok) return []
-        const json = await res.json()
-        return json.data ?? []
+        const data = await fetchApiDataWithFallback<CategoryResponse[]>(
+            "/v1/category",
+            { revalidate: 300, timeoutMs: 3000 }
+        )
+        return data ?? []
     } catch {
         return []
     }
@@ -128,6 +86,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.5,
         },
         {
+            url: `${SITE_URL}/teslimat`,
+            lastModified: new Date(),
+            changeFrequency: "monthly",
+            priority: 0.4,
+        },
+        {
             url: `${SITE_URL}/gizlilik`,
             changeFrequency: "yearly",
             priority: 0.3,
@@ -162,7 +126,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Ürün sayfaları
     const productPages: MetadataRoute.Sitemap = products.map((product) => ({
         url: `${SITE_URL}/urun/${product.slug || product.id}`,
-        lastModified: product.updatedAt ? new Date(product.updatedAt) : new Date(),
+        lastModified: new Date(), // ProductResponse doesn't have updatedAt in current types
         changeFrequency: "weekly" as const,
         priority: 0.8,
     }))
@@ -177,7 +141,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Kategori sayfaları
     const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
-        url: `${SITE_URL}/urunler?category=${cat.slug || cat.name}`,
+        url: `${SITE_URL}/urunler?category=${encodeURIComponent(cat.name)}`,
         lastModified: new Date(),
         changeFrequency: "weekly" as const,
         priority: 0.6,
@@ -185,3 +149,4 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [...staticPages, ...productPages, ...blogPages, ...categoryPages]
 }
+

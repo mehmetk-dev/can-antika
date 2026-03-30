@@ -51,7 +51,7 @@ function RelatedProductsInner({ products, currentProductId }: RelatedProductsPro
                 prefetch={false}
                 className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-background shadow-[0_6px_18px_rgba(33,24,14,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_14px_30px_rgba(33,24,14,0.14)]"
               >
-                <div className="relative aspect-[4/5] overflow-hidden bg-muted">
+                <div className="relative aspect-square sm:aspect-[4/5] overflow-hidden bg-[#f9f7f0]">
                   <Image
                     src={imageUrl}
                     alt={product.title}
@@ -59,29 +59,26 @@ function RelatedProductsInner({ products, currentProductId }: RelatedProductsPro
                     loading="lazy"
                     decoding="async"
                     sizes="(max-width: 640px) 47vw, (max-width: 1024px) 31vw, 24vw"
-                    className="object-cover object-center transition-transform duration-500 will-change-transform group-hover:scale-[1.03]"
+                    className="object-cover object-center transition-transform duration-700 will-change-transform group-hover:scale-105"
                   />
-                  <span className="absolute left-2 top-2 rounded-md bg-background/92 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary shadow-sm sm:left-3 sm:top-3">
-                    Tek Ürün
-                  </span>
+                  <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/5" />
                 </div>
 
-                <div className="flex grow flex-col p-3 sm:p-4">
-                  {product.category?.name && (
-                    <p className="inline-flex w-fit rounded-md border border-primary/15 bg-primary/5 px-2 py-1 text-[10px] uppercase tracking-wider text-primary/80 sm:text-[11px]">
-                      {product.category.name}
-                    </p>
-                  )}
-                  <h3 className="mt-2 min-h-[2.8rem] line-clamp-2 font-serif text-base font-medium leading-tight text-foreground sm:text-lg">
+                <div className="flex grow flex-col p-4">
+                  <div className="mb-2 hidden sm:block">
+                    {product.category?.name && (
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/80">
+                        {product.category.name}
+                      </p>
+                    )}
+                  </div>
+                  <h3 className="line-clamp-2 font-serif text-base font-normal leading-tight text-foreground group-hover:text-primary transition-colors">
                     {product.title}
                   </h3>
-                  <div className="mt-3 flex items-end justify-between gap-2">
-                    <p className="font-serif text-lg font-semibold text-primary sm:text-xl">
+                  <div className="mt-3 flex items-center justify-between">
+                    <p className="font-sans text-sm font-medium text-foreground">
                       ₺{(product.price ?? 0).toLocaleString("tr-TR")}
                     </p>
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-xs">
-                      Detayı Gör
-                    </span>
                   </div>
                 </div>
               </Link>

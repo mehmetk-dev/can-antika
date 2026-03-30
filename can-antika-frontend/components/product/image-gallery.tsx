@@ -43,15 +43,15 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
   return (
     <div className="min-w-0 w-full space-y-4">
       {/* Main image area */}
-      <div className="group relative aspect-[3/4] w-full max-w-full overflow-hidden rounded-lg bg-muted">
+      <div className="group relative aspect-square w-full max-w-full overflow-hidden rounded-lg bg-[#f9f7f0]">
         <Image
           src={useFallbackImage ? "/placeholder.svg" : mainImage}
           alt={productName}
           fill
           priority
           fetchPriority="high"
-          sizes="(max-width: 640px) 92vw, (max-width: 1024px) 52vw, 42vw"
-          className="object-cover object-center transition-transform duration-300 will-change-transform group-hover:scale-[1.02]"
+          sizes="(max-width: 640px) 100vw, 50vw"
+          className="object-contain p-2 sm:p-4 object-center transition-transform duration-300 will-change-transform group-hover:scale-[1.02]"
           onError={handleImageError}
         />
 

@@ -1,7 +1,8 @@
-﻿import type { Metadata } from "next"
-import { cache } from "react"
+import type { Metadata } from "next"
+import { cache, Suspense } from "react"
 import { notFound } from "next/navigation"
 import { BlogDetailClient } from "./blog-detail-client"
+import BlogLoading from "./loading"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { BlogPost, BlogCategory } from "@/lib/types"
 
@@ -77,6 +78,15 @@ export default async function BlogDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+
+  return (
+    <Suspense fallback={<BlogLoading />}>
+      <BlogDetailResolver slug={slug} />
+    </Suspense>
+  )
+}
+
+async function BlogDetailResolver({ slug }: { slug: string }) {
   const [postResult, categoriesResult] = await Promise.allSettled([
     fetchBlogPost(slug),
     fetchBlogCategories(),
@@ -86,9 +96,7 @@ export default async function BlogDetailPage({
     ? categoriesResult.value
     : []
 
-  if (!post) {
-    notFound()
-  }
+  // Removed notFound() check so that BlogDetailClient's client-side fallback can work.
 
   const jsonLd = post
     ? {

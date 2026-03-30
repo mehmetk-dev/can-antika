@@ -17,6 +17,20 @@ export default function robots(): MetadataRoute.Robots {
                     "/bakim/",
                 ],
             },
+            // AI crawler'larını engelle (Cloudflare managed robots.txt kapatılınca bu devralır)
+            {
+                userAgent: [
+                    "GPTBot",
+                    "ClaudeBot",
+                    "CCBot",
+                    "Google-Extended",
+                    "Bytespider",
+                    "Amazonbot",
+                    "Applebot-Extended",
+                    "meta-externalagent",
+                ],
+                disallow: "/",
+            },
         ],
         sitemap: `${SITE_URL}/sitemap.xml`,
     }

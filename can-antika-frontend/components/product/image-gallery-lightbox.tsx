@@ -22,7 +22,7 @@ export function ImageGalleryLightbox({
     onNext,
 }: ImageGalleryLightboxProps) {
     return (
-        <DialogContent className="max-w-5xl bg-background p-2 sm:p-2 w-[96vw] sm:w-auto">
+        <DialogContent className="w-[95vw] sm:max-w-[90vw] lg:max-w-6xl bg-background p-2 sm:p-4 border-none shadow-2xl rounded-xl">
             <DialogTitle className="sr-only">{productName}</DialogTitle>
             <DialogDescription className="sr-only">{productName} ürün görselleri galeri görünümü.</DialogDescription>
             <div className="relative h-[70vh] sm:h-[82vh] w-full">

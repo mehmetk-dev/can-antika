@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Minus, Plus, Trash2, ShoppingBag, Loader2, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useCart } from "@/hooks/useCart"
 
 function CartContent() {
@@ -17,9 +18,40 @@ function CartContent() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center py-32">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="mt-4 text-muted-foreground">Sepet yükleniyor...</p>
+            <div className="grid gap-8 lg:grid-cols-3 animate-in fade-in duration-500">
+                <div className="lg:col-span-2 space-y-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <Skeleton className="h-7 w-40" />
+                    </div>
+                    {[1, 2].map(i => (
+                        <div key={i} className="flex gap-4 rounded-lg border border-border bg-card p-4">
+                            <Skeleton className="h-24 w-24 rounded-md sm:h-32 sm:w-32" />
+                            <div className="flex flex-1 flex-col justify-between">
+                                <div className="space-y-3">
+                                    <Skeleton className="h-5 w-3/4" />
+                                    <Skeleton className="h-4 w-1/4" />
+                                </div>
+                                <div className="flex items-center justify-between mt-4">
+                                    <Skeleton className="h-8 w-24" />
+                                    <Skeleton className="h-6 w-20" />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className="lg:col-span-1">
+                    <div className="sticky top-24 rounded-lg border border-border bg-card p-6">
+                        <Skeleton className="h-6 w-32 mb-6" />
+                        <div className="space-y-4">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-full" />
+                        </div>
+                        <Separator className="my-4" />
+                        <Skeleton className="h-6 w-full mb-6" />
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full mt-2" />
+                    </div>
+                </div>
             </div>
         )
     }

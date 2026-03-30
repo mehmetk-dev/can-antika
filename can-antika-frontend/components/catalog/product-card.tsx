@@ -72,7 +72,7 @@ export const ProductCard = memo(function ProductCard({ product, isPriority = fal
           {product.title}
         </h3>
         {condition && <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">{condition}</p>}
-        {product.category && <p className="mt-1 text-xs text-muted-foreground">{product.category.name}</p>}
+        {product.category && <p className="mt-1 text-xs text-muted-foreground hidden sm:block">{product.category.name}</p>}
         <div className="mt-3">
           {isSold ? (
             <p className="font-semibold text-muted-foreground line-through">₺{(product.price ?? 0).toLocaleString("tr-TR")}</p>

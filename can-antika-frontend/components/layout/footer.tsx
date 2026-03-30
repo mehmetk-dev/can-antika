@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { ChevronDown } from "lucide-react"
 
 import { categoryApi } from "@/lib/api"
 import { useSiteSettings } from "@/lib/site-settings-context"
@@ -69,16 +70,35 @@ function SocialIcon({ type }: { type: "facebook" | "instagram" | "twitter" | "yo
   )
 }
 
-function CornerOrnament({ className }: { className?: string }) {
+function FooterAccordion({ title, children }: { title: string; children: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false)
+
   return (
-    <svg className={className} viewBox="0 0 120 120" fill="none" aria-hidden="true">
-      <path d="M6 114V64C6 31 31 6 64 6h50" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M14 106V68C14 40 36 14 64 14h38" stroke="currentColor" strokeWidth="0.9" opacity="0.75" />
-      <path d="M22 98V72c0-22 18-40 40-40h26" stroke="currentColor" strokeWidth="0.8" opacity="0.55" />
-      <circle cx="64" cy="64" r="4" fill="currentColor" opacity="0.45" />
-      <circle cx="40" cy="88" r="2.5" fill="currentColor" opacity="0.35" />
-      <circle cx="88" cy="40" r="2.5" fill="currentColor" opacity="0.35" />
-    </svg>
+    <div className="border-b border-primary-foreground/10 py-4 sm:border-none sm:py-0">
+      <button 
+        type="button" 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="flex w-full items-center justify-between sm:cursor-auto sm:pointer-events-none"
+      >
+        <h3 className="font-serif text-lg font-semibold text-primary-foreground">{title}</h3>
+        <ChevronDown 
+          className={cn(
+            "h-5 w-5 text-primary-foreground/70 transition-transform duration-300 sm:hidden", 
+            isOpen && "rotate-180"
+          )} 
+        />
+      </button>
+      <div 
+        className={cn(
+          "grid transition-all duration-300 ease-in-out sm:grid-rows-[1fr] sm:mt-4 sm:opacity-100",
+          isOpen ? "grid-rows-[1fr] mt-4 opacity-100" : "grid-rows-[0fr] opacity-0"
+        )}
+      >
+        <div className="overflow-hidden">
+          {children}
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -116,38 +136,21 @@ export function Footer({ className }: FooterProps) {
   const hasCategories = categories.length > 0
 
   return (
-    <footer className={cn("relative mt-20 overflow-hidden border-t border-primary-foreground/10 bg-primary text-primary-foreground", className)}>
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.22]"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d1a46e' stroke-opacity='0.6' stroke-width='1'%3E%3Crect x='10' y='10' width='100' height='100'/%3E%3Crect x='28' y='28' width='64' height='64'/%3E%3Cpath d='M10 60h100M60 10v100'/%3E%3C/g%3E%3C/svg%3E\")",
-          backgroundSize: "120px 120px",
-          backgroundPosition: "0 0",
-        }}
-      />
-      <div className="pointer-events-none absolute inset-0 opacity-20">
-        <div className="absolute -top-32 left-[-10%] h-80 w-80 rounded-full bg-accent/10" />
-        <div className="absolute -bottom-32 right-[-10%] h-80 w-80 rounded-full bg-accent/10" />
-      </div>
-      <CornerOrnament className="pointer-events-none absolute left-5 top-5 h-20 w-20 text-accent/30" />
-      <CornerOrnament className="pointer-events-none absolute right-5 top-5 h-20 w-20 -scale-x-100 text-accent/30" />
-      <CornerOrnament className="pointer-events-none absolute bottom-5 left-5 h-20 w-20 -scale-y-100 text-accent/30" />
-      <CornerOrnament className="pointer-events-none absolute bottom-5 right-5 h-20 w-20 scale-x-[-1] scale-y-[-1] text-accent/30" />
-
-      <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
+    <footer className={cn("relative mt-auto overflow-hidden border-t-2 border-[#d4af37]/20 bg-[#5A3A22] text-[#fbf9f6]", className)}>
+      <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
         <div
-          className={`grid gap-10 border-b border-primary-foreground/10 pb-10 md:grid-cols-2 xl:gap-8 ${hasCategories ? "xl:grid-cols-4" : "xl:grid-cols-3"
+          className={`grid gap-2 sm:gap-10 border-b border-primary-foreground/10 pb-8 sm:pb-10 md:grid-cols-2 xl:gap-8 ${hasCategories ? "xl:grid-cols-4" : "xl:grid-cols-3"
             }`}
         >
-          <div>
+          {/* Always Visible Company Info */}
+          <div className="mb-6 sm:mb-0">
             <Link href="/" className="inline-block">
               <h2 className="font-serif text-3xl font-semibold tracking-tight text-primary-foreground">{settings.storeName || "Can Antika"}</h2>
             </Link>
             <div className="mt-2 flex items-center gap-2">
-              <span className="h-px w-8 bg-gradient-to-r from-accent/60 to-transparent" />
-              <span className="text-[10px] uppercase tracking-[0.24em] text-accent">{settings.businessType || "Antika Eşya Satışı"}</span>
-              <span className="h-px w-8 bg-gradient-to-l from-accent/60 to-transparent" />
+              <span className="h-px w-8 bg-gradient-to-r from-[#d4af37]/60 to-transparent" />
+              <span className="text-[10px] uppercase tracking-[0.24em] text-[#d4af37]">{settings.businessType || "Antika Eşya Satışı"}</span>
+              <span className="h-px w-8 bg-gradient-to-l from-[#d4af37]/60 to-transparent" />
             </div>
             <p className="mt-5 max-w-md text-sm leading-7 text-primary-foreground/75">
               {settings.storeDescription || settings.footerAbout || "Nadir parçaları güvenli alışveriş deneyimiyle koleksiyonerlerle buluşturuyoruz."}
@@ -155,12 +158,12 @@ export function Footer({ className }: FooterProps) {
 
             <div className="mt-6 space-y-2 text-sm text-primary-foreground/75">
               {settings.phone ? (
-                <a href={phoneHref} className="block transition-colors hover:text-accent">
+                <a href={phoneHref} className="block transition-colors hover:text-[#d4af37]">
                   {settings.phone}
                 </a>
               ) : null}
               {settings.email ? (
-                <a href={mailHref} className="block transition-colors hover:text-accent">
+                <a href={mailHref} className="block transition-colors hover:text-[#d4af37]">
                   {settings.email}
                 </a>
               ) : null}
@@ -169,7 +172,7 @@ export function Footer({ className }: FooterProps) {
                   href={mapHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block max-w-md transition-colors hover:text-accent"
+                  className="block max-w-md transition-colors hover:text-[#d4af37]"
                 >
                   {settings.address}
                 </a>
@@ -184,7 +187,7 @@ export function Footer({ className }: FooterProps) {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 text-primary-foreground/70 transition-colors hover:border-accent hover:bg-accent/10 hover:text-accent"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/5 text-primary-foreground/70 transition-colors hover:border-[#d4af37] hover:bg-[#d4af37]/10 hover:text-[#d4af37]"
                   >
                     <SocialIcon type={social.key} />
                   </a>
@@ -193,64 +196,63 @@ export function Footer({ className }: FooterProps) {
             )}
           </div>
 
-          <div>
-            <h3 className="font-serif text-lg font-semibold text-primary-foreground">Kurumsal</h3>
-            <ul className="mt-4 space-y-2.5">
+          {/* Accordion Links on Mobile */}
+          <FooterAccordion title="Kurumsal">
+            <ul className="space-y-2.5 pb-2 sm:pb-0">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
+                  <Link href={link.href} className="text-sm text-primary-foreground/70 transition-colors hover:text-[#d4af37]">
                     {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
-          </div>
+          </FooterAccordion>
 
           {hasCategories && (
-            <div>
-              <h3 className="font-serif text-lg font-semibold text-primary-foreground">Kategoriler</h3>
-              <ul className="mt-4 space-y-2.5">
+            <FooterAccordion title="Kategoriler">
+              <ul className="space-y-2.5 pb-2 sm:pb-0">
                 {categories.map((cat) => (
                   <li key={cat.id}>
                     <Link
                       href={`/urunler?category=${encodeURIComponent(cat.name)}`}
-
-                      className="text-sm text-primary-foreground/70 transition-colors hover:text-accent"
+                      className="text-sm text-primary-foreground/70 transition-colors hover:text-[#d4af37]"
                     >
                       {cat.name}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </FooterAccordion>
           )}
 
-          <div>
-            <h3 className="font-serif text-lg font-semibold text-primary-foreground">Hukuki</h3>
-            <ul className="mt-4 space-y-2.5">
-              {footerLinks.legal.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-primary-foreground/70 transition-colors hover:text-accent">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            {!hasCategories && isCategoriesLoading && (
-              <p className="mt-4 text-xs text-primary-foreground/45">Kategoriler yükleniyor...</p>
-            )}
-          </div>
+          <FooterAccordion title="Hukuki">
+            <div className="pb-2 sm:pb-0">
+              <ul className="space-y-2.5">
+                {footerLinks.legal.map((link) => (
+                  <li key={link.name}>
+                    <Link href={link.href} className="text-sm text-primary-foreground/70 transition-colors hover:text-[#d4af37]">
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              {!hasCategories && isCategoriesLoading && (
+                <p className="mt-4 text-xs text-primary-foreground/45">Kategoriler yükleniyor...</p>
+              )}
+            </div>
+          </FooterAccordion>
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-4">
-          <p className="text-sm text-primary-foreground/60">© 2026 Can Antika</p>
-          <p className="text-sm text-primary-foreground/50">
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:justify-between sm:gap-4">
+          <p className="text-sm text-primary-foreground/60 text-center">© 2026 Can Antika</p>
+          <p className="text-sm text-primary-foreground/50 text-center">
             Dijital altyapı ve geliştirme:{" "}
             <a
               href="https://fogistanbul.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline decoration-primary-foreground/30 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+              className="underline decoration-primary-foreground/30 underline-offset-4 transition-colors hover:text-[#d4af37] hover:decoration-[#d4af37]"
             >
               Fogistanbul.com
             </a>

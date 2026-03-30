@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { HelpCircle, ChevronDown } from "lucide-react"
+import { useState, useEffect } from "react"
+import { HelpCircle, ChevronDown, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { PageHero } from "@/components/layout/page-hero"
 import type { FaqItem } from "@/lib/types"
+import { faqApi } from "@/lib/api"
 
 interface FaqClientProps {
     initialFaqs: FaqItem[]
@@ -12,6 +13,26 @@ interface FaqClientProps {
 
 export function FaqClient({ initialFaqs }: FaqClientProps) {
     const [openItems, setOpenItems] = useState<Set<number>>(new Set())
+    const [faqs, setFaqs] = useState<FaqItem[]>(initialFaqs)
+    const [isLoading, setIsLoading] = useState(initialFaqs.length === 0)
+
+    useEffect(() => {
+        if (initialFaqs.length === 0) {
+            async function fetchFaqs() {
+                try {
+                    const res = await faqApi.getActive();
+                    if (Array.isArray(res)) {
+                        setFaqs([...res].sort((a, b) => a.displayOrder - b.displayOrder));
+                    }
+                } catch (error) {
+                    console.error("Client-side fallback Faq fetch error:", error);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+            fetchFaqs();
+        }
+    }, [initialFaqs.length]);
 
     const toggleItem = (id: number) => {
         setOpenItems((prev) => {
@@ -40,7 +61,12 @@ export function FaqClient({ initialFaqs }: FaqClientProps) {
                 {/* FAQ Content */}
                 <section className="py-16">
                     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                        {initialFaqs.length === 0 ? (
+                        {isLoading ? (
+                            <div className="text-center py-24 flex flex-col items-center justify-center">
+                                <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
+                                <h3 className="font-serif text-lg text-foreground">Sorular yükleniyor...</h3>
+                            </div>
+                        ) : faqs.length === 0 ? (
                             <div className="text-center py-24">
                                 <HelpCircle className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                                 <h3 className="font-serif text-xl text-foreground">Henüz SSS eklenmemiş</h3>
@@ -50,7 +76,7 @@ export function FaqClient({ initialFaqs }: FaqClientProps) {
                             </div>
                         ) : (
                             <div className="space-y-3">
-                                {initialFaqs.map((faq) => {
+                                {faqs.map((faq) => {
                                     const isOpen = openItems.has(faq.id)
                                     return (
                                         <div

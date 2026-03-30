@@ -119,25 +119,26 @@ export function CategoriesSection() {
                 <div className="pointer-events-none absolute inset-2 z-10 border border-[#c39569]/30" />
 
                 {[
-                  "left-4 top-4",
-                  "right-4 top-4 rotate-90",
-                  "bottom-4 left-4 -rotate-90",
-                  "bottom-4 right-4 rotate-180",
+                  "left-2 top-2",
+                  "right-2 top-2 rotate-90",
+                  "bottom-2 left-2 -rotate-90",
+                  "bottom-2 right-2 rotate-180",
                 ].map((pos) => (
                   <div key={pos} className={`absolute ${pos} z-10`}>
-                    <svg className="h-6 w-6 text-[#d1a46e]/65" viewBox="0 0 24 24">
+                    <svg className="h-4 w-4 text-[#d1a46e]/60" viewBox="0 0 24 24">
                       <path d="M0,12 Q0,0 12,0" fill="none" stroke="currentColor" strokeWidth="2" />
-                      <circle cx="12" cy="0" r="2" fill="currentColor" />
-                      <circle cx="0" cy="12" r="2" fill="currentColor" />
+                      <circle cx="12" cy="0" r="1.5" fill="currentColor" />
+                      <circle cx="0" cy="12" r="1.5" fill="currentColor" />
                     </svg>
                   </div>
                 ))}
 
-                <div className="aspect-square overflow-hidden">
+                <div className="relative aspect-[3/4] overflow-hidden">
                   <Image
                     src={category.dynamicImage || getCategoryImage(category.name)}
                     alt={category.name}
                     fill
+                    unoptimized={true}
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
@@ -145,7 +146,7 @@ export function CategoriesSection() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#1b120c]/90 via-transparent to-transparent" />
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+                <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
                   <div className="flex items-center gap-2">
                     <div className="h-px flex-1 bg-gradient-to-r from-[#d1a46e]/70 to-transparent" />
                     <span className="font-serif text-[10px] uppercase tracking-widest text-[#e6c49d] sm:text-xs">
