@@ -85,7 +85,6 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   }, [canonicalSlug, slug, router])
 
   const viewCountedRef = useRef<number | null>(null)
-  const productId = product?.id ?? null
   useEffect(() => {
     if (!productId || viewCountedRef.current === productId) return
     viewCountedRef.current = productId

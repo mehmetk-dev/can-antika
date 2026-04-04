@@ -10,8 +10,8 @@ import "./globals.css"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { SiteSettingsResponse } from "@/lib/types"
 
-const _inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
-const _playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair", display: "swap" })
+const _inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap", preload: true })
+const _playfair = Playfair_Display({ subsets: ["latin", "latin-ext"], variable: "--font-playfair", display: "swap", preload: true })
 
 const fetchSiteSettings = cache(async () => {
   return fetchApiDataWithFallback<SiteSettingsResponse>("/v1/site-settings", {
@@ -102,7 +102,7 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL || "https://api.canantika.com"} />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL || "https://api.canantika.com"} />
-        <link rel="preload" href="/dükkan.webp" as="image" type="image/webp" fetchPriority="high" />
+        <link rel="preload" href="/d%C3%BCkkan.webp" as="image" type="image/webp" fetchPriority="high" />
         {gaId && (
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`} strategy="afterInteractive" />
