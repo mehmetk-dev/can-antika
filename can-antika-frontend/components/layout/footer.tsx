@@ -1,12 +1,10 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo } from "react"
 import Link from "next/link"
 
-import { categoryApi } from "@/lib/api"
 import { useSiteSettings } from "@/lib/site-settings-context"
 import { cn, sanitizeExternalUrl } from "@/lib/utils"
-import type { CategoryResponse } from "@/lib/types"
 
 const footerLinks = {
   company: [
@@ -88,16 +86,6 @@ interface FooterProps {
 
 export function Footer({ className }: FooterProps) {
   const settings = useSiteSettings()
-  const [categories, setCategories] = useState<CategoryResponse[]>([])
-  const [isCategoriesLoading, setIsCategoriesLoading] = useState(true)
-
-  useEffect(() => {
-    categoryApi
-      .getAllCached()
-      .then((items) => setCategories(items.slice(0, 6)))
-      .catch(() => setCategories([]))
-      .finally(() => setIsCategoriesLoading(false))
-  }, [])
 
   const socialLinks = useMemo(
     () => [
@@ -113,7 +101,6 @@ export function Footer({ className }: FooterProps) {
   const phoneHref = settings.phone ? `tel:${settings.phone.replace(/\s+/g, "")}` : ""
   const mailHref = settings.email ? `mailto:${settings.email}` : ""
   const mapHref = "https://maps.app.goo.gl/Sv4bqXDK7164WQGR9"
-  const hasCategories = categories.length > 0
 
   return (
     <footer className={cn("relative mt-20 overflow-hidden border-t border-primary-foreground/10 bg-primary text-primary-foreground", className)}>
@@ -137,8 +124,7 @@ export function Footer({ className }: FooterProps) {
 
       <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
         <div
-          className={`grid gap-10 border-b border-primary-foreground/10 pb-10 md:grid-cols-2 xl:gap-8 ${hasCategories ? "xl:grid-cols-4" : "xl:grid-cols-3"
-            }`}
+          className="grid gap-10 border-b border-primary-foreground/10 pb-10 md:grid-cols-2 xl:gap-8 xl:grid-cols-3"
         >
           <div>
             <Link href="/" className="inline-block">
@@ -206,25 +192,6 @@ export function Footer({ className }: FooterProps) {
             </ul>
           </div>
 
-          {hasCategories && (
-            <div>
-              <h3 className="font-serif text-lg font-semibold text-primary-foreground">Kategoriler</h3>
-              <ul className="mt-4 space-y-2.5">
-                {categories.map((cat) => (
-                  <li key={cat.id}>
-                    <Link
-                      href={`/urunler?category=${encodeURIComponent(cat.name)}`}
-
-                      className="text-sm text-primary-foreground/70 transition-colors hover:text-accent"
-                    >
-                      {cat.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
           <div>
             <h3 className="font-serif text-lg font-semibold text-primary-foreground">Hukuki</h3>
             <ul className="mt-4 space-y-2.5">
@@ -236,9 +203,6 @@ export function Footer({ className }: FooterProps) {
                 </li>
               ))}
             </ul>
-            {!hasCategories && isCategoriesLoading && (
-              <p className="mt-4 text-xs text-primary-foreground/45">Kategoriler yükleniyor...</p>
-            )}
           </div>
         </div>
 

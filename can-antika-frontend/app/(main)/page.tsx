@@ -41,9 +41,7 @@ export default async function HomePage() {
   return (
     <div>
       <main>
-        <Suspense fallback={<SectionSkeleton height="h-[500px]" />}>
-          <HeroSection />
-        </Suspense>
+        <HeroSection />
         <Suspense fallback={<SectionSkeleton height="h-96" />}>
           <NewArrivals />
         </Suspense>

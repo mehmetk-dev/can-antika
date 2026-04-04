@@ -22,7 +22,7 @@ function RelatedProductsInner({ products, currentProductId }: RelatedProductsPro
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-end justify-between sm:mb-8">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary/70 sm:text-xs">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary/90 sm:text-xs">
               Sizin için seçtik
             </p>
             <h2 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:mt-2 sm:text-3xl">

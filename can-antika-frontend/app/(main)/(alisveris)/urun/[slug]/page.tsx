@@ -113,6 +113,10 @@ export default async function ProductPage({
 async function ProductResolver({ slug }: { slug: string }) {
   const product = await fetchProduct(slug)
 
+  const mainImageUrl = product?.imageUrls?.[0]
+    ? resolveImageUrl(product.imageUrls[0])
+    : null
+
   const jsonLd = product
     ? {
       "@context": "https://schema.org",
@@ -143,6 +147,10 @@ async function ProductResolver({ slug }: { slug: string }) {
 
   return (
     <>
+      {/* Preload LCP image — tarayıcı JS beklemeden görseli indirmeye başlar */}
+      {mainImageUrl && mainImageUrl !== "/placeholder.svg" && (
+        <link rel="preload" as="image" href={mainImageUrl} fetchPriority="high" />
+      )}
       {jsonLd && (
         <script
           type="application/ld+json"

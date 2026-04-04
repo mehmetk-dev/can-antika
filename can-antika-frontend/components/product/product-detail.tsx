@@ -59,9 +59,9 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
       <nav className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
         <ol className="flex min-w-0 items-center gap-2 overflow-hidden text-sm text-muted-foreground">
           <li><Link href="/" className="hover:text-primary transition-colors">Ana Sayfa</Link></li>
-          <ChevronRight className="h-4 w-4" />
+          <li aria-hidden="true"><ChevronRight className="h-4 w-4" /></li>
           <li><Link href="/urunler" className="hover:text-primary transition-colors">Ürünler</Link></li>
-          <ChevronRight className="h-4 w-4" />
+          <li aria-hidden="true"><ChevronRight className="h-4 w-4" /></li>
           <li className="max-w-[150px] truncate font-medium text-foreground sm:max-w-[220px]">{product.title}</li>
         </ol>
       </nav>
@@ -150,7 +150,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 )}
                 <div className="flex items-center gap-2 text-sm">
                   <div className={`h-1.5 w-1.5 rounded-full ${maxStock > 5 ? "bg-emerald-500/80" : maxStock > 0 ? "bg-amber-500/80" : "bg-red-500/80"}`} />
-                  <span className="text-muted-foreground/80 font-light text-xs">
+                  <span className="text-muted-foreground font-light text-xs">
                     {maxStock === 1
                       ? "Sadece 1 adet mevcut"
                       : maxStock > 5

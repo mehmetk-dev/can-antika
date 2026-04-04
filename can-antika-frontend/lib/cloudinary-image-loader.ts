@@ -11,7 +11,7 @@ export default function cloudinaryImageLoader({
 }): string {
     // Cloudinary images → Cloudinary CDN with responsive transforms (f_auto → WebP/AVIF)
     if (isCloudinaryImageUrl(src)) {
-        return toCloudinaryResponsiveUrl(src, width, quality ?? 75)
+        return toCloudinaryResponsiveUrl(src, width, quality ?? "auto")
     }
 
     // Local / non-Cloudinary images → return as-is

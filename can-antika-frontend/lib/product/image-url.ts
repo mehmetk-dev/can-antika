@@ -28,11 +28,11 @@ export function isCloudinaryImageUrl(url?: string | null): boolean {
   return Boolean(url && url.includes("res.cloudinary.com") && url.includes("/upload/"))
 }
 
-export function toCloudinaryResponsiveUrl(rawUrl: string, width: number, quality?: number): string {
+export function toCloudinaryResponsiveUrl(rawUrl: string, width: number, quality?: number | string): string {
   if (!isCloudinaryImageUrl(rawUrl)) return rawUrl
 
   const safeWidth = Math.max(120, Math.min(1600, Math.round(width)))
-  const q = quality ?? 75
+  const q = quality ?? "auto"
   const transform = `f_auto,q_${q},c_limit,w_${safeWidth}`
 
   const uploadMarker = "/upload/"

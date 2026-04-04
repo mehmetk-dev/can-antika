@@ -25,7 +25,7 @@ export function WhatsAppButton({ product, className = "" }: WhatsAppButtonProps)
                     <span className="sm:hidden">WhatsApp'tan Bilgi Al</span>
                     <span className="hidden sm:inline">Koleksiyon Uzmanına Danışın</span>
                 </span>
-                <span className="mt-0.5 text-[9px] uppercase tracking-widest text-[#5c4a3d]/50 sm:text-[10px]">
+                <span className="mt-0.5 text-[9px] uppercase tracking-widest text-[#5c4a3d]/70 sm:text-[10px]">
                     Hemen Sorun
                 </span>
             </div>
