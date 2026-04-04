@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { orderApi } from "@/lib/api"
 import type { OrderResponse } from "@/lib/types"
 import { getOrderStatus } from "@/lib/commerce/order-utils"
+import { getProductUrl } from "@/lib/product/product-url"
 import { formatDateTR } from "@/lib/utils"
 
 function OrdersContent() {
@@ -130,7 +131,7 @@ function OrdersContent() {
                           </p>
                         </div>
                         {item.product && (
-                          <Link href={`/urun/${item.product.slug ?? item.product.id}`}>
+                          <Link href={getProductUrl(item.product)}>
                             <Button variant="outline" size="sm" className="bg-transparent">
                               Detay
                             </Button>

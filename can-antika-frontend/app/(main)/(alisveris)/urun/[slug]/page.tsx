@@ -15,9 +15,19 @@ function parseNumericProductId(slug: string): number | null {
   return Number.isFinite(numericId) ? numericId : null
 }
 
+/** Slug sonundaki "-123" gibi ID suffix'ini çıkarır */
+function extractTrailingId(slug: string): number | null {
+  const match = slug.match(/-(\d+)$/)
+  if (!match) return null
+  const id = Number.parseInt(match[1], 10)
+  return Number.isFinite(id) ? id : null
+}
+
 function slugToTitle(slug: string): string {
   const raw = decodeURIComponent(slug || "")
-  const normalized = raw
+  // Sondaki ID suffix'ini kaldır (ör: "gumus-sigara-agizligi-76" → "gumus-sigara-agizligi")
+  const withoutId = raw.replace(/-(\d+)$/, "")
+  const normalized = withoutId
     .trim()
     .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ")
@@ -53,7 +63,18 @@ const fetchProduct = cache(async (slug: string) => {
     if (productFromId) return productFromId
   }
 
-  return fetchProductBySlug(slug)
+  // Slug ile dene
+  const productFromSlug = await fetchProductBySlug(slug)
+  if (productFromSlug) return productFromSlug
+
+  // Slug bulunamadıysa sondaki ID ile dene (ör: "gumus-sigara-agizligi-76" → 76)
+  const trailingId = extractTrailingId(slug)
+  if (trailingId !== null) {
+    const productFromTrailingId = await fetchProductById(trailingId)
+    if (productFromTrailingId) return productFromTrailingId
+  }
+
+  return null
 })
 
 // Metadata'da ürünü fetch ediyoruz — cache() sayesinde ProductResolver tekrar fetch yapmaz.

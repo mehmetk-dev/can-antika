@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { VintageSearch } from "@/components/ui/vintage-icons"
+import { getProductUrl } from "@/lib/product/product-url"
 import { useProductSearch } from "@/hooks/useProductSearch"
 
 interface HeaderSearchProps {
@@ -54,7 +55,7 @@ export function HeaderSearch({ isSearchOpen, setIsSearchOpen }: HeaderSearchProp
                         {searchResults.map((p) => (
                             <Link
                                 key={p.id}
-                                href={`/urun/${p.slug ?? p.id}`}
+                                href={getProductUrl(p)}
                                 prefetch={false}
                                 onClick={handleClose}
                                 className="flex items-center gap-3 px-3 py-2 hover:bg-muted transition-colors"

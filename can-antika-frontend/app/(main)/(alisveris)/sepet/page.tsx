@@ -7,6 +7,7 @@ import { Minus, Plus, Trash2, ShoppingBag, Loader2, ArrowRight } from "lucide-re
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import { getProductUrl } from "@/lib/product/product-url"
 import { useCart } from "@/hooks/useCart"
 
 function CartContent() {
@@ -106,7 +107,7 @@ function CartContent() {
                             style={{ opacity: isUpdating ? 0.6 : 1 }}
                         >
                             {/* Product Image */}
-                            <Link href={`/urun/${item.product.slug ?? item.product.id}`} className="shrink-0">
+                            <Link href={getProductUrl(item.product)} className="shrink-0">
                                 <Image
                                     src={imageUrl}
                                     alt={item.product.title}
@@ -119,7 +120,7 @@ function CartContent() {
                             {/* Product Info */}
                             <div className="flex flex-1 flex-col justify-between min-w-0">
                                 <div>
-                                    <Link href={`/urun/${item.product.slug ?? item.product.id}`}>
+                                    <Link href={getProductUrl(item.product)}>
                                         <h3 className="font-serif font-medium text-foreground hover:text-primary transition-colors line-clamp-2">
                                             {item.product.title}
                                         </h3>

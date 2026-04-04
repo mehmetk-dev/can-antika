@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { resolveImageUrl } from "@/lib/product/image-url"
+import { getProductUrl } from "@/lib/product/product-url"
 import type { ProductResponse } from "@/lib/types"
 
 interface RelatedProductsProps {
@@ -47,7 +48,7 @@ function RelatedProductsInner({ products, currentProductId }: RelatedProductsPro
             return (
               <Link
                 key={product.id}
-                href={`/urun/${product.slug ?? product.id}`}
+                href={getProductUrl(product)}
                 prefetch={false}
                 className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-background shadow-[0_6px_18px_rgba(33,24,14,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_14px_30px_rgba(33,24,14,0.14)]"
               >

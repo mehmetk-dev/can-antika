@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
+import { getProductUrl } from "@/lib/product/product-url"
 import type { ProductResponse, CursorResponse, CategoryResponse, BlogPost } from "@/lib/types"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://canantika.com"
@@ -125,7 +126,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Ürün sayfaları
     const productPages: MetadataRoute.Sitemap = products.map((product) => ({
-        url: `${SITE_URL}/urun/${product.slug || product.id}`,
+        url: `${SITE_URL}${getProductUrl(product)}`,
         lastModified: new Date(), // ProductResponse doesn't have updatedAt in current types
         changeFrequency: "weekly" as const,
         priority: 0.8,

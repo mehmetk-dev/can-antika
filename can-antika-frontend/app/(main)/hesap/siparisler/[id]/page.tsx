@@ -17,6 +17,7 @@ import { TrackingInfoCard } from "@/components/order/tracking-info-card"
 import { ReturnRequestDialog } from "@/components/order/return-request-dialog"
 import { CancelOrderButton } from "@/components/order/cancel-order-button"
 import { getOrderStatus } from "@/lib/commerce/order-utils"
+import { getProductUrl } from "@/lib/product/product-url"
 import { formatDateTR } from "@/lib/utils"
 
 function OrderDetailContent({ orderId }: { orderId: number }) {
@@ -118,7 +119,7 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <Link href={`/urun/${item.product?.slug ?? item.product?.id ?? ""}`} className="font-medium text-foreground hover:text-primary line-clamp-1">
+                                        <Link href={item.product ? getProductUrl(item.product) : ""} className="font-medium text-foreground hover:text-primary line-clamp-1">
                                             {item.title || item.product?.title || "Ürün"}
                                         </Link>
                                         <p className="text-sm text-muted-foreground">Adet: {item.quantity}</p>

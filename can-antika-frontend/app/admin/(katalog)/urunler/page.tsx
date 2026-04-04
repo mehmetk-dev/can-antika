@@ -15,6 +15,7 @@ import Link from "next/link"
 import type { ProductResponse, CategoryResponse } from "@/lib/types"
 import { ADMIN_PAGE_SIZE } from "@/lib/constants"
 import { resolveImageUrl } from "@/lib/product/image-url"
+import { getProductUrl } from "@/lib/product/product-url"
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<ProductResponse[]>([])
@@ -204,7 +205,7 @@ export default function AdminProductsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <Link href={`/urun/${product.slug ?? product.id}`}>
+                          <Link href={getProductUrl(product)}>
                             <DropdownMenuItem>
                               <Eye className="mr-2 h-4 w-4" />
                               Görüntüle

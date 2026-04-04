@@ -8,6 +8,7 @@ import { Loader2, PackageSearch } from "lucide-react"
 import { productApi } from "@/lib/api"
 import { ProductDetail } from "@/components/product/product-detail"
 import { Button } from "@/components/ui/button"
+import { getProductUrl } from "@/lib/product/product-url"
 import type { ProductResponse } from "@/lib/types"
 
 interface ProductPageClientProps {
@@ -38,7 +39,20 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
         return productApi.getById(numericId, 3000)
       }
 
-      return productApi.getBySlug(slug, 3000)
+      // Önce slug ile dene
+      try {
+        return await productApi.getBySlug(slug, 3000)
+      } catch {
+        // Slug bulunamadıysa sondaki ID ile dene (ör: "gumus-sigara-agizligi-76" → 76)
+        const trailingMatch = slug.match(/-(\d+)$/)
+        if (trailingMatch) {
+          const trailingId = Number.parseInt(trailingMatch[1], 10)
+          if (Number.isFinite(trailingId)) {
+            return productApi.getById(trailingId, 3000)
+          }
+        }
+        throw new Error("Product not found")
+      }
     }
 
     fetchProduct()
@@ -63,11 +77,12 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
     }
   }, [initialProduct, slug])
 
-  const productSlug = product?.slug
+  const productId = product?.id ?? null
+  const canonicalSlug = product ? getProductUrl(product).replace('/urun/', '') : null
   useEffect(() => {
-    if (!productSlug || productSlug === slug) return
-    router.replace(`/urun/${productSlug}`)
-  }, [productSlug, slug, router])
+    if (!canonicalSlug || canonicalSlug === slug) return
+    router.replace(`/urun/${canonicalSlug}`, { scroll: false })
+  }, [canonicalSlug, slug, router])
 
   const viewCountedRef = useRef<number | null>(null)
   const productId = product?.id ?? null

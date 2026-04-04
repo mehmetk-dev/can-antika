@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Trash2, ShoppingBag, Loader2, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getProductUrl } from "@/lib/product/product-url"
 import { useFavorites } from "@/hooks/useFavorites"
 
 function WishlistContent() {
@@ -47,7 +48,7 @@ function WishlistContent() {
             className="group relative overflow-hidden rounded-lg bg-card"
             style={{ opacity: isRemoving ? 0.5 : 1 }}
           >
-            <Link href={`/urun/${product.slug ?? product.id}`}>
+            <Link href={getProductUrl(product)}>
               <div className="aspect-[3/4] overflow-hidden relative">
                 <Image
                   src={imageUrl}
