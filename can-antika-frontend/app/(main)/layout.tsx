@@ -1,9 +1,7 @@
 
-import dynamic from "next/dynamic"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-
-const SitePopup = dynamic(() => import("@/components/home/site-popup").then(m => ({ default: m.SitePopup })), { ssr: false })
+import { SitePopupWrapper } from "@/components/home/site-popup-wrapper"
 
 export default function MainLayout({
     children,
@@ -15,7 +13,7 @@ export default function MainLayout({
             <Header />
             <div className="flex-1">{children}</div>
             <Footer />
-            <SitePopup />
+            <SitePopupWrapper />
         </div>
     )
 }
