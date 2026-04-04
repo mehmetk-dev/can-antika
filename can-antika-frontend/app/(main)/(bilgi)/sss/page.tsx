@@ -6,7 +6,7 @@ import type { FaqItem } from "@/lib/types"
 export const revalidate = 300
 
 export const metadata: Metadata = {
-    title: "Sıkça Sorulan Sorular | Can Antika",
+    title: "Sıkça Sorulan Sorular",
     description: "Can Antika hakkında merak ettikleriniz ve sıkça sorulan soruların yanıtları.",
 }
 
