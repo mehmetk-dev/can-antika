@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BusinessInfo } from "@/components/legal/business-info";
 
 export const metadata: Metadata = {
   title: "Çerez Politikası",
@@ -19,13 +20,7 @@ export default function CookiePolicyPage() {
 
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">1. Veri Sorumlusu</h2>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Mesut Can (Şahıs İşletmesi)</li>
-              <li>Marka: Can Antika</li>
-              <li>Adres: Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <BusinessInfo />
           </section>
 
           <section className="mt-8 space-y-3">
@@ -95,12 +90,7 @@ export default function CookiePolicyPage() {
 
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">12. İletişim</h2>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Mesut Can (Şahıs İşletmesi)</li>
-              <li>Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <BusinessInfo variant="contact" />
           </section>
 
           <section className="mt-8 space-y-3">
@@ -110,7 +100,6 @@ export default function CookiePolicyPage() {
               <li><Link href="/gizlilik" className="underline-offset-4 hover:underline">Gizlilik Politikası</Link></li>
               <li><Link href="/kullanim-kosullari" className="underline-offset-4 hover:underline">Kullanım Koşulları</Link></li>
               <li><Link href="/mesafeli-satis-sozlesmesi" className="underline-offset-4 hover:underline">Mesafeli Satış Sözleşmesi</Link></li>
-              <li><Link href="/mesafeli-satis-sozlesmesi" className="underline-offset-4 hover:underline">Ön Bilgilendirme Formu</Link></li>
               <li><Link href="/iade" className="underline-offset-4 hover:underline">İade / İptal / Cayma Politikası</Link></li>
             </ul>
           </section>

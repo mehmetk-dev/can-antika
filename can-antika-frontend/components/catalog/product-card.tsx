@@ -38,8 +38,8 @@ export const ProductCard = memo(function ProductCard({ product, isPriority = fal
           loading={isPriority ? "eager" : "lazy"}
           fetchPriority={isPriority ? "high" : "auto"}
           decoding="async"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className={`object-cover object-center transition-transform duration-500 will-change-transform group-hover:scale-[1.03] ${isSold ? "grayscale opacity-60" : ""}`}
+          sizes="(max-width: 640px) 47vw, (max-width: 1024px) 31vw, 280px"
+          className={`object-cover object-center transition-transform duration-500 group-hover:will-change-transform group-hover:scale-[1.03] ${isSold ? "grayscale opacity-60" : ""}`}
           onError={() => setImageErrored(true)}
         />
 

@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import Image from "next/image"
 import { ZoomIn, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog } from "@/components/ui/dialog"
 import { resolveImageUrl } from "@/lib/product/image-url"
-import { ImageGalleryLightbox } from "./image-gallery-lightbox"
+import { ImageGalleryLightbox, getLightboxUrl } from "./image-gallery-lightbox"
 
 interface ImageGalleryProps {
   images: string[]
@@ -20,6 +20,35 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
 
   const safeIndex = images.length > 0 ? Math.min(selectedIndex, images.length - 1) : 0
   const mainImage = images[safeIndex] ? resolveImageUrl(images[safeIndex]) : "/placeholder.svg"
+  const preloadedRef = useRef<Set<string>>(new Set())
+
+  // Lightbox açılınca tüm fotoğrafları arka planda büyük boyutta preload et
+  useEffect(() => {
+    if (!lightboxOpen || images.length === 0) return
+
+    // Önce şu an seçili olan fotoğrafı yükle
+    const currentResolved = resolveImageUrl(images[safeIndex])
+    if (currentResolved !== "/placeholder.svg") {
+      const url = getLightboxUrl(currentResolved)
+      if (!preloadedRef.current.has(url)) {
+        const img = new window.Image()
+        img.src = url
+        preloadedRef.current.add(url)
+      }
+    }
+
+    // Sonra diğer tüm fotoğrafları arka planda yükle
+    images.forEach((image, index) => {
+      if (index === safeIndex) return
+      const resolved = resolveImageUrl(image)
+      if (resolved === "/placeholder.svg") return
+      const url = getLightboxUrl(resolved)
+      if (preloadedRef.current.has(url)) return
+      const img = new window.Image()
+      img.src = url
+      preloadedRef.current.add(url)
+    })
+  }, [lightboxOpen, images, safeIndex])
 
   const handlePrevious = useCallback(() => {
     setUseFallbackImage(false)
@@ -50,7 +79,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
           fill
           priority
           fetchPriority="high"
-          sizes="(max-width: 640px) 100vw, 50vw"
+          sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 500px"
           className="object-contain p-2 sm:p-4 object-center transition-transform duration-300 will-change-transform group-hover:scale-[1.02]"
           onError={handleImageError}
         />

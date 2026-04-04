@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BusinessInfo } from "@/components/legal/business-info";
 
 export const metadata: Metadata = {
   title: "Mesafeli Satış Sözleşmesi",
@@ -17,14 +18,7 @@ export default function DistanceSalesContractPage() {
           <section className="mt-6 space-y-3">
             <h2 className="text-xl font-semibold">Madde 1 — Taraflar</h2>
             <p className="font-medium">SATICI</p>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Adı / Unvanı: Mesut Can (Şahıs İşletmesi)</li>
-              <li>Marka: Can Antika</li>
-              <li>Web Sitesi: www.canantika.com</li>
-              <li>Adres: Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <BusinessInfo />
             <p className="font-medium">ALICI (TÜKETİCİ)</p>
             <p className="leading-7">Alıcı’ya ilişkin ad-soyad, teslimat adresi, fatura adresi, telefon ve e-posta bilgileri sipariş sırasında sisteme girilen bilgilerden oluşur. Alıcı, siparişi onaylayarak işbu sözleşmeyi kabul etmiş sayılır.</p>
           </section>
@@ -37,7 +31,7 @@ export default function DistanceSalesContractPage() {
 
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">Madde 3 — Ürün Bilgileri</h2>
-            <p className="leading-7">Sözleşme konusu ürünün adı ve temel nitelikleri; türü, materyali, ölçüsü, dönemi ve kondisyon bilgileri; varsa restorasyon/onarım bilgileri; satış fiyatı ve vergiler dahil toplam bedeli; teslimat ve varsa ek masrafları ile ödeme yöntemi sipariş özeti ekranında ve sipariş onayında yer alır.</p>
+            <p className="leading-7">Sözleşme konusu ürünün adı ve temel nitelikleri; türü, materyali, ölçüsü, dönemi ve kondisyon bilgileri; satış fiyatı ve vergiler dahil toplam bedeli; teslimat ve varsa ek masrafları ile ödeme yöntemi sipariş özeti ekranında ve sipariş onayında yer alır.</p>
             <p className="leading-7">Ürün sayfasındaki fotoğraflar esasen ürünün gerçek görsellerini göstermeyi amaçlar. Ekran, ışık ve cihaz farklılıkları nedeniyle ton farkları oluşabilir. Antika ürünlerde yaşa bağlı patina ve doğal kullanım belirtileri, açıklamada belirtildiği ölçüde tek başına ayıp sayılmaz.</p>
           </section>
 
@@ -76,8 +70,8 @@ export default function DistanceSalesContractPage() {
           </section>
 
           <section className="mt-8 space-y-3">
-            <h2 className="text-xl font-semibold">Madde 10 — Antika Ürünler, Belgeleme ve Mevzuata Uyum</h2>
-            <p className="leading-7">Gerekmesi halinde müze müdürlüğü, belge, devir ve bildirim süreçleri dahil ilgili kültür varlığı mevzuatı uygulanır. Ürünle sunulan orijinallik/kondisyon belgeleri satış kapsamı bakımından esastır.</p>
+            <h2 className="text-xl font-semibold">Madde 10 — Antika Ürünlere İlişkin Özel Not</h2>
+            <p className="leading-7">Satışa sunulan ürünler antika ve koleksiyonluk niteliğinde tekil parçalar olabilir. Ürünle birlikte sunulan kondisyon açıklamaları ve görseller satış kapsamı bakımından esastır.</p>
           </section>
 
           <section className="mt-8 space-y-3">

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -43,11 +44,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         if (userOptional.isPresent()) {
             user = userOptional.get();
-            // Mevcut kullanıcıyı güncelle
+            if (user.getProvider() == null || user.getProvider() == AuthProvider.LOCAL) {
+                // E-posta/şifre ile kayıtlı kullanıcı Google ile giriş yapamaz
+                throw new OAuth2AuthenticationException(
+                        new OAuth2Error("account_exists",
+                                "Bu e-posta adresi ile zaten bir hesap mevcut. Lütfen e-posta ve şifre ile giriş yapın.",
+                                null));
+            }
+            // Google kullanıcılarının profil bilgisini güncelle
             user.setName(name);
             user.setImageUrl(picture);
-            // Eğer daha önce LOCAL ile girmişse, şimdi Google ID'sini de ekleyebiliriz
-            // Veya sadece provider'ı değiştirebiliriz
             userRepository.save(user);
         } else {
             // Yeni kullanıcı oluştur
@@ -56,8 +62,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .name(name)
                     .imageUrl(picture)
                     .provider(AuthProvider.GOOGLE)
-                    .role(Role.USER) // Varsayılan rol
-                    .passwordHash("") // Şifre yok
+                    .role(Role.USER)
+                    .passwordHash("$2a$10$NO_PASSWORD_SET_FOR_OAUTH2_USER_PLACEHOLDER")
                     .build();
             userRepository.save(user);
         }

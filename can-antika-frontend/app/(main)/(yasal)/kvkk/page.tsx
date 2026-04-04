@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BusinessInfo } from "@/components/legal/business-info";
 
 
 export const metadata: Metadata = {
@@ -29,13 +30,7 @@ export default function KvkkPage() {
               KVKK uyarınca kişisel verileriniz, veri sorumlusu sıfatıyla aşağıda bilgileri yer alan işletme tarafından
               işlenmektedir:
             </p>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Veri Sorumlusu: Mesut Can (Şahıs İşletmesi)</li>
-              <li>Marka / Site: Can Antika</li>
-              <li>Adres: Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <BusinessInfo />
           </section>
 
           <section className="mt-8 space-y-5">
@@ -145,20 +140,20 @@ export default function KvkkPage() {
             </div>
 
             <div className="space-y-2">
-              <p className="font-medium">g) Antika Ürünlere İlişkin Belgeleme ve Satış Sonrası İspat Süreçleri</p>
+              <p className="font-medium">g) Ürün Bilgileri ve Satış Sonrası İspat Süreçleri</p>
               <p className="leading-7">
                 İşlenen Veriler: Ad, soyad, satın alma bilgileri, ürün açıklamaları, ürün görselleri, ürün kondisyon /
-                nitelik kayıtları, talep halinde ekspertiz veya belge sürecine ilişkin bilgiler
+                nitelik kayıtları
               </p>
               <p className="leading-7">
                 Amaç: Ürün özelliklerinin kayıt altına alınması, satış sonrası ispat süreçlerinin yürütülmesi, ürün
-                açıklamalarının doğrulanması, talep halinde ekspertiz / belgeleme süreçlerinin yürütülmesi
+                açıklamalarının doğrulanması
               </p>
               <p className="leading-7">
                 Hukuki Sebep: Bir hakkın tesisi, kullanılması veya korunması için veri işlemenin zorunlu olması (KVKK m.
                 5/2-e), veri sorumlusunun hukuki yükümlülüğünü yerine getirmesi (KVKK m. 5/2-ç)
               </p>
-              <p className="leading-7">Toplama Yöntemi: Sipariş ve satış kayıtları, müşteri talepleri, ürün belgeleme süreçleri</p>
+              <p className="leading-7">Toplama Yöntemi: Sipariş ve satış kayıtları, müşteri talepleri</p>
             </div>
 
             <p className="leading-7">
@@ -179,7 +174,6 @@ export default function KvkkPage() {
               <li>Muhasebe, mali müşavirlik ve e-fatura/e-arşiv hizmet sağlayıcılarına: Muhasebe, faturalandırma ve vergi yükümlülüklerinin yerine getirilmesi amacıyla kimlik ve işlem bilgileri</li>
               <li>Yetkili kamu kurum ve kuruluşlarına: Mevzuattan kaynaklanan yükümlülüklerin yerine getirilmesi veya usulüne uygun resmi talep bulunması halinde gerekli bilgiler</li>
               <li>Sigorta şirketlerine: Yalnızca sigortalanması talep edilen veya gerekli görülen yüksek değerli ürünlere ilişkin işlemlerde gerekli minimum bilgiler</li>
-              <li>Uzman / ekspertiz / restorasyon hizmeti sağlayıcılarına: Yalnızca bu yönde hizmet talebi bulunması halinde, talep konusu ürün bilgileri ve gerekli iletişim verileri</li>
             </ul>
           </section>
 
@@ -248,12 +242,7 @@ export default function KvkkPage() {
             <p className="leading-7">
               Kişisel verilerinizin işlenmesine ilişkin her türlü soru ve başvurunuz için bizimle iletişime geçebilirsiniz:
             </p>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Mesut Can (Şahıs İşletmesi)</li>
-              <li>Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <BusinessInfo variant="contact" />
           </section>
 
           <section className="mt-8 space-y-3">

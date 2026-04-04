@@ -208,7 +208,7 @@ export function ContactClient() {
         </section>
 
         {/* Map */}
-        <section className="relative h-[350px]">
+        <section className="relative h-[450px] lg:h-[600px]">
           <Image
             src="/istanbul-cukurcuma-beyoglu-antique-district-aerial.jpg"
             alt="Konum"

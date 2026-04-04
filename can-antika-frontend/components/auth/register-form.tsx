@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -160,8 +161,8 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                         className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary mt-0.5"
                     />
                     <Label htmlFor="acceptTerms" className="text-sm cursor-pointer text-muted-foreground leading-relaxed">
-                        <span className="font-medium text-foreground">Kullanım koşullarını</span> ve{" "}
-                        <span className="font-medium text-foreground">gizlilik politikasını</span> okudum, kabul ediyorum.
+                        <Link href="/kullanim-kosullari" target="_blank" onClick={(e) => e.stopPropagation()} className="font-medium text-foreground underline underline-offset-4 hover:text-primary transition-colors">Kullanım koşullarını</Link> ve{" "}
+                        <Link href="/gizlilik" target="_blank" onClick={(e) => e.stopPropagation()} className="font-medium text-foreground underline underline-offset-4 hover:text-primary transition-colors">gizlilik politikasını</Link> okudum, kabul ediyorum.
                     </Label>
                 </div>
 

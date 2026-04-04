@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BusinessInfo } from "@/components/legal/business-info";
 
 export const metadata: Metadata = {
   title: "Teslimat / Kargo Politikası",
@@ -60,10 +61,7 @@ export default function ShippingPolicyPage() {
               mağazadan ücretsiz teslim alma gibi kampanya ve uygulamalar varsa, bunlar sipariş sırasında ayrıca
               gösterilir.
             </p>
-            <p className="leading-7">
-              Bu nedenle, “500 TL üzeri ücretsiz kargo” veya “hızlı teslimat 50 TL” gibi sabit ifadeler yalnızca
-              gerçekten aktif ve istikrarlı şekilde uygulanıyorsa kullanılmalıdır.
-            </p>
+
           </section>
 
           <section className="mt-8 space-y-3">
@@ -106,10 +104,7 @@ export default function ShippingPolicyPage() {
               Ürünün niteliğine, değerine ve kırılganlığına göre uygun görülen gönderilerde sigortalı taşıma veya ek
               güvenlik önlemleri tercih edilebilir.
             </p>
-            <p className="leading-7">
-              Ancak tüm siparişlerin otomatik olarak “tam değer üzerinden sigortalı” gönderildiği yalnızca gerçekten
-              böyle bir uygulama varsa belirtilmelidir. Aksi halde bu konuda genel ve sınırsız bir taahhüt verilmez.
-            </p>
+
           </section>
 
           <section className="mt-8 space-y-3">
@@ -122,7 +117,7 @@ export default function ShippingPolicyPage() {
             <ul className="list-disc space-y-1 pl-6 leading-7">
               <li>Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
             </ul>
-            <p className="leading-7 text-sm text-muted-foreground italic">Mağazadan teslim alma seçeneği mevcut değilse bu bölüm kaldırılmalıdır.</p>
+
           </section>
 
           <section className="mt-8 space-y-3">
@@ -138,12 +133,7 @@ export default function ShippingPolicyPage() {
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">9. İletişim</h2>
             <p className="leading-7">Teslimat ve kargo süreçlerine ilişkin sorularınız için bizimle iletişime geçebilirsiniz:</p>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Mesut Can (Şahıs İşletmesi)</li>
-              <li>Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <BusinessInfo variant="contact" />
           </section>
         </article>
       </main>

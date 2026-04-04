@@ -1,13 +1,10 @@
 "use client"
 
 import { useState, useCallback, useMemo } from "react"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { ChevronRight, Heart, Share2, ShoppingBag, Check, Shield, Package, ShieldCheck, Lock } from "lucide-react"
 import { ImageGallery } from "@/components/product/image-gallery"
-import { PurchaseDialog, ContactDialog } from "@/components/product/product-dialogs"
-import { ProductReviews } from "@/components/product/product-reviews"
-import { RelatedProducts } from "@/components/product/related-products"
-import { WhatsAppButton } from "@/components/product/whatsapp-button"
 import { QuantitySelector } from "@/components/product/quantity-selector"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -17,6 +14,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useProductActions } from "@/hooks/useProductActions"
 import { getProductAttributes, eraLabels } from "@/lib/product/product-utils"
 import type { ProductResponse } from "@/lib/types"
+
+const PurchaseDialog = dynamic(() => import("@/components/product/product-dialogs").then(m => ({ default: m.PurchaseDialog })))
+const ContactDialog = dynamic(() => import("@/components/product/product-dialogs").then(m => ({ default: m.ContactDialog })))
+const ProductReviews = dynamic(() => import("@/components/product/product-reviews").then(m => ({ default: m.ProductReviews })))
+const RelatedProducts = dynamic(() => import("@/components/product/related-products").then(m => ({ default: m.RelatedProducts })))
+const WhatsAppButton = dynamic(() => import("@/components/product/whatsapp-button").then(m => ({ default: m.WhatsAppButton })))
 
 interface ProductDetailProps {
   product: ProductResponse

@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Sparkles } from "lucide-react"
+import { Sparkles, AlertCircle } from "lucide-react"
 import { useAuth } from "@/lib/auth/auth-context"
 import { LoginForm } from "@/components/auth/login-form"
 import { RegisterForm } from "@/components/auth/register-form"
@@ -27,6 +27,7 @@ export default function AuthPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = getSafeRedirect(searchParams.get("redirect"))
+  const oauthError = searchParams.get("error") === "oauth2"
   const { isAuthenticated, isLoading } = useAuth()
   const [mode, setMode] = useState<FormMode>("login")
   const [isAnimating, setIsAnimating] = useState(false)
@@ -109,6 +110,13 @@ export default function AuthPage() {
               </div>
               <span className="font-serif text-2xl font-semibold text-primary">Can Antika</span>
             </div>
+
+            {oauthError && (
+              <div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                Google ile giriş başarısız oldu. Lütfen tekrar deneyin.
+              </div>
+            )}
 
             {/* Login */}
             <div className="relative">

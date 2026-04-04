@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
   ].filter(Boolean).join(" ")
 
   return {
-    title: `İletişim | ${storeName} - Bize Ulaşın`,
+    title: "İletişim",
     description,
     keywords: [`${storeName.toLowerCase()} iletişim`, "antikacı telefon", "istanbul antikacı"],
     openGraph: {

@@ -41,7 +41,7 @@ export function FilterSidebar({
           Kategori
         </AccordionTrigger>
         <AccordionContent>
-          <div className="space-y-3 pt-2 pb-1">
+          <div className="space-y-3 pt-2 pb-1 max-h-[300px] overflow-y-auto pr-2" style={{ scrollbarWidth: "thin" }}>
             {apiCategories.map((cat) => (
               <div key={cat.id} className="flex items-center gap-3 group">
                 <Checkbox
@@ -67,7 +67,7 @@ export function FilterSidebar({
           Dönem
         </AccordionTrigger>
         <AccordionContent>
-          <div className="space-y-3 pt-2 pb-1">
+          <div className="space-y-3 pt-2 pb-1 max-h-[300px] overflow-y-auto pr-2" style={{ scrollbarWidth: "thin" }}>
             {apiPeriods.map((period) => (
               <div key={period.id} className="flex items-center gap-3 group">
                 <Checkbox

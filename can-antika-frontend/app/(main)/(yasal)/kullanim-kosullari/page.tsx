@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BusinessInfo } from "@/components/legal/business-info";
 
 export const metadata: Metadata = {
   title: "Kullanım Koşulları",
@@ -19,14 +20,7 @@ export default function TermsPage() {
 
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">1. Taraflar ve Site Bilgisi</h2>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Satıcı / İşletme: Mesut Can (Şahıs İşletmesi)</li>
-              <li>Marka: Can Antika</li>
-              <li>İnternet Sitesi: www.canantika.com</li>
-              <li>Adres: Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <BusinessInfo />
           </section>
 
           <section className="mt-8 space-y-3">
@@ -92,63 +86,52 @@ export default function TermsPage() {
           </section>
 
           <section className="mt-8 space-y-3">
-            <h2 className="text-xl font-semibold">12. Kültürel Miras ve Mevzuata Uyum</h2>
-            <p className="leading-7">Satışa sunulan ürünlerde yürürlükteki kültür varlığı mevzuatına uygun hareket edilmesi amaçlanır. Tescil/bildirim/devir gibi zorunlu süreçler mevzuata göre ayrıca yürütülür.</p>
-          </section>
-
-          <section className="mt-8 space-y-3">
-            <h2 className="text-xl font-semibold">13. Fikri Mülkiyet Hakları</h2>
+            <h2 className="text-xl font-semibold">12. Fikri Mülkiyet Hakları</h2>
             <p className="leading-7">Sitedeki metin, görsel, logo, tasarım, yazılım ve veri tabanı hakları aksi belirtilmedikçe Can Antika’ya veya hak sahiplerine aittir. İzinsiz çoğaltma, ticari kullanım, scraping ve veri madenciliği yasaktır.</p>
           </section>
 
           <section className="mt-8 space-y-3">
-            <h2 className="text-xl font-semibold">14. Yasaklanan Kullanımlar</h2>
+            <h2 className="text-xl font-semibold">13. Yasaklanan Kullanımlar</h2>
             <p className="leading-7">Sahte bilgiyle sipariş oluşturma, yetkisiz erişim, bot/crawler kullanımı, kampanya suistimali, karalayıcı içerik üretimi ve mevzuata aykırı kullanım açıkça yasaktır.</p>
           </section>
 
           <section className="mt-8 space-y-3">
-            <h2 className="text-xl font-semibold">15. Üçüncü Taraf Hizmetler ve Bağlantılar</h2>
+            <h2 className="text-xl font-semibold">14. Üçüncü Taraf Hizmetler ve Bağlantılar</h2>
             <p className="leading-7">Ödeme, kargo, harita ve sosyal medya gibi üçüncü taraf servislerde ilgili sağlayıcının koşulları geçerli olur.</p>
           </section>
 
           <section className="mt-8 space-y-3">
-            <h2 className="text-xl font-semibold">16. Sorumluluğun Sınırlandırılması</h2>
+            <h2 className="text-xl font-semibold">15. Sorumluluğun Sınırlandırılması</h2>
             <p className="leading-7">Site kesintisiz/hatasız çalışma taahhüdü vermez. Antika ürünlerin doğasından kaynaklanan özellikler her durumda ayıp sayılmaz. Ancak tüketici mevzuatından doğan emredici haklar saklıdır.</p>
           </section>
 
           <section className="mt-8 space-y-3">
-            <h2 className="text-xl font-semibold">17. Değişiklik Hakkı</h2>
+            <h2 className="text-xl font-semibold">16. Değişiklik Hakkı</h2>
             <p className="leading-7">Kullanım Koşulları mevzuat, teknik gereklilik veya ticari süreç güncellemelerine göre revize edilebilir. Güncel metin yayımlandığı tarihte yürürlüğe girer.</p>
           </section>
 
           <section className="mt-8 space-y-3">
-            <h2 className="text-xl font-semibold">18. Delil Sözleşmesi ve Elektronik Kayıtlar</h2>
+            <h2 className="text-xl font-semibold">17. Delil Sözleşmesi ve Elektronik Kayıtlar</h2>
             <p className="leading-7">Taraflar, mevzuatın izin verdiği ölçüde sistem kayıtları, loglar ve elektronik yazışmaların delil niteliğini kabul eder. Bu hüküm tüketicinin emredici haklarını ortadan kaldırmaz.</p>
           </section>
 
           <section className="mt-8 space-y-3">
-            <h2 className="text-xl font-semibold">19. Uygulanacak Hukuk ve Uyuşmazlık Çözümü</h2>
+            <h2 className="text-xl font-semibold">18. Uygulanacak Hukuk ve Uyuşmazlık Çözümü</h2>
             <p className="leading-7">İşbu Kullanım Koşulları&apos;na Türkiye Cumhuriyeti hukuku uygulanır. Tüketici işlemlerinde Tüketici Hakem Heyetleri ve Tüketici Mahkemeleri yetkilidir.</p>
           </section>
 
           <section className="mt-8 space-y-3">
-            <h2 className="text-xl font-semibold">20. İletişim</h2>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Mesut Can (Şahıs İşletmesi)</li>
-              <li>Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <h2 className="text-xl font-semibold">19. İletişim</h2>
+            <BusinessInfo variant="contact" />
           </section>
 
           <section className="mt-8 space-y-3">
-            <h2 className="text-xl font-semibold">21. İlgili Hukuki Metinler</h2>
+            <h2 className="text-xl font-semibold">20. İlgili Hukuki Metinler</h2>
             <ul className="list-disc space-y-1 pl-6 leading-7">
               <li><Link href="/kvkk" className="underline-offset-4 hover:underline">KVKK Aydınlatma Metni</Link></li>
               <li><Link href="/gizlilik" className="underline-offset-4 hover:underline">Gizlilik Politikası</Link></li>
               <li><Link href="/cerezler" className="underline-offset-4 hover:underline">Çerez Politikası</Link></li>
               <li><Link href="/mesafeli-satis-sozlesmesi" className="underline-offset-4 hover:underline">Mesafeli Satış Sözleşmesi</Link></li>
-              <li><Link href="/mesafeli-satis-sozlesmesi" className="underline-offset-4 hover:underline">Ön Bilgilendirme Formu</Link></li>
               <li><Link href="/iade" className="underline-offset-4 hover:underline">İade / İptal / Cayma Politikası</Link></li>
               <li><Link href="/teslimat" className="underline-offset-4 hover:underline">Teslimat / Kargo Politikası</Link></li>
             </ul>

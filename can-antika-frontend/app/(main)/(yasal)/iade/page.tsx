@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BusinessInfo } from "@/components/legal/business-info";
 
 export const metadata: Metadata = {
   title: "İade / İptal / Cayma Politikası",
@@ -30,10 +31,7 @@ export default function ReturnPolicyPage() {
               Cayma hakkının kullanılması için bu süre içinde tarafımıza açık bir bildirim yapılması yeterlidir.
             </p>
             <p className="leading-7">İletişim Bilgileri:</p>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <BusinessInfo variant="phone-only" />
           </section>
 
           <section className="mt-8 space-y-3">
@@ -53,7 +51,7 @@ export default function ReturnPolicyPage() {
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">3. İade Koşulları</h2>
             <p className="leading-7">
-              İade edilecek ürünün mümkünse eksiksiz şekilde, varsa birlikte gönderilen belge, sertifika, fatura ve ek
+              İade edilecek ürünün mümkünse eksiksiz şekilde, varsa birlikte gönderilen fatura ve ek
               parçalarıyla birlikte gönderilmesi gerekir.
             </p>
             <p className="leading-7">
@@ -66,7 +64,7 @@ export default function ReturnPolicyPage() {
             <ul className="list-disc space-y-1 pl-6 leading-7">
               <li>ürünün tüketici tarafından olağan inceleme sınırını aşacak şekilde kullanılması,</li>
               <li>ürünün zarar görmesi, eksiltilmesi veya değiştirilmesi,</li>
-              <li>birlikte verilen sertifika, belge veya ayırt edici unsurların kaybedilmesi,</li>
+              <li>birlikte verilen belge veya ayırt edici unsurların kaybedilmesi,</li>
               <li>ürüne sonradan müdahale edilmesi, restore edilmesi veya yapısının değiştirilmesi.</li>
             </ul>
             <p className="leading-7">
@@ -87,10 +85,7 @@ export default function ReturnPolicyPage() {
               <li>ürünün niteliği gereği tekrar satışa uygun olmayacak şekilde değiştirilmiş olması,</li>
               <li>mevzuat gereği cayma hakkı dışında kalan diğer haller.</li>
             </ul>
-            <p className="leading-7">
-              “Özel sipariş” veya “müzayede ürünü” ifadelerini yalnızca sitende gerçekten böyle bir satış modeli varsa
-              kullanman daha doğru olur. Aksi halde bu ifadeler gereksiz yere geniş kalır.
-            </p>
+
           </section>
 
           <section className="mt-8 space-y-3">
@@ -105,9 +100,7 @@ export default function ReturnPolicyPage() {
               taşıyıcı belirtilmemişse de tüketiciden iade masrafı talep edilemez. Belirtilen taşıyıcının tüketicinin
               bulunduğu yerde şubesi yoksa, satıcı ilave masraf talep etmeksizin ürünü tüketiciden almakla yükümlüdür.
             </p>
-            <p className="leading-7">
-              Bu nedenle sitede ayrıca Ön Bilgilendirme Formu içinde iade taşıyıcısının net yazılması gerekir.
-            </p>
+
           </section>
 
           <section className="mt-8 space-y-3">
@@ -138,10 +131,7 @@ export default function ReturnPolicyPage() {
             </p>
             <p className="leading-7">
               Teslimat sırasında kargo paketinde açık hasar görülüyorsa, kargo görevlisi ile birlikte tutanak tutulması
-              faydalıdır. Ancak tutanak tutulmamış olması tek başına tüm hakların kaybı anlamına gelmez. Bu nedenle
-              “tutanaksız hiçbir hasar kabul edilmez” gibi kesin bir ifade kullanmaman daha güvenlidir. Bu yaklaşım,
-              teslimata kadar oluşan kayıp ve hasardan kural olarak satıcının sorumlu olduğu genel tüketici rejimiyle de
-              uyumludur.
+              faydalıdır. Ancak tutanak tutulmamış olması tek başına tüm hakların kaybı anlamına gelmez.
             </p>
           </section>
 
@@ -177,12 +167,7 @@ export default function ReturnPolicyPage() {
             <p className="leading-7">
               İade, iptal, cayma hakkı veya ayıplı ürün başvurularınız için bizimle iletişime geçebilirsiniz:
             </p>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Mesut Can (Şahıs İşletmesi)</li>
-              <li>Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <BusinessInfo variant="contact" />
           </section>
         </article>
       </main>

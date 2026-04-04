@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { resolveImageUrl } from "@/lib/product/image-url"
+import { resolvePeriodLabel } from "@/lib/product/product-utils"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { ProductResponse, CursorResponse } from "@/lib/types"
 import { NewArrivalsClientFallback } from "./new-arrivals-client-fallback"
@@ -74,7 +75,7 @@ export function NewArrivalsUI({ products }: { products: ProductResponse[] }) {
 
         <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-6 lg:grid-cols-4">
           {products.map((item) => {
-            const era = (item.attributes?.era as string) || ""
+            const era = resolvePeriodLabel(item)
             const imageUrl = resolveImageUrl(item.imageUrls?.[0])
             const isSold = (item.stock ?? 0) <= 0
 

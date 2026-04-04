@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BusinessInfo } from "@/components/legal/business-info";
 
 export const metadata: Metadata = {
   title: "Gizlilik ve Kişisel Verilerin Korunması Politikası",
@@ -21,13 +22,7 @@ export default function PrivacyPolicyPage() {
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">1. Veri Sorumlusu</h2>
             <p className="leading-7">6698 sayılı Kişisel Verilerin Korunması Kanunu (&ldquo;KVKK&rdquo;) uyarınca kişisel verileriniz, veri sorumlusu sıfatıyla aşağıdaki kişi/işletme tarafından işlenmektedir:</p>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Veri Sorumlusu: Mesut Can (Şahıs İşletmesi)</li>
-              <li>Faaliyet Konusu: Antika Perakende Ticareti</li>
-              <li>Adres: Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <BusinessInfo />
           </section>
 
           <section className="mt-8 space-y-3">
@@ -42,8 +37,8 @@ export default function PrivacyPolicyPage() {
             <p className="font-medium">d) Finansal Bilgiler</p>
             <ul className="list-disc space-y-1 pl-6 leading-7"><li>Ödeme işlemine ilişkin sınırlı bilgiler</li><li>İade işlemleri için gerekli banka/IBAN bilgileri (varsa)</li></ul>
             <p className="leading-7 text-sm italic">Önemli: Kredi kartı bilgileriniz sistemlerimizde saklanmaz. Ödeme sırasında girilen kart bilgileri, güvenli bağlantı üzerinden doğrudan yetkili ve lisanslı ödeme kuruluşu / banka altyapısına iletilir.</p>
-            <p className="font-medium">e) Antika Ürünlere Özgü Bilgiler</p>
-            <ul className="list-disc space-y-1 pl-6 leading-7"><li>Ürüne ilişkin görseller ve açıklamalar</li><li>Ekspertiz / değerlendirme talebi içeriği</li><li>Ürün kondisyonuna, ölçüsüne, materyaline, dönemine ve varsa restorasyon bilgilerine ilişkin kayıtlar</li><li>Satış sonrası ispat ve belge süreçlerine ilişkin kayıtlar</li></ul>
+            <p className="font-medium">e) Ürün Bilgileri</p>
+            <ul className="list-disc space-y-1 pl-6 leading-7"><li>Ürüne ilişkin görseller ve açıklamalar</li><li>Ürün kondisyonuna, ölçüsüne, materyaline ve dönemine ilişkin kayıtlar</li><li>Satış sonrası ispat ve belge süreçlerine ilişkin kayıtlar</li></ul>
             <p className="leading-7 text-sm text-muted-foreground">Not: T.C. kimlik numarası, vergi numarası veya benzeri ek veriler ancak mevzuat gerektiriyorsa ya da somut işlem için gerçekten zorunluysa işlenir.</p>
           </section>
 
@@ -57,7 +52,7 @@ export default function PrivacyPolicyPage() {
               <li>Mesafeli satış sözleşmesi ve ilgili yasal yükümlülüklerin yerine getirilmesi</li>
               <li>Site güvenliğinin sağlanması, kötüye kullanımın ve dolandırıcılık riskinin önlenmesi</li>
               <li>Muhasebe, vergi ve arşiv yükümlülüklerinin yerine getirilmesi</li>
-              <li>Ürünlere ilişkin açıklama, belge, ekspertiz veya satış sonrası ispat süreçlerinin yürütülmesi</li>
+              <li>Ürünlere ilişkin açıklama ve satış sonrası ispat süreçlerinin yürütülmesi</li>
               <li>Açık rızanız olması halinde kampanya, duyuru ve bilgilendirme gönderilmesi</li>
               <li>Hizmet kalitesinin geliştirilmesi ve kullanıcı deneyiminin iyileştirilmesi</li>
             </ul>
@@ -113,12 +108,7 @@ export default function PrivacyPolicyPage() {
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">10. İletişim</h2>
             <p className="leading-7">Bu politika hakkındaki soru, talep veya başvurularınız için bizimle iletişime geçebilirsiniz:</p>
-            <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Mesut Can (Şahıs İşletmesi)</li>
-              <li>Adres: Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
-              <li>Telefon: +90 507 687 92 15</li>
-              <li>E-posta: destek@canantika.com</li>
-            </ul>
+            <BusinessInfo variant="contact" />
           </section>
         </article>
       </main>

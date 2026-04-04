@@ -98,6 +98,10 @@ export default async function RootLayout({
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL || "https://api.canantika.com"} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL || "https://api.canantika.com"} />
         {gaId && (
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`} strategy="afterInteractive" />

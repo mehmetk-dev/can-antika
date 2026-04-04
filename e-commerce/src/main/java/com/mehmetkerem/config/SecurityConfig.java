@@ -46,6 +46,7 @@ public class SecurityConfig {
         private final PasswordEncoder passwordEncoder;
         private final CustomOAuth2UserService customOAuth2UserService;
         private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+        private final com.mehmetkerem.security.OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
         private final Environment environment;
 
         @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
@@ -187,7 +188,8 @@ public class SecurityConfig {
                                 .oauth2Login(oauth2 -> oauth2
                                                 .userInfoEndpoint(userInfo -> userInfo
                                                                 .userService(customOAuth2UserService))
-                                                .successHandler(oAuth2LoginSuccessHandler))
+                                                .successHandler(oAuth2LoginSuccessHandler)
+                                                .failureHandler(oAuth2LoginFailureHandler))
                                 .authenticationProvider(daoAuthProvider())
                                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)

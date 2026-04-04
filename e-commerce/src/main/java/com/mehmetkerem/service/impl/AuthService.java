@@ -18,6 +18,7 @@ import com.mehmetkerem.repository.UserRepository;
 import com.mehmetkerem.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import com.mehmetkerem.enums.AuthProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -68,6 +69,15 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
     @Override
     public LoginResponse login(LoginRequest req) {
         String email = req.getEmail().trim().toLowerCase();
+
+        // Google ile kayıt olmuş kullanıcılar email/şifre ile giriş yapamaz
+        userRepository.findByEmail(email).ifPresent(u -> {
+            if (u.getProvider() == AuthProvider.GOOGLE) {
+                throw new BadRequestException(
+                        "Bu hesap Google ile oluşturulmuş. Lütfen 'Google ile Giriş Yap' butonunu kullanın.");
+            }
+        });
+
         Authentication authentication = authManager
                 .authenticate(new UsernamePasswordAuthenticationToken(email, req.getPassword()));
         Object principal = authentication != null ? authentication.getPrincipal() : null;
