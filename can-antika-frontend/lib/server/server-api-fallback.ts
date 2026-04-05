@@ -9,6 +9,12 @@ type FetchWithFallbackOptions = {
   timeoutMs?: number
 }
 
+export type ApiFetchTiming = {
+  path: string
+  durationMs: number
+  source: "fast-path" | "fallback"
+}
+
 function buildApiUrl(baseUrl: string, path: string): string {
   const normalizedBase = baseUrl.replace(/\/$/, "")
   const normalizedPath = path.startsWith("/") ? path : `/${path}`
@@ -49,16 +55,26 @@ export async function fetchApiDataWithFallback<T>(
   options: FetchWithFallbackOptions = {}
 ): Promise<T | null> {
   const { revalidate = 60, timeoutMs = 1200 } = options
+  const start = performance.now()
   const baseUrls = getServerApiUrlCandidates()
 
-  if (baseUrls.length === 0) return null
+  if (baseUrls.length === 0) {
+    console.warn(`[server-api-fallback] No API URL candidates available for ${path}`)
+    return null
+  }
 
   // Try the last working URL first for fast path
   // Cap at 700ms — on Docker internal network backend responds < 50ms (Redis cache)
   if (lastWorkingBaseUrl) {
     try {
       const result = await tryFetch<T>(lastWorkingBaseUrl, path, revalidate, Math.min(timeoutMs, 700))
-      if (result) return result
+      if (result) {
+        const dur = Math.round(performance.now() - start)
+        if (dur > 200) {
+          console.info(`[server-api-fallback] ${path} → ${dur}ms (fast-path)`)
+        }
+        return result
+      }
     } catch {
       lastWorkingBaseUrl = null
     }
@@ -77,8 +93,13 @@ export async function fetchApiDataWithFallback<T>(
       })
     )
     lastWorkingBaseUrl = baseUrl
+    const dur = Math.round(performance.now() - start)
+    if (dur > 200) {
+      console.info(`[server-api-fallback] ${path} → ${dur}ms (fallback)`)
+    }
     return result
   } catch {
+    console.warn(`[server-api-fallback] All API candidates failed for ${path}`)
     return null
   }
 }

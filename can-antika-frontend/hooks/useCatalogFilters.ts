@@ -22,6 +22,8 @@ interface UseCatalogFiltersOptions {
     initialTotalCount?: number
     initialCategories?: CategoryResponse[]
     initialPeriods?: PeriodResponse[]
+    ssrCategoryId?: string
+    ssrPeriodId?: string
 }
 
 export function useCatalogFilters({
@@ -29,6 +31,8 @@ export function useCatalogFilters({
     initialTotalCount = 0,
     initialCategories = [],
     initialPeriods = [],
+    ssrCategoryId,
+    ssrPeriodId,
 }: UseCatalogFiltersOptions) {
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -49,10 +53,10 @@ export function useCatalogFilters({
     const [userInteracted, setUserInteracted] = useState(false)
     const initialLoadSkipped = useRef(false)
 
-    // Filter state
+    // Filter state — initialize from SSR-resolved IDs when available
     const [selectedFilters, setSelectedFilters] = useState({
-        categories: [] as string[],
-        periods: [] as string[],
+        categories: ssrCategoryId ? [ssrCategoryId] : [] as string[],
+        periods: ssrPeriodId ? [ssrPeriodId] : [] as string[],
         priceRanges: [] as string[],
     })
     const [sortBy, setSortBy] = useState("newest")
@@ -65,6 +69,8 @@ export function useCatalogFilters({
                     (c) => c.name.toLowerCase() === categoryParam.toLowerCase() || c.id.toString() === categoryParam
                 )
                 if (match) {
+                    // If SSR already resolved this filter, skip re-fetch
+                    if (ssrCategoryId === match.id.toString()) return
                     setSelectedFilters((prev) => ({ ...prev, categories: [match.id.toString()] }))
                     setUserInteracted(true)
                 }
@@ -90,6 +96,8 @@ export function useCatalogFilters({
                 (p) => p.name.toLowerCase() === periodParam.toLowerCase() || p.id.toString() === periodParam
             )
             if (match) {
+                // If SSR already resolved this filter, skip re-fetch
+                if (ssrPeriodId === match.id.toString()) return
                 setSelectedFilters((prev) => ({ ...prev, periods: [match.id.toString()] }))
                 setUserInteracted(true)
             }
@@ -104,12 +112,13 @@ export function useCatalogFilters({
                     (p) => p.name.toLowerCase() === periodParam.toLowerCase() || p.id.toString() === periodParam
                 )
                 if (match) {
+                    if (ssrPeriodId === match.id.toString()) return
                     setSelectedFilters((prev) => ({ ...prev, periods: [match.id.toString()] }))
                     setUserInteracted(true)
                 }
             })
             .catch((e) => console.error("Dönem yükleme hatası:", e))
-    }, [periodParam, initialPeriods])
+    }, [periodParam, initialPeriods, ssrPeriodId])
 
     // Reset page when search or category changes
     useEffect(() => {

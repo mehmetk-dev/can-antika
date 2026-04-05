@@ -11,7 +11,7 @@ import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { SiteSettingsResponse } from "@/lib/types"
 
 const _inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap", preload: true })
-const _playfair = Playfair_Display({ subsets: ["latin", "latin-ext"], variable: "--font-playfair", display: "swap", preload: true })
+const _playfair = Playfair_Display({ subsets: ["latin", "latin-ext"], variable: "--font-playfair", display: "swap", preload: false })
 
 const fetchSiteSettings = cache(async () => {
   return fetchApiDataWithFallback<SiteSettingsResponse>("/v1/site-settings", {

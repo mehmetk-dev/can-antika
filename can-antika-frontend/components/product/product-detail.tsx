@@ -305,7 +305,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                         <span className="text-[10px] uppercase tracking-[0.3em] text-[#d4af37] font-semibold">Kondisyon Raporu</span>
                       </div>
                       <blockquote className="font-serif text-2xl text-[#5c4a3d] leading-relaxed italic">
-                        "{condition}"
+                        &ldquo;{condition}&rdquo;
                       </blockquote>
                       <div className="mt-8 flex items-center gap-2 text-[#5c4a3d]/40 italic text-sm">
                         <Check className="h-4 w-4" />
@@ -390,7 +390,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                           <span className="text-[10px] uppercase tracking-[0.2em] text-[#d4af37] font-semibold">Kondisyon</span>
                         </div>
                         <p className="font-serif text-xl text-[#5c4a3d] leading-relaxed italic">
-                          "{condition}"
+                          &ldquo;{condition}&rdquo;
                         </p>
                         <p className="mt-4 text-[11px] text-[#5c4a3d]/50 italic">
                           Uzmanlarımız tarafından incelenmiş ve onaylanmıştır.

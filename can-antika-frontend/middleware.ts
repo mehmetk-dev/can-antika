@@ -2,24 +2,27 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getServerApiUrlCandidates } from "@/lib/server/server-api-url";
 
-const MAINTENANCE_CACHE_TTL_MS = 60_000;
+const MAINTENANCE_CACHE_TTL_MS = 300_000;
 const MAINTENANCE_TIMEOUT_MS = 400;
 let maintenanceModeCache: { value: boolean; expiresAt: number } | null = null;
 
 async function fetchMaintenanceModeFromBase(apiBase: string): Promise<boolean> {
     const settingsUrl = new URL("/v1/site-settings", `${apiBase.replace(/\/$/, "")}/`).toString();
-    const settingsRes = await fetch(settingsUrl, {
+
+    const fetchPromise = fetch(settingsUrl, {
         method: "GET",
         headers: { Accept: "application/json" },
         next: { revalidate: 60 },
-        signal: AbortSignal.timeout(MAINTENANCE_TIMEOUT_MS),
+    }).then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
     });
 
-    if (!settingsRes.ok) {
-        throw new Error(`HTTP ${settingsRes.status}`);
-    }
+    const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), MAINTENANCE_TIMEOUT_MS)
+    );
 
-    const json = await settingsRes.json();
+    const json = await Promise.race([fetchPromise, timeout]);
     const envelopeMode = json?.data?.maintenanceMode;
     const directMode = json?.maintenanceMode;
 

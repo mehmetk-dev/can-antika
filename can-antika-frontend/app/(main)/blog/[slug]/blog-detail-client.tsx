@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge"
 import { blogApi } from "@/lib/api"
 import Link from "next/link"
 import Image from "next/image"
-import DOMPurify from "dompurify"
 import type { BlogPost, BlogCategory } from "@/lib/types"
 import { formatDateTR } from "@/lib/utils"
 
@@ -20,6 +19,18 @@ export function BlogDetailClient({ initialPost, slug, initialCategories = [] }: 
     const [post, setPost] = useState<BlogPost | null>(initialPost)
     const [categories, setCategories] = useState<BlogCategory[]>(initialCategories)
     const [loading, setLoading] = useState(!initialPost)
+    const [sanitizedContent, setSanitizedContent] = useState<string>("")
+
+    useEffect(() => {
+        if (!post?.content) return
+        let cancelled = false
+        import("dompurify").then((mod) => {
+            if (cancelled) return
+            const DOMPurify = mod.default
+            setSanitizedContent(DOMPurify.sanitize(post.content))
+        })
+        return () => { cancelled = true }
+    }, [post?.content])
 
     useEffect(() => {
         if (initialCategories.length === 0) {
@@ -160,7 +171,7 @@ export function BlogDetailClient({ initialPost, slug, initialCategories = [] }: 
                             prose-a:text-primary prose-a:no-underline hover:prose-a:underline
                             prose-strong:text-foreground
                             prose-img:rounded-xl prose-img:shadow-lg"
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
+                        dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                     />
 
                     {/* Bottom CTA */}

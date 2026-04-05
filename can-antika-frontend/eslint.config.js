@@ -1,1 +1,6 @@
-module.exports = require("eslint-config-next/core-web-vitals");
+const nextConfig = require("eslint-config-next/core-web-vitals");
+
+module.exports = [
+  { ignores: ["**/*.orig.*"] },
+  ...(Array.isArray(nextConfig) ? nextConfig : [nextConfig]),
+];

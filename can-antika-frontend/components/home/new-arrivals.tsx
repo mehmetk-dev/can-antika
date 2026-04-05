@@ -16,7 +16,7 @@ export async function NewArrivals() {
   try {
     const data = await fetchApiDataWithFallback<CursorResponse<ProductResponse>>(
       "/v1/product?page=0&size=4&sortBy=id&direction=desc",
-      { revalidate: 120, timeoutMs: 3000 }
+      { revalidate: 120, timeoutMs: 1500 }
     )
     products = (data?.items ?? []).slice(0, 4)
   } catch {

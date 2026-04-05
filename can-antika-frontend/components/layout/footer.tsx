@@ -1,10 +1,7 @@
-"use client"
-
-import { useMemo } from "react"
 import Link from "next/link"
 
-import { useSiteSettings } from "@/lib/site-settings-context"
 import { cn, sanitizeExternalUrl } from "@/lib/utils"
+import type { SiteSettingsResponse } from "@/lib/types"
 
 const footerLinks = {
   company: [
@@ -82,21 +79,17 @@ function CornerOrnament({ className }: { className?: string }) {
 
 interface FooterProps {
   className?: string
+  settings: SiteSettingsResponse
 }
 
-export function Footer({ className }: FooterProps) {
-  const settings = useSiteSettings()
-
-  const socialLinks = useMemo(
-    () => [
-      { key: "facebook" as const, href: sanitizeExternalUrl(settings.facebook) },
-      { key: "instagram" as const, href: sanitizeExternalUrl(settings.instagram) },
-      { key: "twitter" as const, href: sanitizeExternalUrl(settings.twitter) },
-      { key: "youtube" as const, href: sanitizeExternalUrl(settings.youtube) },
-      { key: "tiktok" as const, href: sanitizeExternalUrl(settings.tiktok) },
-    ].filter((item): item is { key: "facebook" | "instagram" | "twitter" | "youtube" | "tiktok"; href: string } => Boolean(item.href)),
-    [settings.facebook, settings.instagram, settings.twitter, settings.youtube, settings.tiktok]
-  )
+export function Footer({ className, settings }: FooterProps) {
+  const socialLinks = [
+    { key: "facebook" as const, href: sanitizeExternalUrl(settings.facebook) },
+    { key: "instagram" as const, href: sanitizeExternalUrl(settings.instagram) },
+    { key: "twitter" as const, href: sanitizeExternalUrl(settings.twitter) },
+    { key: "youtube" as const, href: sanitizeExternalUrl(settings.youtube) },
+    { key: "tiktok" as const, href: sanitizeExternalUrl(settings.tiktok) },
+  ].filter((item): item is { key: "facebook" | "instagram" | "twitter" | "youtube" | "tiktok"; href: string } => Boolean(item.href))
 
   const phoneHref = settings.phone ? `tel:${settings.phone.replace(/\s+/g, "")}` : ""
   const mailHref = settings.email ? `mailto:${settings.email}` : ""

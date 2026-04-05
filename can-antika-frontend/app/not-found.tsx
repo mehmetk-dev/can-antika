@@ -1,8 +1,20 @@
 import Link from "next/link"
+import { cache } from "react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
+import type { SiteSettingsResponse } from "@/lib/types"
+import { SITE_SETTINGS_DEFAULTS } from "@/lib/site-settings-context"
 
-export default function NotFound() {
+const fetchSiteSettings = cache(async () => {
+    return fetchApiDataWithFallback<SiteSettingsResponse>("/v1/site-settings", {
+        revalidate: 300,
+        timeoutMs: 900,
+    })
+})
+
+export default async function NotFound() {
+    const settings = await fetchSiteSettings()
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Header />
@@ -44,7 +56,7 @@ export default function NotFound() {
                     </div>
                 </div>
             </main>
-            <Footer />
+            <Footer settings={settings ?? SITE_SETTINGS_DEFAULTS as SiteSettingsResponse} />
         </div>
     )
 }

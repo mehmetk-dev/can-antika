@@ -40,20 +40,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
         }
 
-        authApi.getProfile()
-            .then((profile) => {
-                setUser(profile ?? null);
-                if (profile) {
-                    markAuthSessionActive();
-                } else {
+        const fetchProfile = () => {
+            authApi.getProfile()
+                .then((profile) => {
+                    setUser(profile ?? null);
+                    if (profile) {
+                        markAuthSessionActive();
+                    } else {
+                        clearAuthSessionFlag();
+                    }
+                })
+                .catch(() => {
+                    setUser(null);
                     clearAuthSessionFlag();
-                }
-            })
-            .catch(() => {
-                setUser(null);
-                clearAuthSessionFlag();
-            })
-            .finally(() => setIsLoading(false));
+                })
+                .finally(() => setIsLoading(false));
+        };
+
+        // Hidrasyon sırasında ağ bant genişliğini tüketmemek için geciktir
+        if (typeof requestIdleCallback === "function") {
+            const id = requestIdleCallback(fetchProfile, { timeout: 2000 });
+            return () => cancelIdleCallback(id);
+        }
+        const timer = setTimeout(fetchProfile, 100);
+        return () => clearTimeout(timer);
     }, []);
 
     const login = useCallback(async (data: LoginRequest) => {

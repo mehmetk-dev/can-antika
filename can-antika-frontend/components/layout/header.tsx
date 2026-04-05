@@ -1,13 +1,6 @@
-"use client"
-
 import Link from "next/link"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth/auth-context"
-import { useCartWishlistCounts } from "@/hooks/useCartWishlistCounts"
-import { MobileMenu } from "@/components/header/mobile-menu"
-import { HeaderSearch } from "@/components/header/header-search"
-import { HeaderActions } from "@/components/header/header-actions"
+import { Suspense } from "react"
+import { HeaderClientIsland } from "@/components/header/header-client-island"
 import { cn } from "@/lib/utils"
 
 const navigation = [
@@ -24,17 +17,6 @@ interface HeaderProps {
 }
 
 export function Header({ sticky = true, className }: HeaderProps) {
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { isAuthenticated, isAdmin, user, logout } = useAuth()
-  const { cartCount, wishlistCount } = useCartWishlistCounts(isAuthenticated)
-  const router = useRouter()
-
-  const handleLogout = () => {
-    logout()
-    router.push("/")
-  }
-
   return (
     <header
       className={cn(
@@ -45,27 +27,22 @@ export function Header({ sticky = true, className }: HeaderProps) {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between lg:h-20">
-          <MobileMenu
-            isOpen={isMenuOpen}
-            onOpenChange={setIsMenuOpen}
-            navigation={navigation}
-            isAuthenticated={isAuthenticated}
-          />
+          {/* Mobile menu placeholder — client island renders here */}
+          <div className="lg:hidden w-10" id="mobile-menu-slot" />
 
-          {/* Logo */}
+          {/* Logo — server rendered */}
           <Link href="/" className="flex items-center gap-2">
             <span className="font-serif text-2xl font-semibold tracking-tight text-primary lg:text-3xl">
               Can Antika
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation — server rendered */}
           <nav className="hidden lg:flex lg:items-center lg:gap-8">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-               
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 {item.name}
@@ -73,20 +50,21 @@ export function Header({ sticky = true, className }: HeaderProps) {
             ))}
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            <HeaderSearch isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
-            <HeaderActions
-              isAuthenticated={isAuthenticated}
-              isAdmin={isAdmin}
-              userName={user?.name}
-              cartCount={cartCount}
-              wishlistCount={wishlistCount}
-              onLogout={handleLogout}
-            />
-          </div>
+          {/* Client island: search, auth, cart, mobile menu */}
+          <Suspense fallback={<HeaderActionsSkeleton />}>
+            <HeaderClientIsland navigation={navigation} />
+          </Suspense>
         </div>
       </div>
     </header>
+  )
+}
+
+function HeaderActionsSkeleton() {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-9 w-9 animate-pulse rounded-md bg-muted/40" />
+      <div className="h-9 w-9 animate-pulse rounded-md bg-muted/40" />
+    </div>
   )
 }

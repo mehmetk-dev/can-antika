@@ -130,7 +130,6 @@ export function LoginForm({ onSuccess, onSwitchToRegister, prefillEmail }: Login
             </div>
 
             {/* Google Login — external OAuth2 redirect, not a Next.js page */}
-            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a
                 href={`${process.env.NEXT_PUBLIC_API_URL || ""}/oauth2/authorization/google`}
                 className="flex w-full items-center justify-center gap-3 rounded-lg border border-border/50 bg-card px-4 py-3 text-sm font-medium text-foreground shadow-sm hover:bg-muted/50 transition-colors"

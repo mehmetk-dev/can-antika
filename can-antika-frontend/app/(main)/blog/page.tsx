@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 }
 
 const fetchBlogPosts = cache(async () => {
-    return fetchApiDataWithFallback<CursorResponse<BlogPost>>("/v1/blog?page=0&size=50", {
+    return fetchApiDataWithFallback<CursorResponse<BlogPost>>("/v1/blog?page=0&size=12", {
         revalidate: 60,
         timeoutMs: 1800,
     })

@@ -88,9 +88,15 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   useEffect(() => {
     if (!productId || viewCountedRef.current === productId) return
     viewCountedRef.current = productId
-    void productApi.incrementViewCount(productId).catch(() => {
+    const fire = () => void productApi.incrementViewCount(productId).catch(() => {
       // Metrik güncellemesi başarısız olsa da kullanıcıya hissettirme
     })
+    if (typeof requestIdleCallback === "function") {
+      const id = requestIdleCallback(fire, { timeout: 3000 })
+      return () => cancelIdleCallback(id)
+    }
+    const timer = setTimeout(fire, 2000)
+    return () => clearTimeout(timer)
   }, [productId])
 
   const categoryId = product?.category?.id ?? null
@@ -101,7 +107,7 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
     const loadRelatedProducts = async () => {
       try {
         const sameCategoryResult = categoryId
-          ? await productApi.search({ categoryId, size: 12 }, 2000)
+          ? await productApi.search({ categoryId, size: 5 }, 2000)
           : { items: [] as ProductResponse[] }
 
         const sameCategoryFiltered = (sameCategoryResult.items || []).filter((item) => item.id !== productId)
@@ -112,7 +118,7 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
         }
 
         // Only fetch fallback if category results aren't enough
-        const latestProducts = await productApi.getAll(0, 20, "id", "desc")
+        const latestProducts = await productApi.getAll(0, 5, "id", "desc")
 
         const fallbackProducts = (latestProducts.items ?? []).filter(
           (item) =>

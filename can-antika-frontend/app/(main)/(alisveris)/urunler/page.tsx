@@ -32,24 +32,34 @@ export const metadata: Metadata = {
 }
 
 // Cache'li endpoint kullan — /v1/product search yerine listing (Redis cache'li)
-const fetchInitialProducts = cache(async () => {
+const fetchInitialProducts = cache(async (filters?: { categoryId?: number; periodId?: number; title?: string }) => {
+  if (filters && (filters.categoryId || filters.periodId || filters.title)) {
+    const params = new URLSearchParams({ page: "0", size: "20", sortBy: "id", direction: "desc" })
+    if (filters.categoryId) params.set("categoryId", filters.categoryId.toString())
+    if (filters.periodId) params.set("periodId", filters.periodId.toString())
+    if (filters.title) params.set("title", filters.title)
+    return fetchApiDataWithFallback<CursorResponse<ProductResponse>>(`/v1/product/search?${params}`, {
+      revalidate: 60,
+      timeoutMs: 1500,
+    })
+  }
   return fetchApiDataWithFallback<CursorResponse<ProductResponse>>("/v1/product?page=0&size=20&sortBy=id&direction=desc", {
     revalidate: 60,
-    timeoutMs: 3500,
+    timeoutMs: 1500,
   })
 })
 
 const fetchCategories = cache(async () => {
   return fetchApiDataWithFallback<CategoryResponse[]>("/v1/category/find-all", {
     revalidate: 300,
-    timeoutMs: 2500,
+    timeoutMs: 1200,
   })
 })
 
 const fetchPeriods = cache(async () => {
   return fetchApiDataWithFallback<PeriodResponse[]>("/v1/period/find-all", {
     revalidate: 300,
-    timeoutMs: 2500,
+    timeoutMs: 1200,
   })
 })
 
@@ -85,19 +95,16 @@ function CatalogSkeleton() {
   )
 }
 
-export default async function CatalogPage() {
-  const [productsResult, categoriesResult, periodsResult] = await Promise.allSettled([
-    fetchInitialProducts(),
+export default async function CatalogPage({
+  searchParams: searchParamsPromise,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  // Fetch categories and periods first (ISR-cached, near-instant after first load)
+  const [categoriesResult, periodsResult] = await Promise.allSettled([
     fetchCategories(),
     fetchPeriods(),
   ])
-
-  const initialData = productsResult.status === "fulfilled" && productsResult.value
-    ? {
-      items: Array.isArray(productsResult.value.items) ? productsResult.value.items : [],
-      totalElement: typeof productsResult.value.totalElement === "number" ? productsResult.value.totalElement : 0,
-    }
-    : { items: [], totalElement: 0 }
 
   const initialCategories = categoriesResult.status === "fulfilled" && Array.isArray(categoriesResult.value)
     ? categoriesResult.value
@@ -107,6 +114,45 @@ export default async function CatalogPage() {
     ? periodsResult.value
     : []
 
+  // Resolve URL filter params to IDs
+  const params = await searchParamsPromise
+  const categoryParam = typeof params.category === "string" ? params.category : undefined
+  const periodParam = typeof params.period === "string" ? params.period : undefined
+  const searchQuery = typeof params.q === "string" ? params.q : undefined
+
+  let ssrCategoryId: number | undefined
+  if (categoryParam && initialCategories.length > 0) {
+    const match = initialCategories.find(
+      (c) => c.name.toLowerCase() === categoryParam.toLowerCase() || c.id.toString() === categoryParam
+    )
+    if (match) ssrCategoryId = match.id
+  }
+
+  let ssrPeriodId: number | undefined
+  if (periodParam && initialPeriods.length > 0) {
+    const match = initialPeriods.find(
+      (p) => p.name.toLowerCase() === periodParam.toLowerCase() || p.id.toString() === periodParam
+    )
+    if (match) ssrPeriodId = match.id
+  }
+
+  // Fetch products — pre-filtered if URL has filters
+  const productsResult = await fetchInitialProducts(
+    (ssrCategoryId || ssrPeriodId || searchQuery)
+      ? { categoryId: ssrCategoryId, periodId: ssrPeriodId, title: searchQuery }
+      : undefined
+  ).then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    () => ({ status: "rejected" as const, value: null }),
+  )
+
+  const initialData = productsResult.status === "fulfilled" && productsResult.value
+    ? {
+      items: Array.isArray(productsResult.value.items) ? productsResult.value.items : [],
+      totalElement: typeof productsResult.value.totalElement === "number" ? productsResult.value.totalElement : 0,
+    }
+    : { items: [], totalElement: 0 }
+
   return (
     <Suspense fallback={<CatalogSkeleton />}>
       <CatalogClient
@@ -114,6 +160,8 @@ export default async function CatalogPage() {
         initialTotalCount={initialData.totalElement}
         initialCategories={initialCategories}
         initialPeriods={initialPeriods}
+        ssrCategoryId={ssrCategoryId?.toString()}
+        ssrPeriodId={ssrPeriodId?.toString()}
       />
     </Suspense>
   )

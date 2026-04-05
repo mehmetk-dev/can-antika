@@ -22,7 +22,7 @@ export function WhatsAppButton({ product, className = "" }: WhatsAppButtonProps)
             </div>
             <div className="flex flex-col items-center">
                 <span className="font-serif text-[13px] font-medium tracking-wide text-[#5c4a3d] sm:text-sm">
-                    <span className="sm:hidden">WhatsApp'tan Bilgi Al</span>
+                    <span className="sm:hidden">WhatsApp&apos;tan Bilgi Al</span>
                     <span className="hidden sm:inline">Koleksiyon Uzmanına Danışın</span>
                 </span>
                 <span className="mt-0.5 text-[9px] uppercase tracking-widest text-[#5c4a3d]/70 sm:text-[10px]">

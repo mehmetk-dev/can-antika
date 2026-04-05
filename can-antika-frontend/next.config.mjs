@@ -1,9 +1,10 @@
+import withBundleAnalyzer from '@next/bundle-analyzer'
+
+const analyzer = withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
     loader: "custom",
     loaderFile: "./lib/cloudinary-image-loader.ts",
@@ -17,7 +18,7 @@ const nextConfig = {
     minimumCacheTTL: 86400,
   },
   experimental: {
-    cssChunking: "loose",
+    cssChunking: "strict",
     optimizeCss: true,
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons", "recharts"],
   },
@@ -31,4 +32,4 @@ const nextConfig = {
   },
 }
 
-export default nextConfig;
+export default analyzer(nextConfig);

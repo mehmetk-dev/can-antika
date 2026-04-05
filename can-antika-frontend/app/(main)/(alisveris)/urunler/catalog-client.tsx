@@ -28,6 +28,8 @@ interface CatalogClientProps {
   initialTotalCount?: number
   initialCategories?: CategoryResponse[]
   initialPeriods?: PeriodResponse[]
+  ssrCategoryId?: string
+  ssrPeriodId?: string
 }
 
 export function CatalogClient({
@@ -35,12 +37,14 @@ export function CatalogClient({
   initialTotalCount = 0,
   initialCategories = [],
   initialPeriods = [],
+  ssrCategoryId,
+  ssrPeriodId,
 }: CatalogClientProps) {
   const {
     products, categories, periods, totalCount, isLoading,
     page, totalPages, selectedFilters, sortBy, activeFilterCount,
     handleFilterChange, handleClearFilters, handleSortChange, handlePageChange,
-  } = useCatalogFilters({ initialProducts, initialTotalCount, initialCategories, initialPeriods })
+  } = useCatalogFilters({ initialProducts, initialTotalCount, initialCategories, initialPeriods, ssrCategoryId, ssrPeriodId })
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 

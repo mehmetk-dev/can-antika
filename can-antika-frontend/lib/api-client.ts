@@ -2,8 +2,8 @@ import type { ResultData } from "./types";
 import { clearAuthSessionFlag, hasAuthSessionFlag } from "./auth/auth-session";
 
 const ENV_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").trim();
-const REQUEST_TIMEOUT_MS = 15000;
-const REFRESH_TIMEOUT_MS = 8000;
+const REQUEST_TIMEOUT_MS = 8000;
+const REFRESH_TIMEOUT_MS = 5000;
 const CSRF_COOKIE_NAME = "XSRF-TOKEN";
 const CSRF_HEADER_NAME = "X-XSRF-TOKEN";
 

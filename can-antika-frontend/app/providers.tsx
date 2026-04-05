@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthProvider } from "@/lib/auth/auth-context";
+import { WebVitalsReporter } from "@/components/layout/web-vitals-reporter";
 import { SiteSettingsProvider } from "@/lib/site-settings-context";
 import type { SiteSettingsResponse } from "@/lib/types";
 import { Toaster } from "sonner";
@@ -29,6 +30,7 @@ export function Providers({
                         },
                     }}
                 />
+                <WebVitalsReporter />
             </AuthProvider>
         </SiteSettingsProvider>
     );

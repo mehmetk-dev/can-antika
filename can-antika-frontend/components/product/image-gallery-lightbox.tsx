@@ -36,9 +36,10 @@ export function ImageGalleryLightbox({
         const probe = new window.Image()
         probe.src = lightboxUrl
         if (probe.complete && probe.naturalWidth > 0) {
-            setLoaded(true)
+            // Already cached — update state in microtask to avoid sync setState in effect
+            queueMicrotask(() => setLoaded(true))
         } else {
-            setLoaded(false)
+            queueMicrotask(() => setLoaded(false))
         }
     }, [lightboxUrl])
 

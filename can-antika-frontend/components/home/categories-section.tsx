@@ -1,11 +1,7 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Loader2 } from "lucide-react"
 
-import { categoryApi } from "@/lib/api"
+import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import { resolveImageUrl } from "@/lib/product/image-url"
 import type { CategoryResponse } from "@/lib/types"
 
@@ -26,63 +22,38 @@ function getCategoryImage(name: string): string {
   return "/placeholder.svg"
 }
 
-export function CategoriesSection() {
-  const [categories, setCategories] = useState<(CategoryResponse & { count: number | null; dynamicImage?: string })[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+export async function CategoriesSection() {
+  const [cats, countsResponse] = await Promise.all([
+    fetchApiDataWithFallback<CategoryResponse[]>("/v1/category/find-all", {
+      revalidate: 300,
+      timeoutMs: 1200,
+    }),
+    fetchApiDataWithFallback<Record<string, number>>("/v1/category/product-counts", {
+      revalidate: 120,
+      timeoutMs: 1200,
+    }),
+  ])
 
-  useEffect(() => {
-    let isMounted = true
+  if (!cats || cats.length === 0) return null
 
-    const loadCategories = async () => {
-      try {
-        const [cats, countsResponse] = await Promise.all([
-          categoryApi.getAllCached(true),
-          categoryApi.getProductCounts(true).catch(() => null),
-        ])
-
-        const countByCategory = new Map<number, number>()
-        if (countsResponse) {
-          Object.entries(countsResponse).forEach(([categoryId, count]) => {
-            const parsedId = Number(categoryId)
-            if (Number.isFinite(parsedId) && parsedId > 0) {
-              countByCategory.set(parsedId, Number(count) || 0)
-            }
-          })
-        }
-
-        const visible = cats
-          .map((cat) => ({
-            ...cat,
-            count: countByCategory.has(cat.id) ? (countByCategory.get(cat.id) ?? 0) : null,
-            dynamicImage: cat.coverImageUrl ? resolveImageUrl(cat.coverImageUrl) : undefined,
-          }))
-          .filter((c) => c.count === null || c.count > 0)
-          .slice(0, 4)
-
-        if (isMounted) setCategories(visible)
-      } catch {
-        if (isMounted) setCategories([])
-      } finally {
-        if (isMounted) setIsLoading(false)
+  const countByCategory = new Map<number, number>()
+  if (countsResponse) {
+    Object.entries(countsResponse).forEach(([categoryId, count]) => {
+      const parsedId = Number(categoryId)
+      if (Number.isFinite(parsedId) && parsedId > 0) {
+        countByCategory.set(parsedId, Number(count) || 0)
       }
-    }
-
-    loadCategories()
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  if (isLoading) {
-    return (
-      <section className="relative overflow-hidden bg-[#2a1c12] py-24 lg:py-32">
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-[#d1a46e]" />
-        </div>
-      </section>
-    )
+    })
   }
+
+  const categories = cats
+    .map((cat) => ({
+      ...cat,
+      count: countByCategory.has(cat.id) ? (countByCategory.get(cat.id) ?? 0) : null,
+      dynamicImage: cat.coverImageUrl ? resolveImageUrl(cat.coverImageUrl) : undefined,
+    }))
+    .filter((c) => c.count === null || c.count > 0)
+    .slice(0, 4)
 
   if (categories.length === 0) return null
 
