@@ -150,7 +150,7 @@ export function CatalogClient({
 
               <div className="flex items-center gap-3">
                 <Select value={sortBy} onValueChange={handleSortChange}>
-                  <SelectTrigger className="w-44 bg-transparent border-primary/20 hover:border-primary/40">
+                  <SelectTrigger className="w-52 bg-transparent border-primary/20 hover:border-primary/40">
                     <SelectValue placeholder="Sıralama" />
                   </SelectTrigger>
                   <SelectContent>

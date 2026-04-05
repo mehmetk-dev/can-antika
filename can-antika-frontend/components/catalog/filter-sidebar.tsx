@@ -34,7 +34,7 @@ export function FilterSidebar({
     selectedFilters.priceRanges.length
 
   const content = (
-    <Accordion type="multiple" defaultValue={["category", "period", "price"]} className="w-full">
+    <Accordion type="multiple" defaultValue={["category"]} className="w-full">
       {/* Category Filter — DB'den gelen kategoriler */}
       <AccordionItem value="category" className="border-primary/10">
         <AccordionTrigger className="font-serif text-base hover:no-underline hover:text-primary py-3">

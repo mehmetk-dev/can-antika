@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Loader2, PackageSearch } from "lucide-react"
+import { PackageSearch } from "lucide-react"
 
 import { productApi } from "@/lib/api"
 import { ProductDetail } from "@/components/product/product-detail"
@@ -23,6 +23,14 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   const [isLoading, setIsLoading] = useState(!initialProduct)
   const [relatedProducts, setRelatedProducts] = useState<ProductResponse[]>([])
 
+  // Hide the server-rendered shell once the full client component is ready
+  useEffect(() => {
+    if (!isLoading && product) {
+      const shell = document.getElementById("product-ssr-shell")
+      if (shell) shell.style.display = "none"
+    }
+  }, [isLoading, product])
+
   useEffect(() => {
     let isCancelled = false
 
@@ -39,17 +47,27 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
         return productApi.getById(numericId, 3000)
       }
 
-      // Önce slug ile dene
-      try {
-        return await productApi.getBySlug(slug, 3000)
-      } catch {
-        // Slug bulunamadıysa sondaki ID ile dene (ör: "gumus-sigara-agizligi-76" → 76)
-        const trailingMatch = slug.match(/-(\d+)$/)
-        if (trailingMatch) {
-          const trailingId = Number.parseInt(trailingMatch[1], 10)
-          if (Number.isFinite(trailingId)) {
-            return productApi.getById(trailingId, 3000)
+      // Önce sondaki ID ile dene — en hızlı yol (ör: "gumus-kemer-tokasi-76" → id=76)
+      const trailingMatch = slug.match(/-(\d+)$/)
+      if (trailingMatch) {
+        const trailingId = Number.parseInt(trailingMatch[1], 10)
+        if (Number.isFinite(trailingId)) {
+          try {
+            return await productApi.getById(trailingId, 3000)
+          } catch {
+            // ID ile bulunamazsa slug ile dene
           }
+        }
+      }
+
+      // Slug ile dene (ID suffix'i çıkarılmış hali)
+      const slugWithoutId = trailingMatch ? slug.replace(/-\d+$/, "") : slug
+      try {
+        return await productApi.getBySlug(slugWithoutId, 3000)
+      } catch {
+        // Slug ile de bulunamazsa, tam slug ile dene
+        if (trailingMatch) {
+          return productApi.getBySlug(slug, 3000)
         }
         throw new Error("Product not found")
       }
@@ -141,13 +159,9 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   }, [productId, categoryId])
 
   if (isLoading) {
-    return (
-      <div className="bg-background">
-        <div className="flex items-center justify-center py-32">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </div>
-    )
+    // Suspense fallback (ProductLoading skeleton) is already visible —
+    // returning null keeps the same skeleton instead of switching to a spinner.
+    return null
   }
 
   if (!product) {
