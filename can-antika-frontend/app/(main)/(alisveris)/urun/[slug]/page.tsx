@@ -202,7 +202,7 @@ async function ProductResolver({ slug }: { slug: string }) {
             </ol>
           </nav>
 
-          <div className="grid gap-6 sm:gap-10 lg:grid-cols-[5fr_7fr] lg:gap-12 items-start lg:items-center pb-8">
+          <div className="grid gap-6 sm:gap-10 lg:grid-cols-[5fr_7fr] lg:gap-12 items-start pb-8">
             {/* Main image — server-rendered */}
             {mainImageUrl && mainImageUrl !== "/placeholder.svg" && (
               <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-muted">

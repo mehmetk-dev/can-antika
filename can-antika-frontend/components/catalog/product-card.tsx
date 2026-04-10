@@ -68,10 +68,10 @@ export const ProductCard = memo(function ProductCard({ product, isPriority = fal
       </div>
 
       <div className="border-t border-border/60 p-4">
-        {era && <p className="text-xs font-medium uppercase tracking-wider text-accent">{eraLabels[era] || era}</p>}
-        <h3 className="mt-1 line-clamp-2 font-serif text-lg font-medium leading-tight text-foreground transition-colors group-hover:text-primary">
+        {era && <p className="text-xs font-medium uppercase tracking-wider text-primary/85">{eraLabels[era] || era}</p>}
+        <h2 className="mt-1 line-clamp-2 font-serif text-lg font-medium leading-tight text-foreground transition-colors group-hover:text-primary">
           {product.title}
-        </h3>
+        </h2>
         {condition && <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">{condition}</p>}
         {product.category && <p className="mt-1 text-xs text-muted-foreground hidden sm:block">{product.category.name}</p>}
         <div className="mt-3">

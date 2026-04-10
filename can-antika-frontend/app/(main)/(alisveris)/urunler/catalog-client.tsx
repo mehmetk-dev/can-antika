@@ -55,7 +55,7 @@ export function CatalogClient({
           <div className="text-center lg:text-left">
             <div className="inline-flex items-center gap-2 mb-3">
               <span className="h-px w-8 bg-primary/40 hidden lg:block" />
-              <span className="text-xs uppercase tracking-[0.2em] text-primary/70">Koleksiyonumuz</span>
+              <span className="text-xs uppercase tracking-[0.2em] text-primary">Koleksiyonumuz</span>
               <span className="h-px w-8 bg-primary/40 hidden lg:block" />
             </div>
             <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
@@ -150,7 +150,7 @@ export function CatalogClient({
 
               <div className="flex items-center gap-3">
                 <Select value={sortBy} onValueChange={handleSortChange}>
-                  <SelectTrigger className="w-52 bg-transparent border-primary/20 hover:border-primary/40">
+                  <SelectTrigger className="w-52 bg-transparent border-primary/20 hover:border-primary/40" aria-label="Sıralama seçin">
                     <SelectValue placeholder="Sıralama" />
                   </SelectTrigger>
                   <SelectContent>

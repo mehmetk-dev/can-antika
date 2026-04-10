@@ -3,15 +3,8 @@ import { cache } from "react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { SitePopupWrapper } from "@/components/home/site-popup-wrapper"
-import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
+import { fetchSiteSettings } from "@/lib/server/site-settings"
 import type { SiteSettingsResponse } from "@/lib/types"
-
-const fetchSiteSettings = cache(async () => {
-    return fetchApiDataWithFallback<SiteSettingsResponse>("/v1/site-settings", {
-        revalidate: 300,
-        timeoutMs: 900,
-    })
-})
 
 const FOOTER_DEFAULTS: Pick<SiteSettingsResponse, "storeName" | "businessType" | "storeDescription" | "footerAbout" | "phone" | "email" | "address" | "facebook" | "instagram" | "twitter" | "youtube" | "tiktok"> = {
     storeName: "Can Antika",

@@ -40,26 +40,26 @@ const fetchInitialProducts = cache(async (filters?: { categoryId?: number; perio
     if (filters.title) params.set("title", filters.title)
     return fetchApiDataWithFallback<CursorResponse<ProductResponse>>(`/v1/product/search?${params}`, {
       revalidate: 60,
-      timeoutMs: 1500,
+      timeoutMs: 800,
     })
   }
   return fetchApiDataWithFallback<CursorResponse<ProductResponse>>("/v1/product?page=0&size=20&sortBy=id&direction=desc", {
     revalidate: 60,
-    timeoutMs: 1500,
+    timeoutMs: 800,
   })
 })
 
 const fetchCategories = cache(async () => {
   return fetchApiDataWithFallback<CategoryResponse[]>("/v1/category/find-all", {
     revalidate: 300,
-    timeoutMs: 1200,
+    timeoutMs: 600,
   })
 })
 
 const fetchPeriods = cache(async () => {
   return fetchApiDataWithFallback<PeriodResponse[]>("/v1/period/find-all", {
     revalidate: 300,
-    timeoutMs: 1200,
+    timeoutMs: 600,
   })
 })
 
@@ -70,7 +70,7 @@ function CatalogSkeleton() {
         <div className="mb-8 text-center lg:text-left">
           <div className="inline-flex items-center gap-2 mb-3">
             <span className="h-px w-8 bg-primary/40 hidden lg:block" />
-            <span className="text-xs uppercase tracking-[0.2em] text-primary/70">Koleksiyonumuz</span>
+            <span className="text-xs uppercase tracking-[0.2em] text-primary">Koleksiyonumuz</span>
             <span className="h-px w-8 bg-primary/40 hidden lg:block" />
           </div>
           <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">

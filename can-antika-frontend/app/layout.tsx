@@ -2,23 +2,14 @@ import type React from "react"
 import type { Metadata } from "next"
 import Script from "next/script"
 import { Inter, Playfair_Display } from "next/font/google"
-import { cache } from "react"
 
 import { Providers } from "./providers"
 import "./globals.css"
 
-import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
-import type { SiteSettingsResponse } from "@/lib/types"
+import { fetchSiteSettings } from "@/lib/server/site-settings"
 
 const _inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap", preload: true })
 const _playfair = Playfair_Display({ subsets: ["latin", "latin-ext"], variable: "--font-playfair", display: "swap", preload: false })
-
-const fetchSiteSettings = cache(async () => {
-  return fetchApiDataWithFallback<SiteSettingsResponse>("/v1/site-settings", {
-    revalidate: 300,
-    timeoutMs: 900,
-  })
-})
 
 const GA_ID_PATTERN = /^(G-[A-Z0-9]+|GTM-[A-Z0-9]+|UA-\d+-\d+)$/i
 const FB_PIXEL_ID_PATTERN = /^\d{5,20}$/

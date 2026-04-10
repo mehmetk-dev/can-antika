@@ -85,6 +85,28 @@ services:
       retries: 3
       start_period: 120s
 
+  # --- FRONTEND (Dev Mode) ---
+  frontend:
+    image: node:20-alpine
+    container_name: can-antika-frontend-local
+    working_dir: /app
+    volumes:
+      - ./can-antika-frontend:/app
+      - frontend_node_modules_local:/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - INTERNAL_API_URL=http://backend:8080
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    command: sh -c "corepack enable && corepack prepare pnpm@10.32.1 --activate && pnpm install && pnpm dev -H 0.0.0.0"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   postgres_data_local:
   redis_data_local:
+  frontend_node_modules_local:
