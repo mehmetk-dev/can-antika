@@ -68,8 +68,8 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
 
       {/* Product Section */}
       <section className="mx-auto max-w-[1400px] px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="grid gap-6 sm:gap-12 lg:grid-cols-2 lg:gap-20 items-start">
-          <div className="relative min-w-0 w-full lg:sticky lg:top-8">
+        <div className="grid gap-6 sm:gap-10 lg:grid-cols-[5fr_7fr] lg:gap-12 items-start lg:items-center">
+          <div className="relative min-w-0 w-full">
             <ImageGallery images={productImages} productName={product.title} />
           </div>
 

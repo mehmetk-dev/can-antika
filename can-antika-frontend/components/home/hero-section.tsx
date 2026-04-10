@@ -7,7 +7,7 @@ export function HeroSection() {
     <section className="relative min-h-[90vh] overflow-hidden">
       <div className="absolute inset-0 -z-20">
         <Image
-          src="/dükkan.webp"
+          src="https://res.cloudinary.com/dqlbenxvc/image/upload/f_auto,q_auto/v1775851600/d%C3%BCkkan_koutzn.webp"
           alt="Can Antika mağaza içi"
           fill
           priority
