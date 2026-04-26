@@ -3,6 +3,7 @@ package com.mehmetkerem.controller.impl;
 import com.mehmetkerem.controller.IRestProductController;
 import com.mehmetkerem.dto.request.ProductRequest;
 import com.mehmetkerem.dto.response.CursorResponse;
+import com.mehmetkerem.dto.response.ProductCardResponse;
 import com.mehmetkerem.dto.response.ProductResponse;
 import com.mehmetkerem.service.IProductService;
 import com.mehmetkerem.service.product.ProductSortResolver;
@@ -69,6 +70,38 @@ public class RestProductControllerImpl implements IRestProductController {
         return ResultHelper.success(productService.getProductsByCategory(categoryId));
     }
 
+    @GetMapping("/search/cards")
+    @Override
+    public ResultData<CursorResponse<ProductCardResponse>> searchProductCards(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) Long periodId,
+            @RequestParam(required = false) List<Long> periodIds,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        Sort sort = resolveProductSort(sortBy, direction);
+        int cappedSize = Math.min(Math.max(size, 1), 100);
+        Pageable pageable = PageRequest.of(page, cappedSize, sort);
+        CursorResponse<ProductCardResponse> cursorResult = productService.searchProductCards(
+                title,
+                categoryId,
+                categoryIds,
+                periodId,
+                periodIds,
+                minPrice,
+                maxPrice,
+                minRating,
+                pageable);
+        return ResultHelper.success(cursorResult);
+    }
+
     @GetMapping("/search")
     @Override
     public ResultData<CursorResponse<ProductResponse>> searchProducts(
@@ -106,6 +139,18 @@ public class RestProductControllerImpl implements IRestProductController {
     @Override
     public ResultData<String> deleteProduct(@PathVariable("id") Long id) {
         return ResultHelper.success(productService.deleteProduct(id));
+    }
+
+    @GetMapping("/cards")
+    @Override
+    public ResultData<CursorResponse<ProductCardResponse>> listProductCards(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+        int cappedSize = Math.min(Math.max(size, 1), 100);
+        CursorResponse<ProductCardResponse> cursorResult = productService.getProductCards(page, cappedSize, sortBy, direction);
+        return ResultHelper.success(cursorResult);
     }
 
     @GetMapping("/{id}")

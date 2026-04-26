@@ -10,10 +10,10 @@ import { Button } from "@/components/ui/button"
 import { resolveImageUrl } from "@/lib/product/image-url"
 import { getProductUrl } from "@/lib/product/product-url"
 import { eraLabels, getProductAttributes } from "@/lib/product/product-utils"
-import type { ProductResponse } from "@/lib/types"
+import type { ProductCardResponse } from "@/lib/types"
 
 interface ProductCardProps {
-  product: ProductResponse
+  product: ProductCardResponse
   isPriority?: boolean
 }
 

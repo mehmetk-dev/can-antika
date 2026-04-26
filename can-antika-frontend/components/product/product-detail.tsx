@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { useProductActions } from "@/hooks/useProductActions"
 import { getProductAttributes, eraLabels } from "@/lib/product/product-utils"
-import type { ProductResponse } from "@/lib/types"
+import type { ProductResponse, ProductCardResponse } from "@/lib/types"
 
 const PurchaseDialog = dynamic(() => import("@/components/product/product-dialogs").then(m => ({ default: m.PurchaseDialog })))
 const ContactDialog = dynamic(() => import("@/components/product/product-dialogs").then(m => ({ default: m.ContactDialog })))
@@ -23,7 +23,7 @@ const WhatsAppButton = dynamic(() => import("@/components/product/whatsapp-butto
 
 interface ProductDetailProps {
   product: ProductResponse
-  relatedProducts?: ProductResponse[]
+  relatedProducts?: ProductCardResponse[]
 }
 
 export function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {

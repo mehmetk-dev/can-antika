@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { productApi, categoryApi, periodApi } from "@/lib/api"
 import { priceRanges } from "@/lib/product/products"
-import type { ProductResponse, CategoryResponse, CursorResponse, PeriodResponse } from "@/lib/types"
+import type { ProductCardResponse, CategoryResponse, CursorResponse, PeriodResponse } from "@/lib/types"
 import { CATALOG_PAGE_SIZE } from "@/lib/constants"
 
 const PAGE_SIZE = CATALOG_PAGE_SIZE
@@ -18,7 +18,7 @@ const SORT_MAP: Record<string, { sortBy: string; direction: string }> = {
 }
 
 interface UseCatalogFiltersOptions {
-    initialProducts?: ProductResponse[]
+    initialProducts?: ProductCardResponse[]
     initialTotalCount?: number
     initialFetchCompleted?: boolean
     initialCategories?: CategoryResponse[]
@@ -45,7 +45,7 @@ export function useCatalogFilters({
     const hasInitialResult = initialFetchCompleted
 
     // Data state
-    const [products, setProducts] = useState<ProductResponse[]>(initialProducts)
+    const [products, setProducts] = useState<ProductCardResponse[]>(initialProducts)
     const [categories, setCategories] = useState<CategoryResponse[]>(initialCategories)
     const [periods, setPeriods] = useState<PeriodResponse[]>(initialPeriods)
     const [totalCount, setTotalCount] = useState(initialTotalCount)
@@ -170,7 +170,7 @@ export function useCatalogFilters({
         const periodIds = selectedPeriodIds.length > 1 ? selectedPeriodIds.join(",") : undefined
 
         try {
-            const result: CursorResponse<ProductResponse> = await productApi.search({
+            const result: CursorResponse<ProductCardResponse> = await productApi.searchCards({
                 title: currentSearch || undefined,
                 categoryId,
                 categoryIds,
@@ -197,7 +197,7 @@ export function useCatalogFilters({
                 setTotalCount(0)
             } else {
                 try {
-                    const fallbackResult = await productApi.getAll(currentPage, PAGE_SIZE, sort.sortBy, sort.direction)
+                    const fallbackResult = await productApi.getCards(currentPage, PAGE_SIZE, sort.sortBy, sort.direction)
                     const fallbackItems = Array.isArray(fallbackResult.items) ? fallbackResult.items : []
                     const fallbackTotal =
                         typeof fallbackResult.totalElement === "number" ? fallbackResult.totalElement : fallbackItems.length

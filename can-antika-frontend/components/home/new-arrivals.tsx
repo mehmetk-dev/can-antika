@@ -7,15 +7,15 @@ import { resolveImageUrl } from "@/lib/product/image-url"
 import { getProductUrl } from "@/lib/product/product-url"
 import { resolvePeriodLabel } from "@/lib/product/product-utils"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
-import type { ProductResponse, CursorResponse } from "@/lib/types"
+import type { ProductCardResponse, CursorResponse } from "@/lib/types"
 import { NewArrivalsClientFallback } from "./new-arrivals-client-fallback"
 
 export async function NewArrivals() {
-  let products: ProductResponse[] = []
+  let products: ProductCardResponse[] = []
 
   try {
-    const data = await fetchApiDataWithFallback<CursorResponse<ProductResponse>>(
-      "/v1/product?page=0&size=4&sortBy=id&direction=desc",
+    const data = await fetchApiDataWithFallback<CursorResponse<ProductCardResponse>>(
+      "/v1/product/cards?page=0&size=4&sortBy=id&direction=desc",
       { revalidate: 120, timeoutMs: 1500 }
     )
     products = (data?.items ?? []).slice(0, 4)
@@ -31,7 +31,7 @@ export async function NewArrivals() {
   return <NewArrivalsUI products={products} />
 }
 
-export function NewArrivalsUI({ products }: { products: ProductResponse[] }) {
+export function NewArrivalsUI({ products }: { products: ProductCardResponse[] }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-amber-50 to-amber-100/50 py-24 lg:py-32">
       <div

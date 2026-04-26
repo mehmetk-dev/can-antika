@@ -6,10 +6,10 @@ import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { resolveImageUrl } from "@/lib/product/image-url"
 import { getProductUrl } from "@/lib/product/product-url"
-import type { ProductResponse } from "@/lib/types"
+import type { ProductCardResponse } from "@/lib/types"
 
 interface RelatedProductsProps {
-  products: ProductResponse[]
+  products: ProductCardResponse[]
   currentProductId: number
 }
 

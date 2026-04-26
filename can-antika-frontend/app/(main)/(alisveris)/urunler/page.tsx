@@ -4,7 +4,7 @@ import { Suspense } from "react"
 
 import { CatalogClient } from "./catalog-client"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
-import type { ProductResponse, CategoryResponse, PeriodResponse, CursorResponse } from "@/lib/types"
+import type { ProductCardResponse, CategoryResponse, PeriodResponse, CursorResponse } from "@/lib/types"
 
 export const revalidate = 60
 
@@ -38,12 +38,12 @@ const fetchInitialProducts = cache(async (filters?: { categoryId?: number; perio
     if (filters.categoryId) params.set("categoryId", filters.categoryId.toString())
     if (filters.periodId) params.set("periodId", filters.periodId.toString())
     if (filters.title) params.set("title", filters.title)
-    return fetchApiDataWithFallback<CursorResponse<ProductResponse>>(`/v1/product/search?${params}`, {
+    return fetchApiDataWithFallback<CursorResponse<ProductCardResponse>>(`/v1/product/search/cards?${params}`, {
       revalidate: 60,
       timeoutMs: 800,
     })
   }
-  return fetchApiDataWithFallback<CursorResponse<ProductResponse>>("/v1/product?page=0&size=20&sortBy=id&direction=desc", {
+  return fetchApiDataWithFallback<CursorResponse<ProductCardResponse>>("/v1/product/cards?page=0&size=20&sortBy=id&direction=desc", {
     revalidate: 60,
     timeoutMs: 800,
   })

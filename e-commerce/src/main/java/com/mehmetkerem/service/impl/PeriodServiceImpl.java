@@ -30,7 +30,7 @@ public class PeriodServiceImpl implements IPeriodService {
     private final ProductRepository productRepository;
 
     @Override
-    @CacheEvict(cacheNames = { "periods:byIds", "periods:all" }, allEntries = true)
+    @CacheEvict(cacheNames = { "periods:byIds", "periods:all", "products:list", "products:cards", "products:byId", "products:bySlug" }, allEntries = true)
     public PeriodResponse savePeriod(PeriodRequest request) {
         String normalizedName = normalizeRequired(request.getName());
         if (periodRepository.findByNameIgnoreCase(normalizedName).isPresent()) {
@@ -45,7 +45,7 @@ public class PeriodServiceImpl implements IPeriodService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "periods:byIds", "periods:all" }, allEntries = true)
+    @CacheEvict(cacheNames = { "periods:byIds", "periods:all", "products:list", "products:cards", "products:byId", "products:bySlug" }, allEntries = true)
     public PeriodResponse updatePeriod(Long id, PeriodRequest request) {
         Period period = getPeriodById(id);
         String normalizedName = normalizeRequired(request.getName());
@@ -64,7 +64,7 @@ public class PeriodServiceImpl implements IPeriodService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "periods:byIds", "periods:all" }, allEntries = true)
+    @CacheEvict(cacheNames = { "periods:byIds", "periods:all", "products:list", "products:cards", "products:byId", "products:bySlug" }, allEntries = true)
     public String deletePeriod(Long id) {
         if (productRepository.existsByPeriodId(id)) {
             throw new BadRequestException("Bu döneme bağlı ürünler var. Önce ürünlerde dönemi güncelleyin.");

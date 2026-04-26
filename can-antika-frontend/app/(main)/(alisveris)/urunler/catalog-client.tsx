@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { useCatalogFilters } from "@/hooks/useCatalogFilters"
-import type { ProductResponse, CategoryResponse, PeriodResponse } from "@/lib/types"
+import type { ProductCardResponse, CategoryResponse, PeriodResponse } from "@/lib/types"
 
 type ViewMode = "grid" | "large"
 
@@ -24,7 +24,7 @@ function VintageCorner({ className }: { className?: string }) {
 }
 
 interface CatalogClientProps {
-  initialProducts?: ProductResponse[]
+  initialProducts?: ProductCardResponse[]
   initialTotalCount?: number
   initialFetchCompleted?: boolean
   initialCategories?: CategoryResponse[]

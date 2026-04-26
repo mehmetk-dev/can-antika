@@ -2,6 +2,7 @@ package com.mehmetkerem.service;
 
 import com.mehmetkerem.dto.request.ProductRequest;
 import com.mehmetkerem.dto.response.CursorResponse;
+import com.mehmetkerem.dto.response.ProductCardResponse;
 import com.mehmetkerem.dto.response.ProductImportResponse;
 import com.mehmetkerem.dto.response.ProductResponse;
 import com.mehmetkerem.model.Product;
@@ -36,6 +37,11 @@ public interface IProductService {
             BigDecimal minPrice, BigDecimal maxPrice, Double minRating, Pageable pageable);
 
     CursorResponse<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction);
+
+    CursorResponse<ProductCardResponse> searchProductCards(String title, Long categoryId, List<Long> categoryIds, Long periodId, List<Long> periodIds,
+            BigDecimal minPrice, BigDecimal maxPrice, Double minRating, Pageable pageable);
+
+    CursorResponse<ProductCardResponse> getProductCards(int page, int size, String sortBy, String direction);
 
     void updateProductRating(Long productId, double averageRating, int reviewCount);
 

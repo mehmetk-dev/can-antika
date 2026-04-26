@@ -28,6 +28,20 @@ export interface ProductResponse {
     viewCount?: number;
 }
 
+export interface ProductCardResponse {
+    id: number;
+    title: string;
+    slug?: string;
+    price: number;
+    stock?: number;
+    category?: CategoryResponse;
+    period?: PeriodResponse;
+    imageUrls?: string[];
+    attributes?: Record<string, unknown>;
+    averageRating?: number;
+    reviewCount?: number;
+}
+
 export interface ProductRequest {
     title: string;
     description?: string;

@@ -28,6 +28,8 @@ Bu rapor kod incelemesine dayali. Canli production metriklerine, Coolify loglari
 - Katalog SSR bos sonuc ile SSR timeout/basarisiz sonuc ayrildi.
 - Frontend Dockerfile icinde `pnpm@latest` yerine `pnpm@10.32.1` sabitlendi.
 - Frontend ve backend icin `.dockerignore` dosyalari eklendi.
+- Kart/liste ekranlari icin geriye uyumlu `ProductCardResponse` akisi eklendi.
+- Katalog, yeni gelenler ve benzer urunler hafif kart endpointlerine tasindi.
 
 ## Incelenen Ana Dosyalar
 

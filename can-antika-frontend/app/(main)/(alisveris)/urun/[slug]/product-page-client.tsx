@@ -9,7 +9,7 @@ import { productApi } from "@/lib/api"
 import { ProductDetail } from "@/components/product/product-detail"
 import { Button } from "@/components/ui/button"
 import { getProductUrl } from "@/lib/product/product-url"
-import type { ProductResponse } from "@/lib/types"
+import type { ProductResponse, ProductCardResponse } from "@/lib/types"
 
 interface ProductPageClientProps {
   initialProduct: ProductResponse | null
@@ -21,7 +21,7 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
 
   const [product, setProduct] = useState<ProductResponse | null>(initialProduct)
   const [isLoading, setIsLoading] = useState(!initialProduct)
-  const [relatedProducts, setRelatedProducts] = useState<ProductResponse[]>([])
+  const [relatedProducts, setRelatedProducts] = useState<ProductCardResponse[]>([])
 
   useEffect(() => {
     let isCancelled = false
@@ -119,8 +119,8 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
     const loadRelatedProducts = async () => {
       try {
         const sameCategoryResult = categoryId
-          ? await productApi.search({ categoryId, size: 5 }, 2000)
-          : { items: [] as ProductResponse[] }
+          ? await productApi.searchCards({ categoryId, size: 5 }, 2000)
+          : { items: [] as ProductCardResponse[] }
 
         const sameCategoryFiltered = (sameCategoryResult.items || []).filter((item) => item.id !== productId)
 
@@ -130,7 +130,7 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
         }
 
         // Only fetch fallback if category results aren't enough
-        const latestProducts = await productApi.getAll(0, 5, "id", "desc")
+        const latestProducts = await productApi.getCards(0, 5, "id", "desc")
 
         const fallbackProducts = (latestProducts.items ?? []).filter(
           (item) =>

@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react"
 import { productApi } from "@/lib/api"
-import type { ProductResponse } from "@/lib/types"
+import type { ProductCardResponse } from "@/lib/types"
 import { NewArrivalsUI } from "./new-arrivals"
 
 export function NewArrivalsClientFallback() {
-  const [products, setProducts] = useState<ProductResponse[]>([])
+  const [products, setProducts] = useState<ProductCardResponse[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     productApi
-      .getAll(0, 4, "id", "desc")
+      .getCards(0, 4, "id", "desc")
       .then((data) => {
         setProducts((data?.items ?? []).slice(0, 4))
       })

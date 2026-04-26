@@ -2,6 +2,7 @@ package com.mehmetkerem.controller;
 
 import com.mehmetkerem.dto.request.ProductRequest;
 import com.mehmetkerem.dto.response.CursorResponse;
+import com.mehmetkerem.dto.response.ProductCardResponse;
 import com.mehmetkerem.dto.response.ProductImportResponse;
 import com.mehmetkerem.dto.response.ProductResponse;
 import com.mehmetkerem.util.ResultData;
@@ -38,6 +39,26 @@ public interface IRestProductController {
             @RequestParam(required = false) Double minRating,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction);
+
+    ResultData<CursorResponse<ProductCardResponse>> searchProductCards(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) Long periodId,
+            @RequestParam(required = false) List<Long> periodIds,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction);
+
+    ResultData<CursorResponse<ProductCardResponse>> listProductCards(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction);
 
