@@ -31,15 +31,31 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
     useEffect(() => {
         let cancelled = false
         if (isAuthenticated) {
-            cartApi.getCart().then(cart => {
-                if (cancelled) return
-                const item = cart.items?.find(i => i.product.id === product.id)
-                if (item && item.quantity >= maxStock) {
-                    setAddedToCart(true)
-                }
-            }).catch(() => {
-                // Sepet kontrol hatası sessizce görmezden gelinir
-            })
+            let idleId: number | null = null
+            let timerId: number | null = null
+            const checkCart = () => {
+                cartApi.getCart().then(cart => {
+                    if (cancelled) return
+                    const item = cart.items?.find(i => i.product.id === product.id)
+                    if (item && item.quantity >= maxStock) {
+                        setAddedToCart(true)
+                    }
+                }).catch(() => {
+                    // Sepet kontrol hatası sessizce görmezden gelinir
+                })
+            }
+
+            if (typeof requestIdleCallback === "function") {
+                idleId = requestIdleCallback(checkCart, { timeout: 2500 })
+            } else {
+                timerId = window.setTimeout(checkCart, 1200)
+            }
+
+            return () => {
+                cancelled = true
+                if (idleId !== null) cancelIdleCallback(idleId)
+                if (timerId !== null) window.clearTimeout(timerId)
+            }
         } else {
             const items = guestCart.getItems()
             const item = items.find(i => i.product.id === product.id)

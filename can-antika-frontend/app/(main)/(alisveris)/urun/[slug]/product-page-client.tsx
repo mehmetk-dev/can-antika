@@ -23,14 +23,6 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   const [isLoading, setIsLoading] = useState(!initialProduct)
   const [relatedProducts, setRelatedProducts] = useState<ProductResponse[]>([])
 
-  // Hide the server-rendered shell once the full client component is ready
-  useEffect(() => {
-    if (!isLoading && product) {
-      const shell = document.getElementById("product-ssr-shell")
-      if (shell) shell.style.display = "none"
-    }
-  }, [isLoading, product])
-
   useEffect(() => {
     let isCancelled = false
 
@@ -121,6 +113,8 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   useEffect(() => {
     if (!productId) return
     let isCancelled = false
+    let idleId: number | null = null
+    let timerId: number | null = null
 
     const loadRelatedProducts = async () => {
       try {
@@ -151,10 +145,17 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
       }
     }
 
-    void loadRelatedProducts()
+    const scheduleLoad = () => void loadRelatedProducts()
+    if (typeof requestIdleCallback === "function") {
+      idleId = requestIdleCallback(scheduleLoad, { timeout: 2500 })
+    } else {
+      timerId = window.setTimeout(scheduleLoad, 1200)
+    }
 
     return () => {
       isCancelled = true
+      if (idleId !== null) cancelIdleCallback(idleId)
+      if (timerId !== null) window.clearTimeout(timerId)
     }
   }, [productId, categoryId])
 

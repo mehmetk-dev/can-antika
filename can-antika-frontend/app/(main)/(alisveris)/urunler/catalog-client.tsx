@@ -26,6 +26,7 @@ function VintageCorner({ className }: { className?: string }) {
 interface CatalogClientProps {
   initialProducts?: ProductResponse[]
   initialTotalCount?: number
+  initialFetchCompleted?: boolean
   initialCategories?: CategoryResponse[]
   initialPeriods?: PeriodResponse[]
   ssrCategoryId?: string
@@ -35,6 +36,7 @@ interface CatalogClientProps {
 export function CatalogClient({
   initialProducts = [],
   initialTotalCount = 0,
+  initialFetchCompleted,
   initialCategories = [],
   initialPeriods = [],
   ssrCategoryId,
@@ -44,7 +46,7 @@ export function CatalogClient({
     products, categories, periods, totalCount, isLoading,
     page, totalPages, selectedFilters, sortBy, activeFilterCount,
     handleFilterChange, handleClearFilters, handleSortChange, handlePageChange,
-  } = useCatalogFilters({ initialProducts, initialTotalCount, initialCategories, initialPeriods, ssrCategoryId, ssrPeriodId })
+  } = useCatalogFilters({ initialProducts, initialTotalCount, initialFetchCompleted, initialCategories, initialPeriods, ssrCategoryId, ssrPeriodId })
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 

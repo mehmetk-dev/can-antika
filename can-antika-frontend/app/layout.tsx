@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import Script from "next/script"
-import { Inter, Playfair_Display } from "next/font/google"
+import { Inter, Playfair_Display, Cinzel } from "next/font/google"
 
 import { Providers } from "./providers"
 import "./globals.css"
@@ -10,6 +10,7 @@ import { fetchSiteSettings } from "@/lib/server/site-settings"
 
 const _inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap", preload: true })
 const _playfair = Playfair_Display({ subsets: ["latin", "latin-ext"], variable: "--font-playfair", display: "swap", preload: false })
+const _cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel", display: "swap" })
 
 const GA_ID_PATTERN = /^(G-[A-Z0-9]+|GTM-[A-Z0-9]+|UA-\d+-\d+)$/i
 const FB_PIXEL_ID_PATTERN = /^\d{5,20}$/
@@ -108,7 +109,7 @@ export default async function RootLayout({
           </Script>
         )}
       </head>
-      <body className={`${_inter.variable} ${_playfair.variable} font-sans antialiased`}>
+      <body className={`${_inter.variable} ${_playfair.variable} ${_cinzel.variable} font-sans antialiased`}>
         <Providers initialSiteSettings={s}>{children}</Providers>
       </body>
     </html>

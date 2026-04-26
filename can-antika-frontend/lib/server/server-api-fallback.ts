@@ -63,11 +63,12 @@ export async function fetchApiDataWithFallback<T>(
     return null
   }
 
-  // Try the last working URL first for fast path
-  // Cap at 700ms — on Docker internal network backend responds < 50ms (Redis cache)
+  // Try the last working URL first for fast path. Do not cap this below the
+  // route timeout; in Dockerfile deployments the last working URL may be the
+  // public API domain, where a 700ms cap can force unnecessary client refetches.
   if (lastWorkingBaseUrl) {
     try {
-      const result = await tryFetch<T>(lastWorkingBaseUrl, path, revalidate, Math.min(timeoutMs, 700))
+      const result = await tryFetch<T>(lastWorkingBaseUrl, path, revalidate, timeoutMs)
       if (result) {
         const dur = Math.round(performance.now() - start)
         if (dur > 200) {

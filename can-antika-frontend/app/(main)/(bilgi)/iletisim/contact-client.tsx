@@ -64,11 +64,14 @@ export function ContactClient() {
 
   const whatsappNumber = (settings.whatsapp || settings.phone || "").replace(/[^0-9]/g, "")
 
+  const phoneHref = settings.phone ? `tel:${settings.phone.replace(/\s+/g, "")}` : ""
+  const mailHref = settings.email ? `mailto:${settings.email}` : ""
+
   const contactItems = [
-    { Icon: VintageLocationIcon, label: "Adres", value: settings.address || "—" },
-    { Icon: VintagePhoneIcon, label: "Telefon", value: settings.phone || "—" },
-    { Icon: VintageMailIcon, label: "E-posta", value: settings.email || "—" },
-    { Icon: VintageClockIcon, label: "Çalışma", value: `Pzt-Cum: ${settings.weekdayHours || "–"} / Cmt: ${settings.saturdayHours || "–"}` },
+    { Icon: VintageLocationIcon, label: "Adres", value: settings.address || "—", href: "" },
+    { Icon: VintagePhoneIcon, label: "Telefon", value: settings.phone || "—", href: phoneHref },
+    { Icon: VintageMailIcon, label: "E-posta", value: settings.email || "—", href: mailHref },
+    { Icon: VintageClockIcon, label: "Çalışma", value: `Pzt-Cum: ${settings.weekdayHours || "–"} / Cmt: ${settings.saturdayHours || "–"}`, href: "" },
   ]
 
   return (
@@ -82,122 +85,135 @@ export function ContactClient() {
           description="Sorularınız için buradayız"
         />
 
-        <section className="py-20 bg-muted/20">
+        <section className="bg-muted/20 pb-0 pt-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-12 lg:grid-cols-5">
-              {/* Left - Antique Style Contact Cards */}
-              <div className="lg:col-span-2 space-y-5">
-                {contactItems.map((item) => (
-                  <div
-                    key={item.label}
-                    className="relative p-6 bg-gradient-to-br from-[#faf6f0] to-[#f5ede0] border border-[#d4c4a8] shadow-sm hover:shadow-md transition-all group"
-                  >
-                    {/* Decorative corners */}
-                    <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-accent/60" />
-                    <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-accent/60" />
-                    <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-accent/60" />
-                    <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-accent/60" />
+            <div className="grid items-stretch gap-8 lg:grid-cols-5">
+              {/* Sol Taraf - İletişim Bilgileri (Form ile aynı boyda olması için flex-col h-full) */}
+              <div className="flex flex-col gap-5 lg:col-span-2">
+                <div className="flex flex-col gap-5 h-full">
+                  {contactItems.map((item) => (
+                    <div
+                      key={item.label}
+                      className="group relative flex-1 border border-[#d4c4a8] bg-gradient-to-br from-[#faf6f0] to-[#f5ede0] p-6 shadow-sm transition-all hover:shadow-md"
+                    >
+                      {/* Dekoratif Köşeler */}
+                      <div className="absolute left-2 top-2 h-4 w-4 border-l-2 border-t-2 border-accent/60" />
+                      <div className="absolute right-2 top-2 h-4 w-4 border-r-2 border-t-2 border-accent/60" />
+                      <div className="absolute bottom-2 left-2 h-4 w-4 border-b-2 border-l-2 border-accent/60" />
+                      <div className="absolute bottom-2 right-2 h-4 w-4 border-b-2 border-r-2 border-accent/60" />
 
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-16 w-16 shrink-0 items-center justify-center bg-[#f9f5ec] border-2 border-[#c9b896] rounded-full group-hover:border-accent group-hover:bg-accent/10 transition-all shadow-inner">
-                        <div className="text-primary group-hover:text-accent transition-colors">
-                          <item.Icon />
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-[#c9b896] bg-[#f9f5ec] shadow-inner transition-all group-hover:border-accent group-hover:bg-accent/10">
+                          <div className="text-primary transition-colors group-hover:text-accent">
+                            <item.Icon />
+                          </div>
+                        </div>
+                        <div>
+                          <p className="font-cinzel text-[10px] font-bold uppercase tracking-[0.25em] text-accent/80">{item.label}</p>
+                          {item.href ? (
+                            <a href={item.href} className="mt-1 block font-serif text-lg text-foreground hover:text-accent transition-colors">
+                              {item.value}
+                            </a>
+                          ) : (
+                            <p className="mt-1 font-serif text-lg text-foreground">{item.value}</p>
+                          )}
                         </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-primary/60 uppercase tracking-[0.2em] font-medium">{item.label}</p>
-                        <p className="font-serif text-lg text-foreground mt-1">{item.value}</p>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-                {/* WhatsApp - Antique style */}
-                {whatsappNumber && (
-                  <a
-                    href={`https://wa.me/${whatsappNumber}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="relative flex items-center justify-center gap-3 w-full py-4 bg-[#25D366] hover:bg-[#20BD5A] text-white font-medium transition-colors overflow-hidden"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                    <span className="font-serif tracking-wide">WhatsApp ile Ulaşın</span>
-                  </a>
-                )}
+                  {/* WhatsApp - Tasarımsal ve Şık */}
+                  {whatsappNumber && (
+                    <a
+                      href={`https://wa.me/${whatsappNumber}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative flex items-center justify-center gap-3 border border-[#25D366]/40 bg-[#25D366]/5 py-5 transition-all hover:bg-[#25D366] hover:text-white"
+                    >
+                      <div className="absolute inset-1 border border-[#25D366]/20 transition-all group-hover:border-white/40" />
+                      <MessageCircle className="h-5 w-5 text-[#25D366] group-hover:text-white" />
+                      <span className="font-cinzel text-xs font-bold uppercase tracking-[0.2em] text-[#25D366] group-hover:text-white">
+                        WhatsApp ile Ulaşın
+                      </span>
+                    </a>
+                  )}
+                </div>
               </div>
 
-              {/* Right - Form */}
-              <div className="lg:col-span-3 relative">
-                <div className="absolute inset-0 -z-10 opacity-[0.06]">
-                  <Image
-                    src="/vintage-antique-shop-storefront-istanbul-sepia-ton.jpg"
-                    alt=""
-                    role="presentation"
-                    fill
-                    sizes="75vw"
-                    className="object-cover"
-                  />
-                </div>
+              {/* Sağ Taraf - Form (Derinleştirilmiş Antik Hava) */}
+              <div className="relative lg:col-span-3">
+                <div className="group relative h-full border border-[#d4c4a8] bg-gradient-to-br from-[#faf6f0] to-[#f5ede0] p-8 shadow-sm lg:p-12">
+                  {/* Dekoratif Köşeler */}
+                  <div className="absolute left-3 top-3 h-6 w-6 border-l-2 border-t-2 border-accent/40" />
+                  <div className="absolute right-3 top-3 h-6 w-6 border-r-2 border-t-2 border-accent/40" />
+                  <div className="absolute bottom-3 left-3 h-6 w-6 border-b-2 border-l-2 border-accent/40" />
+                  <div className="absolute bottom-3 right-3 h-6 w-6 border-b-2 border-r-2 border-accent/40" />
+                  
+                  {/* Arka Plan Dokusu */}
+                  <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M30 0l30 30-30 30L0 30z\' fill=\'%23000000\' fill-opacity=\'1\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")' }} />
 
-                <div className="bg-card/95 backdrop-blur-sm border border-border p-8 lg:p-10">
-                  <div className="mb-8">
-                    <h2 className="font-serif text-2xl font-semibold text-foreground">Mesaj Gönderin</h2>
-                    <p className="mt-1 text-muted-foreground text-sm">En kısa sürede dönüş yapacağız</p>
+                  <div className="relative mb-10">
+                    <h2 className="font-cinzel text-3xl font-bold tracking-tight text-foreground">Mesaj <span className="text-accent italic">Gönderin</span></h2>
+                    <p className="mt-2 text-sm font-medium text-muted-foreground uppercase tracking-widest">En kısa sürede dönüş yapacağız</p>
+                    <div className="mt-4 h-px w-20 bg-accent/30" />
                   </div>
 
                   {isSubmitted ? (
-                    <div className="py-12 text-center">
-                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                        <CheckCircle className="h-7 w-7 text-primary" />
+                    <div className="flex h-[300px] flex-col items-center justify-center text-center">
+                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-primary/20 bg-primary/10">
+                        <CheckCircle className="h-8 w-8 text-primary" />
                       </div>
-                      <h3 className="mt-4 font-serif text-xl font-semibold text-foreground">Teşekkürler!</h3>
-                      <p className="mt-2 text-muted-foreground text-sm">Mesajınız bize ulaştı.</p>
-                      <Button onClick={() => setIsSubmitted(false)} variant="outline" className="mt-5">
+                      <h3 className="mt-6 font-cinzel text-2xl font-bold text-foreground">Teşekkürler!</h3>
+                      <p className="mt-2 text-sm font-medium text-muted-foreground">Mesajınız başarıyla iletilmiştir.</p>
+                      <Button onClick={() => setIsSubmitted(false)} variant="outline" className="mt-8 font-cinzel text-xs font-bold uppercase tracking-widest">
                         Yeni Mesaj
                       </Button>
                     </div>
                   ) : (
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                      <div className="grid gap-5 sm:grid-cols-2">
-                        <div className="space-y-1.5">
-                          <Label htmlFor="name" className="text-sm">
+                    <form onSubmit={handleSubmit} className="relative space-y-6">
+                      <div className="grid gap-6 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="name" className="font-cinzel text-[10px] font-bold uppercase tracking-widest text-primary/70">
                             Ad Soyad
                           </Label>
-                          <Input id="name" name="name" placeholder="Adınız" required maxLength={100} className="h-11" />
+                          <Input id="name" name="name" placeholder="Adınız" required maxLength={100} className="h-12 border-accent/20 bg-[#f9f5ec] focus:border-accent" />
                         </div>
-                        <div className="space-y-1.5">
-                          <Label htmlFor="phone" className="text-sm">
+                        <div className="space-y-2">
+                          <Label htmlFor="phone" className="font-cinzel text-[10px] font-bold uppercase tracking-widest text-primary/70">
                             Telefon
                           </Label>
-                          <Input id="phone" name="phone" type="tel" placeholder="05XX XXX XX XX" required maxLength={20} pattern="[0-9\s\+\-\(\)]{7,20}" className="h-11" />
+                          <Input id="phone" name="phone" type="tel" placeholder="05XX XXX XX XX" required maxLength={20} pattern="[0-9\s\+\-\(\)]{7,20}" className="h-12 border-accent/20 bg-[#f9f5ec] focus:border-accent" />
                         </div>
                       </div>
 
-                      <div className="space-y-1.5">
-                        <Label htmlFor="email" className="text-sm">
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="font-cinzel text-[10px] font-bold uppercase tracking-widest text-primary/70">
                           E-posta
                         </Label>
-                        <Input id="email" name="email" type="email" placeholder="ornek@email.com" required maxLength={254} className="h-11" />
+                        <Input id="email" name="email" type="email" placeholder="ornek@email.com" required maxLength={254} className="h-12 border-accent/20 bg-[#f9f5ec] focus:border-accent" />
                       </div>
 
-                      <div className="space-y-1.5">
-                        <Label htmlFor="message" className="text-sm">
+                      <div className="space-y-2">
+                        <Label htmlFor="message" className="font-cinzel text-[10px] font-bold uppercase tracking-widest text-primary/70">
                           Mesajınız
                         </Label>
                         <Textarea
                           id="message"
                           name="message"
-                          placeholder="Mesajınızı yazın..."
-                          rows={5}
+                          placeholder="Mesajınızı buraya yazın..."
+                          rows={4}
                           required
                           maxLength={2000}
-                          className="resize-none"
+                          className="resize-none border-accent/20 bg-[#f9f5ec] focus:border-accent"
                         />
                       </div>
 
-                      <Button type="submit" className="w-full h-11" disabled={isSubmitting}>
-                        <Send className="w-4 h-4 mr-2" />
-                        {isSubmitting ? "Gönderiliyor..." : "Gönder"}
+                      <Button type="submit" className="group relative h-14 w-full overflow-hidden bg-primary px-8 transition-all hover:bg-primary/90" disabled={isSubmitting}>
+                        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] bg-[position:200%_0,0_0] transition-[background-position] duration-1000 group-hover:bg-[position:-200%_0,0_0]" />
+                        <Send className="mr-3 h-4 w-4 text-accent" />
+                        <span className="relative font-cinzel text-sm font-bold uppercase tracking-[0.2em] text-primary-foreground">
+                          {isSubmitting ? "Gönderiliyor..." : "Mesajı Gönder"}
+                        </span>
                       </Button>
                     </form>
                   )}
@@ -207,33 +223,57 @@ export function ContactClient() {
           </div>
         </section>
 
-        {/* Map */}
-        <section className="relative h-[450px] lg:h-[600px]">
-          <Image
-            src="/istanbul-cukurcuma-beyoglu-antique-district-aerial.jpg"
-            alt="Konum"
-            fill
-            sizes="100vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-primary/30" />
+        {/* Harita ve Konum - Antika Eser Görünümü */}
+        <section className="relative w-full bg-muted/20 py-20 lg:py-24">
+          <div className="mx-auto max-w-6xl px-4 lg:px-8">
+            <div className="group relative h-[500px] w-full overflow-hidden shadow-2xl lg:h-[650px]">
+              {/* Dekoratif Dış Çerçeve */}
+              <div className="pointer-events-none absolute inset-0 z-20 border-[12px] border-accent/5 lg:border-[20px]" />
+              <div className="pointer-events-none absolute inset-1 z-20 border border-accent/40 lg:inset-2" />
+              
+              <Image
+                src="/istanbul-cukurcuma-beyoglu-antique-district-aerial.jpg"
+                alt="Konum Haritası"
+                fill
+                sizes="(max-width: 1200px) 100vw, 1200px"
+                className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                style={{ filter: "sepia(0.2) contrast(1.1) brightness(0.85)" }}
+              />
 
-          <div className="absolute bottom-6 left-6 bg-card p-5 shadow-lg max-w-xs">
-            <div className="flex items-start gap-3">
-              <div className="text-primary shrink-0 mt-0.5">
-                <VintageLocationIcon />
-              </div>
-              <div>
-                <p className="font-serif font-semibold text-foreground">{settings.storeName || "Can Antika"}</p>
-                <p className="text-sm text-muted-foreground mt-1">{settings.address || "—"}</p>
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.storeName || "Can Antika")}+${encodeURIComponent(settings.address || "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block mt-2 text-sm font-medium text-primary hover:text-accent transition-colors"
-                >
-                  Yol tarifi al →
-                </a>
+              {/* Antika Kaplamalar (Overlay) */}
+              <div className="pointer-events-none absolute inset-0 bg-primary/20 mix-blend-multiply" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
+              
+              {/* Eskitme Doku (SVG Noise) */}
+              <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }} />
+
+              {/* Adres Plaketi (Antique Plaque) */}
+              <div className="absolute bottom-8 left-8 z-30 max-w-xs scale-90 sm:bottom-12 sm:left-12 sm:scale-100">
+                <div className="relative overflow-hidden border border-accent/40 bg-[#fdfaf5] p-6 shadow-2xl">
+                  {/* Köşe Süsleri */}
+                  <div className="absolute left-0 top-0 h-4 w-4 border-l-2 border-t-2 border-accent/60" />
+                  <div className="absolute right-0 top-0 h-4 w-4 border-r-2 border-t-2 border-accent/60" />
+                  <div className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-accent/60" />
+                  <div className="absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-accent/60" />
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="shrink-0 text-accent">
+                      <VintageLocationIcon />
+                    </div>
+                    <div>
+                      <p className="font-cinzel text-lg font-bold tracking-wide text-primary">Can Antika</p>
+                      <p className="mt-2 text-sm font-medium leading-relaxed text-primary/80">{settings.address || "—"}</p>
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.storeName || "Can Antika")}+${encodeURIComponent(settings.address || "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex border-b border-accent/30 font-cinzel text-xs font-bold uppercase tracking-widest text-accent transition-colors hover:text-primary"
+                      >
+                        Yol tarifi al
+                      </a>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

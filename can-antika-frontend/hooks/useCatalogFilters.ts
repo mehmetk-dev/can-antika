@@ -20,6 +20,7 @@ const SORT_MAP: Record<string, { sortBy: string; direction: string }> = {
 interface UseCatalogFiltersOptions {
     initialProducts?: ProductResponse[]
     initialTotalCount?: number
+    initialFetchCompleted?: boolean
     initialCategories?: CategoryResponse[]
     initialPeriods?: PeriodResponse[]
     ssrCategoryId?: string
@@ -29,6 +30,7 @@ interface UseCatalogFiltersOptions {
 export function useCatalogFilters({
     initialProducts = [],
     initialTotalCount = 0,
+    initialFetchCompleted = initialProducts.length > 0,
     initialCategories = [],
     initialPeriods = [],
     ssrCategoryId,
@@ -40,14 +42,14 @@ export function useCatalogFilters({
     const periodParam = searchParams.get("period")
     const searchQuery = searchParams.get("q") || ""
 
-    const hasInitialData = initialProducts.length > 0
+    const hasInitialResult = initialFetchCompleted
 
     // Data state
     const [products, setProducts] = useState<ProductResponse[]>(initialProducts)
     const [categories, setCategories] = useState<CategoryResponse[]>(initialCategories)
     const [periods, setPeriods] = useState<PeriodResponse[]>(initialPeriods)
     const [totalCount, setTotalCount] = useState(initialTotalCount)
-    const [isLoading, setIsLoading] = useState(!hasInitialData)
+    const [isLoading, setIsLoading] = useState(!hasInitialResult)
     const [page, setPage] = useState(0)
 
     const [userInteracted, setUserInteracted] = useState(false)
@@ -214,10 +216,10 @@ export function useCatalogFilters({
     }, [fetchTrigger])
 
     useEffect(() => {
-        if (!hasInitialData || userInteracted) {
+        if (!hasInitialResult || userInteracted) {
             fetchProducts()
         }
-    }, [fetchProducts, hasInitialData, userInteracted])
+    }, [fetchProducts, hasInitialResult, userInteracted])
 
     // Handlers
     const handleFilterChange = (filterType: string, value: string) => {

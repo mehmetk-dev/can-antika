@@ -152,12 +152,14 @@ export default async function CatalogPage({
       totalElement: typeof productsResult.value.totalElement === "number" ? productsResult.value.totalElement : 0,
     }
     : { items: [], totalElement: 0 }
+  const initialFetchCompleted = productsResult.status === "fulfilled" && Boolean(productsResult.value)
 
   return (
     <Suspense fallback={<CatalogSkeleton />}>
       <CatalogClient
         initialProducts={initialData.items}
         initialTotalCount={initialData.totalElement}
+        initialFetchCompleted={initialFetchCompleted}
         initialCategories={initialCategories}
         initialPeriods={initialPeriods}
         ssrCategoryId={ssrCategoryId?.toString()}

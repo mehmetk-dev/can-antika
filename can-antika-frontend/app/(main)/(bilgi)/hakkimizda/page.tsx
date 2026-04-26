@@ -2,19 +2,30 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHero } from "@/components/layout/page-hero"
-import { Award, Clock, Heart, Quote, Shield } from "lucide-react"
+import { Award, Crown, Gem, GlassWater, History, Key, Landmark, Quote, Shield, Sparkles, Star, Utensils } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Hakkımızda - 1990'dan Beri Antika Uzmanı",
+  title: "Hakkımızda - Can Antika | Mesut Can",
   description:
-    "1990'dan beri İstanbul Beyoğlu'nda antika tutkunlarına hizmet veriyorum. Osmanlı döneminden Art Deco'ya kadar geniş yelpazede eşsiz eserler sunuyorum.",
-  keywords: ["can antika", "hakkımızda", "antikacı istanbul", "antika uzmanı", "çukurcuma antikacısı", "mesut can"],
+    "1982'den günümüze uzanan bir antika tutkusu. Orhan Can'ın Kapalıçarşı'da attığı temellerden, Mesut Can'ın Beyoğlu'ndaki modern vizyonuna uzanan hikayemiz.",
+  keywords: ["can antika", "hakkımızda", "mesut can", "orhan can", "antikacı istanbul", "beyoğlu antikacı", "koleksiyon uzmanı"],
   openGraph: {
     title: "Hakkımızda | Can Antika",
-    description: "1990'dan beri İstanbul'da antika tutkunlarına hizmet veriyorum.",
+    description: "Geçmişin zarafetini geleceğe taşıyan bir aile geleneği.",
     type: "website",
     locale: "tr_TR",
   },
+}
+
+function CornerOrnament({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 120 120" fill="none" aria-hidden="true">
+      <path d="M6 114V64C6 31 31 6 64 6h50" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M14 106V68C14 40 36 14 64 14h38" stroke="currentColor" strokeWidth="0.9" opacity="0.75" />
+      <path d="M22 98V72c0-22 18-40 40-40h26" stroke="currentColor" strokeWidth="0.8" opacity="0.55" />
+      <circle cx="64" cy="64" r="4" fill="currentColor" opacity="0.45" />
+    </svg>
+  )
 }
 
 export default function AboutPage() {
@@ -23,75 +34,77 @@ export default function AboutPage() {
       <main>
         <PageHero
           imageSrc="/vintage-sepia-antique-collection-old-photographs-o.jpg"
-          imageAlt="Hakkımızda"
-          eyebrow="Est. 1990"
-          title="Hakkımızda"
-          description="Geçmişin zarafetini geleceğe taşıyan bir tutku hikayesi"
+          imageAlt="Can Antika Koleksiyon"
+          eyebrow="Bir Aile Geleneği"
+          title="Hikâyemiz"
+          description="1982'den bugüne, kuşaktan kuşağa aktarılan bir tutku"
           priority
         />
 
-        <section className="py-24">
+        {/* Kurucu Bölümü */}
+        <section className="relative overflow-hidden py-24 lg:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
               <div className="relative">
-                <div className="absolute -inset-6 rounded-lg border-2 border-accent/20" />
-                <div className="absolute -inset-3 rounded-lg border border-accent/10" />
-
+                <div className="absolute -inset-10 opacity-10">
+                  <CornerOrnament className="h-full w-full text-accent" />
+                </div>
+                
                 <div className="relative">
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-lg shadow-2xl">
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-border/50">
                     <Image
-                      src="/distinguished-turkish-gentleman-antique-dealer-60s.jpg"
-                      alt="Mehmet Can - Can Antika kurucusu"
+                      src="/mesutcan.jpeg"
+                      alt="Mesut Can - Can Antika Kurucusu"
                       fill
                       sizes="(max-width: 1024px) 100vw, 40vw"
-                      className="object-cover"
+                      className="object-cover transition-transform duration-700 hover:scale-105"
                     />
                   </div>
 
-                  <div className="absolute -bottom-6 -right-6 rounded-xl bg-primary p-6 shadow-xl">
-                    <p className="font-serif text-4xl font-bold text-primary-foreground">35+</p>
-                    <p className="text-sm text-primary-foreground/80">Yıllık Deneyim</p>
+                  <div className="absolute -bottom-8 -right-8 hidden rounded-2xl bg-primary p-8 shadow-2xl lg:block">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/20">
+                        <Award className="h-6 w-6 text-accent" />
+                      </div>
+                      <div>
+                        <p className="font-serif text-2xl font-bold text-primary-foreground">1982'den Beri</p>
+                        <p className="text-xs uppercase tracking-widest text-primary-foreground/60">Sektörel Birikim</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-
-                <div className="absolute -bottom-4 left-8 rounded-lg border border-border/50 bg-card px-6 py-3 shadow-lg">
-                  <p className="font-serif text-xl italic text-primary">Mehmet Can</p>
                 </div>
               </div>
 
-              <div className="lg:pl-8">
-                <span className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-1.5 text-sm font-medium text-accent">
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                  Kurucu
-                </span>
-
-                <h2 className="mt-6 font-serif text-4xl font-semibold leading-tight text-foreground">Mehmet Can</h2>
-
-                <p className="mt-2 text-lg font-medium text-accent">Antika Uzmanı & Koleksiyoner</p>
-
-                <div className="mt-8 space-y-6 leading-relaxed text-muted-foreground">
-                  <p>
-                    1990 yılında, babamın bana aktardığı antika sevgisiyle bu yolculuğa başladım. İstanbul&apos;un tarihi
-                    Beyoğlu semtinde açtığım küçük dükkan, bugün Türkiye&apos;nin en saygın antika galerilerinden biri
-                    haline geldi.
-                  </p>
-
-                  <p>
-                    35 yılı aşkın deneyimimle, Osmanlı döneminden Art Deco&apos;ya, Viktoryen&apos;den 19. yüzyıl klasiklerine
-                    kadar geniş bir yelpazede eşsiz antika eserler sunuyorum. Her parça, titizlikle incelenir ve
-                    orijinalliği kişisel garantim altındadır.
-                  </p>
-
-                  <p>
-                    Antikacılık benim için sadece bir meslek değil, bir yaşam biçimi. Her eserin arkasındaki hikayeyi
-                    keşfetmek, o hikayeyi yeni sahiplerine aktarmak bana tarif edilemez bir mutluluk veriyor.
-                  </p>
+              <div className="relative lg:pl-12">
+                <div className="mb-8 flex items-center gap-3">
+                  <span className="h-px w-8 bg-accent" />
+                  <span className="font-serif text-sm uppercase tracking-[0.3em] text-accent">Kurucu</span>
                 </div>
 
-                <div className="mt-10 relative border-l-2 border-accent/30 pl-6">
-                  <Quote className="absolute -left-3 -top-1 h-6 w-6 bg-background text-accent/50" />
-                  <p className="font-serif text-xl italic text-foreground">
-                    &ldquo;Her antika parça, geçmişten gelen bir mektuptur. Ben sadece postacıyım.&rdquo;
+                <h2 className="font-cinzel text-5xl font-bold leading-tight text-foreground tracking-tight">
+                  Mesut Can
+                </h2>
+                <p className="mt-2 text-xl font-medium text-accent/80 italic">Can Antika</p>
+
+                <div className="mt-10 space-y-8 text-lg leading-relaxed text-muted-foreground">
+                  <p>
+                    <span className="float-left mr-4 mt-4 translate-y-1 font-cinzel text-[5.2rem] font-bold leading-[0.8] text-primary transition-colors hover:text-accent select-none drop-shadow-md">
+                      A
+                    </span>
+                    ntika ile tanışmam ailemden miras kalan bir tutkunun doğal bir devamı oldu. Babam Orhan Can, 1982 yılında Kapalıçarşı’da Rus, Avrupa ve Osmanlı dönemlerine ait seçkin antika eserlerin alım satımına başlayarak bu yolculuğun temelini attı.
+                  </p>
+                  
+                  <p>
+                    Gümüş objelerden madalya ve nişanlara, kağıt ve madeni paralardan enfiye kutularına kadar uzanan geniş bir koleksiyon anlayışıyla yıllar içinde güçlü bir birikim oluşturdu.
+                  </p>
+
+                  <div className="relative border-l-4 border-accent/20 bg-muted/30 p-8 py-6 italic shadow-inner">
+                    <Quote className="absolute -left-3 -top-3 h-8 w-8 text-accent/40" />
+                    &ldquo;Bizim için antikacılık sadece bir ticaret değil; geçmişle bugün arasında kurulan bir bağdır. Her eser, kendi döneminin izlerini taşıyan özel bir hikâyeye sahiptir.&rdquo;
+                  </div>
+
+                  <p>
+                    Ben ise bu dünyaya 14 yaşımda adım attım. 2008 yılından itibaren antikaya olan ilgim, zamanla mesleğime dönüştü. Ailemizin 1997 yılında Beyoğlu’nda açtığı dükkanımızda, bugün Can Antika çatısı altında bu geleneği sürdürmekteyim.
                   </p>
                 </div>
               </div>
@@ -99,112 +112,196 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="relative overflow-hidden bg-muted/30 py-24">
+        {/* Markalar Bölümü */}
+        <section className="relative overflow-hidden bg-primary py-24 lg:py-32">
+          {/* Arka plan dekorasyonu */}
+          <div className="absolute inset-0 opacity-[0.03]" 
+               style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M30 0l30 30-30 30L0 30z\' fill=\'%23ffffff\' fill-opacity=\'1\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")', backgroundSize: '30px 30px' }} />
+          
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="mb-4 inline-block font-serif text-sm uppercase tracking-widest text-accent">
-                Değerlerim
-              </span>
-              <h2 className="font-serif text-4xl font-semibold text-foreground">Beni Farklı Kılan Değerler</h2>
-              <p className="mt-4 text-lg text-muted-foreground">35 yıldır aynı prensiplerle çalışıyorum</p>
+            <div className="mb-20 text-center">
+              <span className="font-cinzel text-sm uppercase tracking-[0.5em] text-accent/70">Küratör Seçkisi</span>
+              <h2 className="mt-4 font-cinzel text-4xl font-bold text-primary-foreground md:text-5xl">Dünya Markaları & Nadide Parçalar</h2>
+              <p className="mx-auto mt-6 max-w-2xl text-lg text-primary-foreground/60">
+                Koleksiyonumuzda yer alan, her biri kendi alanında ekol olmuş efsanevi markalar.
+              </p>
             </div>
 
-            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {[
-                {
-                  icon: Shield,
-                  title: "Güvenilirlik",
-                  desc: "Her eser, kişisel garantim ve sertifikam ile sunulur",
+                { 
+                  name: "Christofle", 
+                  sub: "Paris 1830", 
+                  desc: "Gümüş işçiliğinde Fransız zarafeti.",
+                  icon: Utensils
                 },
-                {
-                  icon: Award,
-                  title: "Uzmanlık",
-                  desc: "35 yılı aşkın deneyim ve derin bilgi birikimi",
+                { 
+                  name: "Lalique", 
+                  sub: "Alsace 1888", 
+                  desc: "Kristal ve cam sanatının zirvesi.",
+                  icon: GlassWater
                 },
-                {
-                  icon: Heart,
-                  title: "Tutku",
-                  desc: "Her parçaya aynı özen ve sevgiyle yaklaşırım",
+                { 
+                  name: "Tiffany & Co.", 
+                  sub: "New York 1837", 
+                  desc: "İkonik mücevher ve lüks tasarımı.",
+                  icon: Gem
                 },
-                {
-                  icon: Clock,
-                  title: "Sabır",
-                  desc: "Doğru parçayı bulmak için acele etmem",
+                { 
+                  name: "Fabergé", 
+                  sub: "St. Petersburg 1842", 
+                  desc: "Çarlık Rusyası'nın eşsiz mirası.",
+                  icon: Crown
                 },
-              ].map((item) => (
-                <div
-                  key={item.title}
-                  className="group relative rounded-xl border border-border/50 bg-card p-8 shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-lg"
-                >
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/20">
-                    <item.icon className="h-8 w-8 text-primary" />
+                { 
+                  name: "Sheffield", 
+                  sub: "England 1743", 
+                  desc: "İngiliz çeliği ve gümüş ustalığı.",
+                  icon: Shield
+                }
+              ].map((brand) => (
+                <div key={brand.name} className="group relative flex flex-col items-center overflow-hidden rounded-xl border border-accent/20 bg-primary-foreground/[0.02] p-6 transition-all duration-500 hover:border-accent/50 hover:bg-primary-foreground/[0.05]">
+                  {/* Hallmark Style Ornament */}
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-accent/30 transition-colors group-hover:border-accent">
+                    <brand.icon className="h-6 w-6 text-accent transition-transform duration-500 group-hover:scale-110" strokeWidth={1} />
                   </div>
-                  <h3 className="mt-6 font-serif text-xl font-semibold text-foreground">{item.title}</h3>
-                  <p className="mt-3 leading-relaxed text-muted-foreground">{item.desc}</p>
+
+                  <h3 className="font-cinzel text-lg font-bold text-primary-foreground tracking-widest">{brand.name}</h3>
+                  <p className="mt-1 text-[9px] uppercase tracking-[0.3em] text-accent/60 font-semibold">{brand.sub}</p>
+                  
+                  <div className="my-4 h-px w-8 bg-accent/20 transition-all group-hover:w-16 group-hover:bg-accent/40" />
+                  
+                  <p className="text-xs leading-relaxed text-primary-foreground/40 font-medium">
+                    {brand.desc}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-24">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-16 text-center">
-              <span className="mb-4 inline-block font-serif text-sm uppercase tracking-widest text-accent">
-                Yolculuğum
-              </span>
-              <h2 className="font-serif text-4xl font-semibold text-foreground">35 Yıllık Bir Hikaye</h2>
+        {/* Zaman Çizelgesi */}
+        <section className="relative overflow-hidden py-24 lg:py-32">
+          <div className="pointer-events-none absolute left-0 top-1/2 h-96 w-96 -translate-y-1/2 translate-x-[-50%] rounded-full bg-accent/5 blur-[100px]" />
+          
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-20 text-center">
+              <Landmark className="mx-auto h-12 w-12 text-accent/40" />
+              <h2 className="mt-6 font-cinzel text-4xl font-bold text-foreground">Yılların Birikimi</h2>
+              <p className="mt-4 text-muted-foreground">Kuşaktan kuşağa aktarılan deneyim durakları</p>
             </div>
 
-            <div className="relative">
-              <div className="absolute bottom-0 left-8 top-0 w-px bg-border lg:left-1/2 lg:-translate-x-px" />
-
+            <div className="relative space-y-6 before:absolute before:inset-0 before:ml-5 before:h-full before:w-[1px] before:bg-gradient-to-b before:from-transparent before:via-accent/40 before:to-transparent lg:before:mx-auto">
               {[
-                { year: "1990", title: "Başlangıç", desc: "Beyoğlu'nda küçük bir dükkan ile yolculuğum başladı" },
-                { year: "2000", title: "Büyüme", desc: "Koleksiyonumu genişleterek Osmanlı eserlerine odaklandım" },
-                { year: "2010", title: "Tanınma", desc: "Türkiye'nin önde gelen antika galerilerinden biri haline geldim" },
-                { year: "2020", title: "Dijitalleşme", desc: "Online platformlarla daha geniş kitlelere ulaşmaya başladım" },
-              ].map((item, index) => (
-                <div
-                  key={item.year}
-                  className={`relative flex items-center gap-8 pb-12 last:pb-0 ${index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
-                    }`}
-                >
-                  <div className="absolute left-8 h-4 w-4 rounded-full border-4 border-background bg-primary shadow lg:left-1/2 lg:-translate-x-1/2" />
-                  <div className={`ml-20 lg:ml-0 lg:w-1/2 ${index % 2 === 0 ? "lg:pr-16 lg:text-right" : "lg:pl-16"}`}>
-                    <span className="inline-block font-serif text-3xl font-bold text-accent">{item.year}</span>
-                    <h3 className="mt-2 font-serif text-xl font-semibold text-foreground">{item.title}</h3>
-                    <p className="mt-2 text-muted-foreground">{item.desc}</p>
+                { 
+                  year: "1982", 
+                  title: "Kapalıçarşı Başlangıcı", 
+                  desc: "Babam Orhan Can'ın, seçkin antika eserlerin alım satımıyla bu yolculuğun temellerini attığı yıl.",
+                  icon: Landmark
+                },
+                { 
+                  year: "1997", 
+                  title: "Beyoğlu Dönemi", 
+                  desc: "Bugün de geleneği sürdürdüğümüz, Beyoğlu'ndaki tarihi mağazamızın kapılarını açtığı dönem.",
+                  icon: History
+                },
+                { 
+                  year: "2008", 
+                  title: "Mesleğe İlk Adım", 
+                  desc: "14 yaşımda çıraklıkla başlayan yolculuğum ve antikaya olan ilgimin profesyonel mesleğime dönüşmesi.",
+                  icon: Sparkles
+                },
+                { 
+                  year: "Bugün", 
+                  title: "Dijital Dönüşüm", 
+                  desc: "Can Antika markasıyla, aileden miras kalan bu geleneksel değerleri modern platformlara taşıyoruz.",
+                  icon: Star
+                }
+              ].map((item, idx) => (
+                <div key={item.year} className="group relative flex items-center lg:justify-between py-2">
+                  {/* Filigran Yıl (Arka Plan) */}
+                  <div className={`hidden lg:flex lg:w-[45%] items-center ${idx % 2 === 0 ? "justify-end pr-16" : "order-last justify-start pl-16"}`}>
+                    <span className="font-cinzel text-[5rem] font-black leading-none text-accent/[0.04] select-none transition-colors duration-500 group-hover:text-accent/10">{item.year}</span>
                   </div>
-                  <div className="hidden lg:block lg:w-1/2" />
+                  
+                  {/* Merkez Düğüm (Elmas Şekli) */}
+                  <div className="absolute left-0 flex h-10 w-10 rotate-45 items-center justify-center rounded-sm border border-accent/40 bg-background/90 shadow-[0_0_15px_rgba(var(--accent),0.1)] backdrop-blur-sm transition-transform duration-500 group-hover:scale-110 group-hover:bg-accent/10 lg:left-1/2 lg:-ml-5 z-10">
+                    <div className="-rotate-45">
+                      <item.icon className="h-4 w-4 text-accent" strokeWidth={1.5} />
+                    </div>
+                  </div>
+
+                  {/* İçerik Kartı */}
+                  <div className={`ml-14 sm:ml-16 relative overflow-hidden rounded-xl border border-accent/20 bg-card/60 p-5 shadow-lg backdrop-blur-md transition-all duration-500 hover:border-accent/50 hover:bg-card/90 hover:shadow-xl lg:ml-0 lg:w-[45%] ${idx % 2 === 0 ? "lg:text-left" : "lg:text-right"}`}>
+                    {/* Mobil Filigran (Sadece küçük ekranlarda görünür) */}
+                    <div className="absolute -bottom-4 -right-2 pointer-events-none lg:hidden">
+                      <span className="font-cinzel text-7xl font-black text-accent/[0.05]">{item.year}</span>
+                    </div>
+
+                    {/* Dekoratif Çizgiler */}
+                    <div className={`absolute top-0 h-px w-24 bg-gradient-to-r from-transparent via-accent/50 to-transparent ${idx % 2 === 0 ? "left-8" : "right-8"}`} />
+                    <div className={`absolute bottom-0 h-px w-24 bg-gradient-to-r from-transparent via-accent/50 to-transparent ${idx % 2 === 0 ? "left-8" : "right-8"}`} />
+
+                    <span className="relative z-10 font-cinzel text-lg font-bold text-accent lg:hidden">{item.year}</span>
+                    <h3 className="relative z-10 mt-1 font-cinzel text-xl font-bold text-foreground tracking-tight">{item.title}</h3>
+                    
+                    <div className={`relative z-10 my-3 h-px w-10 bg-accent/30 ${idx % 2 === 0 ? "" : "ml-auto"}`} />
+                    
+                    <p className="relative z-10 text-sm leading-relaxed text-muted-foreground font-medium">{item.desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="relative overflow-hidden bg-primary py-24">
-          <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-            <h2 className="font-serif text-4xl font-semibold text-primary-foreground">Koleksiyonumu Keşfedin</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-xl text-primary-foreground/80">
-              Her biri özenle seçilmiş, eşsiz antika parçalarımı incelemek için mağazamızı ziyaret edin
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                href="/urunler"
-                className="inline-flex items-center justify-center rounded-lg bg-accent px-8 py-4 font-medium text-accent-foreground transition-colors hover:bg-accent/90"
-              >
-                Ürünleri İncele
-              </Link>
-              <Link
-                href="/iletisim"
-                className="inline-flex items-center justify-center rounded-lg border border-primary-foreground/20 bg-primary-foreground/10 px-8 py-4 font-medium text-primary-foreground transition-colors hover:bg-primary-foreground/20"
-              >
-                İletişime Geç
-              </Link>
+        {/* Vizyon ve CTA Bölümü (Antique Banner) */}
+        <div className="px-4 sm:px-6 lg:px-8">
+          <section className="relative mx-auto mt-12 max-w-6xl overflow-hidden rounded-2xl shadow-2xl">
+            {/* Antika Görseli ve Kaplama */}
+            <div className="absolute inset-0 bg-primary">
+              <Image 
+                src="/elegant-antique-shop-interior-with-chandeliers-and.jpg" 
+                alt="Antika Dükkanı İçi" 
+                fill 
+                className="object-cover object-center opacity-30 mix-blend-luminosity"
+              />
+              {/* Lüks Kahverengi/Altın Degradesi */}
+              <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-primary/95 md:bg-gradient-to-r md:from-primary/95 md:via-primary/80 md:to-primary/90" />
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3Ccircle cx=\'13\' cy=\'13\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E')]" />
             </div>
-          </div>
-        </section>
+
+            <div className="relative m-5 flex flex-col items-center justify-between gap-10 rounded-xl border border-accent/30 p-8 md:m-6 md:flex-row md:p-12 lg:p-16">
+              {/* Sol Taraf: Metin */}
+              <div className="max-w-2xl text-center md:text-left">
+                <h2 className="font-cinzel text-3xl font-bold tracking-wide text-primary-foreground sm:text-4xl md:text-5xl">
+                  Geleceğe <span className="text-accent italic">Miras</span>
+                </h2>
+                
+                <div className="mt-5 mb-6 flex items-center justify-center gap-3 md:justify-start">
+                  <div className="h-[2px] w-12 bg-accent/60" />
+                  <div className="h-2 w-2 rotate-45 border border-accent/80" />
+                  <div className="h-[2px] w-12 bg-accent/60" />
+                </div>
+                
+                <p className="text-sm font-medium leading-relaxed text-primary-foreground/90 sm:text-base md:text-lg">
+                  Her biri birer sanat eseri olan bu nadide hikâyeleri koruyarak doğru koleksiyonerlere ulaştırmak ve gelecek nesillere aktarmak en büyük gayemizdir. Sizi de bu tarihi yolculuğa davet ediyoruz.
+                </p>
+              </div>
+              
+              {/* Sağ Taraf: Buton */}
+              <div className="w-full shrink-0 md:w-auto">
+                <Link href="/urunler" className="group relative flex w-full items-center justify-center overflow-hidden rounded-sm border border-accent bg-accent px-6 py-5 transition-all duration-500 hover:bg-accent/90 hover:shadow-[0_0_25px_rgba(var(--accent),0.4)] md:inline-flex md:w-auto md:px-10">
+                  {/* İç Çerçeve Animasyonu */}
+                  <div className="absolute inset-1 border border-[#3d2b1f]/20 transition-all duration-500 group-hover:inset-2 group-hover:border-[#3d2b1f]/40" />
+                  <span className="relative z-10 font-cinzel text-sm font-bold uppercase tracking-[0.2em] text-[#3d2b1f] transition-colors">
+                    Koleksiyonu İncele
+                  </span>
+                </Link>
+              </div>
+            </div>
+          </section>
+        </div>
       </main>
     </div>
   )

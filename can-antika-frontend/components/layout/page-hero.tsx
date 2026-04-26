@@ -27,9 +27,9 @@ export function PageHero({ imageSrc, imageAlt, eyebrow, title, description, prio
           <div className="h-px w-16 bg-accent/50" />
         </div>
 
-        <span className="mb-4 inline-block font-serif text-lg uppercase tracking-widest text-accent">{eyebrow}</span>
+        <span className="mb-4 inline-block font-cinzel text-lg uppercase tracking-widest text-accent">{eyebrow}</span>
 
-        <h1 className="font-serif text-5xl font-bold leading-tight text-primary-foreground md:text-6xl">
+        <h1 className="font-cinzel text-5xl font-bold leading-tight text-primary-foreground md:text-6xl">
           {title}
         </h1>
 
