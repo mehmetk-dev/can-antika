@@ -4,9 +4,9 @@ import { HeaderClientIsland } from "@/components/header/header-client-island"
 import { cn } from "@/lib/utils"
 
 const navigation = [
-  { name: "Ürünler", href: "/urunler", description: "Koleksiyonumuzu keşfedin" },
+  { name: "Ürünler", href: "/urunler", description: "Koleksiyonumuzu keşfedin", prefetch: false },
   { name: "Blog", href: "/blog", description: "Antika dünyasından yazılar" },
-  { name: "Hakkımızda", href: "/hakkimizda", description: "35 yıllık tecrübe" },
+  { name: "Hakkımızda", href: "/hakkimizda", description: "40 yılı aşkın tecrübe" },
   { name: "İletişim", href: "/iletisim", description: "Bize ulaşın" },
   { name: "SSS", href: "/sss", description: "Sık sorulan sorular" },
 ]
@@ -43,6 +43,7 @@ export function Header({ sticky = true, className }: HeaderProps) {
               <Link
                 key={item.name}
                 href={item.href}
+                prefetch={item.prefetch}
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 {item.name}

@@ -75,9 +75,11 @@ public interface OrderMapper {
                     ProductResponse fullProduct = productMap.get(orderItem.getProductId());
                     ProductResponse product = fullProduct != null
                             ? fullProduct
-                            : new ProductResponse(orderItem.getProductId(), orderItem.getTitle(), orderItem.getPrice());
+                            : null;
                     return OrderItemResponse.builder()
+                            .id(orderItem.getId())
                             .product(product)
+                            .title(orderItem.getTitle())
                             .quantity(orderItem.getQuantity())
                             .price(orderItem.getPrice())
                             .build();

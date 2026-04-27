@@ -60,10 +60,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        // Skip rate limiting for read-only public catalog endpoints (high-traffic, low-risk)
+        // Sadece actuator health endpoint'ini skip et
         if (!"GET".equals(request.getMethod())) return false;
         String path = request.getRequestURI();
-        return path.startsWith("/v1/product/") || path.startsWith("/v1/category/") || path.startsWith("/v1/period/");
+        return path.startsWith("/actuator/");
     }
 
     @Override

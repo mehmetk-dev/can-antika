@@ -2,6 +2,7 @@ package com.mehmetkerem.controller.impl;
 
 import com.mehmetkerem.controller.IRestReviewController;
 import com.mehmetkerem.dto.request.ReviewRequest;
+import com.mehmetkerem.dto.response.CursorResponse;
 import com.mehmetkerem.dto.response.ReviewResponse;
 import com.mehmetkerem.service.IReviewService;
 import com.mehmetkerem.util.ResultData;
@@ -41,6 +42,14 @@ public class RestReviewControllerImpl implements IRestReviewController {
     @Override
     public ResultData<List<ReviewResponse>> findAllReviews() {
         return ResultHelper.success(reviewService.findAllReviews());
+    }
+
+    @GetMapping("/admin/all")
+    @Override
+    public ResultData<CursorResponse<ReviewResponse>> findAllReviewsPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResultHelper.success(reviewService.findAllReviewsPaged(page, size));
     }
 
     @PutMapping("/{id}")

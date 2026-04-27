@@ -144,7 +144,7 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                     name="title"
                                     defaultValue={product?.title}
                                     placeholder={!isEdit ? "Örn: Osmanlı Dönemi Duvar Saati" : undefined}
-                                    required maxLength={255} className="bg-muted/50"
+                                    required maxLength={500} className="bg-muted/50"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -155,7 +155,7 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                     rows={4}
                                     defaultValue={product?.description || ""}
                                     placeholder={!isEdit ? "Ürün hakkında detaylı açıklama..." : undefined}
-                                    required maxLength={5000} className="bg-muted/50"
+                                    required maxLength={4000} className="bg-muted/50"
                                 />
                             </div>
                             <div className="space-y-2">

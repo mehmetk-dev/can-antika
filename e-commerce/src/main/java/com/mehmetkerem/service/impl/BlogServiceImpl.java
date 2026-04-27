@@ -7,6 +7,8 @@ import com.mehmetkerem.repository.BlogCategoryRepository;
 import com.mehmetkerem.repository.BlogPostRepository;
 import com.mehmetkerem.service.IBlogService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ public class BlogServiceImpl implements IBlogService {
     private final BlogCategoryRepository categoryRepository;
 
     @Override
+    @Cacheable(cacheNames = "blog:posts", key = "'published;p=' + #page + ';s=' + #size")
     public Page<BlogPost> getPublishedPosts(int page, int size) {
         return postRepository.findByPublishedTrueOrderByCreatedAtDesc(PageRequest.of(page, size));
     }
@@ -31,6 +34,7 @@ public class BlogServiceImpl implements IBlogService {
     }
 
     @Override
+    @Cacheable(cacheNames = "blog:post", key = "#slug")
     public BlogPost getPostBySlug(String slug) {
         return postRepository.findBySlug(slug)
                 .orElseThrow(() -> new NotFoundException("Blog yazısı bulunamadı: " + slug));
@@ -43,6 +47,7 @@ public class BlogServiceImpl implements IBlogService {
     }
 
     @Override
+    @CacheEvict(cacheNames = { "blog:posts", "blog:post" }, allEntries = true)
     public BlogPost savePost(BlogPost post) {
         validateCategory(post.getCategoryId());
         if (post.getSlug() == null || post.getSlug().isBlank()) {
@@ -52,6 +57,7 @@ public class BlogServiceImpl implements IBlogService {
     }
 
     @Override
+    @CacheEvict(cacheNames = { "blog:posts", "blog:post" }, allEntries = true)
     public BlogPost updatePost(Long id, BlogPost post) {
         validateCategory(post.getCategoryId());
         BlogPost existing = getPostById(id);
@@ -67,11 +73,13 @@ public class BlogServiceImpl implements IBlogService {
     }
 
     @Override
+    @CacheEvict(cacheNames = { "blog:posts", "blog:post", "blog:categories" }, allEntries = true)
     public void deletePost(Long id) {
         postRepository.deleteById(id);
     }
 
     @Override
+    @Cacheable(cacheNames = "blog:categories", key = "'active'")
     public List<BlogCategory> getActiveCategories() {
         return categoryRepository.findByActiveTrue();
     }
@@ -82,11 +90,13 @@ public class BlogServiceImpl implements IBlogService {
     }
 
     @Override
+    @CacheEvict(cacheNames = { "blog:categories" }, allEntries = true)
     public BlogCategory saveCategory(BlogCategory category) {
         return categoryRepository.save(category);
     }
 
     @Override
+    @CacheEvict(cacheNames = { "blog:categories" }, allEntries = true)
     public BlogCategory updateCategory(Long id, BlogCategory category) {
         BlogCategory existing = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Blog kategorisi bulunamadı: " + id));
@@ -97,6 +107,7 @@ public class BlogServiceImpl implements IBlogService {
     }
 
     @Override
+    @CacheEvict(cacheNames = { "blog:categories", "blog:posts", "blog:post" }, allEntries = true)
     public void deleteCategory(Long id) {
         categoryRepository.deleteById(id);
     }

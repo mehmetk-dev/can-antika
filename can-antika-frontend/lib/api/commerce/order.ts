@@ -10,17 +10,20 @@ export const orderApi = {
             params: { page, size, sortBy, direction },
         }),
 
-    getMyOrderById: async (orderId: number): Promise<OrderResponse | null> => {
-        const data = await api.get<CursorResponse<OrderResponse>>("/v1/order/my-orders", {
-            params: { page: 0, size: 100, sortBy: "orderDate", direction: "desc" },
-        });
-        return data.items.find((o) => o.id === orderId) ?? null;
-    },
+    getMyOrderById: (orderId: number) =>
+        api.get<OrderResponse>(`/v1/order/my-orders/${orderId}`),
 
     getAllOrders: (page = 0, size = 20, sortBy = "orderDate", direction = "desc") =>
         api.get<CursorResponse<OrderResponse>>("/v1/order/all", {
             params: { page, size, sortBy, direction },
         }),
+
+    searchOrders: (params: {
+        status?: string; paymentStatus?: string; userId?: number;
+        from?: string; to?: string; q?: string;
+        page?: number; size?: number; sortBy?: string; direction?: string;
+    }) =>
+        api.get<CursorResponse<OrderResponse>>("/v1/order/search", { params }),
 
     getInvoice: (orderId: number) =>
         api.get<OrderInvoiceResponse>(`/v1/order/${orderId}/invoice`),
@@ -41,35 +44,6 @@ export const orderApi = {
     getTimeline: (orderId: number) =>
         api.get<OrderStatusHistoryResponse[]>(`/v1/order/${orderId}/timeline`),
 
-    downloadInvoicePdf: async (orderId: number): Promise<Blob> => {
-        const baseUrls = [
-            process.env.NEXT_PUBLIC_API_URL,
-            "http://localhost:8080",
-            "http://127.0.0.1:8080",
-            "http://localhost:8085",
-            "http://127.0.0.1:8085",
-        ].filter(Boolean) as string[];
-
-        let lastError: Error | null = null;
-        let res: Response | null = null;
-        for (const baseUrl of baseUrls) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000);
-            try {
-                res = await fetch(`${baseUrl.replace(/\/$/, "")}/v1/order/${orderId}/invoice/pdf`, {
-                    credentials: "include",
-                    signal: controller.signal,
-                });
-                if (res.ok) break;
-                lastError = new Error(`PDF endpoint failed: ${res.status}`);
-            } catch (error) {
-                lastError = error instanceof Error ? error : new Error("PDF indirilemedi");
-            } finally {
-                clearTimeout(timeoutId);
-            }
-        }
-
-        if (!res || !res.ok) throw lastError ?? new Error("PDF indirilemedi");
-        return res.blob();
-    },
+    downloadInvoicePdf: (orderId: number) =>
+        api.blob("GET", `/v1/order/${orderId}/invoice/pdf`),
 };

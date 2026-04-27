@@ -360,6 +360,48 @@ export const api = {
     patch: <T>(path: string, options?: RequestOptions) => request<T>("PATCH", path, options),
     delete: <T>(path: string, options?: RequestOptions) => request<T>("DELETE", path, options),
 
+    /** For endpoints that return binary content (PDF, images, etc.) as Blob */
+    blob: async (method: HttpMethod, path: string, options: RequestOptions = {}): Promise<Blob> => {
+        const { body, params, headers: extraHeaders, noAuth, timeoutMs } = options;
+        const effectiveTimeoutMs = timeoutMs ?? 15000;
+        const baseUrls = getCandidateBaseUrls();
+        let lastError: Error | null = null;
+
+        for (const baseUrl of baseUrls) {
+            try {
+                const url = buildUrl(baseUrl, path, params);
+                const init = buildFetchInit(method, body, extraHeaders);
+                let res = await fetchWithTimeout(url, init, effectiveTimeoutMs);
+
+                // Auto-refresh on 401
+                const hasSession = typeof window === "undefined" ? true : hasAuthSessionFlag();
+                if (res.status === 401 && !noAuth && hasSession) {
+                    const refreshed = await tryRefreshToken(baseUrl);
+                    if (refreshed) {
+                        res = await fetchWithTimeout(url, init, effectiveTimeoutMs);
+                    } else {
+                        throw new Error("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
+                    }
+                }
+
+                if (!res.ok) {
+                    let errorMessage = `API error: ${res.status}`;
+                    try { const e = await res.json(); if (e.message) errorMessage = e.message; } catch { /* */ }
+                    throw new Error(errorMessage);
+                }
+
+                return res.blob();
+            } catch (error) {
+                lastError = error instanceof Error ? error : new Error("İstek başarısız");
+                const isNetworkError = isNetworkLikeError(error);
+                if (isNetworkError) continue;
+                throw lastError;
+            }
+        }
+
+        throw lastError ?? new Error("API bağlantısı kurulamadı");
+    },
+
     /** For endpoints that return ResponseEntity directly (not wrapped in ResultData) */
     raw: async <T>(method: HttpMethod, path: string, options: RequestOptions = {}): Promise<T> => {
         const { body, params, headers: extraHeaders, timeoutMs } = options;

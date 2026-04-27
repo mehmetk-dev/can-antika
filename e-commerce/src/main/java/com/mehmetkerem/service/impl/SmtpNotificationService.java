@@ -9,7 +9,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,8 +20,8 @@ import java.util.Properties;
 
 @Slf4j
 @Service
-@Primary
 @Profile("!test")
+@ConditionalOnProperty(name = "resend.enabled", havingValue = "false", matchIfMissing = true)
 public class SmtpNotificationService implements INotificationService {
 
     private final ISiteSettingsService siteSettingsService;

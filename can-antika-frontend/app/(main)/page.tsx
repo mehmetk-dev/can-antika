@@ -24,7 +24,7 @@ const fetchSiteSettings = cache(async () => {
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await fetchSiteSettings()
-  const storeDesc = s?.storeDescription || "1990'dan beri İstanbul'un en güvenilir antika mağazası."
+  const storeDesc = s?.storeDescription || "1982'den beri İstanbul'un en güvenilir antika mağazası."
   const metaDesc = s?.metaDescription || storeDesc
 
   return { description: metaDesc }

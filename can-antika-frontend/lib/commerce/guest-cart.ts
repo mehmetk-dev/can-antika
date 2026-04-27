@@ -23,14 +23,25 @@ function writeCart(items: GuestCartItem[]) {
     window.dispatchEvent(new Event("cart-updated"))
 }
 
+export function isGuestCartProductSellable(product: ProductResponse): boolean {
+    const rawStatus = product.attributes?.status
+    const status = typeof rawStatus === "string" ? rawStatus.trim().toLowerCase() : ""
+    return status !== "sold" && status !== "reserved"
+}
+
 export const guestCart = {
     getItems(): GuestCartItem[] {
         return readCart()
     },
 
+    replaceItems(items: GuestCartItem[]) {
+        writeCart(items)
+    },
+
     addItem(product: ProductResponse, quantity: number) {
         const maxAllowed = Math.max(product.stock ?? 0, 0)
         if (maxAllowed <= 0) throw new Error("Bu ürün şu anda stokta yok.")
+        if (!isGuestCartProductSellable(product)) throw new Error("Bu ürün şu anda satışa uygun değil.")
         if (quantity <= 0) throw new Error("Miktar en az 1 olmalıdır.")
 
         const items = readCart()
@@ -48,7 +59,7 @@ export const guestCart = {
         const item = items.find(i => i.product.id === productId)
         if (item) {
             const maxAllowed = Math.max(item.product.stock ?? 0, 0)
-            if (maxAllowed <= 0 || quantity <= 0) {
+            if (maxAllowed <= 0 || !isGuestCartProductSellable(item.product) || quantity <= 0) {
                 const nextItems = items.filter(i => i.product.id !== productId)
                 writeCart(nextItems)
                 return

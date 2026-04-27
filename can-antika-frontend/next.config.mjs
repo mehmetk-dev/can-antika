@@ -18,7 +18,6 @@ const nextConfig = {
     minimumCacheTTL: 86400,
   },
   experimental: {
-    cssChunking: "strict",
     optimizeCss: true,
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons", "recharts"],
   },

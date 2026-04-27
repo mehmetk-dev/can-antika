@@ -7,6 +7,15 @@ import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import { resolveImageUrl } from "@/lib/product/image-url"
 import type { ProductResponse } from "@/lib/types"
 
+function serializeSafeJsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029")
+}
+
 function parseNumericProductId(slug: string): number | null {
   const trimmed = slug.trim()
   if (!/^\d+$/.test(trimmed)) return null
@@ -45,14 +54,14 @@ async function fetchProductBySlug(slug: string) {
   const safeSlug = encodeURIComponent(slug)
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/slug/${safeSlug}`, {
     revalidate: 300,
-    timeoutMs: 1500,
+    timeoutMs: 4000,
   })
 }
 
 async function fetchProductById(id: number) {
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/${id}`, {
     revalidate: 300,
-    timeoutMs: 1500,
+    timeoutMs: 4000,
   })
 }
 
@@ -177,7 +186,7 @@ async function ProductResolver({ slug }: { slug: string }) {
       {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeSafeJsonLd(jsonLd) }}
         />
       )}
 

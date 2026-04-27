@@ -13,6 +13,10 @@ export interface CartResponse {
     id: number;
     userId: number;
     items: CartItemResponse[];
+    subtotal?: number;
+    discount?: number;
+    total?: number;
+    couponCode?: string | null;
     updatedAt?: string;
 }
 

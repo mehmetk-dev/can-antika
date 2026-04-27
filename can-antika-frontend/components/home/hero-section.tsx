@@ -59,7 +59,7 @@ export function HeroSection() {
             <div className="relative">
               <div className="absolute inset-0 animate-pulse rounded-full border border-[#d1a46e]/35" />
               <p className="rounded-full border border-[#d1a46e]/55 bg-[#7b4019]/35 px-4 py-1.5 font-serif text-xs uppercase tracking-[0.3em] text-[#f1d3ab]">
-                1990&apos;dan Beri
+                1982&apos;den Beri
               </p>
             </div>
             <div className="h-px w-12 bg-gradient-to-l from-transparent to-[#d1a46e]/70" />

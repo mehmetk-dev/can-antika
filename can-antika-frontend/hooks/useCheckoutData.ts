@@ -4,6 +4,7 @@ import type { CartResponse, AddressResponse } from "@/lib/types"
 
 export interface CheckoutData {
     cart: CartResponse | null
+    setCart: (cart: CartResponse | null) => void
     addresses: AddressResponse[]
     selectedAddressId: number | null
     setSelectedAddressId: (id: number | null) => void
@@ -33,11 +34,12 @@ export function useCheckoutData(): CheckoutData {
         })
     }, [])
 
-    const cartTotal = cart?.items?.reduce((sum, item) => sum + item.total, 0) ?? 0
+    const cartTotal = cart?.subtotal ?? cart?.items?.reduce((sum, item) => sum + item.total, 0) ?? 0
     const itemCount = cart?.items?.length ?? 0
 
     return {
         cart,
+        setCart,
         addresses,
         selectedAddressId,
         setSelectedAddressId,

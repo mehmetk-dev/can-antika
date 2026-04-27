@@ -26,6 +26,8 @@ public interface IRestOrderController {
 
     ResultData<CursorResponse<OrderResponse>> getMyOrders(int page, int size, String sortBy, String direction);
 
+    ResultData<OrderResponse> getMyOrderById(Long orderId);
+
     ResultData<OrderResponse> saveOrder(com.mehmetkerem.dto.request.OrderRequest request);
 
     /** Kendi siparişi veya admin için sipariş fişi. */

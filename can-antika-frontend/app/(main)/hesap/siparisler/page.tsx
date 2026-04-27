@@ -85,6 +85,8 @@ function OrdersContent() {
                             ? "bg-primary text-primary-foreground"
                             : order.orderStatus === "SHIPPED"
                               ? "bg-accent text-accent-foreground"
+                              : order.orderStatus === "RETURNED"
+                                ? "bg-purple-100 text-purple-800"
                               : order.orderStatus === "CANCELLED"
                                 ? "bg-destructive text-destructive-foreground"
                                 : "bg-transparent"

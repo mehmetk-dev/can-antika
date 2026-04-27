@@ -1,6 +1,7 @@
 package com.mehmetkerem.service;
 
 import com.mehmetkerem.dto.request.ReviewRequest;
+import com.mehmetkerem.dto.response.CursorResponse;
 import com.mehmetkerem.dto.response.ReviewResponse;
 import com.mehmetkerem.model.Review;
 
@@ -19,6 +20,8 @@ public interface IReviewService {
     Review getReviewById(Long id);
 
     List<ReviewResponse> findAllReviews();
+
+    CursorResponse<ReviewResponse> findAllReviewsPaged(int page, int size);
 
     List<ReviewResponse> getReviewsByProductId(Long productId);
 }

@@ -41,15 +41,17 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     setIsLoading(true)
-    orderApi
-      .getAllOrders(page, PAGE_SIZE)
+    const apiCall = statusFilter === "all"
+      ? orderApi.getAllOrders(page, PAGE_SIZE)
+      : orderApi.searchOrders({ status: statusFilter, page, size: PAGE_SIZE })
+    apiCall
       .then((data) => {
         setOrders(data.items)
         setTotalPages(Math.ceil(data.totalElement / PAGE_SIZE))
       })
-      .catch(() => setOrders([]))
+      .catch(() => { setOrders([]); setTotalPages(0) })
       .finally(() => setIsLoading(false))
-  }, [page]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [page, statusFilter]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const openTrackingDialog = (order: OrderResponse) => {
     setTrackingDialog({
@@ -97,8 +99,6 @@ export default function AdminOrdersPage() {
     }
   }
 
-  const filteredOrders = statusFilter === "all" ? orders : orders.filter((o) => o.orderStatus === statusFilter)
-
   return (
     <div className="space-y-6">
       <div>
@@ -107,7 +107,7 @@ export default function AdminOrdersPage() {
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(0); }}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Durum filtrele" />
           </SelectTrigger>
@@ -140,7 +140,7 @@ export default function AdminOrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map((order) => {
+              {orders.map((order) => {
                 const status = getOrderStatus(order.orderStatus)
                 return (
                   <TableRow key={order.id}>
@@ -207,7 +207,7 @@ export default function AdminOrdersPage() {
                               Teslim Edildi
                             </DropdownMenuItem>
                           )}
-                          {order.orderStatus !== "CANCELLED" && order.orderStatus !== "DELIVERED" && (
+                          {order.orderStatus !== "CANCELLED" && order.orderStatus !== "DELIVERED" && order.orderStatus !== "RETURNED" && (
                             <DropdownMenuItem className="text-destructive" onClick={() => handleStatusChange(order.id, "CANCELLED")}>
                               <XCircle className="mr-2 h-4 w-4" />
                               İptal Et
@@ -219,7 +219,7 @@ export default function AdminOrdersPage() {
                   </TableRow>
                 )
               })}
-              {filteredOrders.length === 0 && (
+              {orders.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     Sipariş bulunamadı

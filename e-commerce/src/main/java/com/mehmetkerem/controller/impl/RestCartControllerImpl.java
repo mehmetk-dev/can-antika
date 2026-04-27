@@ -40,7 +40,7 @@ public class RestCartControllerImpl implements com.mehmetkerem.controller.IRestC
     }
 
     @PostMapping("/sync")
-    public ResultData<CartResponse> syncCart(@Valid @RequestBody List<CartItemRequest> requests) {
+    public ResultData<CartResponse> syncCart(@Valid @RequestBody List<@Valid CartItemRequest> requests) {
         return ResultHelper.success(cartService.saveCart(requireCurrentUserId(), requests));
     }
 

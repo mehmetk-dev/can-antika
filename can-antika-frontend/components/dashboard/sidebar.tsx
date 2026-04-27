@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Heart, Package, MapPin, User, LogOut, ChevronLeft, MessageSquare, Shield } from "lucide-react"
+import { Heart, Package, MapPin, User, LogOut, ChevronLeft, MessageSquare, Shield, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth/auth-context"
@@ -11,6 +11,7 @@ const navigation = [
   { name: "Hesabım", href: "/hesap", icon: User },
   { name: "Favorilerim", href: "/hesap/favoriler", icon: Heart },
   { name: "Siparişlerim", href: "/hesap/siparisler", icon: Package },
+  { name: "İadelerim", href: "/hesap/iadeler", icon: RotateCcw },
   { name: "Adreslerim", href: "/hesap/adresler", icon: MapPin },
   { name: "Destek", href: "/hesap/destek", icon: MessageSquare },
 ]

@@ -186,6 +186,13 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
+    public OrderResponse getMyOrderById(Long userId, Long orderId) {
+        Order order = getOrderById(orderId);
+        orderAuthorizationService.assertOwner(order, userId);
+        return toOrderResponse(order);
+    }
+
+    @Override
     public Page<OrderResponse> getOrdersByUserId(Long userId, Pageable pageable) {
         return toOrderResponsePage(orderRepository.findByUserId(userId, pageable));
     }
@@ -226,6 +233,14 @@ public class OrderServiceImpl implements IOrderService {
 
         if (newStatus == OrderStatus.CANCELLED && oldStatus != OrderStatus.CANCELLED) {
             log.info("Sipariş iptal ediliyor, stoklar iade ediliyor. Sipariş ID: {}", orderId);
+            stockService.revertStockLevels(order.getOrderItems());
+        }
+
+        if (newStatus == OrderStatus.RETURNED && oldStatus != OrderStatus.RETURNED) {
+            if (oldStatus != OrderStatus.DELIVERED) {
+                throw new BadRequestException("Sadece teslim edilmiş siparişler iade edildi olarak işaretlenebilir.");
+            }
+            log.info("Sipariş iade edildi, stoklar iade ediliyor. Sipariş ID: {}", orderId);
             stockService.revertStockLevels(order.getOrderItems());
         }
 

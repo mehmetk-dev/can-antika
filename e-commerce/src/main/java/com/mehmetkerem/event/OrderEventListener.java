@@ -100,6 +100,7 @@ public class OrderEventListener {
             case PAID -> "Ödendi";
             case SHIPPED -> "Kargoya Verildi";
             case DELIVERED -> "Teslim Edildi";
+            case RETURNED -> "İade Edildi";
             case CANCELLED -> "İptal Edildi";
         };
     }

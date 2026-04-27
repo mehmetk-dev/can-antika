@@ -156,6 +156,12 @@ function CartContent() {
                                             <Plus className="h-3 w-3" />
                                         </Button>
                                     </div>
+                                    {maxStock > 0 && item.quantity >= maxStock && (
+                                        <p className="text-xs text-muted-foreground">Stok limitine ulaşıldı</p>
+                                    )}
+                                    {maxStock <= 0 && (
+                                        <p className="text-xs text-destructive">Bu ürün artık stokta yok</p>
+                                    )}
 
                                     {/* Price & Remove */}
                                     <div className="flex items-center gap-4">

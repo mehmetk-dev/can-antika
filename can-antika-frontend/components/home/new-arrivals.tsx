@@ -66,7 +66,7 @@ export function NewArrivalsUI({ products }: { products: ProductCardResponse[] })
               <circle cx="80" cy="8" r="3" fill="currentColor" />
             </svg>
           </div>
-          <Link href="/urunler" className="hidden sm:block">
+          <Link href="/urunler" prefetch={false} className="hidden sm:block">
             <Button variant="ghost" className="group gap-2 font-serif text-amber-800 hover:bg-amber-200/50 hover:text-amber-950">
               Tümünü Gör
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -81,7 +81,7 @@ export function NewArrivalsUI({ products }: { products: ProductCardResponse[] })
             const isSold = (item.stock ?? 0) <= 0
 
             return (
-              <Link key={item.id} href={getProductUrl(item)} className="group relative">
+              <Link key={item.id} href={getProductUrl(item)} prefetch={false} className="group relative">
                 <div className="relative overflow-hidden rounded-sm border-2 border-amber-300/50 bg-white shadow-lg transition-all duration-300 group-hover:border-amber-500 group-hover:shadow-xl group-hover:shadow-amber-200/50">
                   <div className="absolute left-2 top-2 h-6 w-6 border-l-2 border-t-2 border-amber-400/60" />
                   <div className="absolute right-2 top-2 h-6 w-6 border-r-2 border-t-2 border-amber-400/60" />

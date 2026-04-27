@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -17,18 +17,22 @@ export default function AdminReturnsPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [statusFilter, setStatusFilter] = useState("all")
 
-    useEffect(() => {
-        orderReturnApi
+    const loadReturns = useCallback(() => {
+        return orderReturnApi
             .getAllReturns()
             .then(setReturns)
             .catch(() => setReturns([]))
             .finally(() => setIsLoading(false))
     }, [])
 
+    useEffect(() => {
+        void loadReturns()
+    }, [loadReturns])
+
     const handleApprove = async (returnId: number) => {
         try {
-            const updated = await orderReturnApi.approve(returnId)
-            setReturns((prev) => prev.map((r) => (r.id === returnId ? updated : r)))
+            await orderReturnApi.approve(returnId)
+            await loadReturns()
             toast.success("İade talebi onaylandı")
         } catch {
             toast.error("Onaylama başarısız")
@@ -37,8 +41,8 @@ export default function AdminReturnsPage() {
 
     const handleReject = async (returnId: number) => {
         try {
-            const updated = await orderReturnApi.reject(returnId)
-            setReturns((prev) => prev.map((r) => (r.id === returnId ? updated : r)))
+            await orderReturnApi.reject(returnId)
+            await loadReturns()
             toast.success("İade talebi reddedildi")
         } catch {
             toast.error("Reddetme başarısız")
@@ -87,9 +91,11 @@ export default function AdminReturnsPage() {
                             <TableRow>
                                 <TableHead>İade No</TableHead>
                                 <TableHead>Sipariş No</TableHead>
+                                <TableHead>Kullanıcı</TableHead>
                                 <TableHead>Tarih</TableHead>
                                 <TableHead>Sebep</TableHead>
                                 <TableHead>Durum</TableHead>
+                                <TableHead>İşlem Tarihi</TableHead>
                                 <TableHead className="w-[160px]">İşlem</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -100,8 +106,10 @@ export default function AdminReturnsPage() {
                                     <TableRow key={ret.id}>
                                         <TableCell className="font-medium">#{ret.id}</TableCell>
                                         <TableCell>#{ret.orderId}</TableCell>
+                                        <TableCell>{ret.userId ? `#${ret.userId}` : "-"}</TableCell>
                                         <TableCell>{formatDate(ret.createdAt)}</TableCell>
                                         <TableCell className="max-w-[300px] truncate">{ret.reason}</TableCell>
+                                        <TableCell>{ret.processedAt ? formatDate(ret.processedAt) : "-"}</TableCell>
                                         <TableCell>
                                             <Badge variant={status.variant} className={status.className}>
                                                 {status.label}
@@ -128,7 +136,7 @@ export default function AdminReturnsPage() {
                             })}
                             {filteredReturns.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                                         İade talebi bulunamadı
                                     </TableCell>
                                 </TableRow>

@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const metaTitle = s?.metaTitle || `${storeName} | Geçmişin Zarafeti`
   const metaDesc =
     s?.metaDescription ||
-    "Eşsiz antika eserler, uzman onayı ve güvenli teslimat ile sizlerleyiz. 1990'dan beri kalite ve güven."
+    "Eşsiz antika eserler, uzman onayı ve güvenli teslimat ile sizlerleyiz. 1982'den beri kalite ve güven."
   const keywords = s?.metaKeywords
     ? s.metaKeywords.split(",").map((k: string) => k.trim())
     : ["antika", "antika mağazası", "osmanlı antika", "istanbul antika", "can antika"]

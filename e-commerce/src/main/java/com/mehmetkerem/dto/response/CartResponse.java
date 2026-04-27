@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 
 @NoArgsConstructor
@@ -19,5 +20,9 @@ public class CartResponse {
     private Long id;
     private Long userId;
     private List<CartItemResponse> items;
+    private BigDecimal subtotal;
+    private BigDecimal discount;
+    private BigDecimal total;
+    private String couponCode;
     private LocalDateTime updatedAt;
 }

@@ -106,6 +106,12 @@ public class RestOrderControllerImpl implements IRestOrderController {
     }
 
     @Override
+    @GetMapping("/my-orders/{orderId}")
+    public ResultData<OrderResponse> getMyOrderById(@PathVariable Long orderId) {
+        return ResultHelper.success(orderService.getMyOrderById(requireCurrentUserId(), orderId));
+    }
+
+    @Override
     @PostMapping("/save")
     public ResultData<OrderResponse> saveOrder(@Valid @RequestBody com.mehmetkerem.dto.request.OrderRequest request) {
         return ResultHelper.success(orderService.saveOrder(requireCurrentUserId(), request));

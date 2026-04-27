@@ -23,11 +23,13 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
         Page<Order> findByUserId(Long userId, Pageable pageable);
 
-        @Override
-        Page<Order> findAll(Pageable pageable);
+    @EntityGraph(attributePaths = { "orderItems", "shippingAddress" })
+    @Override
+    Page<Order> findAll(Pageable pageable);
 
-        @Override
-        Page<Order> findAll(Specification<Order> spec, Pageable pageable);
+    @EntityGraph(attributePaths = { "orderItems", "shippingAddress" })
+    @Override
+    Page<Order> findAll(Specification<Order> spec, Pageable pageable);
 
         boolean existsByUserIdAndOrderItemsProductId(Long userId, Long productId);
 

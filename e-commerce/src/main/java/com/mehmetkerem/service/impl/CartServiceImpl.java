@@ -45,9 +45,9 @@ public class CartServiceImpl implements ICartService {
 
         Cart cart = getCartByUserId(userId);
 
-        List<CartItem> entityCartItem = cartItemMapper.toEntityCartItem(cartItemRequests);
+        List<CartItem> incomingCartItems = cartItemMapper.toEntityCartItem(cartItemRequests);
 
-        List<Long> productIds = entityCartItem.stream()
+        List<Long> productIds = incomingCartItems.stream()
                 .map(CartItem::getProductId)
                 .collect(Collectors.toList());
 
@@ -56,7 +56,7 @@ public class CartServiceImpl implements ICartService {
         Map<Long, ProductResponse> productMap = products.stream()
                 .collect(Collectors.toMap(ProductResponse::getId, p -> p));
 
-        for (CartItem item : entityCartItem) {
+        for (CartItem item : incomingCartItems) {
             ProductResponse product = productMap.get(item.getProductId());
             if (product == null) {
                 throw new NotFoundException("Product not found: " + item.getProductId());
@@ -66,20 +66,40 @@ public class CartServiceImpl implements ICartService {
 
         // Merge: aynı ürünlü kalemleri birleştir
         Map<Long, CartItem> mergedItems = new LinkedHashMap<>();
-        for (CartItem item : entityCartItem) {
-            if (mergedItems.containsKey(item.getProductId())) {
-                CartItem existing = mergedItems.get(item.getProductId());
-                existing.setQuantity(existing.getQuantity() + item.getQuantity());
-            } else {
+        for (CartItem item : cart.getItems()) {
+            mergedItems.put(item.getProductId(), item);
+        }
+
+        for (CartItem item : incomingCartItems) {
+            CartItem existing = mergedItems.get(item.getProductId());
+            if (existing == null) {
+                cart.getItems().add(item);
                 mergedItems.put(item.getProductId(), item);
+                continue;
+            }
+
+            existing.setQuantity(existing.getQuantity() + item.getQuantity());
+            ProductResponse product = productMap.get(item.getProductId());
+            if (product != null) {
+                existing.setPrice(product.getPrice());
             }
         }
 
-        cart.getItems().clear();
-        cart.getItems().addAll(mergedItems.values());
-        cart.setCouponCode(null);
+        List<CartItemRequest> mergedRequests = mergedItems.values().stream()
+                .map(item -> {
+                    CartItemRequest request = new CartItemRequest();
+                    request.setProductId(item.getProductId());
+                    request.setQuantity(item.getQuantity());
+                    return request;
+                })
+                .toList();
+        stockService.validateCartStock(mergedRequests);
+
         cart.setUpdatedAt(LocalDateTime.now());
 
+        if (cart.getItems().isEmpty()) {
+            cart.setCouponCode(null);
+        }
         return toResponse(cartRepository.save(cart));
     }
 
@@ -94,6 +114,7 @@ public class CartServiceImpl implements ICartService {
         });
     }
 
+    @Transactional
     @Override
     public CartResponse getCartResponseByUserId(Long userId) {
         return toResponse(getCartByUserId(userId));
@@ -146,6 +167,7 @@ public class CartServiceImpl implements ICartService {
         return toResponse(cartRepository.save(cart));
     }
 
+    @Transactional
     @Override
     public CartResponse removeItem(Long userId, Long productId) {
         Cart cart = getCartByUserId(userId);
@@ -156,14 +178,19 @@ public class CartServiceImpl implements ICartService {
             log.warn("Sepetten ürün silme hatası: Ürün bulunamadı. Kullanıcı ID: {}, Ürün ID: {}", userId, productId);
             throw new NotFoundException(ExceptionMessages.PRODUCT_NOT_FOUND);
         }
+        if (cart.getItems().isEmpty()) {
+            cart.setCouponCode(null);
+        }
         log.info("Ürün sepetten çıkarıldı. Kullanıcı ID: {}, Ürün ID: {}", userId, productId);
         return toResponse(cartRepository.save(cart));
     }
 
+    @Transactional
     @Override
     public String clearCart(Long userId) {
         Cart cart = getCartByUserId(userId);
         cart.getItems().clear();
+        cart.setCouponCode(null);
         cart.setUpdatedAt(LocalDateTime.now());
         cartRepository.save(cart);
         return String.format(Messages.CLEAR_VALUE, userId, "sepet");
@@ -195,6 +222,7 @@ public class CartServiceImpl implements ICartService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    @Transactional
     @Override
     public BigDecimal calculateTotal(Long userId) {
         Cart cart = getCartByUserId(userId);
@@ -214,15 +242,45 @@ public class CartServiceImpl implements ICartService {
     }
 
     private CartResponse toResponse(Cart cart) {
+        List<CartItemResponse> items = toResponseCartItems(cart);
+        CartTotals totals = calculateTotals(cart.getCouponCode(), items);
         return CartResponse.builder()
                 .id(cart.getId())
                 .userId(cart.getUserId())
-                .items(toResponseCartItem(cart.getItems()))
+                .items(items)
+                .subtotal(totals.subtotal())
+                .discount(totals.discount())
+                .total(totals.total())
+                .couponCode(totals.couponCode())
                 .updatedAt(cart.getUpdatedAt())
                 .build();
     }
 
-    private List<CartItemResponse> toResponseCartItem(List<CartItem> cartItems) {
+    private CartTotals calculateTotals(String couponCode, List<CartItemResponse> items) {
+        BigDecimal subtotal = items.stream()
+                .map(CartItemResponse::getTotal)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (couponCode == null || couponCode.isBlank()) {
+            return new CartTotals(subtotal, BigDecimal.ZERO, subtotal, null);
+        }
+
+        try {
+            BigDecimal total = couponService.applyCoupon(couponCode, subtotal);
+            BigDecimal discount = subtotal.subtract(total).max(BigDecimal.ZERO);
+            return new CartTotals(subtotal, discount, total, couponCode.toUpperCase());
+        } catch (Exception e) {
+            log.warn("Gecersiz kupon sepet yanitindan cikarildi. Kupon: {}, Sebep: {}", couponCode, e.getMessage());
+            return new CartTotals(subtotal, BigDecimal.ZERO, subtotal, null);
+        }
+    }
+
+    private record CartTotals(BigDecimal subtotal, BigDecimal discount, BigDecimal total, String couponCode) {
+    }
+
+    private List<CartItemResponse> toResponseCartItems(Cart cart) {
+        List<CartItem> cartItems = cart.getItems();
         if (cartItems.isEmpty()) {
             return new ArrayList<>();
         }
@@ -234,15 +292,24 @@ public class CartServiceImpl implements ICartService {
         Map<Long, ProductResponse> productMap = productService.getProductResponsesByIds(productIds).stream()
                 .collect(Collectors.toMap(ProductResponse::getId, p -> p));
 
+        List<Long> unavailableProductIds = cartItems.stream()
+                .map(CartItem::getProductId)
+                .filter(productId -> !productMap.containsKey(productId))
+                .toList();
+        if (!unavailableProductIds.isEmpty()) {
+            log.warn("Sepetten erisilemeyen urunler temizleniyor. UserId: {}, ProductIds: {}",
+                    cart.getUserId(), unavailableProductIds);
+            cartItems.removeIf(cartItem -> unavailableProductIds.contains(cartItem.getProductId()));
+            if (cartItems.isEmpty()) {
+                cart.setCouponCode(null);
+            }
+        }
+
         return cartItems.stream()
                 .map(cartItem -> {
                     ProductResponse product = productMap.get(cartItem.getProductId());
-                    if (product == null) {
-                        return null;
-                    }
                     return cartItemMapper.toResponseWithProduct(cartItem, product);
                 })
-                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 }

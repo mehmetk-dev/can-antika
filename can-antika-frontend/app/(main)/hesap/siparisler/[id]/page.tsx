@@ -8,28 +8,41 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { orderApi } from "@/lib/api"
-import type { OrderResponse } from "@/lib/types"
+import { orderApi, orderReturnApi } from "@/lib/api"
+import type { OrderResponse, OrderReturnResponse } from "@/lib/types"
 import { toast } from "sonner"
 import { useSiteSettings } from "@/lib/site-settings-context"
 import { generateInvoiceHtml } from "@/lib/commerce/invoice-template"
 import { TrackingInfoCard } from "@/components/order/tracking-info-card"
 import { ReturnRequestDialog } from "@/components/order/return-request-dialog"
 import { CancelOrderButton } from "@/components/order/cancel-order-button"
-import { getOrderStatus } from "@/lib/commerce/order-utils"
+import { getOrderStatus, getReturnStatus } from "@/lib/commerce/order-utils"
 import { getProductUrl } from "@/lib/product/product-url"
 import { formatDateTR } from "@/lib/utils"
 
 function OrderDetailContent({ orderId }: { orderId: number }) {
     const [order, setOrder] = useState<OrderResponse | null>(null)
+    const [orderReturn, setOrderReturn] = useState<OrderReturnResponse | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const settings = useSiteSettings()
 
     useEffect(() => {
-        orderApi
-            .getMyOrderById(orderId)
-            .then((found) => setOrder(found))
-            .catch(() => setOrder(null))
+        Promise.allSettled([
+            orderApi.getMyOrderById(orderId),
+            orderReturnApi.getMyReturns(),
+        ])
+            .then(([orderResult, returnsResult]) => {
+                if (orderResult.status === "fulfilled") {
+                    setOrder(orderResult.value)
+                } else {
+                    setOrder(null)
+                }
+
+                if (returnsResult.status === "fulfilled") {
+                    const existingReturn = returnsResult.value.find((item) => item.orderId === orderId) ?? null
+                    setOrderReturn(existingReturn)
+                }
+            })
             .finally(() => setIsLoading(false))
     }, [orderId])
 
@@ -55,6 +68,8 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
     }
 
     const status = getOrderStatus(order.orderStatus)
+    const returnStatus = orderReturn ? getReturnStatus(orderReturn.status) : null
+    const hasActiveReturn = orderReturn?.status === "PENDING" || orderReturn?.status === "APPROVED"
 
     const handleInvoice = async () => {
         try {
@@ -119,9 +134,15 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <Link href={item.product ? getProductUrl(item.product) : ""} className="font-medium text-foreground hover:text-primary line-clamp-1">
-                                            {item.title || item.product?.title || "Ürün"}
-                                        </Link>
+                                        {item.product ? (
+                                            <Link href={getProductUrl(item.product)} className="font-medium text-foreground hover:text-primary line-clamp-1">
+                                                {item.title || item.product.title || "Ürün"}
+                                            </Link>
+                                        ) : (
+                                            <p className="font-medium text-foreground line-clamp-1">
+                                                {item.title || "Ürün"}
+                                            </p>
+                                        )}
                                         <p className="text-sm text-muted-foreground">Adet: {item.quantity}</p>
                                         <p className="font-medium text-primary mt-1">₺{item.price.toLocaleString("tr-TR")}</p>
                                     </div>
@@ -190,8 +211,25 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
 
                     <CancelOrderButton order={order} onCancelled={setOrder} />
 
-                    {order.orderStatus === "DELIVERED" && (
-                        <ReturnRequestDialog orderId={order.id} />
+                    {orderReturn && returnStatus && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="font-serif text-base">İade Talebi</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <Badge variant={returnStatus.variant} className={returnStatus.className}>
+                                    {returnStatus.label}
+                                </Badge>
+                                <p className="text-sm text-muted-foreground">{orderReturn.reason}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    {formatDateTR(orderReturn.createdAt, "compact")}
+                                </p>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {order.orderStatus === "DELIVERED" && !hasActiveReturn && (
+                        <ReturnRequestDialog orderId={order.id} onCreated={setOrderReturn} />
                     )}
                 </div>
             </div>

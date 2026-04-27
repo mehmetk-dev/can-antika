@@ -33,9 +33,11 @@ export interface OrderRequest {
 export interface OrderReturnResponse {
     id: number;
     orderId: number;
+    userId?: number;
     reason: string;
     status: string;
     createdAt: string;
+    processedAt?: string;
 }
 
 export interface OrderReturnRequest {

@@ -1,30 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useMemo } from "react"
+import DOMPurify from "dompurify"
 
 export function BlogContentSanitized({ html }: { html: string }) {
-    const [sanitized, setSanitized] = useState("")
-
-    useEffect(() => {
-        if (!html) return
-        let cancelled = false
-        import("dompurify").then((mod) => {
-            if (cancelled) return
-            setSanitized(mod.default.sanitize(html))
-        })
-        return () => { cancelled = true }
+    const sanitized = useMemo(() => {
+        if (!html || html.trim().length === 0) return ""
+        return DOMPurify.sanitize(html)
     }, [html])
 
     if (!sanitized) {
-        return (
-            <div className="space-y-4 animate-pulse">
-                <div className="h-4 bg-muted/40 rounded w-full" />
-                <div className="h-4 bg-muted/40 rounded w-5/6" />
-                <div className="h-4 bg-muted/40 rounded w-4/6" />
-                <div className="h-4 bg-muted/40 rounded w-full" />
-                <div className="h-4 bg-muted/40 rounded w-3/6" />
-            </div>
-        )
+        return null
     }
 
     return (

@@ -1,6 +1,7 @@
 package com.mehmetkerem.service.impl;
 
 import com.mehmetkerem.dto.request.ReviewRequest;
+import com.mehmetkerem.dto.response.CursorResponse;
 import com.mehmetkerem.dto.response.ProductResponse;
 import com.mehmetkerem.dto.response.ReviewResponse;
 import com.mehmetkerem.dto.response.UserResponse;
@@ -11,8 +12,11 @@ import com.mehmetkerem.model.Review;
 import com.mehmetkerem.repository.ReviewRepository;
 import com.mehmetkerem.service.IReviewService;
 import com.mehmetkerem.util.Messages;
+import com.mehmetkerem.util.ResultHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,6 +77,7 @@ public class ReviewServiceImpl implements IReviewService {
                 productId, avgRating, count);
     }
 
+    @Transactional
     @Override
     public String deleteReview(Long userId, Long id) {
         Review review = getReviewById(id);
@@ -109,11 +114,68 @@ public class ReviewServiceImpl implements IReviewService {
                 .orElseThrow(() -> new NotFoundException(String.format(ExceptionMessages.NOT_FOUND, id, "yorum")));
     }
 
+    private static final int MAX_FIND_ALL_RESULTS = 500;
+
     @Override
     public List<ReviewResponse> findAllReviews() {
-        return reviewRepository.findAll().stream()
-                .map(this::getDetails)
+        Page<Review> page = reviewRepository.findAll(PageRequest.of(0, MAX_FIND_ALL_RESULTS));
+        if (page.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> userIds = page.getContent().stream()
+                .map(Review::getUserId)
+                .distinct()
                 .toList();
+        List<Long> productIds = page.getContent().stream()
+                .map(Review::getProductId)
+                .distinct()
+                .toList();
+
+        java.util.Map<Long, UserResponse> userMap = userService.getUserResponsesByIds(userIds);
+        java.util.Map<Long, ProductResponse> productMap = productService.getProductResponsesByIds(productIds).stream()
+                .collect(java.util.stream.Collectors.toMap(ProductResponse::getId, p -> p, (a, b) -> a));
+
+        return page.getContent().stream()
+                .map(review -> reviewMapper.toResponseWithDetails(
+                        review,
+                        productMap.getOrDefault(review.getProductId(), null),
+                        toPublicUser(userMap.get(review.getUserId()))))
+                .toList();
+    }
+
+    @Override
+    public CursorResponse<ReviewResponse> findAllReviewsPaged(int page, int size) {
+        Page<Review> reviewPage = reviewRepository.findAll(PageRequest.of(page, size));
+        if (reviewPage.isEmpty()) {
+            return ResultHelper.toCursor(new org.springframework.data.domain.PageImpl<>(
+                    List.<ReviewResponse>of(),
+                    reviewPage.getPageable(),
+                    reviewPage.getTotalElements()));
+        }
+
+        List<Long> userIds = reviewPage.getContent().stream()
+                .map(Review::getUserId)
+                .distinct()
+                .toList();
+        List<Long> productIds = reviewPage.getContent().stream()
+                .map(Review::getProductId)
+                .distinct()
+                .toList();
+
+        java.util.Map<Long, UserResponse> userMap = userService.getUserResponsesByIds(userIds);
+        java.util.Map<Long, ProductResponse> productMap = productService.getProductResponsesByIds(productIds).stream()
+                .collect(java.util.stream.Collectors.toMap(ProductResponse::getId, p -> p, (a, b) -> a));
+
+        List<ReviewResponse> mapped = reviewPage.getContent().stream()
+                .map(review -> reviewMapper.toResponseWithDetails(
+                        review,
+                        productMap.getOrDefault(review.getProductId(), null),
+                        toPublicUser(userMap.get(review.getUserId()))))
+                .toList();
+
+        return ResultHelper.toCursor(
+                new org.springframework.data.domain.PageImpl<>(mapped, reviewPage.getPageable(), reviewPage.getTotalElements()));
     }
 
     @Override
@@ -132,11 +194,10 @@ public class ReviewServiceImpl implements IReviewService {
                 .distinct()
                 .toList();
 
-        // UserService'den batch almak mümkün değilse, en azından cache'li çağrılar
-        // yapılır
+        java.util.Map<Long, UserResponse> rawUserMap = userService.getUserResponsesByIds(userIds);
         java.util.Map<Long, UserResponse> userMap = new java.util.HashMap<>();
-        for (Long uid : userIds) {
-            userMap.put(uid, toPublicUser(userService.getUserResponseById(uid)));
+        for (var entry : rawUserMap.entrySet()) {
+            userMap.put(entry.getKey(), toPublicUser(entry.getValue()));
         }
 
         return reviews.stream()

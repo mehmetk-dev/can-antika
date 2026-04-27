@@ -20,17 +20,17 @@ import { OrderConfirmation } from "@/components/checkout/order-confirmation"
 function CheckoutContent() {
     const router = useRouter()
     const {
-        cart, addresses, selectedAddressId, setSelectedAddressId,
+        cart, setCart, addresses, selectedAddressId, setSelectedAddressId,
         note, setNote, isLoading, cartTotal, itemCount,
     } = useCheckoutData()
 
-    const coupon = useCoupon(cartTotal)
+    const coupon = useCoupon(cart, setCart)
     const [paymentMethod, setPaymentMethod] = useState<"CREDIT_CARD" | "EFT" | "CASH_ON_DELIVERY">("CREDIT_CARD")
     const [isPlacing, setIsPlacing] = useState(false)
     const [orderPlaced, setOrderPlaced] = useState(false)
     const [orderId, setOrderId] = useState<number | null>(null)
 
-    const finalTotal = Math.max(0, cartTotal - coupon.discount)
+    const finalTotal = cart?.total ?? Math.max(0, cartTotal - coupon.discount)
 
     const handlePlaceOrder = async () => {
         if (!selectedAddressId) {

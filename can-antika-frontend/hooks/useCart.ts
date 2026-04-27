@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth/auth-context"
-import { cartApi } from "@/lib/api"
-import { guestCart, type GuestCartItem } from "@/lib/commerce/guest-cart"
+import { cartApi, productApi } from "@/lib/api"
+import { guestCart, isGuestCartProductSellable, type GuestCartItem } from "@/lib/commerce/guest-cart"
 import { toast } from "sonner"
 import type { CartResponse, CartItemResponse } from "@/lib/types"
 
@@ -24,6 +24,41 @@ export function useCart() {
 
     const isGuest = !authLoading && !isAuthenticated
 
+    const loadGuestCart = async () => {
+        const storedItems = guestCart.getItems()
+        setGuestItems(storedItems)
+
+        if (storedItems.length === 0) {
+            setIsLoading(false)
+            return
+        }
+
+        const results = await Promise.allSettled(
+            storedItems.map(async (item): Promise<GuestCartItem | null> => {
+                const product = await productApi.getById(item.product.id, 3000)
+                const maxAllowed = Math.max(product.stock ?? 0, 0)
+                if (maxAllowed <= 0 || !isGuestCartProductSellable(product)) return null
+                return {
+                    product,
+                    quantity: Math.min(item.quantity, maxAllowed),
+                }
+            }),
+        )
+
+        const refreshedItems = results
+            .map((result, index): GuestCartItem | null => {
+                if (result.status === "fulfilled") return result.value
+                return storedItems[index] ?? null
+            })
+            .filter((item): item is GuestCartItem => item !== null)
+
+        if (JSON.stringify(refreshedItems) !== JSON.stringify(storedItems)) {
+            guestCart.replaceItems(refreshedItems)
+        }
+        setGuestItems(refreshedItems)
+        setIsLoading(false)
+    }
+
     const fetchCart = () => {
         if (authLoading) return
         if (isAuthenticated) {
@@ -34,8 +69,7 @@ export function useCart() {
                 })
                 .finally(() => setIsLoading(false))
         } else {
-            setGuestItems(guestCart.getItems())
-            setIsLoading(false)
+            void loadGuestCart()
         }
     }
 
@@ -144,7 +178,7 @@ export function useCart() {
         }))
         : (cart?.items ?? [])
 
-    const cartTotal = items.reduce((sum, item) => sum + item.total, 0)
+    const cartTotal = isGuest ? items.reduce((sum, item) => sum + item.total, 0) : (cart?.subtotal ?? 0)
     const itemCount = items.length
 
     return {

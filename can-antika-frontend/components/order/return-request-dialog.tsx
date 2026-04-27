@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { orderReturnApi } from "@/lib/api"
+import type { OrderReturnResponse } from "@/lib/types"
 import { toast } from "sonner"
 
 interface ReturnRequestDialogProps {
     orderId: number
+    onCreated?: (orderReturn: OrderReturnResponse) => void
 }
 
-export function ReturnRequestDialog({ orderId }: ReturnRequestDialogProps) {
+export function ReturnRequestDialog({ orderId, onCreated }: ReturnRequestDialogProps) {
     const [returnReason, setReturnReason] = useState("")
     const [isReturning, setIsReturning] = useState(false)
     const [open, setOpen] = useState(false)
@@ -18,7 +20,8 @@ export function ReturnRequestDialog({ orderId }: ReturnRequestDialogProps) {
     const handleSubmit = async () => {
         setIsReturning(true)
         try {
-            await orderReturnApi.createReturn({ orderId, reason: returnReason })
+            const created = await orderReturnApi.createReturn({ orderId, reason: returnReason })
+            onCreated?.(created)
             toast.success("İade talebiniz oluşturuldu")
             setOpen(false)
             setReturnReason("")

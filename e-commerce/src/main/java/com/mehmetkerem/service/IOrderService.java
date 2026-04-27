@@ -21,6 +21,9 @@ public interface IOrderService {
 
     OrderResponse getOrderResponseById(Long orderId);
 
+    /** Kullanıcının kendi sipariş detayı (ownership kontrolü yapar). */
+    OrderResponse getMyOrderById(Long userId, Long orderId);
+
     Page<OrderResponse> getOrdersByUserId(Long userId, Pageable pageable);
 
     Page<OrderResponse> getAllOrders(Pageable pageable);

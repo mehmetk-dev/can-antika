@@ -9,6 +9,6 @@ import type { SiteSettingsResponse } from "@/lib/types"
 export const fetchSiteSettings = cache(async () => {
     return fetchApiDataWithFallback<SiteSettingsResponse>("/v1/site-settings", {
         revalidate: 300,
-        timeoutMs: 600,
+        timeoutMs: 2000,
     })
 })

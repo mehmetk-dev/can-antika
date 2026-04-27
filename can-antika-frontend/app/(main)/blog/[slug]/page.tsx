@@ -24,14 +24,14 @@ const fetchBlogPost = cache(async (slug: string) => {
   const safeSlug = encodeURIComponent(slug)
   return fetchApiDataWithFallback<BlogPost>(`/v1/blog/${safeSlug}`, {
     revalidate: 60,
-    timeoutMs: 1800,
+    timeoutMs: 4000,
   })
 })
 
 const fetchBlogCategories = cache(async () => {
   return fetchApiDataWithFallback<BlogCategory[]>("/v1/blog/categories", {
     revalidate: 300,
-    timeoutMs: 1200,
+    timeoutMs: 4000,
   })
 })
 

@@ -30,6 +30,8 @@ import com.mehmetkerem.util.ResultHelper;
 import com.mehmetkerem.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -39,6 +41,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -64,6 +68,7 @@ public class ProductServiceImpl implements IProductService {
     private final ProductSortResolver productSortResolver;
     private final ProductExcelParser productExcelParser;
     private final ProductSlugGenerator productSlugGenerator;
+    private final CacheManager cacheManager;
 
     private static final int SLUG_SAVE_MAX_RETRIES = 5;
 
@@ -89,21 +94,48 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public String deleteProduct(Long id) {
         Product product = getProductById(id);
+        List<String> imageUrls = new java.util.ArrayList<>();
 
-        // Delete images from Cloudinary (or local storage)
+        // Defer image deletion until the database transaction is committed.
         if (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
-            product.getImageUrls().forEach(url -> {
-                try {
-                    fileStorageService.deleteFile(url);
-                } catch (Exception e) {
-                    log.warn("Resim silinirken hata oluştu: url={}, error={}", url, e.getMessage());
-                }
-            });
+            imageUrls.addAll(product.getImageUrls());
         }
 
         productRepository.delete(product);
+        deleteImagesAfterCommit(imageUrls);
         activityLogService.log(ActivityType.PRODUCT_DELETED, SecurityUtils.getCurrentUserId(), "Ürün silindi: " + product.getTitle());
         return String.format(Messages.DELETE_VALUE, id, "ürün");
+    }
+
+    private void deleteImagesAfterCommit(List<String> imageUrls) {
+        List<String> urls = imageUrls.stream()
+                .filter(Objects::nonNull)
+                .toList();
+        if (urls.isEmpty()) {
+            return;
+        }
+
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            deleteProductImages(urls);
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                deleteProductImages(urls);
+            }
+        });
+    }
+
+    private void deleteProductImages(List<String> imageUrls) {
+        imageUrls.forEach(url -> {
+            try {
+                fileStorageService.deleteFile(url);
+            } catch (Exception e) {
+                log.warn("Resim silinirken hata olustu: url={}, error={}", url, e.getMessage());
+            }
+        });
     }
 
     @Override
@@ -131,7 +163,7 @@ public class ProductServiceImpl implements IProductService {
     @Cacheable(cacheNames = "products:byId", key = "#id")
     public ProductResponse getProductResponseById(Long id) {
         Product product = getProductById(id);
-        return mapProductWithRelations(product);
+        return mapProductsWithRelations(List.of(product)).get(0);
     }
 
     @Override
@@ -165,12 +197,14 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = { "products:list", "products:cards", "products:byId", "products:bySlug" }, allEntries = true)
+    // NOT: Rating güncellemesi, ürün listeleme cache'lerini silmemeli.
+    // Sadece tek ürün cache'ini temizlemek yeterli.
     public void updateProductRating(Long productId, double averageRating, int reviewCount) {
         Product product = getProductById(productId);
         product.setAverageRating(averageRating);
         product.setReviewCount(reviewCount);
         productRepository.save(product);
+        evictProductDetailCaches(product);
     }
 
     @Override
@@ -363,23 +397,6 @@ public class ProductServiceImpl implements IProductService {
         return cardAttributes.isEmpty() ? null : cardAttributes;
     }
 
-    private ProductResponse mapProductWithRelations(Product product) {
-        CategoryResponse categoryResponse = null;
-        if (product.getCategoryId() != null) {
-            categoryResponse = categoryService.getCategoryResponsesByIds(List.of(product.getCategoryId()))
-                    .get(product.getCategoryId());
-        }
-        PeriodResponse periodResponse = null;
-        if (product.getPeriodId() != null) {
-            periodResponse = periodService.getPeriodResponsesByIds(List.of(product.getPeriodId()))
-                    .get(product.getPeriodId());
-        }
-        return mapProductWithRelations(
-                product,
-                categoryResponse == null ? Map.of() : Map.of(product.getCategoryId(), categoryResponse),
-                periodResponse == null ? Map.of() : Map.of(product.getPeriodId(), periodResponse));
-    }
-
     private ProductResponse mapProductWithRelations(
             Product product,
             Map<Long, CategoryResponse> categoryMap,
@@ -470,14 +487,34 @@ public class ProductServiceImpl implements IProductService {
         Product product = optionalProduct
                 .orElseThrow(() -> new com.mehmetkerem.exception.NotFoundException(
                         "Ürün bulunamadı: " + slug));
-        return mapProductWithRelations(product);
+        return mapProductsWithRelations(List.of(product)).get(0);
     }
 
     @Transactional
     @Override
+    // NOT: View count artırma, ürün listeleme cache'lerini silmemeli.
+    // Sadece tek ürün cache'ini temizlemek yeterli; liste cache'lerinin
+    // her görüntülemede silinmesi cache thrashing yaratır.
     @CacheEvict(cacheNames = "products:byId", key = "#productId")
     public void incrementViewCount(Long productId) {
         productRepository.incrementViewCount(productId);
+    }
+
+    private void evictProductDetailCaches(Product product) {
+        Cache byIdCache = cacheManager.getCache("products:byId");
+        if (byIdCache != null) {
+            byIdCache.evict(product.getId());
+        }
+
+        String slug = product.getSlug();
+        if (slug == null || slug.isBlank()) {
+            return;
+        }
+
+        Cache bySlugCache = cacheManager.getCache("products:bySlug");
+        if (bySlugCache != null) {
+            bySlugCache.evict(slug);
+        }
     }
 
     @Override

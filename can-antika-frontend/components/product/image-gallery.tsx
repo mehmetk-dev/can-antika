@@ -22,32 +22,24 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
   const mainImage = images[safeIndex] ? resolveImageUrl(images[safeIndex]) : "/placeholder.svg"
   const preloadedRef = useRef<Set<string>>(new Set())
 
-  // Lightbox açılınca tüm fotoğrafları arka planda büyük boyutta preload et
+  // Lightbox açılınca sadece önceki ve sonraki fotoğrafı büyük boyutta preload et
   useEffect(() => {
-    if (!lightboxOpen || images.length === 0) return
+    if (!lightboxOpen || images.length <= 1) return
 
-    // Önce şu an seçili olan fotoğrafı yükle
-    const currentResolved = resolveImageUrl(images[safeIndex])
-    if (currentResolved !== "/placeholder.svg") {
-      const url = getLightboxUrl(currentResolved)
-      if (!preloadedRef.current.has(url)) {
-        const img = new window.Image()
-        img.src = url
-        preloadedRef.current.add(url)
-      }
-    }
-
-    // Sonra diğer tüm fotoğrafları arka planda yükle
-    images.forEach((image, index) => {
-      if (index === safeIndex) return
-      const resolved = resolveImageUrl(image)
+    const preloadIndex = (offset: number) => {
+      const idx = (safeIndex + offset + images.length) % images.length
+      const resolved = resolveImageUrl(images[idx])
       if (resolved === "/placeholder.svg") return
       const url = getLightboxUrl(resolved)
       if (preloadedRef.current.has(url)) return
       const img = new window.Image()
       img.src = url
       preloadedRef.current.add(url)
-    })
+    }
+
+    preloadIndex(0)   // mevcut
+    preloadIndex(1)   // sonraki
+    preloadIndex(-1)  // önceki
   }, [lightboxOpen, images, safeIndex])
 
   const handlePrevious = useCallback(() => {

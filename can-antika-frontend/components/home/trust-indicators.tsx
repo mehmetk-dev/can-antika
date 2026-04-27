@@ -41,8 +41,8 @@ export function TrustIndicators() {
           <circle cx="24" cy="22" r="2" fill="currentColor" />
         </svg>
       ),
-      title: "1990'dan Beri",
-      description: "34 yıllık deneyim ve binlerce mutlu koleksiyoner.",
+      title: "1982'den Beri",
+      description: "40 yılı aşkın deneyim ve binlerce mutlu koleksiyoner.",
     },
     {
       icon: (

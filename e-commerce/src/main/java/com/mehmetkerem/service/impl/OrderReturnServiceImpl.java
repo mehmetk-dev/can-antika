@@ -2,6 +2,7 @@ package com.mehmetkerem.service.impl;
 
 import com.mehmetkerem.dto.request.OrderReturnRequest;
 import com.mehmetkerem.dto.response.OrderReturnResponse;
+import com.mehmetkerem.enums.OrderStatus;
 import com.mehmetkerem.enums.ReturnStatus;
 import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.ExceptionMessages;
@@ -34,17 +35,21 @@ public class OrderReturnServiceImpl implements IOrderReturnService {
     public OrderReturnResponse createReturn(Long userId, OrderReturnRequest request) {
         Order order = orderService.getOrderById(request.getOrderId());
         orderAuthorizationService.assertOwner(order, userId);
-        boolean hasPending = orderReturnRepository.existsByOrderIdAndUserIdAndStatus(
-                request.getOrderId(), userId, ReturnStatus.PENDING);
-        if (hasPending) {
-            throw new BadRequestException("Bu sipariş için zaten bekleyen bir iade talebiniz var.");
+        if (order.getOrderStatus() != OrderStatus.DELIVERED) {
+            throw new BadRequestException("Sadece teslim edilmiş siparişler için iade talebi oluşturulabilir.");
+        }
+
+        boolean hasOpenOrApprovedReturn = orderReturnRepository.existsByOrderIdAndUserIdAndStatusIn(
+                request.getOrderId(), userId, List.of(ReturnStatus.PENDING, ReturnStatus.APPROVED));
+        if (hasOpenOrApprovedReturn) {
+            throw new BadRequestException("Bu sipariş için zaten bekleyen veya onaylanmış bir iade talebiniz var.");
         }
 
         OrderReturn orderReturn = OrderReturn.builder()
                 .orderId(request.getOrderId())
                 .userId(userId)
                 .status(ReturnStatus.PENDING)
-                .reason(request.getReason())
+                .reason(request.getReason().trim())
                 .createdAt(LocalDateTime.now())
                 .build();
         orderReturn = orderReturnRepository.save(orderReturn);
@@ -72,7 +77,12 @@ public class OrderReturnServiceImpl implements IOrderReturnService {
         if (orderReturn.getStatus() != ReturnStatus.PENDING) {
             throw new BadRequestException("Sadece bekleyen iade talepleri onaylanabilir.");
         }
-        orderService.revertStockForOrder(orderReturn.getOrderId());
+        Order order = orderService.getOrderById(orderReturn.getOrderId());
+        if (order.getOrderStatus() != OrderStatus.DELIVERED) {
+            throw new BadRequestException("Sadece teslim edilmiş siparişlerin iade talepleri onaylanabilir.");
+        }
+        orderService.updateOrderStatus(orderReturn.getOrderId(), OrderStatus.RETURNED);
+        orderService.updatePaymentStatus(orderReturn.getOrderId(), com.mehmetkerem.enums.PaymentStatus.REFUNDED);
         orderReturn.setStatus(ReturnStatus.APPROVED);
         orderReturn.setProcessedAt(LocalDateTime.now());
         orderReturn = orderReturnRepository.save(orderReturn);

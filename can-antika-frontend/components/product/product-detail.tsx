@@ -317,14 +317,14 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
               )}
 
               <TabsContent value="reviews" className="mt-0 outline-none pt-4">
-                <ProductReviews productId={product.id} />
+                {activeTab === "reviews" ? <ProductReviews productId={product.id} /> : null}
               </TabsContent>
             </Tabs>
           </div>
 
           {/* MOBILE ACCORDION */}
           <div className="md:hidden">
-            <Accordion type="single" collapsible defaultValue="details" className="w-full">
+            <Accordion type="single" collapsible value={activeTab} onValueChange={handleTabChange} className="w-full">
               <AccordionItem value="details" className="border-border/40">
                 <AccordionTrigger className="font-serif text-lg tracking-wide hover:no-underline">Detaylar</AccordionTrigger>
                 <AccordionContent>
@@ -404,7 +404,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
               <AccordionItem value="reviews" className="border-border/40 border-b-0">
                 <AccordionTrigger className="font-serif text-lg tracking-wide hover:no-underline">Yorumlar</AccordionTrigger>
                 <AccordionContent>
-                  <ProductReviews productId={product.id} />
+                  {activeTab === "reviews" ? <ProductReviews productId={product.id} /> : null}
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

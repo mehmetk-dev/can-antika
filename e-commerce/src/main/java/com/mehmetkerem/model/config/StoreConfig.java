@@ -19,7 +19,7 @@ public class StoreConfig {
     private String businessType = "Antika Eşya Satışı";
 
     @Column(length = 500)
-    private String storeDescription = "1989'den beri İstanbul'da en kaliteli antika eşyaları sunuyoruz.";
+    private String storeDescription = "1982'den beri İstanbul'da en kaliteli antika eşyaları sunuyoruz.";
 
     private String companyName = "Can Antika Ltd. Şti.";
 

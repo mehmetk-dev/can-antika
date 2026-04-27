@@ -76,6 +76,31 @@ public class RateLimitConfig {
             payment.setUserScoped(true);
             payment.setMessage("Odeme istegi limiti asildi. Lutfen kisa sure sonra tekrar deneyin.");
             buckets.add(payment);
+
+            // Public catalog okuma endpoint'leri için cömert limit — scraper koruması
+            BucketConfig catalogProduct = new BucketConfig();
+            catalogProduct.setName("catalog-product");
+            catalogProduct.setPathPrefix("/v1/product");
+            catalogProduct.setMaxRequests(120);
+            catalogProduct.setWindowMinutes(1);
+            catalogProduct.setMessage("Cok fazla urun sorgulamasi. Lutfen biraz bekleyin.");
+            buckets.add(catalogProduct);
+
+            BucketConfig catalogCategory = new BucketConfig();
+            catalogCategory.setName("catalog-category");
+            catalogCategory.setPathPrefix("/v1/category");
+            catalogCategory.setMaxRequests(60);
+            catalogCategory.setWindowMinutes(1);
+            catalogCategory.setMessage("Cok fazla kategori sorgulamasi. Lutfen biraz bekleyin.");
+            buckets.add(catalogCategory);
+
+            BucketConfig catalogPeriod = new BucketConfig();
+            catalogPeriod.setName("catalog-period");
+            catalogPeriod.setPathPrefix("/v1/period");
+            catalogPeriod.setMaxRequests(60);
+            catalogPeriod.setWindowMinutes(1);
+            catalogPeriod.setMessage("Cok fazla donem sorgulamasi. Lutfen biraz bekleyin.");
+            buckets.add(catalogPeriod);
         }
     }
 }

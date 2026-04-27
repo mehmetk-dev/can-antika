@@ -9,7 +9,7 @@ import type { SiteSettingsResponse } from "@/lib/types"
 const FOOTER_DEFAULTS: Pick<SiteSettingsResponse, "storeName" | "businessType" | "storeDescription" | "footerAbout" | "phone" | "email" | "address" | "facebook" | "instagram" | "twitter" | "youtube" | "tiktok"> = {
     storeName: "Can Antika",
     businessType: "Antika Eşya Satışı",
-    storeDescription: "1989'den beri İstanbul'un kalbinde, geçmişin eşsiz güzelliklerini geleceğe taşıyoruz.",
+    storeDescription: "1982'den beri İstanbul'un kalbinde, geçmişin eşsiz güzelliklerini geleceğe taşıyoruz.",
     footerAbout: "",
     phone: "",
     email: "",
