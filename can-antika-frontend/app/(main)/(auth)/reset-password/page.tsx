@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { Suspense, useMemo, useState } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,6 +12,26 @@ import { authApi } from "@/lib/api"
 import { toast } from "sonner"
 
 export default function ResetPasswordPage() {
+    return (
+        <div className="bg-background">
+            <main className="mx-auto max-w-md px-4 py-16 sm:px-6">
+                <Suspense fallback={<ResetPasswordFallback />}>
+                    <ResetPasswordForm />
+                </Suspense>
+            </main>
+        </div>
+    )
+}
+
+function ResetPasswordFallback() {
+    return (
+        <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+    )
+}
+
+function ResetPasswordForm() {
     const searchParams = useSearchParams()
     const token = useMemo(() => searchParams.get("token") || "", [searchParams])
     const [newPassword, setNewPassword] = useState("")
@@ -48,65 +68,61 @@ export default function ResetPasswordPage() {
     }
 
     return (
-        <div className="bg-background">
-            <main className="mx-auto max-w-md px-4 py-16 sm:px-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Yeni Şifre Belirle</CardTitle>
-                        <CardDescription>
-                            Hesabın için yeni bir şifre belirle.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="newPassword">Yeni Şifre</Label>
-                                <Input
-                                    id="newPassword"
-                                    type="password"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    minLength={6}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Yeni Şifre Tekrar</Label>
-                                <Input
-                                    id="confirmPassword"
-                                    type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    minLength={6}
-                                    required
-                                />
-                            </div>
-                            <Button type="submit" className="w-full" disabled={loading || !token}>
-                                {loading ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Güncelleniyor...
-                                    </>
-                                ) : (
-                                    "Şifreyi Güncelle"
-                                )}
-                            </Button>
-                        </form>
-
-                        {!token && (
-                            <p className="mt-3 text-sm text-destructive">
-                                Geçersiz bağlantı. E-postadaki tam linki açtığından emin ol.
-                            </p>
+        <Card>
+            <CardHeader>
+                <CardTitle>Yeni Şifre Belirle</CardTitle>
+                <CardDescription>
+                    Hesabın için yeni bir şifre belirle.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="newPassword">Yeni Şifre</Label>
+                        <Input
+                            id="newPassword"
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            minLength={6}
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Yeni Şifre Tekrar</Label>
+                        <Input
+                            id="confirmPassword"
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            minLength={6}
+                            required
+                        />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading || !token}>
+                        {loading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Güncelleniyor...
+                            </>
+                        ) : (
+                            "Şifreyi Güncelle"
                         )}
+                    </Button>
+                </form>
 
-                        <p className="mt-4 text-center text-sm text-muted-foreground">
-                            <Link href="/giris" className="text-primary hover:underline">
-                                Giriş ekranına dön
-                            </Link>
-                        </p>
-                    </CardContent>
-                </Card>
-            </main>
-        </div>
+                {!token && (
+                    <p className="mt-3 text-sm text-destructive">
+                        Geçersiz bağlantı. E-postadaki tam linki açtığından emin ol.
+                    </p>
+                )}
+
+                <p className="mt-4 text-center text-sm text-muted-foreground">
+                    <Link href="/giris" className="text-primary hover:underline">
+                        Giriş ekranına dön
+                    </Link>
+                </p>
+            </CardContent>
+        </Card>
     )
 }

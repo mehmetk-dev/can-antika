@@ -35,7 +35,7 @@ public class RateLimitConfig {
         private long windowMinutes = 1;
         /** true ise key: ip + subject (email/refresh/principal) olarak üretilir. */
         private boolean userScoped = false;
-        private String message = "Istek limiti asildi. Lutfen daha sonra tekrar deneyin.";
+        private String message = "İstek limiti aşıldı. Lütfen daha sonra tekrar deneyin.";
     }
 
     @PostConstruct
@@ -47,7 +47,7 @@ public class RateLimitConfig {
             authLogin.setMaxRequests(5);
             authLogin.setWindowMinutes(1);
             authLogin.setUserScoped(true);
-            authLogin.setMessage("Cok fazla giris denemesi. Lutfen daha sonra tekrar deneyin.");
+            authLogin.setMessage("Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin.");
             buckets.add(authLogin);
 
             BucketConfig authRefresh = new BucketConfig();
@@ -56,8 +56,25 @@ public class RateLimitConfig {
             authRefresh.setMaxRequests(20);
             authRefresh.setWindowMinutes(1);
             authRefresh.setUserScoped(true);
-            authRefresh.setMessage("Cok fazla token yenileme denemesi. Lutfen daha sonra tekrar deneyin.");
+            authRefresh.setMessage("Çok fazla token yenileme denemesi. Lütfen daha sonra tekrar deneyin.");
             buckets.add(authRefresh);
+
+            BucketConfig authForgotPassword = new BucketConfig();
+            authForgotPassword.setName("auth-forgot-password");
+            authForgotPassword.setPathPrefix("/v1/auth/forgot-password");
+            authForgotPassword.setMaxRequests(3);
+            authForgotPassword.setWindowMinutes(1);
+            authForgotPassword.setUserScoped(true);
+            authForgotPassword.setMessage("Çok fazla şifre sıfırlama isteği. Lütfen biraz bekleyin.");
+            buckets.add(authForgotPassword);
+
+            BucketConfig authResetPassword = new BucketConfig();
+            authResetPassword.setName("auth-reset-password");
+            authResetPassword.setPathPrefix("/v1/auth/reset-password");
+            authResetPassword.setMaxRequests(5);
+            authResetPassword.setWindowMinutes(1);
+            authResetPassword.setMessage("Çok fazla şifre sıfırlama denemesi. Lütfen biraz bekleyin.");
+            buckets.add(authResetPassword);
 
             BucketConfig contact = new BucketConfig();
             contact.setName("contact");
@@ -65,7 +82,7 @@ public class RateLimitConfig {
             contact.setMaxRequests(6);
             contact.setWindowMinutes(1);
             contact.setUserScoped(true);
-            contact.setMessage("Cok fazla iletisim denemesi. Lutfen biraz bekleyin.");
+            contact.setMessage("Çok fazla iletişim denemesi. Lütfen biraz bekleyin.");
             buckets.add(contact);
 
             BucketConfig payment = new BucketConfig();
@@ -74,7 +91,7 @@ public class RateLimitConfig {
             payment.setMaxRequests(10);
             payment.setWindowMinutes(1);
             payment.setUserScoped(true);
-            payment.setMessage("Odeme istegi limiti asildi. Lutfen kisa sure sonra tekrar deneyin.");
+            payment.setMessage("Ödeme isteği limiti aşıldı. Lütfen kısa süre sonra tekrar deneyin.");
             buckets.add(payment);
 
             // Public catalog okuma endpoint'leri için cömert limit — scraper koruması
@@ -83,7 +100,7 @@ public class RateLimitConfig {
             catalogProduct.setPathPrefix("/v1/product");
             catalogProduct.setMaxRequests(120);
             catalogProduct.setWindowMinutes(1);
-            catalogProduct.setMessage("Cok fazla urun sorgulamasi. Lutfen biraz bekleyin.");
+            catalogProduct.setMessage("Çok fazla ürün sorgulaması. Lütfen biraz bekleyin.");
             buckets.add(catalogProduct);
 
             BucketConfig catalogCategory = new BucketConfig();
@@ -91,7 +108,7 @@ public class RateLimitConfig {
             catalogCategory.setPathPrefix("/v1/category");
             catalogCategory.setMaxRequests(60);
             catalogCategory.setWindowMinutes(1);
-            catalogCategory.setMessage("Cok fazla kategori sorgulamasi. Lutfen biraz bekleyin.");
+            catalogCategory.setMessage("Çok fazla kategori sorgulaması. Lütfen biraz bekleyin.");
             buckets.add(catalogCategory);
 
             BucketConfig catalogPeriod = new BucketConfig();
@@ -99,7 +116,7 @@ public class RateLimitConfig {
             catalogPeriod.setPathPrefix("/v1/period");
             catalogPeriod.setMaxRequests(60);
             catalogPeriod.setWindowMinutes(1);
-            catalogPeriod.setMessage("Cok fazla donem sorgulamasi. Lutfen biraz bekleyin.");
+            catalogPeriod.setMessage("Çok fazla dönem sorgulaması. Lütfen biraz bekleyin.");
             buckets.add(catalogPeriod);
         }
     }

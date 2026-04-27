@@ -171,6 +171,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
             }
         }
 
+        if (path.startsWith("/v1/auth/forgot-password")) {
+            String forgotSubject = firstNonBlank(
+                    request.getParameter("email"));
+            if (forgotSubject != null) {
+                return forgotSubject;
+            }
+        }
+
         if (path.startsWith("/v1/contact")) {
             String contactSubject = firstNonBlank(
                     extractJsonField(request, "email"),

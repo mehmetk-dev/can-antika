@@ -24,6 +24,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.UUID;
@@ -121,6 +122,7 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
                         "Oturum yenilenemedi. Lutfen tekrar giris yapin."));
     }
 
+    @Transactional
     @Override
     public void forgotPassword(String email) {
         String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
@@ -133,6 +135,7 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
         });
     }
 
+    @Transactional
     @Override
     public void resetPassword(PasswordResetRequest request) {
         String validationResult = userService.validatePasswordResetToken(request.getToken());
@@ -151,6 +154,7 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
         refreshTokenService.deleteByUserId(user.getId());
     }
 
+    @Transactional
     @Override
     public void changePassword(Long userId, String oldPassword, String newPassword) {
         User user = userService.getUserById(userId);

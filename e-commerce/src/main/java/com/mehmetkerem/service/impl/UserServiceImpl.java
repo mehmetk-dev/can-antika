@@ -152,6 +152,7 @@ public class UserServiceImpl implements IUserService {
         return userMapper.toResponseWithAddresses(user, addressService.getAddressesByUserId(user.getId()));
     }
 
+    @Transactional
     @Override
     public void createPasswordResetTokenForUser(User user, String token) {
         // Eski token varsa temizle (Opsiyonel, iş kuralına bağlı)
