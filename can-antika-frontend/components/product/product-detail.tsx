@@ -29,7 +29,11 @@ interface ProductDetailProps {
 export function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {
   const [activeTab, setActiveTab] = useState("details")
   const handleTabChange = useCallback((tab: string) => {
+    const scrollY = window.scrollY
     setActiveTab(tab)
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: scrollY })
+    })
   }, [])
 
   const maxStock = useMemo(() => Math.max(product.stock ?? 0, 0), [product.stock])
@@ -229,14 +233,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 >
                   Hikaye & Köken
                 </TabsTrigger>
-                {condition && (
-                  <TabsTrigger
-                    value="condition"
-                    className="relative rounded-none border-b-2 border-transparent bg-transparent pb-3 pt-2 font-serif text-sm tracking-wide text-muted-foreground transition-none data-[state=active]:border-[#d4af37] data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
-                  >
-                    Durum Raporu
-                  </TabsTrigger>
-                )}
+
                 <TabsTrigger
                   value="reviews"
                   className="relative rounded-none border-b-2 border-transparent bg-transparent pb-3 pt-2 font-serif text-sm tracking-wide text-muted-foreground transition-none data-[state=active]:border-[#d4af37] data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
@@ -293,28 +290,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 </div>
               </TabsContent>
 
-              {condition && (
-                <TabsContent value="condition" className="mt-0 outline-none">
-                  <div className="max-w-3xl rounded-none border-l-2 border-[#d4af37]/40 bg-[#fbf9f6] p-10 mt-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none transition-opacity group-hover:opacity-10">
-                      <Shield className="h-24 w-24 text-[#d4af37]" strokeWidth={0.5} />
-                    </div>
-                    <div className="relative">
-                      <div className="flex items-center gap-2 mb-6">
-                        <span className="h-px w-6 bg-[#d4af37]/40" />
-                        <span className="text-[10px] uppercase tracking-[0.3em] text-[#d4af37] font-semibold">Kondisyon Raporu</span>
-                      </div>
-                      <blockquote className="font-serif text-2xl text-[#5c4a3d] leading-relaxed italic">
-                        &ldquo;{condition}&rdquo;
-                      </blockquote>
-                      <div className="mt-8 flex items-center gap-2 text-[#5c4a3d]/40 italic text-sm">
-                        <Check className="h-4 w-4" />
-                        <span>Can Antika tarafından onaylanmış, hatasız ve orijinal kondisyondadır.</span>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-              )}
+
 
               <TabsContent value="reviews" className="mt-0 outline-none pt-4">
                 {activeTab === "reviews" ? <ProductReviews productId={product.id} /> : null}
@@ -377,29 +353,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 </AccordionContent>
               </AccordionItem>
 
-              {condition && (
-                <AccordionItem value="condition" className="border-border/40">
-                  <AccordionTrigger className="font-serif text-lg tracking-wide hover:no-underline">Durum Raporu</AccordionTrigger>
-                  <AccordionContent>
-                    <div className="rounded-none border-l-2 border-[#d4af37]/40 bg-[#fbf9f6] p-6 mt-2 relative overflow-hidden group">
-                      <div className="absolute -top-4 -right-4 opacity-5 pointer-events-none">
-                        <Shield className="h-16 w-16 text-[#d4af37]" strokeWidth={1} />
-                      </div>
-                      <div className="relative">
-                        <div className="flex items-center gap-2 mb-4">
-                          <span className="text-[10px] uppercase tracking-[0.2em] text-[#d4af37] font-semibold">Kondisyon</span>
-                        </div>
-                        <p className="font-serif text-xl text-[#5c4a3d] leading-relaxed italic">
-                          &ldquo;{condition}&rdquo;
-                        </p>
-                        <p className="mt-4 text-[11px] text-[#5c4a3d]/50 italic">
-                          Uzmanlarımız tarafından incelenmiş ve onaylanmıştır.
-                        </p>
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              )}
+
 
               <AccordionItem value="reviews" className="border-border/40 border-b-0">
                 <AccordionTrigger className="font-serif text-lg tracking-wide hover:no-underline">Yorumlar</AccordionTrigger>

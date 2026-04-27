@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button"
 export function FeaturedStory() {
   return (
     <section className="relative bg-gradient-to-b from-white to-amber-50 py-24 lg:py-32 overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.02]">
-        <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <pattern id="story-pattern" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
-            <path d="M25,0 L25,50 M0,25 L50,25" stroke="currentColor" strokeWidth="0.5" className="text-amber-900" />
-            <circle cx="25" cy="25" r="2" fill="currentColor" className="text-amber-900" />
+      <div className="absolute inset-0 opacity-[0.03]">
+        <svg className="h-full w-full">
+          <pattern id="story-pattern" x="0" y="0" width="240" height="240" patternUnits="userSpaceOnUse">
+            <path d="M120,0 L120,240 M0,120 L240,120" stroke="currentColor" strokeWidth="1" className="text-amber-900" />
+            <circle cx="120" cy="120" r="6" fill="currentColor" className="text-amber-900" />
           </pattern>
           <rect width="100%" height="100%" fill="url(#story-pattern)" />
         </svg>
@@ -63,7 +63,7 @@ export function FeaturedStory() {
 
             <div className="aspect-[4/5] overflow-hidden rounded-sm">
               <Image
-                src="/antique-dealer-examining-vintage-clock-with-magnif.jpg"
+                src="/antique-still-life.png"
                 alt="Antika değerlendirme"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -76,7 +76,7 @@ export function FeaturedStory() {
             {/* Vintage etiket */}
             <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 transform">
               <div className="rounded-sm border border-amber-400 bg-amber-50 px-6 py-2 shadow-lg">
-                <p className="font-serif text-sm font-medium text-amber-800">Est. 1990</p>
+                <p className="font-serif text-sm font-medium text-amber-800">Est. 1982</p>
               </div>
             </div>
           </div>
@@ -108,13 +108,13 @@ export function FeaturedStory() {
 
             <div className="mt-8 space-y-4 font-serif text-lg leading-relaxed text-amber-800/80">
               <p>
-                <span className="float-left mr-2 font-serif text-5xl font-bold leading-none text-amber-600">1</span>990
-                yılında İstanbul’un tarihi Çukurcuma semtinde küçük bir dükkân olarak başlayan yolculuğumuz, bugün
-                Türkiye’nin en saygın antika merkezlerinden biri haline geldi.
+                <span className="float-left mr-2 font-serif text-5xl font-bold leading-none text-amber-600">1</span>982
+                yılında Kapalıçarşı’da başlayan bu eşsiz yolculuğumuz, bugün Beyoğlu'ndaki tarihi mağazamızda
+                Türkiye’nin en saygın antika merkezlerinden biri olarak devam ediyor.
               </p>
               <p className="text-base">
-                Her eser, ekibimizin titiz araştırması ve uzman değerlendirmesinden geçerek koleksiyonumuza dahil olur.
-                <em className="text-amber-700"> Sadece antika satmıyoruz; tarihi koruyoruz ve geleceğe aktarıyoruz.</em>
+                Bizim için antikacılık sadece bir ticaret değil; geçmişle bugün arasında kurulan bir bağdır.
+                <em className="text-amber-700"> Her eser, kendi döneminin izlerini taşıyan özel bir hikâyeye sahiptir.</em>
               </p>
             </div>
 

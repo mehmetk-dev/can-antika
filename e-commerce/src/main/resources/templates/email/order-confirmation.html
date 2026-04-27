@@ -1,22 +1,20 @@
 <!DOCTYPE html>
 <html lang="tr" xmlns:th="http://www.thymeleaf.org">
-
 <body>
-    <div th:fragment="content" style="text-align:center;padding:20px 0;">
-        <div style="display:inline-block;background-color:#e8f0eb;border-radius:50%;padding:20px;margin-bottom:16px;">
-            <span style="font-size:36px;color:#1a3a2a;">✓</span>
+    <div th:fragment="content" style="text-align:center;padding:0;font-size:15px;line-height:1.6;color:#504137;">
+        <p style="margin:0 0 24px;font-family:'Cormorant Garamond','Times New Roman',Times,serif;font-size:18px;font-style:italic;color:#66554b;">
+            Siparişiniz başarıyla alınmış olup büyük bir özenle işleme konulmuştur.
+        </p>
+        <div style="background-color:#f9f6f0;border:1px solid #d2bf97;padding:24px;margin:32px 0;">
+            <p style="margin:0;color:#8a7668;font-size:11px;text-transform:uppercase;letter-spacing:3px;">SİPARİŞ KODUNUZ</p>
+            <p style="margin:12px 0 0;color:#7b4019;font-size:24px;font-weight:600;letter-spacing:4px;font-family:'Cinzel','Times New Roman',Times,serif;" th:text="${orderCode}">ORD-12345678</p>
         </div>
-        <p style="color:#2d3830;font-size:16px;line-height:1.7;margin:16px 0;">Siparişiniz başarıyla alındı ve işleme
-            konuldu.</p>
-        <div style="background-color:#f7faf8;border:2px solid #1a3a2a;padding:24px;margin:20px 0;">
-            <p style="margin:0;color:#5e6e63;font-size:12px;text-transform:uppercase;letter-spacing:2px;">Sipariş
-                Kodunuz</p>
-            <p style="margin:8px 0 0;color:#1a3a2a;font-size:26px;font-weight:700;letter-spacing:3px;font-family:'Georgia',serif;"
-                th:text="${orderCode}">ORD-12345678</p>
+        <p style="margin:0;color:#8a7668;font-size:14px;">
+            Siparişinizin durumunu "Hesabım" sayfasından veya Can Antika üzerinden takip edebilirsiniz.
+        </p>
+        <div style="text-align:center;margin:32px 0 10px;">
+            <a href="https://canantika.com/hesabim/siparisler" style="display:inline-block;background-color:#7b4019;color:#fffdf8;text-decoration:none;padding:14px 32px;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;border-radius:2px;font-family:-apple-system,sans-serif;">SİPARİŞLERİME GİT</a>
         </div>
-        <p style="color:#5e6e63;font-size:14px;line-height:1.6;">Siparişinizin durumunu hesabınızdan takip
-            edebilirsiniz.</p>
     </div>
 </body>
-
 </html>

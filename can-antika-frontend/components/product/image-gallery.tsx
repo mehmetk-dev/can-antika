@@ -17,12 +17,27 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [useFallbackImage, setUseFallbackImage] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [mainLoaded, setMainLoaded] = useState(false)
 
   const safeIndex = images.length > 0 ? Math.min(selectedIndex, images.length - 1) : 0
   const mainImage = images[safeIndex] ? resolveImageUrl(images[safeIndex]) : "/placeholder.svg"
   const preloadedRef = useRef<Set<string>>(new Set())
 
-  // Lightbox açılınca sadece önceki ve sonraki fotoğrafı büyük boyutta preload et
+  const preloadGalleryImage = useCallback((offset: number) => {
+    if (images.length <= 1) return
+    const idx = (safeIndex + offset + images.length) % images.length
+    const resolved = resolveImageUrl(images[idx])
+    if (resolved === "/placeholder.svg" || preloadedRef.current.has(resolved)) return
+    const img = new window.Image()
+    img.src = resolved
+    preloadedRef.current.add(resolved)
+  }, [safeIndex, images])
+
+  useEffect(() => {
+    preloadGalleryImage(1)
+    preloadGalleryImage(-1)
+  }, [preloadGalleryImage])
+
   useEffect(() => {
     if (!lightboxOpen || images.length <= 1) return
 
@@ -37,18 +52,20 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
       preloadedRef.current.add(url)
     }
 
-    preloadIndex(0)   // mevcut
-    preloadIndex(1)   // sonraki
-    preloadIndex(-1)  // önceki
+    preloadIndex(0)
+    preloadIndex(1)
+    preloadIndex(-1)
   }, [lightboxOpen, images, safeIndex])
 
   const handlePrevious = useCallback(() => {
     setUseFallbackImage(false)
+    setMainLoaded(false)
     setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
   }, [images.length])
 
   const handleNext = useCallback(() => {
     setUseFallbackImage(false)
+    setMainLoaded(false)
     setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
   }, [images.length])
 
@@ -60,6 +77,21 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
 
     setUseFallbackImage(true)
   }, [selectedIndex, images.length])
+
+  const handleThumbnailClick = useCallback((index: number) => {
+    if (index === safeIndex) return
+    setMainLoaded(false)
+    setSelectedIndex(index)
+    setUseFallbackImage(false)
+  }, [safeIndex])
+
+  const handleThumbnailEnter = useCallback((image: string) => {
+    const resolved = resolveImageUrl(image)
+    if (resolved === "/placeholder.svg" || preloadedRef.current.has(resolved)) return
+    const img = new window.Image()
+    img.src = resolved
+    preloadedRef.current.add(resolved)
+  }, [])
 
   return (
     <div className="min-w-0 w-full space-y-4">
@@ -74,6 +106,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
           sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 500px"
           className="object-contain p-2 sm:p-4 object-center transition-transform duration-300 will-change-transform group-hover:scale-[1.02]"
           onError={handleImageError}
+          onLoad={() => setMainLoaded(true)}
         />
 
         {/* Clickable overlay to open lightbox */}
@@ -124,16 +157,20 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
       </Dialog>
 
       {images.length > 1 && (
-        <div className="grid w-full gap-2" style={{ gridTemplateColumns: `repeat(${images.length}, minmax(0, 1fr))` }}>
+        <div
+          className="grid w-full gap-2 transition-opacity duration-300"
+          style={{
+            gridTemplateColumns: `repeat(${images.length}, minmax(0, 1fr))`,
+            opacity: mainLoaded ? 1 : 0,
+          }}
+        >
           {images.map((image, index) => {
             const thumbUrl = resolveImageUrl(image)
             return (
               <button
                 key={`thumb-${image}-${index}`}
-                onClick={() => {
-                  setSelectedIndex(index)
-                  setUseFallbackImage(false)
-                }}
+                onClick={() => handleThumbnailClick(index)}
+                onMouseEnter={() => handleThumbnailEnter(image)}
                 className={`relative aspect-square w-full overflow-hidden rounded-md transition-all ${selectedIndex === index
                   ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
                   : "opacity-70 hover:opacity-100"

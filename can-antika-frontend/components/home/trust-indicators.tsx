@@ -70,26 +70,10 @@ export function TrustIndicators() {
   return (
     <section className="relative border-y border-amber-200 bg-gradient-to-b from-amber-50 to-white py-20 lg:py-24 overflow-hidden">
       <div className="absolute inset-0 opacity-[0.03]">
-        <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <pattern id="trust-pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-            <circle
-              cx="20"
-              cy="20"
-              r="15"
-              stroke="currentColor"
-              strokeWidth="0.5"
-              fill="none"
-              className="text-amber-900"
-            />
-            <circle
-              cx="20"
-              cy="20"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="0.3"
-              fill="none"
-              className="text-amber-900"
-            />
+        <svg className="h-full w-full">
+          <pattern id="trust-pattern" x="0" y="0" width="240" height="240" patternUnits="userSpaceOnUse">
+            <path d="M120,0 L120,240 M0,120 L240,120" stroke="currentColor" strokeWidth="1" className="text-amber-900" />
+            <circle cx="120" cy="120" r="6" fill="currentColor" className="text-amber-900" />
           </pattern>
           <rect width="100%" height="100%" fill="url(#trust-pattern)" />
         </svg>

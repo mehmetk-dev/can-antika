@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 <html lang="tr" xmlns:th="http://www.thymeleaf.org">
-
 <body>
-    <div th:fragment="content" style="text-align:center;padding:20px 0;">
-        <p style="color:#2d3830;font-size:16px;line-height:1.7;margin:0 0 16px;">
-            <strong style="color:#1a3a2a;" th:text="${orderCode}">ORD-123</strong> numaralı siparişinizin durumu
-            güncellendi.
+    <div th:fragment="content" style="text-align:center;padding:0;font-size:15px;line-height:1.6;color:#504137;">
+        <p style="margin:0 0 24px;">
+            <strong style="color:#7b4019;" th:text="${orderCode}">ORD-123</strong> numaralı siparişinizin durumu güncellenmiştir.
         </p>
-        <div style="background-color:#f7faf8;border:2px solid #1a3a2a;padding:24px;margin:20px 0;">
-            <p style="margin:0;color:#5e6e63;font-size:12px;text-transform:uppercase;letter-spacing:2px;">Yeni Durum</p>
-            <p style="margin:10px 0 0;color:#1a3a2a;font-size:22px;font-weight:700;font-family:'Georgia',serif;"
-                th:text="${statusLabel}">
-                Hazırlanıyor</p>
+        <div style="background-color:#f9f6f0;border:1px solid #d2bf97;padding:24px;margin:32px 0;">
+            <p style="margin:0;color:#8a7668;font-size:11px;text-transform:uppercase;letter-spacing:3px;">YENİ DURUM</p>
+            <p style="margin:12px 0 0;color:#7b4019;font-size:22px;font-weight:600;letter-spacing:2px;font-family:'Cormorant Garamond','Times New Roman',Times,serif;" th:text="${statusLabel}">Hazırlanıyor</p>
         </div>
-        <p style="color:#5e6e63;font-size:14px;">Detaylar için hesabınızı kontrol edebilirsiniz.</p>
+        <p style="margin:0;color:#8a7668;font-size:14px;">Detaylı bilgi için sipariş özetinize göz atabilirsiniz.</p>
+        <div style="text-align:center;margin:32px 0 10px;">
+            <a th:href="'https://canantika.com/hesabim/siparisler/' + ${orderCode}" style="display:inline-block;background-color:#7b4019;color:#fffdf8;text-decoration:none;padding:14px 32px;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;border-radius:2px;font-family:-apple-system,sans-serif;">SİPARİŞ DETAYI</a>
+        </div>
     </div>
 </body>
-
 </html>

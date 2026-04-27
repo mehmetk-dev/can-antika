@@ -160,7 +160,7 @@ export default function AboutPage() {
                   icon: Shield
                 }
               ].map((brand) => (
-                <div key={brand.name} className="group relative flex flex-col items-center overflow-hidden rounded-xl border border-accent/20 bg-primary-foreground/[0.02] p-6 transition-all duration-500 hover:border-accent/50 hover:bg-primary-foreground/[0.05]">
+                <div key={brand.name} className="group relative flex flex-col items-center overflow-hidden rounded-xl border border-accent/30 bg-black/20 p-6 shadow-xl backdrop-blur-md transition-all duration-500 hover:-translate-y-2 hover:border-accent/60 hover:bg-black/40 hover:shadow-2xl hover:shadow-accent/10">
                   {/* Hallmark Style Ornament */}
                   <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-accent/30 transition-colors group-hover:border-accent">
                     <brand.icon className="h-6 w-6 text-accent transition-transform duration-500 group-hover:scale-110" strokeWidth={1} />
@@ -256,7 +256,7 @@ export default function AboutPage() {
         </section>
 
         {/* Vizyon ve CTA Bölümü (Antique Banner) */}
-        <div className="px-4 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6 lg:px-8 mb-24 lg:mb-32">
           <section className="relative mx-auto mt-12 max-w-6xl overflow-hidden rounded-2xl shadow-2xl">
             {/* Antika Görseli ve Kaplama */}
             <div className="absolute inset-0 bg-primary">
