@@ -17,7 +17,7 @@ import { cn, formatDateTR } from "@/lib/utils"
 import { useAuth } from "@/lib/auth/auth-context"
 
 export function NotificationsDropdown() {
-    const { isAuthenticated, isLoading: authLoading } = useAuth()
+    const { isAuthenticated, isLoading: authLoading, isAdmin } = useAuth()
     const [notifications, setNotifications] = useState<NotificationResponse[]>([])
     const [unreadCount, setUnreadCount] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
@@ -140,10 +140,21 @@ export function NotificationsDropdown() {
 
         setIsOpen(false)
 
-        if (notification.type.includes("TICKET")) {
+        const type = notification.type;
+        if (type.includes("TICKET")) {
             router.push(`/hesap/destek/${notification.referenceId}`)
-        } else if (notification.type.includes("ORDER")) {
+        } else if (type.includes("ORDER") && !type.includes("NEW_ORDER")) {
             router.push(`/hesap/siparisler/${notification.referenceId}`)
+        } else if (isAdmin) {
+            if (type === "NEW_ORDER") {
+                router.push("/admin/siparisler")
+            } else if (type === "NEW_CONTACT") {
+                router.push("/admin/iletisim-talepleri")
+            } else if (type === "NEW_REVIEW") {
+                router.push("/admin/yorumlar")
+            } else if (type === "RETURN_REQUEST") {
+                router.push("/admin/iadeler")
+            }
         }
     }
 

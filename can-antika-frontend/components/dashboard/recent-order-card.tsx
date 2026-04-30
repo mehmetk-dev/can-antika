@@ -1,9 +1,11 @@
 import Image from "next/image"
-import { Package } from "lucide-react"
+import Link from "next/link"
+import { Package, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import type { OrderResponse } from "@/lib/types"
+import { getOrderStatus } from "@/lib/commerce/order-utils"
+import { formatDateTR } from "@/lib/utils"
 
 interface RecentOrderCardProps {
     recentOrders: OrderResponse[]
@@ -11,41 +13,82 @@ interface RecentOrderCardProps {
 
 export default function RecentOrderCard({ recentOrders }: RecentOrderCardProps) {
     return (
-        <Card className="shadow-xs border-border/50">
-            <CardHeader className="py-3 border-b border-border/50 flex flex-row items-center justify-between">
-                <CardTitle className="text-sm font-semibold">Sipariş Akışı</CardTitle>
-                <div className="flex items-center gap-1">
-                    <Button variant="outline" size="icon" className="h-6 w-6 rounded-full"><span className="text-xs">&lt;</span></Button>
-                    <Button variant="outline" size="icon" className="h-6 w-6 rounded-full"><span className="text-xs">&gt;</span></Button>
+        <Card className="shadow-sm border-stone-200/60 dark:border-stone-800 overflow-hidden">
+            <CardHeader className="py-3 px-5 border-b border-stone-100 dark:border-stone-800 flex flex-row items-center justify-between bg-stone-50/50 dark:bg-stone-900/30">
+                <div className="flex items-center gap-2.5">
+                    <div className="h-7 w-7 rounded-md bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
+                        <Package className="h-3.5 w-3.5 text-sky-700 dark:text-sky-400" />
+                    </div>
+                    <CardTitle className="text-sm font-semibold tracking-tight">Son Siparişler</CardTitle>
                 </div>
+                <Link prefetch={false} href="/admin/siparisler" className="text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-0.5 transition-colors">
+                    Tümü <ChevronRight className="h-3 w-3" />
+                </Link>
             </CardHeader>
-            <CardContent className="p-4">
+            <CardContent className="p-0">
                 {recentOrders.length > 0 ? (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <Badge className="bg-blue-500 hover:bg-blue-600 rounded">Sipariş No: {recentOrders[0].id}</Badge>
-                            <span className="text-xs text-muted-foreground">- Ödeme Onayı Bekliyor</span>
-                        </div>
-                        <div className="text-sm font-bold text-foreground">
-                            {recentOrders[0].user?.name || "Misafir Müşteri"} - ₺{recentOrders[0].totalAmount.toLocaleString("tr-TR")}
-                        </div>
-                        <div className="flex items-center gap-3 p-3 border rounded-md">
-                            <div className="h-10 w-10 bg-muted/50 rounded flex items-center justify-center overflow-hidden">
-                                {recentOrders[0].orderItems?.[0]?.product?.imageUrls?.[0] ? (
-                                    <Image src={recentOrders[0].orderItems[0].product.imageUrls[0]} alt="ürün resmi" width={40} height={40} className="h-full w-full object-cover" />
-                                ) : (
-                                    <Package className="h-5 w-5 text-muted-foreground" />
-                                )}
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium">{recentOrders[0].orderItems?.[0]?.title}</p>
-                                <p className="text-xs font-semibold text-blue-600">{recentOrders[0].orderItems?.[0]?.quantity} Adet</p>
-                            </div>
-                        </div>
+                    <div className="divide-y divide-stone-100 dark:divide-stone-800">
+                        {recentOrders.slice(0, 4).map((order) => {
+                            const status = getOrderStatus(order.orderStatus)
+                            const firstItem = order.orderItems?.[0]
+                            const itemCount = order.orderItems?.length || 0
+
+                            return (
+                                <Link
+                                    key={order.id}
+                                    prefetch={false}
+                                    href={`/admin/siparisler`}
+                                    className="group flex items-center gap-3.5 px-5 py-3 hover:bg-stone-50/80 dark:hover:bg-stone-900/30 transition-colors duration-150"
+                                >
+                                    {/* Product Thumbnail */}
+                                    <div className="h-10 w-10 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center overflow-hidden shrink-0">
+                                        {firstItem?.product?.imageUrls?.[0] ? (
+                                            <Image
+                                                src={firstItem.product.imageUrls[0]}
+                                                alt={firstItem.title || "ürün"}
+                                                width={40}
+                                                height={40}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : (
+                                            <Package className="h-4 w-4 text-stone-400" />
+                                        )}
+                                    </div>
+
+                                    {/* Order Info */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            <span className="text-[12px] font-semibold text-foreground">
+                                                #{order.id}
+                                            </span>
+                                            <Badge variant={status.variant} className={`${status.className} text-[10px] px-1.5 py-0 h-4 leading-none`}>
+                                                {status.label}
+                                            </Badge>
+                                        </div>
+                                        <p className="text-[11px] text-muted-foreground truncate">
+                                            {order.user?.name || "Misafir"} · {firstItem?.title}{itemCount > 1 ? ` +${itemCount - 1}` : ""}
+                                        </p>
+                                    </div>
+
+                                    {/* Amount & Date */}
+                                    <div className="text-right shrink-0">
+                                        <p className="text-[13px] font-bold tabular-nums text-foreground">
+                                            ₺{order.totalAmount.toLocaleString("tr-TR")}
+                                        </p>
+                                        {order.orderDate && (
+                                            <p className="text-[10px] text-muted-foreground mt-0.5">
+                                                {formatDateTR(order.orderDate, "compact")}
+                                            </p>
+                                        )}
+                                    </div>
+                                </Link>
+                            )
+                        })}
                     </div>
                 ) : (
-                    <div className="text-center py-6 text-sm text-muted-foreground bg-amber-50/70 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 rounded-md border border-amber-200/70 dark:border-amber-900/30">
-                        Kayıt bulunamadı.
+                    <div className="text-center py-10 text-sm text-stone-400 dark:text-stone-500">
+                        <Package className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                        Henüz sipariş yok.
                     </div>
                 )}
             </CardContent>

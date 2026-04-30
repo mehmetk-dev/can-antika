@@ -29,6 +29,8 @@ public class OrderReturnServiceImpl implements IOrderReturnService {
     private final IOrderService orderService;
     private final OrderReturnMapper orderReturnMapper;
     private final com.mehmetkerem.service.IOrderAuthorizationService orderAuthorizationService;
+    private final com.mehmetkerem.service.INotificationService notificationService;
+    private final com.mehmetkerem.service.IInAppNotificationService inAppNotificationService;
 
     @Override
     @Transactional
@@ -53,6 +55,23 @@ public class OrderReturnServiceImpl implements IOrderReturnService {
                 .createdAt(LocalDateTime.now())
                 .build();
         orderReturn = orderReturnRepository.save(orderReturn);
+
+        // Admin bildirimleri
+        try {
+            notificationService.sendAdminNotification(
+                    "Yeni İade Talebi - Sipariş #" + request.getOrderId(),
+                    "<p><strong>Sipariş ID:</strong> " + request.getOrderId() + "</p>"
+                            + "<p><strong>Kullanıcı ID:</strong> " + userId + "</p>"
+                            + "<p><strong>Sebep:</strong> " + request.getReason() + "</p>");
+            inAppNotificationService.createForAdmins(
+                    "Yeni İade Talebi: Sipariş #" + request.getOrderId(),
+                    request.getReason(),
+                    "RETURN_REQUEST",
+                    orderReturn.getId());
+        } catch (Exception e) {
+            // silently handle notification failure
+        }
+
         return orderReturnMapper.toResponse(orderReturn);
     }
 

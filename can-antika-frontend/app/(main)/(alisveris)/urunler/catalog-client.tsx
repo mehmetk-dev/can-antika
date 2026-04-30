@@ -13,16 +13,6 @@ import type { ProductCardResponse, CategoryResponse, PeriodResponse } from "@/li
 
 type ViewMode = "grid" | "large"
 
-function VintageCorner({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 40 40" fill="none">
-      <path d="M0 40V20C0 8.954 8.954 0 20 0h20" stroke="currentColor" strokeWidth="1" fill="none" />
-      <path d="M0 35V25C0 14.507 8.507 6 19 6h16" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.5" />
-      <circle cx="20" cy="20" r="2" fill="currentColor" opacity="0.3" />
-    </svg>
-  )
-}
-
 interface CatalogClientProps {
   initialProducts?: ProductCardResponse[]
   initialTotalCount?: number
@@ -45,7 +35,7 @@ export function CatalogClient({
   const {
     products, categories, periods, totalCount, isLoading,
     page, totalPages, selectedFilters, sortBy, activeFilterCount,
-    handleFilterChange, handleClearFilters, handleSortChange, handlePageChange,
+    handleFilterChange, handleCustomPriceChange, handleClearFilters, handleSortChange, handlePageChange,
   } = useCatalogFilters({ initialProducts, initialTotalCount, initialFetchCompleted, initialCategories, initialPeriods, ssrCategoryId, ssrPeriodId })
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -72,6 +62,7 @@ export function CatalogClient({
             <FilterSidebar
               selectedFilters={selectedFilters}
               onFilterChange={handleFilterChange}
+              onCustomPriceChange={handleCustomPriceChange}
               onClearFilters={handleClearFilters}
               isMobile={false}
               apiCategories={categories}
@@ -101,19 +92,6 @@ export function CatalogClient({
                     side="left"
                     className="w-80 border-r border-border bg-background p-0 z-[110]"
                   >
-                    <div
-                      className="pointer-events-none absolute inset-0 opacity-[0.03] z-0"
-                      style={{
-                        backgroundImage:
-                          "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E\")",
-                      }}
-                    />
-
-                    <VintageCorner className="absolute top-4 left-4 h-8 w-8 text-primary/20 z-[1]" />
-                    <VintageCorner className="absolute top-4 right-4 h-8 w-8 text-primary/20 -scale-x-100 z-[1]" />
-                    <VintageCorner className="absolute bottom-4 left-4 h-8 w-8 text-primary/20 -scale-y-100 z-[1]" />
-                    <VintageCorner className="absolute bottom-4 right-4 h-8 w-8 text-primary/20 scale-x-[-1] scale-y-[-1] z-[1]" />
-
                     <SheetHeader className="relative z-[2] border-b border-primary/10 px-6 py-6">
                       <div className="flex items-center justify-between">
                         <div>
@@ -136,6 +114,7 @@ export function CatalogClient({
                       <FilterSidebar
                         selectedFilters={selectedFilters}
                         onFilterChange={handleFilterChange}
+                        onCustomPriceChange={handleCustomPriceChange}
                         onClearFilters={handleClearFilters}
                         isMobile={true}
                         apiCategories={categories}
@@ -157,6 +136,7 @@ export function CatalogClient({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="newest">En Yeni</SelectItem>
+                    <SelectItem value="oldest">En Eski</SelectItem>
                     <SelectItem value="price-asc">Fiyat: Düşükten Yükseğe</SelectItem>
                     <SelectItem value="price-desc">Fiyat: Yüksekten Düşüğe</SelectItem>
                     <SelectItem value="name">İsme Göre</SelectItem>

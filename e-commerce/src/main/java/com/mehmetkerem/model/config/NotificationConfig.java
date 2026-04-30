@@ -36,4 +36,6 @@ public class NotificationConfig {
     private String smsSenderName = "";
 
     private Boolean smsEnabled = false;
+
+    private String adminEmail = "destek@canantika.com";
 }

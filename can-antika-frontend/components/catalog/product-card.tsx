@@ -41,7 +41,7 @@ export const ProductCard = memo(function ProductCard({ product, isPriority = fal
           fetchPriority={isPriority ? "high" : "auto"}
           decoding="async"
           sizes="(max-width: 640px) 47vw, (max-width: 1024px) 31vw, 280px"
-          className={`object-cover object-center transition-transform duration-500 group-hover:will-change-transform group-hover:scale-[1.03] ${isSold ? "grayscale opacity-60" : ""}`}
+          className={`object-cover object-center transition-transform duration-500 group-hover:will-change-transform group-hover:scale-[1.03] ${isSold ? "grayscale-[0.35] opacity-85" : ""}`}
           onError={() => setImageErrored(true)}
         />
 

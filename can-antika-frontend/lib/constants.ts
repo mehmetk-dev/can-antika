@@ -8,14 +8,11 @@ export const CATALOG_PAGE_SIZE = 20;
 export const CARRIERS = [
     "Yurtiçi Kargo",
     "Aras Kargo",
-    "MNG Kargo",
     "Sürat Kargo",
     "PTT Kargo",
     "UPS",
     "DHL",
     "FedEx",
-    "Trendyol Express",
-    "Hepsijet",
 ] as const;
 
 /** Dashboard grafik tarih aralıkları */

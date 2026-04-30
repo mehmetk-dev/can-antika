@@ -5,7 +5,7 @@ import { CatalogClient } from "./catalog-client"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { ProductCardResponse, CategoryResponse, PeriodResponse, CursorResponse } from "@/lib/types"
 
-export const revalidate = 60
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: "Antika Koleksiyon",
@@ -33,17 +33,17 @@ export const metadata: Metadata = {
 // Cache'li endpoint kullan — /v1/product search yerine listing (Redis cache'li)
 const fetchInitialProducts = cache(async (filters?: { categoryId?: number; periodId?: number; title?: string }) => {
   if (filters && (filters.categoryId || filters.periodId || filters.title)) {
-    const params = new URLSearchParams({ page: "0", size: "20", sortBy: "id", direction: "desc" })
+    const params = new URLSearchParams({ page: "0", size: "20", sortBy: "createdAt", direction: "desc" })
     if (filters.categoryId) params.set("categoryId", filters.categoryId.toString())
     if (filters.periodId) params.set("periodId", filters.periodId.toString())
     if (filters.title) params.set("title", filters.title)
     return fetchApiDataWithFallback<CursorResponse<ProductCardResponse>>(`/v1/product/search/cards?${params}`, {
-      revalidate: 60,
+      revalidate: 0,
       timeoutMs: 800,
     })
   }
-  return fetchApiDataWithFallback<CursorResponse<ProductCardResponse>>("/v1/product/cards?page=0&size=20&sortBy=id&direction=desc", {
-    revalidate: 60,
+  return fetchApiDataWithFallback<CursorResponse<ProductCardResponse>>("/v1/product/cards?page=0&size=20&sortBy=createdAt&direction=desc", {
+    revalidate: 0,
     timeoutMs: 800,
   })
 })

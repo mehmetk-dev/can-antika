@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { AuthGuard } from "@/components/auth/auth-guard"
-import { orderApi } from "@/lib/api"
+import { cartApi, orderApi } from "@/lib/api"
 import { toast } from "sonner"
 import { useCheckoutData } from "@/hooks/useCheckoutData"
 import { useCoupon } from "@/hooks/useCoupon"
@@ -29,20 +29,64 @@ function CheckoutContent() {
     const [isPlacing, setIsPlacing] = useState(false)
     const [orderPlaced, setOrderPlaced] = useState(false)
     const [orderId, setOrderId] = useState<number | null>(null)
+    const [termsAccepted, setTermsAccepted] = useState(false)
 
-    const finalTotal = cart?.total ?? Math.max(0, cartTotal - coupon.discount)
+    const finalTotal = Math.max(0, cartTotal - coupon.discount)
 
     const handlePlaceOrder = async () => {
+        if (!termsAccepted) {
+            toast.error("Lütfen mesafeli satış sözleşmesini onaylayın")
+            return
+        }
         if (!selectedAddressId) {
             toast.error("Lütfen teslimat adresi seçin")
             return
         }
+        const selectedAddress = addresses.find((address) => address.id === selectedAddressId)
+        const hasIncompleteAddress = !selectedAddress ||
+            !selectedAddress.title?.trim() ||
+            !selectedAddress.country?.trim() ||
+            !selectedAddress.city?.trim() ||
+            !selectedAddress.district?.trim() ||
+            !selectedAddress.postalCode?.trim() ||
+            !selectedAddress.addressLine?.trim()
+        if (hasIncompleteAddress) {
+            toast.error("Teslimat adresiniz eksik. Lütfen adres bilgilerinizi güncelleyin.")
+            return
+        }
+
         setIsPlacing(true)
         try {
+            const latestCart = await cartApi.getCart()
+            const latestItems = latestCart?.items ?? []
+            const currentItems = cart?.items ?? []
+            const cartChanged =
+                latestItems.length !== currentItems.length ||
+                latestItems.some((item) => {
+                    const current = currentItems.find((currentItem) => currentItem.product.id === item.product.id)
+                    return !current ||
+                        current.quantity !== item.quantity ||
+                        current.price !== item.price ||
+                        current.total !== item.total ||
+                        current.product.stock !== item.product.stock
+                })
+
+            if (latestItems.length === 0) {
+                setCart(latestCart)
+                toast.error("Sepetiniz boş veya ürünler artık satışta değil.")
+                return
+            }
+
+            if (cartChanged) {
+                setCart(latestCart)
+                toast.info("Sepetiniz güncellendi. Lütfen fiyat ve stok bilgilerini kontrol edip tekrar onaylayın.")
+                return
+            }
+
             const order = await orderApi.createOrder({
                 addressId: selectedAddressId,
                 note: note || undefined,
-                paymentStatus: paymentMethod === "CREDIT_CARD" ? "PAID" : "PENDING",
+                paymentStatus: "PENDING",
             })
             // Sipariş sonrası sepet badge'ini sıfırla
             if (typeof window !== "undefined") window.dispatchEvent(new Event("cart-updated"))
@@ -120,6 +164,8 @@ function CheckoutContent() {
                 finalTotal={finalTotal}
                 isPlacing={isPlacing}
                 selectedAddressId={selectedAddressId}
+                termsAccepted={termsAccepted}
+                onTermsAcceptedChange={setTermsAccepted}
                 onPlaceOrder={handlePlaceOrder}
             />
         </div>

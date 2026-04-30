@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { toast } from "sonner"
 import { getErrorMessage } from "@/lib/utils"
 import { useAuth } from "@/lib/auth/auth-context"
-import { cartApi, wishlistApi } from "@/lib/api"
-import { guestCart } from "@/lib/commerce/guest-cart"
+import { cartApi, productApi, wishlistApi } from "@/lib/api"
+import { guestCart, isGuestCartProductSellable } from "@/lib/commerce/guest-cart"
 import type { ProductResponse } from "@/lib/types"
 
 export interface ProductActionsState {
@@ -28,6 +28,31 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
     const [addingToWishlist, setAddingToWishlist] = useState(false)
     const [addedToWishlist, setAddedToWishlist] = useState(false)
 
+    useEffect(() => {
+        setAddedToCart(false)
+        setAddedToWishlist(false)
+    }, [product.id])
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            setAddedToWishlist(false)
+            return
+        }
+        let isCancelled = false
+        wishlistApi.getWishlist()
+            .then((wishlist) => {
+                if (!isCancelled) {
+                    setAddedToWishlist(wishlist.items.some((item) => item.product.id === product.id))
+                }
+            })
+            .catch(() => {
+                if (!isCancelled) setAddedToWishlist(false)
+            })
+        return () => {
+            isCancelled = true
+        }
+    }, [isAuthenticated, product.id])
+
     const handleAddToCart = useCallback(async () => {
         if (addedToCart) {
             toast.info("Bu ürün zaten sepetinizde")
@@ -39,12 +64,24 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
         }
         setAddingToCart(true)
         try {
+            const freshProduct = await productApi.getById(product.id, 3000)
+            const freshStock = Math.max(freshProduct.stock ?? 0, 0)
+            if (freshStock < quantity || !isGuestCartProductSellable(freshProduct)) {
+                window.dispatchEvent(new CustomEvent("product-stock-updated", { detail: { product: freshProduct } }))
+                toast.error("Bu ürün satıldı veya stokta yok.")
+                return
+            }
             if (isAuthenticated) {
                 await cartApi.addItem({ productId: product.id, quantity })
             } else {
-                guestCart.addItem(product, quantity)
+                guestCart.addItem(freshProduct, quantity)
             }
-            toast.success(`${quantity} adet ürün sepete eklendi`)
+            toast.success(`${quantity} adet ürün sepete eklendi`, {
+                action: {
+                    label: "Sepete Git",
+                    onClick: () => { window.location.href = "/sepet" },
+                },
+            })
             setAddedToCart(true)
         } catch (err) {
             toast.error(getErrorMessage(err, "Sepete eklenirken hata oluştu"))

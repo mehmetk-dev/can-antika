@@ -57,8 +57,9 @@ public class StatsServiceImpl implements com.mehmetkerem.service.IStatsService {
                 LocalDateTime monthStart = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
                 long newCustomersThisMonth = userRepository.countByRoleAndCreatedAtAfter(Role.USER, monthStart);
 
-                // Sipariş durumları
-                long pendingOrders = orderRepository.countByOrderStatus(OrderStatus.PENDING);
+                // Bekleyen siparişler: PENDING + PAID (ödendi ama henüz kargoya verilmedi)
+                long pendingOrders = orderRepository.countByOrderStatus(OrderStatus.PENDING)
+                        + orderRepository.countByOrderStatus(OrderStatus.PAID);
                 long totalOrders = orderRepository.countTotalOrders();
                 long totalProducts = productRepository.count();
                 long activeProducts = totalProducts; // soft delete zaten filtreler

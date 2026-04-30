@@ -55,6 +55,12 @@ public class EmailTemplateService implements IEmailTemplateService {
                 Map.of("orderCode", orderCode, "statusLabel", statusLabel));
     }
 
+    @Override
+    public String renderContactFormNotification(String name, String email, String phone, String message) {
+        return render("Yeni İletişim Formu", "email/contact-form-notification",
+                Map.of("contactName", name, "contactEmail", email, "contactPhone", phone, "contactMessage", message));
+    }
+
     private String render(String title, String contentTemplate, Map<String, Object> variables) {
         SiteSettings settings = siteSettingsService.get();
         StoreConfig store = settings.getStoreConfig();

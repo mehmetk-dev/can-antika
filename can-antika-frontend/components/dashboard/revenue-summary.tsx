@@ -1,4 +1,8 @@
-import { Card, CardContent } from "@/components/ui/card"
+"use client"
+
+import { useMemo } from "react"
+import { TrendingUp, TrendingDown, Calendar, DollarSign } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDateTR } from "@/lib/utils"
 import type { StatsResponse } from "@/lib/types"
 
@@ -6,56 +10,127 @@ interface RevenueSummaryProps {
     stats: StatsResponse | null
 }
 
+function formatCurrency(value: number): string {
+    return value > 0 ? `₺${value.toLocaleString("tr-TR", { maximumFractionDigits: 0 })}` : "₺0"
+}
+
 export default function RevenueSummary({ stats }: RevenueSummaryProps) {
     const today = new Date()
+    const todayStr = today.toISOString().split("T")[0]
+
+    const todayRevenue = useMemo(() => {
+        if (!stats?.dailyStats?.length) return 0
+        const todayEntry = stats.dailyStats.find(d => d.date === todayStr)
+        return todayEntry?.revenue ?? 0
+    }, [stats?.dailyStats, todayStr])
+
+    const currentMonthRevenue = useMemo(() => {
+        if (!stats?.monthlyTrends?.length) return 0
+        const currentMonth = todayStr.substring(0, 7)
+        const entry = stats.monthlyTrends.find(m => m.month === currentMonth)
+        return entry?.revenue ?? 0
+    }, [stats?.monthlyTrends, todayStr])
+
+    const previousMonthRevenue = useMemo(() => {
+        if (!stats?.monthlyTrends?.length || stats.monthlyTrends.length < 2) return 0
+        const prevDate = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+        const prevMonthStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}`
+        const entry = stats.monthlyTrends.find(m => m.month === prevMonthStr)
+        return entry?.revenue ?? 0
+    }, [stats?.monthlyTrends, today])
+
+    const monthOverMonth = currentMonthRevenue > 0 && previousMonthRevenue > 0
+        ? ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue * 100)
+        : null
+
+    const rows = [
+        {
+            label: "Günlük Ciro",
+            sub: formatDateTR(today, "full"),
+            value: todayRevenue,
+            icon: DollarSign,
+            accent: "text-emerald-600 dark:text-emerald-400",
+            bg: "bg-emerald-50 dark:bg-emerald-950/20",
+        },
+        {
+            label: "Aylık Ciro",
+            sub: formatDateTR(today, "month-year"),
+            value: currentMonthRevenue,
+            icon: Calendar,
+            accent: "text-emerald-600 dark:text-emerald-400",
+            bg: "bg-stone-50 dark:bg-stone-900/30",
+        },
+        {
+            label: "Yıllık Ciro",
+            sub: String(today.getFullYear()),
+            value: stats?.totalRevenue ? Number(stats.totalRevenue) : 0,
+            icon: TrendingUp,
+            accent: "text-emerald-600 dark:text-emerald-400",
+            bg: "bg-stone-50 dark:bg-stone-900/30",
+        },
+    ]
 
     return (
-        <Card className="shadow-xs border-border/50">
+        <Card className="shadow-sm border-stone-200/60 dark:border-stone-800 overflow-hidden">
+            <CardHeader className="py-3 px-5 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/30">
+                <div className="flex items-center gap-2.5">
+                    <div className="h-7 w-7 rounded-md bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                        <DollarSign className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" />
+                    </div>
+                    <CardTitle className="text-sm font-semibold tracking-tight">Ciro Özeti</CardTitle>
+                </div>
+            </CardHeader>
             <CardContent className="p-0">
-                <div className="flex items-center justify-between p-4 border-b border-border/50">
-                    <div>
-                        <p className="text-sm font-semibold text-foreground">Günlük Ciro</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{formatDateTR(today, "full")}</p>
+                {rows.map((row, i) => (
+                    <div
+                        key={row.label}
+                        className={`flex items-center justify-between px-5 py-3.5 ${
+                            i < rows.length - 1 ? "border-b border-stone-100 dark:border-stone-800" : ""
+                        } transition-colors duration-200 hover:bg-stone-50/80 dark:hover:bg-stone-900/20`}
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className={`h-8 w-8 rounded-lg ${row.bg} flex items-center justify-center`}>
+                                <row.icon className={`h-4 w-4 ${row.accent}`} />
+                            </div>
+                            <div>
+                                <p className="text-[13px] font-medium text-foreground">{row.label}</p>
+                                <p className="text-[11px] text-muted-foreground mt-0.5">{row.sub}</p>
+                            </div>
+                        </div>
+                        <p className={`text-sm font-bold tabular-nums ${row.accent}`}>
+                            {formatCurrency(row.value)}
+                        </p>
                     </div>
-                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-                        {stats?.dailyStats?.[stats.dailyStats.length - 1]?.revenue
-                            ? `₺${stats.dailyStats[stats.dailyStats.length - 1].revenue.toLocaleString("tr-TR")}`
-                            : "0,00 TL"}
-                    </p>
-                </div>
+                ))}
 
-                <div className="flex items-center justify-between p-4 border-b border-border/50">
-                    <div>
-                        <p className="text-sm font-semibold text-foreground">Aylık Ciro</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{formatDateTR(today, "month-year")}</p>
+                {/* Geçen Ay Karşılaştırma */}
+                <div className="px-5 py-3.5 bg-stone-50/70 dark:bg-stone-900/40 border-t border-stone-100 dark:border-stone-800">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                                {monthOverMonth !== null && monthOverMonth >= 0
+                                    ? <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                    : <TrendingDown className="h-4 w-4 text-red-500 dark:text-red-400" />
+                                }
+                            </div>
+                            <div>
+                                <p className="text-[13px] font-medium text-foreground">Geçen Ay</p>
+                                <p className="text-[11px] text-muted-foreground mt-0.5">Önceki Ayın Cirosu</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-sm font-bold tabular-nums text-foreground">
+                                {formatCurrency(previousMonthRevenue)}
+                            </p>
+                            {monthOverMonth !== null && (
+                                <p className={`text-[10px] font-medium mt-0.5 ${
+                                    monthOverMonth >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"
+                                }`}>
+                                    {monthOverMonth >= 0 ? "+" : ""}{monthOverMonth.toFixed(1)}%
+                                </p>
+                            )}
+                        </div>
                     </div>
-                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-                        {stats?.monthlyTrends?.[stats.monthlyTrends.length - 1]?.revenue
-                            ? `₺${stats.monthlyTrends[stats.monthlyTrends.length - 1].revenue.toLocaleString("tr-TR")}`
-                            : "0,00 TL"}
-                    </p>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border-b border-border/50">
-                    <div>
-                        <p className="text-sm font-semibold text-foreground">Yıllık Ciro</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{today.getFullYear()}</p>
-                    </div>
-                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-                        {stats?.totalRevenue ? `₺${stats.totalRevenue.toLocaleString("tr-TR")}` : "0,00 TL"}
-                    </p>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-emerald-50/50 dark:bg-emerald-950/10">
-                    <div>
-                        <p className="text-sm font-semibold text-foreground">Geçen Ay</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">Önceki Ayın Cirosu</p>
-                    </div>
-                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-                        {stats?.monthlyTrends?.length && stats.monthlyTrends.length > 1
-                            ? `₺${stats.monthlyTrends[stats.monthlyTrends.length - 2].revenue.toLocaleString("tr-TR")}`
-                            : "0,00 TL"}
-                    </p>
                 </div>
             </CardContent>
         </Card>

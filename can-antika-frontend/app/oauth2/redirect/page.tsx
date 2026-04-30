@@ -3,30 +3,34 @@
 import { Suspense, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2, CheckCircle, XCircle } from "lucide-react"
-import { authApi } from "@/lib/api"
+import { useAuth } from "@/lib/auth/auth-context"
 import { clearAuthSessionFlag, markAuthSessionActive } from "@/lib/auth/auth-session"
 
 function OAuth2RedirectContent() {
     const router = useRouter()
+    const { refreshUser } = useAuth()
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
     const [message, setMessage] = useState("Google ile giriş yapılıyor...")
 
     useEffect(() => {
         // Cookie'ler backend tarafından zaten set edildi, sadece user bilgisini çek
         markAuthSessionActive()
-        authApi.getProfile()
+        refreshUser()
             .then((user) => {
+                if (!user) {
+                    throw new Error("OAuth profile could not be loaded")
+                }
                 setStatus("success")
                 setMessage(`Hoş geldiniz, ${user.name}!`)
-                setTimeout(() => router.push("/hesap"), 1500)
+                setTimeout(() => router.replace("/hesap"), 1500)
             })
             .catch(() => {
                 clearAuthSessionFlag()
                 setStatus("error")
                 setMessage("Giriş doğrulanamadı. Lütfen tekrar deneyin.")
-                setTimeout(() => router.push("/giris"), 3000)
+                setTimeout(() => router.replace("/giris"), 3000)
             })
-    }, [router])
+    }, [refreshUser, router])
 
     return (
         <div className="text-center space-y-6 p-8">

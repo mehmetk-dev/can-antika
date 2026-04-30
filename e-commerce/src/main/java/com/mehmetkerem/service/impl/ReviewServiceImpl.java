@@ -32,6 +32,8 @@ public class ReviewServiceImpl implements IReviewService {
     private final com.mehmetkerem.service.IUserService userService;
     private final com.mehmetkerem.service.IProductService productService;
     private final com.mehmetkerem.repository.OrderRepository orderRepository;
+    private final com.mehmetkerem.service.INotificationService notificationService;
+    private final com.mehmetkerem.service.IInAppNotificationService inAppNotificationService;
 
     @Transactional
     @Override
@@ -62,6 +64,24 @@ public class ReviewServiceImpl implements IReviewService {
         review.setUserId(userId);
         Review savedReview = reviewRepository.save(review);
         log.info("Yorum başarıyla kaydedildi. Yorum ID: {}", savedReview.getId());
+
+        // Admin bildirimleri
+        try {
+            ProductResponse product = productService.getProductResponseById(request.getProductId());
+            String productName = product != null ? product.getTitle() : "Bilinmeyen Ürün";
+            notificationService.sendAdminNotification(
+                    "Yeni Yorum - " + productName,
+                    "<p><strong>Ürün:</strong> " + productName + "</p>"
+                            + "<p><strong>Yorum:</strong> " + savedReview.getComment() + "</p>"
+                            + "<p><strong>Puan:</strong> " + savedReview.getRating() + "/5</p>");
+            inAppNotificationService.createForAdmins(
+                    "Yeni Yorum: " + productName,
+                    productName + " ürününe " + savedReview.getRating() + " yıldızlı yorum yapıldı.",
+                    "NEW_REVIEW",
+                    savedReview.getId());
+        } catch (Exception e) {
+            log.error("Admin yorum bildirimi gönderilemedi: {}", e.getMessage());
+        }
 
         // Recalculate product rating
         recalculateProductRating(request.getProductId());

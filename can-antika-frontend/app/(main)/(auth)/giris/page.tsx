@@ -28,6 +28,7 @@ export default function AuthPage() {
   const searchParams = useSearchParams()
   const redirectTo = getSafeRedirect(searchParams.get("redirect"))
   const oauthError = searchParams.get("error") === "oauth2"
+  const googleLoginHref = `${process.env.NEXT_PUBLIC_API_URL || ""}/oauth2/authorization/google`
   const { isAuthenticated, isLoading } = useAuth()
   const [mode, setMode] = useState<FormMode>("login")
   const [isAnimating, setIsAnimating] = useState(false)
@@ -112,9 +113,14 @@ export default function AuthPage() {
             </div>
 
             {oauthError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              <div className="mb-4 flex flex-col gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 Google ile giriş başarısız oldu. Lütfen tekrar deneyin.
+                </div>
+                <a href={googleLoginHref} className="font-medium underline underline-offset-4">
+                  Tekrar dene
+                </a>
               </div>
             )}
 

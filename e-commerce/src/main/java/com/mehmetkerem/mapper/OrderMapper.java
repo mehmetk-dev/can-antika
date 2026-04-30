@@ -53,7 +53,9 @@ public interface OrderMapper {
                     }
                     return OrderItem.builder()
                             .productId(ci.getProductId())
+                            .productSlug(product.getSlug())
                             .title(product.getTitle())
+                            .imageUrls(product.getImageUrls())
                             .price(product.getPrice())
                             .quantity(ci.getQuantity())
                             .build();
@@ -79,7 +81,10 @@ public interface OrderMapper {
                     return OrderItemResponse.builder()
                             .id(orderItem.getId())
                             .product(product)
+                            .productId(orderItem.getProductId())
+                            .productSlug(orderItem.getProductSlug())
                             .title(orderItem.getTitle())
+                            .imageUrls(orderItem.getImageUrls())
                             .quantity(orderItem.getQuantity())
                             .price(orderItem.getPrice())
                             .build();

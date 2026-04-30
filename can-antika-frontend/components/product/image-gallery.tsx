@@ -183,7 +183,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                   loading="lazy"
                   decoding="async"
                   sizes="(max-width: 640px) 15vw, 10vw"
-                  className="object-cover object-center"
+                  className="object-contain p-1 object-center"
                   onError={(e) => {
                     e.currentTarget.src = "/placeholder.svg"
                   }}

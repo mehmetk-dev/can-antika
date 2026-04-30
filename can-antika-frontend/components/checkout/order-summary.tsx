@@ -1,7 +1,10 @@
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
 import { ArrowLeft, Tag, X, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import type { CartResponse } from "@/lib/types"
@@ -15,6 +18,8 @@ interface OrderSummaryProps {
     finalTotal: number
     isPlacing: boolean
     selectedAddressId: number | null
+    termsAccepted: boolean
+    onTermsAcceptedChange: (accepted: boolean) => void
     onPlaceOrder: () => void
 }
 
@@ -26,8 +31,12 @@ export function OrderSummary({
     finalTotal,
     isPlacing,
     selectedAddressId,
+    termsAccepted,
+    onTermsAcceptedChange,
     onPlaceOrder,
 }: OrderSummaryProps) {
+    const [confirmOpen, setConfirmOpen] = useState(false)
+
     return (
         <div className="lg:col-span-1">
             <div className="sticky top-24 rounded-lg border border-border bg-card p-6">
@@ -122,10 +131,25 @@ export function OrderSummary({
                     <span className="text-primary text-lg">₺{finalTotal.toLocaleString("tr-TR")}</span>
                 </div>
 
+                <div className="mt-5 flex items-start gap-3 rounded-md border border-border bg-muted/30 p-3">
+                    <Checkbox
+                        id="checkout-legal-approval"
+                        checked={termsAccepted}
+                        onCheckedChange={(checked) => onTermsAcceptedChange(checked === true)}
+                        className="mt-0.5"
+                    />
+                    <label htmlFor="checkout-legal-approval" className="text-xs leading-relaxed text-muted-foreground">
+                        <Link href="/mesafeli-satis-sozlesmesi" className="font-medium text-foreground underline-offset-4 hover:underline" target="_blank">
+                            Mesafeli Satış Sözleşmesi
+                        </Link>{" "}
+                        ve ön bilgilendirme koşullarını okudum, kabul ediyorum.
+                    </label>
+                </div>
+
                 <Button
                     className="w-full mt-6 gap-2"
-                    disabled={isPlacing || !selectedAddressId}
-                    onClick={onPlaceOrder}
+                    disabled={isPlacing || !selectedAddressId || !termsAccepted}
+                    onClick={() => setConfirmOpen(true)}
                 >
                     {isPlacing ? (
                         <>
@@ -136,6 +160,31 @@ export function OrderSummary({
                         "Siparişi Onayla"
                     )}
                 </Button>
+
+                <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Siparişi onaylıyor musunuz?</DialogTitle>
+                            <DialogDescription>
+                                Siparişiniz oluşturulacak ve ödeme durumu ödeme kontrolü tamamlanana kadar beklemede kalacaktır.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={isPlacing}>
+                                Vazgeç
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    setConfirmOpen(false)
+                                    onPlaceOrder()
+                                }}
+                                disabled={isPlacing}
+                            >
+                                Evet, Onayla
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
 
                 <Link href="/sepet">
                     <Button variant="ghost" className="w-full mt-2 gap-2 text-muted-foreground">

@@ -5,7 +5,6 @@ import com.mehmetkerem.service.INotificationService;
 import com.mehmetkerem.service.impl.InAppNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -27,9 +26,6 @@ public class OrderEventListener {
     private final INotificationService notificationService;
     private final InAppNotificationService inAppNotificationService;
 
-    @Value("${app.admin.user-id:1}")
-    private long adminUserId;
-
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOrderEvent(OrderEvent event) {
         switch (event.getType()) {
@@ -43,14 +39,24 @@ public class OrderEventListener {
         // Sipariş onay e-postası
         sendEmailSafely(() -> notificationService.sendOrderConfirmation(event.getUserEmail(), event.getOrderCode()));
 
+        // Admin bildirimleri
+        sendEmailSafely(() -> notificationService.sendAdminNotification(
+                "Yeni Sipariş - " + event.getOrderCode(),
+                "Yeni bir sipariş alındı. Sipariş kodu: " + event.getOrderCode() + " | Müşteri: " + event.getUserEmail()));
+
+        sendInAppSafely(() -> inAppNotificationService.createForAdmins(
+                "Yeni Sipariş: " + event.getOrderCode(),
+                event.getOrderCode() + " numaralı yeni bir sipariş oluşturuldu.",
+                "NEW_ORDER",
+                event.getOrderId()));
+
         // Düşük stok uyarıları
         if (event.getStockAlerts() != null) {
             for (OrderEvent.StockAlertInfo alert : event.getStockAlerts()) {
                 sendEmailSafely(
                         () -> notificationService.sendStockAlert(alert.getProductTitle(), alert.getRemainingStock()));
 
-                sendInAppSafely(() -> inAppNotificationService.create(
-                        adminUserId,
+                sendInAppSafely(() -> inAppNotificationService.createForAdmins(
                         "Stok Uyarısı: " + alert.getProductTitle(),
                         alert.getProductTitle() + " ürününün stoku " + alert.getRemainingStock() + " adede düştü!",
                         "STOCK_ALERT",

@@ -12,6 +12,7 @@ import type { UserResponse, LoginRequest, RegisterRequest } from "../types";
 import { authApi, cartApi } from "../api";
 import { guestCart } from "../commerce/guest-cart";
 import { clearAuthSessionFlag, hasAuthSessionFlag, markAuthSessionActive } from "./auth-session";
+import { toast } from "sonner";
 
 interface AuthContextType {
     user: UserResponse | null;
@@ -21,7 +22,7 @@ interface AuthContextType {
     login: (data: LoginRequest) => Promise<UserResponse>;
     register: (data: RegisterRequest) => Promise<void>;
     logout: () => void;
-    refreshUser: () => Promise<void>;
+    refreshUser: () => Promise<UserResponse | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -75,9 +76,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Guest sepetindeki ürünleri backend'e senkronize et
         const guestItems = guestCart.toSyncPayload();
         if (guestItems.length > 0) {
-            cartApi.syncCart(guestItems)
-                .then(() => guestCart.clear())
-                .catch(() => { /* senkronizasyon başarısız olursa guest cart kalır */ });
+            try {
+                await cartApi.syncCart(guestItems);
+                guestCart.clear();
+            } catch {
+                toast.error("Sepetiniz hesaba aktarılırken hata oluştu. Misafir sepetiniz korunuyor.");
+            }
         }
 
         return user;
@@ -101,9 +105,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const freshUser = await authApi.getProfile();
             setUser(freshUser);
             markAuthSessionActive();
+            return freshUser;
         } catch {
+            setUser(null);
             clearAuthSessionFlag();
-            // Sessiz yakala — mevcut user kalır
+            // Sessiz yakala — çağıran ekran gerekli yönlendirmeyi yapar
+            return null;
         }
     }, []);
 

@@ -2,14 +2,14 @@ import { api } from "../../api-client";
 import type { ProductResponse, ProductCardResponse, ProductRequest, CursorResponse } from "../../types";
 
 export const productApi = {
-    getAll: (page = 0, size = 20, sortBy = "id", direction = "desc") =>
+    getAll: (page = 0, size = 20, sortBy = "createdAt", direction = "desc") =>
         api.get<CursorResponse<ProductResponse>>("/v1/product", {
             params: { page, size, sortBy, direction },
             noAuth: true,
             timeoutMs: 20000,
         }),
 
-    getCards: (page = 0, size = 20, sortBy = "id", direction = "desc") =>
+    getCards: (page = 0, size = 20, sortBy = "createdAt", direction = "desc") =>
         api.get<CursorResponse<ProductCardResponse>>("/v1/product/cards", {
             params: { page, size, sortBy, direction },
             noAuth: true,

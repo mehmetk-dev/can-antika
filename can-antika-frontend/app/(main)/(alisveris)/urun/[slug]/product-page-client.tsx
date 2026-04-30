@@ -22,15 +22,22 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
   const [product, setProduct] = useState<ProductResponse | null>(initialProduct)
   const [isLoading, setIsLoading] = useState(!initialProduct)
   const [relatedProducts, setRelatedProducts] = useState<ProductCardResponse[]>([])
+  const productId = product?.id ?? null
+
+  useEffect(() => {
+    const handleProductStockUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<{ product?: ProductResponse }>).detail
+      if (detail?.product && detail.product.id === productId) {
+        setProduct(detail.product)
+      }
+    }
+
+    window.addEventListener("product-stock-updated", handleProductStockUpdated)
+    return () => window.removeEventListener("product-stock-updated", handleProductStockUpdated)
+  }, [productId])
 
   useEffect(() => {
     let isCancelled = false
-
-    if (initialProduct) {
-      return () => {
-        isCancelled = true
-      }
-    }
 
     const numericId = /^\d+$/.test(slug) ? Number.parseInt(slug, 10) : null
 
@@ -87,7 +94,6 @@ export function ProductPageClient({ initialProduct, slug }: ProductPageClientPro
     }
   }, [initialProduct, slug])
 
-  const productId = product?.id ?? null
   const canonicalSlug = product ? getProductUrl(product).replace('/urun/', '') : null
   useEffect(() => {
     if (!canonicalSlug || canonicalSlug === slug) return

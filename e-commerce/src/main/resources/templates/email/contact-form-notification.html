@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="content" style="text-align:center;padding:0;font-size:15px;line-height:1.6;color:#504137;">
+        <p style="margin:0 0 24px;font-family:'Cormorant Garamond','Times New Roman',Times,serif;font-size:18px;font-style:italic;color:#66554b;">
+            Web sitesi üzerinden yeni bir iletişim formu mesajı alındı.
+        </p>
+
+        <div style="background-color:#fffdf8;border:1px solid #d2bf97;padding:24px;margin:24px 0;text-align:left;">
+            <table cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;">
+                <tr>
+                    <td style="padding:8px 12px;color:#8a7668;font-size:11px;text-transform:uppercase;letter-spacing:3px;width:100px;vertical-align:top;">İsim</td>
+                    <td style="padding:8px 12px;color:#3d2b1f;font-size:16px;font-weight:600;font-family:'Cormorant Garamond','Times New Roman',Times,serif;" th:text="${contactName}">Ad Soyad</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px 12px;color:#8a7668;font-size:11px;text-transform:uppercase;letter-spacing:3px;">E-posta</td>
+                    <td style="padding:8px 12px;">
+                        <a th:href="'mailto:' + ${contactEmail}" style="color:#7b4019;text-decoration:none;font-size:16px;font-family:'Cormorant Garamond','Times New Roman',Times,serif;" th:text="${contactEmail}">email@ornek.com</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:8px 12px;color:#8a7668;font-size:11px;text-transform:uppercase;letter-spacing:3px;">Telefon</td>
+                    <td style="padding:8px 12px;color:#3d2b1f;font-size:16px;font-family:'Cormorant Garamond','Times New Roman',Times,serif;" th:text="${contactPhone}">05XX XXX XX XX</td>
+                </tr>
+            </table>
+
+            <div style="margin:20px 0 0;width:30px;height:1px;background-color:#d2bf97;"></div>
+
+            <p style="margin:20px 0 0;color:#3d2b1f;font-size:15px;line-height:1.7;white-space:pre-wrap;font-family:'Cormorant Garamond','Times New Roman',Times,serif;font-style:italic;" th:text="${contactMessage}">Mesaj içeriği burada gösterilir.</p>
+        </div>
+
+        <div style="text-align:center;margin:32px 0 10px;">
+            <a href="https://canantika.com/admin/mesajlar" style="display:inline-block;background-color:#7b4019;color:#fffdf8;text-decoration:none;padding:14px 32px;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;border-radius:2px;font-family:-apple-system,sans-serif;">YANITLA</a>
+        </div>
+    </div>
+</body>
+</html>

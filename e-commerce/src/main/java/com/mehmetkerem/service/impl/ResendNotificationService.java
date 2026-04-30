@@ -2,6 +2,7 @@ package com.mehmetkerem.service.impl;
 
 import com.mehmetkerem.service.IEmailTemplateService;
 import com.mehmetkerem.service.INotificationService;
+import com.mehmetkerem.service.ISiteSettingsService;
 import com.resend.Resend;
 import com.resend.core.exception.ResendException;
 import com.resend.services.emails.model.CreateEmailOptions;
@@ -22,13 +23,16 @@ public class ResendNotificationService implements INotificationService {
     private final Resend resend;
     private final String fromEmail;
     private final IEmailTemplateService emailTemplateService;
+    private final ISiteSettingsService siteSettingsService;
 
     public ResendNotificationService(@Value("${resend.api.key}") String apiKey,
             @Value("${resend.from.email}") String fromEmail,
-            IEmailTemplateService emailTemplateService) {
+            IEmailTemplateService emailTemplateService,
+            ISiteSettingsService siteSettingsService) {
         this.resend = new Resend(apiKey);
         this.fromEmail = fromEmail;
         this.emailTemplateService = emailTemplateService;
+        this.siteSettingsService = siteSettingsService;
     }
 
     @Override
@@ -69,6 +73,26 @@ public class ResendNotificationService implements INotificationService {
     public void sendOrderStatusUpdate(String toEmail, String orderCode, String statusLabel) {
         sendEmail(toEmail, "Sipariş Durumu Güncellendi - " + orderCode,
                 emailTemplateService.renderOrderStatusUpdate(orderCode, statusLabel));
+    }
+
+    @Override
+    @Async
+    public void sendContactFormNotification(String name, String email, String phone, String message) {
+        String to = getAdminEmail();
+        String subject = "İletişim Formu - " + name;
+        String htmlBody = emailTemplateService.renderContactFormNotification(name, email, phone, message);
+        sendEmail(to, subject, htmlBody);
+    }
+
+    @Override
+    @Async
+    public void sendAdminNotification(String subject, String htmlBody) {
+        sendEmail(getAdminEmail(), subject, htmlBody);
+    }
+
+    private String getAdminEmail() {
+        String adminEmail = siteSettingsService.get().getNotificationConfig().getAdminEmail();
+        return (adminEmail != null && !adminEmail.isEmpty()) ? adminEmail : "destek@canantika.com";
     }
 
     private void sendEmail(String to, String subject, String htmlContent) {

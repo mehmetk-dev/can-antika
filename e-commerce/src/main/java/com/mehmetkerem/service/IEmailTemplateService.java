@@ -13,4 +13,6 @@ public interface IEmailTemplateService {
     String renderStockAlert(String productName, int currentStock);
 
     String renderOrderStatusUpdate(String orderCode, String statusLabel);
+
+    String renderContactFormNotification(String name, String email, String phone, String message);
 }

@@ -8,15 +8,20 @@ import java.util.Set;
 @Component
 public class ProductSortResolver {
 
-    private static final String DEFAULT_SORT_FIELD = "id";
+    private static final String DEFAULT_SORT_FIELD = "createdAt";
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "id", "title", "price", "stock", "averageRating", "reviewCount", "viewCount");
+            "id", "createdAt", "title", "price", "stock", "averageRating", "reviewCount", "viewCount");
 
     public Sort resolve(String sortBy, String direction) {
         String safeSortBy = sanitizeSortBy(sortBy);
-        return isDescending(direction)
+        Sort primarySort = isDescending(direction)
                 ? Sort.by(safeSortBy).descending()
                 : Sort.by(safeSortBy).ascending();
+
+        if ("id".equals(safeSortBy)) {
+            return primarySort;
+        }
+        return primarySort.and(Sort.by("id").descending());
     }
 
     public String sanitizeSortBy(String sortBy) {

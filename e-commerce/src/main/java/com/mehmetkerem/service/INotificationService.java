@@ -12,4 +12,8 @@ public interface INotificationService {
     void sendOrderTrackingEmail(String toEmail, String orderCode, String trackingNumber, String carrier);
 
     void sendOrderStatusUpdate(String toEmail, String orderCode, String statusLabel);
+
+    void sendContactFormNotification(String name, String email, String phone, String message);
+
+    void sendAdminNotification(String subject, String htmlBody);
 }

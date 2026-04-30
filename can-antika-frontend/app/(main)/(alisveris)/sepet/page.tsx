@@ -139,21 +139,23 @@ function CartContent() {
                                         <Button
                                             variant="outline"
                                             size="icon"
-                                            className="h-8 w-8"
+                                            className="h-11 w-11 sm:h-8 sm:w-8"
                                             disabled={isUpdating || item.quantity <= 1}
                                             onClick={() => handleUpdateQuantity(item.product.id, item.quantity - 1)}
+                                            aria-label="Ürün adedini azalt"
                                         >
-                                            <Minus className="h-3 w-3" />
+                                            <Minus className="h-4 w-4 sm:h-3 sm:w-3" />
                                         </Button>
                                         <span className="w-8 text-center font-medium text-sm">{item.quantity}</span>
                                         <Button
                                             variant="outline"
                                             size="icon"
-                                            className="h-8 w-8"
+                                            className="h-11 w-11 sm:h-8 sm:w-8"
                                             disabled={isUpdating || maxStock <= 0 || item.quantity >= maxStock}
                                             onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
+                                            aria-label="Ürün adedini artır"
                                         >
-                                            <Plus className="h-3 w-3" />
+                                            <Plus className="h-4 w-4 sm:h-3 sm:w-3" />
                                         </Button>
                                     </div>
                                     {maxStock > 0 && item.quantity >= maxStock && (

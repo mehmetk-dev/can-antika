@@ -94,6 +94,26 @@ public class SmtpNotificationService implements INotificationService {
                 emailTemplateService.renderOrderStatusUpdate(orderCode, statusLabel));
     }
 
+    @Override
+    @Async
+    public void sendContactFormNotification(String name, String email, String phone, String message) {
+        String to = getAdminEmail();
+        String subject = "İletişim Formu - " + name;
+        String htmlBody = emailTemplateService.renderContactFormNotification(name, email, phone, message);
+        sendEmail(to, subject, htmlBody);
+    }
+
+    @Override
+    @Async
+    public void sendAdminNotification(String subject, String htmlBody) {
+        sendEmail(getAdminEmail(), subject, htmlBody);
+    }
+
+    private String getAdminEmail() {
+        String adminEmail = siteSettingsService.get().getNotificationConfig().getAdminEmail();
+        return (adminEmail != null && !adminEmail.isEmpty()) ? adminEmail : "destek@canantika.com";
+    }
+
     private synchronized JavaMailSenderImpl getOrCreateMailSender(String host, Integer port, String user, String pass) {
         String key = host + ":" + port + ":" + user;
         if (cachedMailSender != null && key.equals(cachedMailSenderKey)) {

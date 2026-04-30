@@ -53,14 +53,14 @@ function slugToTitle(slug: string): string {
 async function fetchProductBySlug(slug: string) {
   const safeSlug = encodeURIComponent(slug)
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/slug/${safeSlug}`, {
-    revalidate: 300,
+    revalidate: 0,
     timeoutMs: 4000,
   })
 }
 
 async function fetchProductById(id: number) {
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/${id}`, {
-    revalidate: 300,
+    revalidate: 0,
     timeoutMs: 4000,
   })
 }

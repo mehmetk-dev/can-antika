@@ -6,7 +6,10 @@ import type { UserResponse } from "./user";
 export interface OrderItemResponse {
     id: number;
     product?: ProductResponse;
+    productId?: number;
+    productSlug?: string;
     title: string;
+    imageUrls?: string[];
     quantity: number;
     price: number;
 }

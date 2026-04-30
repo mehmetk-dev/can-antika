@@ -114,23 +114,27 @@ function OrdersContent() {
 
                 <div className="mt-4 border-t border-border pt-4">
                   {order.orderItems.map((item, i) => {
-                    const imageUrl = item.product?.imageUrls?.[0] || "/placeholder.svg"
+                    const imageUrl = item.product?.imageUrls?.[0] || item.imageUrls?.[0] || "/placeholder.svg"
+                    const itemTitle = item.title || item.product?.title || "Ürün"
                     return (
                       <div key={`${item.id}-${i}`} className="flex items-center gap-4 mb-3 last:mb-0">
                         <div className="relative h-16 w-16 overflow-hidden rounded-md bg-muted shrink-0">
                           <Image
                             src={imageUrl}
-                            alt={item.title || item.product?.title || "Ürün"}
+                            alt={itemTitle}
                             fill
                             sizes="64px"
                             className="object-cover"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-foreground truncate">{item.title || item.product?.title || "Ürün"}</p>
+                          <p className="font-medium text-foreground truncate">{itemTitle}</p>
                           <p className="text-sm text-muted-foreground">
                             {item.quantity} adet × ₺{item.price.toLocaleString("tr-TR")}
                           </p>
+                          {!item.product && (
+                            <p className="text-xs text-muted-foreground">Ürün artık yayında değil</p>
+                          )}
                         </div>
                         {item.product && (
                           <Link href={getProductUrl(item.product)}>

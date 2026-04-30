@@ -8,6 +8,8 @@ public interface IInAppNotificationService {
 
     Notification create(Long userId, String title, String message, String type, Long referenceId);
 
+    void createForAdmins(String title, String message, String type, Long referenceId);
+
     List<Notification> getByUser(Long userId);
 
     long getUnreadCount(Long userId);

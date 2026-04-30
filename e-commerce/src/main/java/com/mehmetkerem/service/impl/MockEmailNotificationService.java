@@ -45,4 +45,15 @@ public class MockEmailNotificationService implements INotificationService {
         log.info("📬 [MOCK EMAIL] To: {} | Subject: Durum Güncelleme | Body: Sipariş {} durumu: {}",
                 toEmail, orderCode, statusLabel);
     }
+
+    @Override
+    public void sendContactFormNotification(String name, String email, String phone, String message) {
+        log.info("📩 [MOCK EMAIL] To: destek@canantika.com | Subject: İletişim Formu - {} | Email: {} | Phone: {} | Body: {}",
+                name, email, phone, message);
+    }
+
+    @Override
+    public void sendAdminNotification(String subject, String htmlBody) {
+        log.info("📩 [MOCK EMAIL] To: admin | Subject: {} | Body: {}", subject, htmlBody);
+    }
 }

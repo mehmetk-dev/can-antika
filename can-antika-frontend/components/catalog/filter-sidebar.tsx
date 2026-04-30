@@ -3,6 +3,7 @@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { priceRanges } from "@/lib/product/products"
 import type { CategoryResponse, PeriodResponse } from "@/lib/types"
@@ -12,8 +13,11 @@ interface FilterSidebarProps {
     categories: string[]
     periods: string[]
     priceRanges: string[]
+    customMinPrice: string
+    customMaxPrice: string
   }
   onFilterChange: (filterType: string, value: string) => void
+  onCustomPriceChange: (field: "customMinPrice" | "customMaxPrice", value: string) => void
   onClearFilters: () => void
   isMobile?: boolean
   apiCategories: CategoryResponse[]
@@ -23,6 +27,7 @@ interface FilterSidebarProps {
 export function FilterSidebar({
   selectedFilters,
   onFilterChange,
+  onCustomPriceChange,
   onClearFilters,
   isMobile = false,
   apiCategories,
@@ -31,7 +36,8 @@ export function FilterSidebar({
   const activeFilterCount =
     selectedFilters.categories.length +
     selectedFilters.periods.length +
-    selectedFilters.priceRanges.length
+    selectedFilters.priceRanges.length +
+    (selectedFilters.customMinPrice || selectedFilters.customMaxPrice ? 1 : 0)
 
   const content = (
     <Accordion type="multiple" defaultValue={["category"]} className="w-full">
@@ -95,6 +101,34 @@ export function FilterSidebar({
         </AccordionTrigger>
         <AccordionContent>
           <div className="space-y-3 pt-2 pb-1">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label htmlFor={`${isMobile ? "mobile-" : ""}min-price`} className="text-xs text-muted-foreground">
+                  Min
+                </Label>
+                <Input
+                  id={`${isMobile ? "mobile-" : ""}min-price`}
+                  inputMode="numeric"
+                  value={selectedFilters.customMinPrice}
+                  onChange={(e) => onCustomPriceChange("customMinPrice", e.target.value)}
+                  placeholder="₺"
+                  className="h-9 bg-muted/40"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor={`${isMobile ? "mobile-" : ""}max-price`} className="text-xs text-muted-foreground">
+                  Max
+                </Label>
+                <Input
+                  id={`${isMobile ? "mobile-" : ""}max-price`}
+                  inputMode="numeric"
+                  value={selectedFilters.customMaxPrice}
+                  onChange={(e) => onCustomPriceChange("customMaxPrice", e.target.value)}
+                  placeholder="₺"
+                  className="h-9 bg-muted/40"
+                />
+              </div>
+            </div>
             {priceRanges.map((range) => (
               <div key={range.value} className="flex items-center gap-3 group">
                 <Checkbox

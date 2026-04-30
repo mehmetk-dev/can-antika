@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { RefreshCw, AlertCircle } from "lucide-react"
+import { RefreshCw, AlertCircle, TrendingUp } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
 const CACHE_KEY = "exchange_rates_cache"
 const CACHE_TTL = 5 * 60_000 // 5 minutes
 
 interface CachedRates {
-    rates: { name: string; value: string }[]
+    rates: { name: string; value: string; code: string }[]
     ts: number
 }
 
@@ -25,11 +25,10 @@ function getCachedRates(): CachedRates | null {
 }
 
 export default function ExchangeRateTicker() {
-    const [exchangeRates, setExchangeRates] = useState<{ name: string; value: string }[]>([])
+    const [exchangeRates, setExchangeRates] = useState<{ name: string; value: string; code: string }[]>([])
     const [error, setError] = useState(false)
 
     useEffect(() => {
-        // Try cache first
         const cached = getCachedRates()
         if (cached) {
             queueMicrotask(() => setExchangeRates(cached.rates))
@@ -44,19 +43,19 @@ export default function ExchangeRateTicker() {
                 return res.json()
             })
             .then(data => {
-                if (data && data.rates && data.rates.TRY) {
+                if (data?.rates?.TRY) {
                     const tryRate = data.rates.TRY
                     const eurRate = tryRate / data.rates.EUR
+                    const gbpRate = tryRate / data.rates.GBP
                     const chfRate = tryRate / data.rates.CHF
                     const audRate = tryRate / data.rates.AUD
-                    const gbpRate = tryRate / data.rates.GBP
 
                     const rates = [
-                        { name: "USD Satış", value: `₺${tryRate.toFixed(4)}` },
-                        { name: "EUR Satış", value: `₺${eurRate.toFixed(4)}` },
-                        { name: "GBP Satış", value: `₺${gbpRate.toFixed(4)}` },
-                        { name: "CHF Satış", value: `₺${chfRate.toFixed(4)}` },
-                        { name: "AUD Satış", value: `₺${audRate.toFixed(4)}` },
+                        { code: "USD", name: "Dolar", value: `₺${tryRate.toFixed(2)}` },
+                        { code: "EUR", name: "Euro", value: `₺${eurRate.toFixed(2)}` },
+                        { code: "GBP", name: "Sterlin", value: `₺${gbpRate.toFixed(2)}` },
+                        { code: "CHF", name: "Frank", value: `₺${chfRate.toFixed(2)}` },
+                        { code: "AUD", name: "Avust. D.", value: `₺${audRate.toFixed(2)}` },
                     ]
                     setExchangeRates(rates)
                     try {
@@ -75,32 +74,44 @@ export default function ExchangeRateTicker() {
     }, [])
 
     return (
-        <>
-            <Card className="shadow-xs border-border/50 overflow-hidden relative">
-                <CardContent className="p-0 flex items-stretch">
-                    <div className="bg-emerald-700 text-emerald-50 px-4 py-2 flex items-center gap-2 m-1 rounded-md shrink-0 text-sm font-medium z-10 relative shadow-sm">
-                        <RefreshCw className="h-4 w-4" />
-                        Döviz Kurları
+        <Card className="shadow-sm border-stone-200/60 dark:border-stone-800 overflow-hidden">
+            <CardContent className="p-0">
+                <div className="flex items-stretch">
+                    {/* Label */}
+                    <div className="bg-stone-900 dark:bg-stone-800 text-white px-4 py-2.5 flex items-center gap-2 shrink-0">
+                        <TrendingUp className="h-4 w-4 text-amber-400" />
+                        <span className="text-[12px] font-semibold tracking-wide">KUR</span>
                     </div>
-                    <div className="flex-1 overflow-hidden flex items-center bg-transparent">
-                        <div className="flex items-center whitespace-nowrap gap-8 animate-ticker pr-8 relative">
-                            {[...exchangeRates, ...exchangeRates, ...exchangeRates, ...exchangeRates].map((rate, i) => (
-                                <span key={i} className="flex items-center gap-1 shrink-0">
-                                    <span className="font-semibold text-foreground">{rate.name}:</span>
-                                    <span className="text-emerald-500 font-medium">{rate.value}</span>
-                                </span>
-                            ))}
-                            {exchangeRates.length === 0 && !error && <span className="text-muted-foreground text-sm shrink-0">Yükleniyor...</span>}
-                            {error && (
-                                <span className="flex items-center gap-1.5 text-muted-foreground text-sm shrink-0">
-                                    <AlertCircle className="h-4 w-4" />
-                                    Döviz verisi alınamadı
-                                </span>
-                            )}
-                        </div>
+
+                    {/* Ticker */}
+                    <div className="flex-1 overflow-hidden flex items-center bg-stone-50/50 dark:bg-stone-900/20">
+                        {exchangeRates.length > 0 ? (
+                            <div className="flex items-center whitespace-nowrap gap-0 animate-ticker pr-8">
+                                {[...exchangeRates, ...exchangeRates, ...exchangeRates, ...exchangeRates].map((rate, i) => (
+                                    <div key={i} className="flex items-center gap-2 px-5 shrink-0">
+                                        <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 tracking-wider">
+                                            {rate.code}
+                                        </span>
+                                        <span className="text-[13px] font-semibold text-foreground tabular-nums">
+                                            {rate.value}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : error ? (
+                            <span className="flex items-center gap-1.5 text-muted-foreground text-[12px] px-4 shrink-0">
+                                <AlertCircle className="h-3.5 w-3.5" />
+                                Döviz verisi alınamadı
+                            </span>
+                        ) : (
+                            <span className="flex items-center gap-1.5 text-muted-foreground text-[12px] px-4 shrink-0">
+                                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                                Yükleniyor...
+                            </span>
+                        )}
                     </div>
-                </CardContent>
-            </Card>
-        </>
+                </div>
+            </CardContent>
+        </Card>
     )
 }

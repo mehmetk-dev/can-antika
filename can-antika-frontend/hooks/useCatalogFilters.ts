@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { productApi, categoryApi, periodApi } from "@/lib/api"
 import { priceRanges } from "@/lib/product/products"
@@ -11,7 +11,8 @@ import { CATALOG_PAGE_SIZE } from "@/lib/constants"
 const PAGE_SIZE = CATALOG_PAGE_SIZE
 
 const SORT_MAP: Record<string, { sortBy: string; direction: string }> = {
-    newest: { sortBy: "id", direction: "desc" },
+    newest: { sortBy: "createdAt", direction: "desc" },
+    oldest: { sortBy: "createdAt", direction: "asc" },
     "price-asc": { sortBy: "price", direction: "asc" },
     "price-desc": { sortBy: "price", direction: "desc" },
     name: { sortBy: "title", direction: "asc" },
@@ -37,7 +38,6 @@ export function useCatalogFilters({
     ssrPeriodId,
 }: UseCatalogFiltersOptions) {
     const searchParams = useSearchParams()
-    const router = useRouter()
     const categoryParam = searchParams.get("category")
     const periodParam = searchParams.get("period")
     const searchQuery = searchParams.get("q") || ""
@@ -53,13 +53,13 @@ export function useCatalogFilters({
     const [page, setPage] = useState(0)
 
     const [userInteracted, setUserInteracted] = useState(false)
-    const initialLoadSkipped = useRef(false)
-
     // Filter state — initialize from SSR-resolved IDs when available
     const [selectedFilters, setSelectedFilters] = useState({
         categories: ssrCategoryId ? [ssrCategoryId] : [] as string[],
         periods: ssrPeriodId ? [ssrPeriodId] : [] as string[],
         priceRanges: [] as string[],
+        customMinPrice: "",
+        customMaxPrice: "",
     })
     const [sortBy, setSortBy] = useState("newest")
 
@@ -157,6 +157,14 @@ export function useCatalogFilters({
             const maxVals = ranges.map((r) => r.max).filter((v) => v !== Number.POSITIVE_INFINITY)
             maxPrice = maxVals.length > 0 ? Math.max(...maxVals) : undefined
         }
+        const customMinPrice = Number(currentFilters.customMinPrice)
+        const customMaxPrice = Number(currentFilters.customMaxPrice)
+        if (currentFilters.customMinPrice.trim() && Number.isFinite(customMinPrice) && customMinPrice >= 0) {
+            minPrice = customMinPrice
+        }
+        if (currentFilters.customMaxPrice.trim() && Number.isFinite(customMaxPrice) && customMaxPrice >= 0) {
+            maxPrice = customMaxPrice
+        }
 
         const selectedCategoryIds = currentFilters.categories
             .map((v) => Number(v))
@@ -225,6 +233,7 @@ export function useCatalogFilters({
     const handleFilterChange = (filterType: string, value: string) => {
         setSelectedFilters((prev) => {
             const current = prev[filterType as keyof typeof prev]
+            if (!Array.isArray(current)) return prev
             const updated = current.includes(value) ? current.filter((v) => v !== value) : [...current, value]
             return { ...prev, [filterType]: updated }
         })
@@ -238,11 +247,21 @@ export function useCatalogFilters({
             categories: [],
             periods: [],
             priceRanges: [],
+            customMinPrice: "",
+            customMaxPrice: "",
         })
         setPage(0)
         setUserInteracted(true)
         setFetchTrigger((c) => c + 1)
-        router.replace("/urunler")
+        window.history.replaceState(null, "", "/urunler")
+    }
+
+    const handleCustomPriceChange = (field: "customMinPrice" | "customMaxPrice", value: string) => {
+        const normalized = value.replace(/[^\d]/g, "")
+        setSelectedFilters((prev) => ({ ...prev, [field]: normalized }))
+        setPage(0)
+        setUserInteracted(true)
+        setFetchTrigger((c) => c + 1)
     }
 
     const handleSortChange = (v: string) => {
@@ -261,7 +280,8 @@ export function useCatalogFilters({
     const activeFilterCount =
         selectedFilters.categories.length +
         selectedFilters.periods.length +
-        selectedFilters.priceRanges.length
+        selectedFilters.priceRanges.length +
+        (selectedFilters.customMinPrice || selectedFilters.customMaxPrice ? 1 : 0)
 
     const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
@@ -277,6 +297,7 @@ export function useCatalogFilters({
         sortBy,
         activeFilterCount,
         handleFilterChange,
+        handleCustomPriceChange,
         handleClearFilters,
         handleSortChange,
         handlePageChange,

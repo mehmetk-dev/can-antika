@@ -4,6 +4,7 @@ import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.model.ContactRequest;
 import com.mehmetkerem.repository.ContactRequestRepository;
 import com.mehmetkerem.service.IContactRequestService;
+import com.mehmetkerem.service.INotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,10 +15,30 @@ import org.springframework.stereotype.Service;
 public class ContactRequestServiceImpl implements IContactRequestService {
 
     private final ContactRequestRepository repository;
+    private final INotificationService notificationService;
+    private final com.mehmetkerem.service.IInAppNotificationService inAppNotificationService;
 
     @Override
     public ContactRequest submitRequest(ContactRequest request) {
-        return repository.save(request);
+        ContactRequest saved = repository.save(request);
+        notificationService.sendContactFormNotification(
+                saved.getName(),
+                saved.getEmail(),
+                (saved.getPhone() != null && !saved.getPhone().isBlank()) ? saved.getPhone() : "Belirtilmedi",
+                saved.getMessage()
+        );
+        try {
+            String message = saved.getMessage();
+            String truncated = message.length() > 120 ? message.substring(0, 120) + "..." : message;
+            inAppNotificationService.createForAdmins(
+                    "Yeni İletişim Formu: " + saved.getName(),
+                    saved.getName() + " tarafından form gönderildi: " + truncated,
+                    "NEW_CONTACT",
+                    saved.getId());
+        } catch (Exception e) {
+            // Form kaydedildi, bildirim başarısız olsa da kullanıcıya hata döndürme
+        }
+        return saved;
     }
 
     @Override

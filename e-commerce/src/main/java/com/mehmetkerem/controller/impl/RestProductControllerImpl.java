@@ -83,8 +83,8 @@ public class RestProductControllerImpl implements IRestProductController {
             @RequestParam(required = false) Double minRating,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
 
         Sort sort = resolveProductSort(sortBy, direction);
         int cappedSize = Math.min(Math.max(size, 1), 100);
@@ -115,8 +115,8 @@ public class RestProductControllerImpl implements IRestProductController {
             @RequestParam(required = false) Double minRating,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
 
         Sort sort = resolveProductSort(sortBy, direction);
         int cappedSize = Math.min(Math.max(size, 1), 100);
@@ -146,8 +146,8 @@ public class RestProductControllerImpl implements IRestProductController {
     public ResultData<CursorResponse<ProductCardResponse>> listProductCards(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
         int cappedSize = Math.min(Math.max(size, 1), 100);
         CursorResponse<ProductCardResponse> cursorResult = productService.getProductCards(page, cappedSize, sortBy, direction);
         return ResultHelper.success(cursorResult);
@@ -163,8 +163,8 @@ public class RestProductControllerImpl implements IRestProductController {
     public ResultData<CursorResponse<ProductResponse>> listProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
         int cappedSize = Math.min(Math.max(size, 1), 100);
         CursorResponse<ProductResponse> cursorResult = productService.getAllProducts(page, cappedSize, sortBy, direction);
         return ResultHelper.success(cursorResult);

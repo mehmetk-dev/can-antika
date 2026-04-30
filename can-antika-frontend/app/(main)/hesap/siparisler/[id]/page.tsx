@@ -122,11 +122,15 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {order.orderItems.map((item, i) => (
+                            {order.orderItems.map((item, i) => {
+                                const imageUrl = item.product?.imageUrls?.[0] || item.imageUrls?.[0]
+                                const itemTitle = item.title || item.product?.title || "Ürün"
+
+                                return (
                                 <div key={`${item.id}-${i}`} className="flex gap-4">
                                     <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
-                                        {item.product?.imageUrls?.[0] ? (
-                                            <Image src={item.product.imageUrls[0]} alt={item.title || item.product?.title || "Ürün"} fill sizes="80px" className="object-cover" />
+                                        {imageUrl ? (
+                                            <Image src={imageUrl} alt={itemTitle} fill sizes="80px" className="object-cover" />
                                         ) : (
                                             <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                                                 <Package className="h-6 w-6" />
@@ -136,18 +140,22 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
                                     <div className="flex-1 min-w-0">
                                         {item.product ? (
                                             <Link href={getProductUrl(item.product)} className="font-medium text-foreground hover:text-primary line-clamp-1">
-                                                {item.title || item.product.title || "Ürün"}
+                                                {itemTitle}
                                             </Link>
                                         ) : (
                                             <p className="font-medium text-foreground line-clamp-1">
-                                                {item.title || "Ürün"}
+                                                {itemTitle}
                                             </p>
                                         )}
                                         <p className="text-sm text-muted-foreground">Adet: {item.quantity}</p>
+                                        {!item.product && (
+                                            <p className="text-xs text-muted-foreground">Ürün artık yayında değil</p>
+                                        )}
                                         <p className="font-medium text-primary mt-1">₺{item.price.toLocaleString("tr-TR")}</p>
                                     </div>
                                 </div>
-                            ))}
+                                )
+                            })}
                         </CardContent>
                     </Card>
 

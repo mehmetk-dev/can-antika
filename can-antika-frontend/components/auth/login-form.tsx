@@ -6,7 +6,6 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
 import { useAuth } from "@/lib/auth/auth-context"
 import { toast } from "sonner"
@@ -25,7 +24,6 @@ export function LoginForm({ onSuccess, onSwitchToRegister, prefillEmail }: Login
     const [loginData, setLoginData] = useState({
         email: prefillEmail ?? "",
         password: "",
-        rememberMe: false,
     })
 
     useEffect(() => {
@@ -93,15 +91,6 @@ export function LoginForm({ onSuccess, onSwitchToRegister, prefillEmail }: Login
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <Checkbox
-                        id="rememberMe"
-                        checked={loginData.rememberMe}
-                        onCheckedChange={(checked) => setLoginData((prev) => ({ ...prev, rememberMe: checked as boolean }))}
-                        className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                    />
-                    <Label htmlFor="rememberMe" className="text-sm cursor-pointer text-muted-foreground">Beni hatırla</Label>
-                </div>
                 <div className="text-right -mt-1">
                     <Link href="/forgot-password" className="text-sm text-primary hover:underline">
                         Şifremi unuttum

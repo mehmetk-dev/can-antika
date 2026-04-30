@@ -2,10 +2,12 @@ package com.mehmetkerem.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import org.hibernate.annotations.Fetch;
@@ -59,6 +61,10 @@ public class Product {
 
     @Version
     private Long version;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Builder.Default
     @Column(nullable = false, columnDefinition = "boolean default false")

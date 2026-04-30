@@ -89,7 +89,7 @@ export function MobileMenu({ isOpen, onOpenChange, navigation, isAuthenticated }
                                 style={{ animationDelay: `${0.1 + navigation.length * 0.06}s` }}
                             >
                                 <span className="absolute -left-2 top-1/2 -translate-y-1/2 font-serif text-3xl font-light text-primary/10 transition-colors group-hover:text-primary/20">
-                                    04
+                                    {String(navigation.length + 1).padStart(2, "0")}
                                 </span>
                                 <div className="ml-6">
                                     <span className="font-serif text-lg text-foreground transition-colors group-hover:text-primary">

@@ -8,7 +8,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://canantika.com"
 async function fetchProducts(): Promise<ProductResponse[]> {
     try {
         const data = await fetchApiDataWithFallback<CursorResponse<ProductResponse>>(
-            "/v1/product?page=0&size=100&sortBy=id&direction=desc",
+            "/v1/product?page=0&size=100&sortBy=createdAt&direction=desc",
             { revalidate: 300, timeoutMs: 5000 }
         )
         return data?.items ?? []
@@ -150,4 +150,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [...staticPages, ...productPages, ...blogPages, ...categoryPages]
 }
-

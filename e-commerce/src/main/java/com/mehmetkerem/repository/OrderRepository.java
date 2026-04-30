@@ -33,16 +33,16 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
         boolean existsByUserIdAndOrderItemsProductId(Long userId, Long productId);
 
-        @Query("SELECT SUM(o.totalAmount) FROM Order o")
+        @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.orderStatus NOT IN ('RETURNED', 'CANCELLED')")
         BigDecimal calculateTotalRevenue();
 
         @Query("SELECT COUNT(o) FROM Order o")
         long countTotalOrders();
 
         @Query(value = "SELECT TO_CHAR(order_date, 'YYYY-MM-DD') as date, SUM(total_amount) as revenue, COUNT(*) as count "
-                        +
-                        "FROM orders WHERE order_date >= :startDate " +
-                        "GROUP BY TO_CHAR(order_date, 'YYYY-MM-DD') ORDER BY date ASC", nativeQuery = true)
+                        + "FROM orders WHERE order_date >= :startDate "
+                        + "AND order_status NOT IN ('RETURNED', 'CANCELLED') "
+                        + "GROUP BY TO_CHAR(order_date, 'YYYY-MM-DD') ORDER BY date ASC", nativeQuery = true)
         List<Object[]> getDailyStats(
                         @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate);
 
@@ -51,11 +51,15 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
                         @org.springframework.data.repository.query.Param("cutoff") java.time.LocalDateTime cutoff);
 
         @Query(value = "SELECT oi.product_id, oi.title, SUM(oi.quantity) as total_sold, SUM(oi.price * oi.quantity) as total_revenue "
-                        + "FROM order_items oi GROUP BY oi.product_id, oi.title ORDER BY total_sold DESC LIMIT :limit", nativeQuery = true)
+                        + "FROM order_items oi "
+                        + "JOIN orders o ON o.id = oi.order_id "
+                        + "WHERE o.order_status NOT IN ('RETURNED', 'CANCELLED') "
+                        + "GROUP BY oi.product_id, oi.title ORDER BY total_sold DESC LIMIT :limit", nativeQuery = true)
         List<Object[]> getTopSellingProducts(@org.springframework.data.repository.query.Param("limit") int limit);
 
         @Query(value = "SELECT o.user_id, u.name, u.email, COUNT(o.id) as order_count, SUM(o.total_amount) as total_spent, u.created_at "
                         + "FROM orders o JOIN users u ON o.user_id = u.id "
+                        + "WHERE o.order_status NOT IN ('RETURNED', 'CANCELLED') "
                         + "GROUP BY o.user_id, u.name, u.email, u.created_at ORDER BY total_spent DESC LIMIT :limit", nativeQuery = true)
         List<Object[]> getTopCustomers(@org.springframework.data.repository.query.Param("limit") int limit);
 
@@ -63,12 +67,15 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
                         + "FROM categories c "
                         + "LEFT JOIN products p ON p.category_id = c.id AND p.deleted = false "
                         + "LEFT JOIN order_items oi ON oi.product_id = p.id "
+                        + "LEFT JOIN orders o ON o.id = oi.order_id "
                         + "WHERE c.deleted = false "
+                        + "AND (o.id IS NULL OR o.order_status NOT IN ('RETURNED', 'CANCELLED')) "
                         + "GROUP BY c.id, c.name ORDER BY COALESCE(SUM(oi.price * oi.quantity), 0) DESC", nativeQuery = true)
         List<Object[]> getSalesByCategory();
 
         @Query(value = "SELECT TO_CHAR(order_date, 'YYYY-MM') as month, SUM(total_amount) as revenue, COUNT(*) as count "
                         + "FROM orders WHERE order_date >= :startDate "
+                        + "AND order_status NOT IN ('RETURNED', 'CANCELLED') "
                         + "GROUP BY TO_CHAR(order_date, 'YYYY-MM') ORDER BY month ASC", nativeQuery = true)
         List<Object[]> getMonthlyRevenue(
                         @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate);

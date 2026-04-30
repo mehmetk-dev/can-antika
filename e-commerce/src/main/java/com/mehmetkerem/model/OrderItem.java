@@ -6,8 +6,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,7 +28,14 @@ public class OrderItem {
     @Column(name = "product_id")
     private Long productId;
 
+    @Column(name = "product_slug")
+    private String productSlug;
+
     private String title;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "image_urls", columnDefinition = "jsonb")
+    private List<String> imageUrls;
 
     private int quantity;
 
