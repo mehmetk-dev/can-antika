@@ -74,37 +74,37 @@ export default function ExchangeRateTicker() {
     }, [])
 
     return (
-        <Card className="shadow-sm border-stone-200/60 dark:border-stone-800 overflow-hidden">
+        <Card className="shadow-sm border-stone-200 dark:border-stone-700 overflow-hidden bg-white dark:bg-stone-900">
             <CardContent className="p-0">
                 <div className="flex items-stretch">
                     {/* Label */}
-                    <div className="bg-stone-900 dark:bg-stone-800 text-white px-4 py-2.5 flex items-center gap-2 shrink-0">
+                    <div className="bg-stone-800 dark:bg-stone-700 text-white px-4 py-2.5 flex items-center gap-2 shrink-0">
                         <TrendingUp className="h-4 w-4 text-amber-400" />
-                        <span className="text-[12px] font-semibold tracking-wide">KUR</span>
+                        <span className="text-[12px] font-bold tracking-wide">KUR</span>
                     </div>
 
                     {/* Ticker */}
-                    <div className="flex-1 overflow-hidden flex items-center bg-stone-50/50 dark:bg-stone-900/20">
+                    <div className="flex-1 overflow-hidden flex items-center">
                         {exchangeRates.length > 0 ? (
                             <div className="flex items-center whitespace-nowrap gap-0 animate-ticker pr-8">
                                 {[...exchangeRates, ...exchangeRates, ...exchangeRates, ...exchangeRates].map((rate, i) => (
                                     <div key={i} className="flex items-center gap-2 px-5 shrink-0">
-                                        <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 tracking-wider">
+                                        <span className="text-[11px] font-bold text-stone-400 dark:text-stone-500 tracking-wider">
                                             {rate.code}
                                         </span>
-                                        <span className="text-[13px] font-semibold text-foreground tabular-nums">
+                                        <span className="text-[13px] font-semibold text-stone-900 dark:text-stone-100 tabular-nums">
                                             {rate.value}
                                         </span>
                                     </div>
                                 ))}
                             </div>
                         ) : error ? (
-                            <span className="flex items-center gap-1.5 text-muted-foreground text-[12px] px-4 shrink-0">
+                            <span className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400 text-[12px] px-4 shrink-0">
                                 <AlertCircle className="h-3.5 w-3.5" />
                                 Döviz verisi alınamadı
                             </span>
                         ) : (
-                            <span className="flex items-center gap-1.5 text-muted-foreground text-[12px] px-4 shrink-0">
+                            <span className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400 text-[12px] px-4 shrink-0">
                                 <RefreshCw className="h-3.5 w-3.5 animate-spin" />
                                 Yükleniyor...
                             </span>

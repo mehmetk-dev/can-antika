@@ -36,17 +36,14 @@ export function useAdminDashboardStats(): AdminDashboardData {
             activityLogApi.getAll(0, 5).catch(() => ({ items: [] })),
             contactApi.getUnreadCount().catch(() => ({ count: 0 })),
             bankTransferApi.getPendingCount().catch(() => ({ count: 0 })),
-            orderReturnApi.getAllReturns().catch(() => [] as { status: string }[])
-        ]).then(([ordersData, logsData, contactCount, transferCount, allReturns]) => {
+            orderReturnApi.getPendingCount().catch(() => ({ count: 0 }))
+        ]).then(([ordersData, logsData, contactCount, transferCount, pendingReturnsResult]) => {
             setRecentOrders(ordersData.items)
             setActivityLogs(logsData.items || [])
-            const pendingReturns = Array.isArray(allReturns)
-                ? allReturns.filter(r => r.status === "PENDING").length
-                : 0
             setPendingTasks({
                 contactRequests: contactCount?.count || 0,
                 bankTransfers: transferCount?.count || 0,
-                pendingReturns
+                pendingReturns: pendingReturnsResult?.count || 0
             })
         })
     }, [])

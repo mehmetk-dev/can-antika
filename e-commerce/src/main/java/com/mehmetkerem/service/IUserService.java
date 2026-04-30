@@ -48,4 +48,7 @@ public interface IUserService {
 
     /** Admin: Kullanıcı rolünü değiştir. */
     void updateUserRole(Long userId, Role newRole);
+
+    /** Cache'lenebilir admin kullanıcı ID listesi. */
+    List<Long> getAdminUserIds();
 }

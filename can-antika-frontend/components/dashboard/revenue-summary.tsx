@@ -49,35 +49,35 @@ export default function RevenueSummary({ stats }: RevenueSummaryProps) {
             sub: formatDateTR(today, "full"),
             value: todayRevenue,
             icon: DollarSign,
-            accent: "text-emerald-600 dark:text-emerald-400",
-            bg: "bg-emerald-50 dark:bg-emerald-950/20",
+            iconBg: "bg-emerald-100 dark:bg-emerald-900/40",
+            iconColor: "text-emerald-700 dark:text-emerald-400",
         },
         {
             label: "Aylık Ciro",
             sub: formatDateTR(today, "month-year"),
             value: currentMonthRevenue,
             icon: Calendar,
-            accent: "text-emerald-600 dark:text-emerald-400",
-            bg: "bg-stone-50 dark:bg-stone-900/30",
+            iconBg: "bg-amber-100 dark:bg-amber-900/40",
+            iconColor: "text-amber-700 dark:text-amber-400",
         },
         {
             label: "Yıllık Ciro",
             sub: String(today.getFullYear()),
             value: stats?.totalRevenue ? Number(stats.totalRevenue) : 0,
             icon: TrendingUp,
-            accent: "text-emerald-600 dark:text-emerald-400",
-            bg: "bg-stone-50 dark:bg-stone-900/30",
+            iconBg: "bg-sky-100 dark:bg-sky-900/40",
+            iconColor: "text-sky-700 dark:text-sky-400",
         },
     ]
 
     return (
-        <Card className="shadow-sm border-stone-200/60 dark:border-stone-800 overflow-hidden">
-            <CardHeader className="py-3 px-5 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/30">
+        <Card className="shadow-sm border-stone-200 dark:border-stone-700 overflow-hidden bg-white dark:bg-stone-900">
+            <CardHeader className="py-3 px-5 border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50">
                 <div className="flex items-center gap-2.5">
-                    <div className="h-7 w-7 rounded-md bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <div className="h-7 w-7 rounded-md bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
                         <DollarSign className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" />
                     </div>
-                    <CardTitle className="text-sm font-semibold tracking-tight">Ciro Özeti</CardTitle>
+                    <CardTitle className="text-sm font-semibold tracking-tight text-stone-900 dark:text-stone-100">Ciro Özeti</CardTitle>
                 </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -86,45 +86,45 @@ export default function RevenueSummary({ stats }: RevenueSummaryProps) {
                         key={row.label}
                         className={`flex items-center justify-between px-5 py-3.5 ${
                             i < rows.length - 1 ? "border-b border-stone-100 dark:border-stone-800" : ""
-                        } transition-colors duration-200 hover:bg-stone-50/80 dark:hover:bg-stone-900/20`}
+                        } transition-colors duration-200 hover:bg-stone-50 dark:hover:bg-stone-800/30`}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`h-8 w-8 rounded-lg ${row.bg} flex items-center justify-center`}>
-                                <row.icon className={`h-4 w-4 ${row.accent}`} />
+                            <div className={`h-8 w-8 rounded-lg ${row.iconBg} flex items-center justify-center`}>
+                                <row.icon className={`h-4 w-4 ${row.iconColor}`} />
                             </div>
                             <div>
-                                <p className="text-[13px] font-medium text-foreground">{row.label}</p>
-                                <p className="text-[11px] text-muted-foreground mt-0.5">{row.sub}</p>
+                                <p className="text-[13px] font-medium text-stone-900 dark:text-stone-100">{row.label}</p>
+                                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">{row.sub}</p>
                             </div>
                         </div>
-                        <p className={`text-sm font-bold tabular-nums ${row.accent}`}>
+                        <p className="text-sm font-bold tabular-nums text-stone-900 dark:text-stone-100">
                             {formatCurrency(row.value)}
                         </p>
                     </div>
                 ))}
 
                 {/* Geçen Ay Karşılaştırma */}
-                <div className="px-5 py-3.5 bg-stone-50/70 dark:bg-stone-900/40 border-t border-stone-100 dark:border-stone-800">
+                <div className="px-5 py-3.5 bg-stone-50 dark:bg-stone-800/30 border-t border-stone-200 dark:border-stone-700">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                            <div className="h-8 w-8 rounded-lg bg-stone-200 dark:bg-stone-700 flex items-center justify-center">
                                 {monthOverMonth !== null && monthOverMonth >= 0
                                     ? <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                                    : <TrendingDown className="h-4 w-4 text-red-500 dark:text-red-400" />
+                                    : <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
                                 }
                             </div>
                             <div>
-                                <p className="text-[13px] font-medium text-foreground">Geçen Ay</p>
-                                <p className="text-[11px] text-muted-foreground mt-0.5">Önceki Ayın Cirosu</p>
+                                <p className="text-[13px] font-medium text-stone-900 dark:text-stone-100">Geçen Ay</p>
+                                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Önceki Ayın Cirosu</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <p className="text-sm font-bold tabular-nums text-foreground">
+                            <p className="text-sm font-bold tabular-nums text-stone-900 dark:text-stone-100">
                                 {formatCurrency(previousMonthRevenue)}
                             </p>
                             {monthOverMonth !== null && (
-                                <p className={`text-[10px] font-medium mt-0.5 ${
-                                    monthOverMonth >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"
+                                <p className={`text-[11px] font-semibold mt-0.5 ${
+                                    monthOverMonth >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
                                 }`}>
                                     {monthOverMonth >= 0 ? "+" : ""}{monthOverMonth.toFixed(1)}%
                                 </p>

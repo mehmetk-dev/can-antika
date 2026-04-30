@@ -26,6 +26,46 @@ const RevenueChart = dynamic(() => import("@/components/dashboard/revenue-chart"
   ),
 })
 
+const heroCards = [
+  {
+    label: "Toplam Sipariş",
+    key: "totalOrders" as const,
+    icon: ShoppingCart,
+    borderColor: "border-l-amber-500",
+    iconBg: "bg-amber-50",
+    iconColor: "text-amber-600",
+    format: (v: number | string) => String(v || "0"),
+  },
+  {
+    label: "Toplam Ciro",
+    key: "totalRevenue" as const,
+    icon: TrendingUp,
+    borderColor: "border-l-emerald-500",
+    iconBg: "bg-emerald-50",
+    iconColor: "text-emerald-600",
+    format: (v: number | string) =>
+      v ? `₺${Number(v).toLocaleString("tr-TR", { maximumFractionDigits: 0 })}` : "₺0",
+  },
+  {
+    label: "Toplam Üye",
+    key: "totalCustomers" as const,
+    icon: Users,
+    borderColor: "border-l-sky-500",
+    iconBg: "bg-sky-50",
+    iconColor: "text-sky-600",
+    format: (v: number | string) => String(v || "0"),
+  },
+  {
+    label: "Toplam Ürün",
+    key: "totalProducts" as const,
+    icon: Package,
+    borderColor: "border-l-stone-500",
+    iconBg: "bg-stone-100",
+    iconColor: "text-stone-600",
+    format: (v: number | string) => String(v || "0"),
+  },
+] as const
+
 const shortcuts = [
   { href: "/admin/urunler", label: "Ürün Yönetimi", icon: Package },
   { href: "/admin/siparisler", label: "Siparişler", icon: ShoppingCart },
@@ -41,63 +81,31 @@ export default function AdminDashboard() {
 
       {/* Hero Stats Bar */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-stone-900 to-stone-800 text-white shadow-md hover:shadow-lg transition-shadow duration-300">
-          <CardContent className="p-4 relative z-10">
-            <div className="flex items-center justify-between mb-3">
-              <div className="h-9 w-9 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                <ShoppingCart className="h-4.5 w-4.5 text-amber-300" />
-              </div>
-              <ArrowUpRight className="h-4 w-4 text-white/30 group-hover:text-amber-300 transition-colors duration-300" />
-            </div>
-            <p className="font-serif text-2xl font-bold tracking-tight">{stats?.totalOrders || "0"}</p>
-            <p className="text-[11px] text-white/50 mt-0.5 tracking-wide uppercase">Toplam Sipariş</p>
-          </CardContent>
-          <div className="absolute -bottom-4 -right-4 h-20 w-20 rounded-full bg-amber-500/5 group-hover:bg-amber-500/10 transition-colors duration-500" />
-        </Card>
-
-        <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-emerald-800 to-emerald-700 text-white shadow-md hover:shadow-lg transition-shadow duration-300">
-          <CardContent className="p-4 relative z-10">
-            <div className="flex items-center justify-between mb-3">
-              <div className="h-9 w-9 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                <TrendingUp className="h-4.5 w-4.5 text-emerald-200" />
-              </div>
-              <ArrowUpRight className="h-4 w-4 text-white/30 group-hover:text-emerald-200 transition-colors duration-300" />
-            </div>
-            <p className="font-serif text-2xl font-bold tracking-tight">
-              {stats?.totalRevenue ? `₺${Number(stats.totalRevenue).toLocaleString("tr-TR", { maximumFractionDigits: 0 })}` : "₺0"}
-            </p>
-            <p className="text-[11px] text-white/50 mt-0.5 tracking-wide uppercase">Toplam Ciro</p>
-          </CardContent>
-          <div className="absolute -bottom-4 -right-4 h-20 w-20 rounded-full bg-white/5 group-hover:bg-white/10 transition-colors duration-500" />
-        </Card>
-
-        <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-stone-100 to-stone-50 dark:from-stone-900 dark:to-stone-800 shadow-md hover:shadow-lg transition-shadow duration-300">
-          <CardContent className="p-4 relative z-10">
-            <div className="flex items-center justify-between mb-3">
-              <div className="h-9 w-9 rounded-lg bg-stone-200 dark:bg-white/10 flex items-center justify-center">
-                <Users className="h-4.5 w-4.5 text-stone-600 dark:text-stone-300" />
-              </div>
-              <ArrowUpRight className="h-4 w-4 text-stone-300 dark:text-white/30 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors duration-300" />
-            </div>
-            <p className="font-serif text-2xl font-bold tracking-tight text-foreground">{stats?.totalCustomers || "0"}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5 tracking-wide uppercase">Toplam Üye</p>
-          </CardContent>
-          <div className="absolute -bottom-4 -right-4 h-20 w-20 rounded-full bg-amber-500/5 group-hover:bg-amber-500/10 transition-colors duration-500" />
-        </Card>
-
-        <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-stone-100 to-stone-50 dark:from-stone-900 dark:to-stone-800 shadow-md hover:shadow-lg transition-shadow duration-300">
-          <CardContent className="p-4 relative z-10">
-            <div className="flex items-center justify-between mb-3">
-              <div className="h-9 w-9 rounded-lg bg-stone-200 dark:bg-white/10 flex items-center justify-center">
-                <Package className="h-4.5 w-4.5 text-stone-600 dark:text-stone-300" />
-              </div>
-              <ArrowUpRight className="h-4 w-4 text-stone-300 dark:text-white/30 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors duration-300" />
-            </div>
-            <p className="font-serif text-2xl font-bold tracking-tight text-foreground">{stats?.totalProducts || "0"}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5 tracking-wide uppercase">Toplam Ürün</p>
-          </CardContent>
-          <div className="absolute -bottom-4 -right-4 h-20 w-20 rounded-full bg-amber-500/5 group-hover:bg-amber-500/10 transition-colors duration-500" />
-        </Card>
+        {heroCards.map((card) => {
+          const Icon = card.icon
+          const value = stats?.[card.key]
+          return (
+            <Card
+              key={card.key}
+              className={`group relative overflow-hidden border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 border-l-4 ${card.borderColor} shadow-sm hover:shadow-md transition-shadow duration-300`}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`h-9 w-9 rounded-lg ${card.iconBg} dark:bg-stone-800 flex items-center justify-center`}>
+                    <Icon className={`h-4 w-4 ${card.iconColor} dark:text-stone-300`} />
+                  </div>
+                  <ArrowUpRight className="h-4 w-4 text-stone-300 dark:text-stone-600 group-hover:text-amber-500 transition-colors duration-300" />
+                </div>
+                <p className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100 tabular-nums">
+                  {card.format(value as number)}
+                </p>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 tracking-wide uppercase font-medium">
+                  {card.label}
+                </p>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
 
       {/* Shortcuts */}
@@ -107,7 +115,7 @@ export default function AdminDashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="gap-2 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white hover:border-stone-300 dark:hover:border-stone-600 transition-all duration-200 whitespace-nowrap rounded-lg shadow-none"
+              className="gap-2 border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white hover:border-stone-400 dark:hover:border-stone-500 transition-all duration-200 whitespace-nowrap rounded-lg shadow-none"
             >
               <Icon className="h-3.5 w-3.5" />
               {label}
@@ -122,13 +130,13 @@ export default function AdminDashboard() {
         <div className="lg:col-span-8 space-y-5">
 
           {/* Sipariş Raporları Chart */}
-          <Card className="shadow-sm border-stone-200/60 dark:border-stone-800 overflow-hidden">
-            <CardHeader className="py-3.5 px-5 border-b border-stone-100 dark:border-stone-800 flex flex-row items-center justify-between bg-stone-50/50 dark:bg-stone-900/30">
+          <Card className="shadow-sm border-stone-200 dark:border-stone-700 overflow-hidden bg-white dark:bg-stone-900">
+            <CardHeader className="py-3.5 px-5 border-b border-stone-200 dark:border-stone-700 flex flex-row items-center justify-between bg-stone-50 dark:bg-stone-800/50">
               <div className="flex items-center gap-2.5">
-                <div className="h-7 w-7 rounded-md bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-md bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
                   <BarChart3 className="h-3.5 w-3.5 text-amber-700 dark:text-amber-400" />
                 </div>
-                <CardTitle className="text-sm font-semibold tracking-tight">Sipariş Raporları</CardTitle>
+                <CardTitle className="text-sm font-semibold tracking-tight text-stone-900 dark:text-stone-100">Sipariş Raporları</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-5">
@@ -140,8 +148,8 @@ export default function AdminDashboard() {
                     size="sm"
                     className={`h-7 px-3 text-[11px] font-medium rounded-md transition-all duration-200 ${
                       chartRange === value
-                        ? "bg-stone-900 hover:bg-stone-800 text-white dark:bg-white dark:text-stone-900 dark:hover:bg-stone-100 shadow-sm"
-                        : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800"
+                        ? "bg-stone-900 hover:bg-stone-800 text-white dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200 shadow-sm"
+                        : "text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800"
                     }`}
                     onClick={() => setChartRange(value)}
                   >
@@ -163,13 +171,13 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <RecentOrderCard recentOrders={recentOrders} />
 
-            <Card className="shadow-sm border-stone-200/60 dark:border-stone-800">
-              <CardHeader className="py-3 px-5 border-b border-stone-100 dark:border-stone-800">
-                <CardTitle className="text-sm font-semibold tracking-tight">Kampanya Süresi Tanımlı Ürünler</CardTitle>
+            <Card className="shadow-sm border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
+              <CardHeader className="py-3 px-5 border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50">
+                <CardTitle className="text-sm font-semibold tracking-tight text-stone-900 dark:text-stone-100">Kampanya Süresi Tanımlı Ürünler</CardTitle>
               </CardHeader>
               <CardContent className="p-5">
-                <div className="text-center py-8 text-sm text-stone-400 dark:text-stone-500">
-                  <Package className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                <div className="text-center py-8 text-sm text-stone-500 dark:text-stone-400">
+                  <Package className="h-8 w-8 mx-auto mb-2 opacity-40" />
                   Henüz kampanya tanımlı ürün yok.
                 </div>
               </CardContent>
@@ -184,14 +192,14 @@ export default function AdminDashboard() {
           <RevenueSummary stats={stats} />
 
           {/* İşlem Günlükleri */}
-          <Card className="shadow-sm border-stone-200/60 dark:border-stone-800">
-            <CardHeader className="py-3 px-5 border-b border-stone-100 dark:border-stone-800">
-              <CardTitle className="text-sm font-semibold tracking-tight">
-                İşlem Günlükleri <span className="text-muted-foreground font-normal">· {formatDateTR(new Date(), "full")}</span>
+          <Card className="shadow-sm border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
+            <CardHeader className="py-3 px-5 border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50">
+              <CardTitle className="text-sm font-semibold tracking-tight text-stone-900 dark:text-stone-100">
+                İşlem Günlükleri <span className="text-stone-500 dark:text-stone-400 font-normal">· {formatDateTR(new Date(), "full")}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5">
-              <div className="text-center py-6 text-sm text-stone-400 dark:text-stone-500">
+              <div className="text-center py-6 text-sm text-stone-500 dark:text-stone-400">
                 Henüz işlem kaydı bulunmuyor.
               </div>
             </CardContent>

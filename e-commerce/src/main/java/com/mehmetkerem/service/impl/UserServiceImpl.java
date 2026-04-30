@@ -3,6 +3,7 @@ package com.mehmetkerem.service.impl;
 import com.mehmetkerem.dto.request.ProfileUpdateRequest;
 import com.mehmetkerem.dto.request.UserRequest;
 import com.mehmetkerem.dto.response.UserResponse;
+import com.mehmetkerem.enums.Role;
 import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.ExceptionMessages;
 import com.mehmetkerem.exception.NotFoundException;
@@ -13,6 +14,7 @@ import com.mehmetkerem.service.IUserService;
 import com.mehmetkerem.service.IAddressService;
 import com.mehmetkerem.util.Messages;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -229,9 +231,17 @@ public class UserServiceImpl implements IUserService {
 
     @Transactional
     @Override
-    public void updateUserRole(Long userId, com.mehmetkerem.enums.Role newRole) {
+    public void updateUserRole(Long userId, Role newRole) {
         User user = getUserById(userId);
         user.setRole(newRole);
         userRepository.save(user);
+    }
+
+    @Override
+    @Cacheable(cacheNames = "adminUserIds", key = "'all'")
+    public List<Long> getAdminUserIds() {
+        return userRepository.findAllByRole(Role.ADMIN).stream()
+                .map(User::getId)
+                .toList();
     }
 }

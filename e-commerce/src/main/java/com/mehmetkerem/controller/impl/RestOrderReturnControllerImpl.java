@@ -50,6 +50,13 @@ public class RestOrderReturnControllerImpl implements IRestOrderReturnController
     }
 
     @Override
+    @GetMapping("/count-pending")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResultData<java.util.Map<String, Long>> getPendingReturnCount() {
+        return ResultHelper.success(java.util.Map.of("count", orderReturnService.getPendingReturnCount()));
+    }
+
+    @Override
     @PutMapping("/{returnId}/approve")
     @PreAuthorize("hasRole('ADMIN')")
     public ResultData<OrderReturnResponse> approve(@PathVariable Long returnId) {

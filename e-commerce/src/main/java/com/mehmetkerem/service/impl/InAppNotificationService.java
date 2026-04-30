@@ -1,10 +1,9 @@
 package com.mehmetkerem.service.impl;
 
-import com.mehmetkerem.enums.Role;
 import com.mehmetkerem.model.Notification;
 import com.mehmetkerem.repository.NotificationRepository;
-import com.mehmetkerem.repository.UserRepository;
 import com.mehmetkerem.service.IInAppNotificationService;
+import com.mehmetkerem.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,7 @@ import java.util.List;
 public class InAppNotificationService implements IInAppNotificationService {
 
     private final NotificationRepository repository;
-    private final UserRepository userRepository;
+    private final IUserService userService;
 
     @Override
     @Transactional
@@ -35,10 +34,7 @@ public class InAppNotificationService implements IInAppNotificationService {
     @Override
     @Transactional
     public void createForAdmins(String title, String message, String type, Long referenceId) {
-        List<Long> adminIds = userRepository.findAllByRole(Role.ADMIN)
-                .stream()
-                .map(com.mehmetkerem.model.User::getId)
-                .toList();
+        List<Long> adminIds = userService.getAdminUserIds();
         if (adminIds.isEmpty()) {
             log.warn("createForAdmins: Hiç admin kullanıcı bulunamadı. Bildirim oluşturulmadı.");
             return;

@@ -13,6 +13,8 @@ public interface IOrderReturnService {
 
     List<OrderReturnResponse> getAllReturns();
 
+    long getPendingReturnCount();
+
     OrderReturnResponse approve(Long returnId);
 
     OrderReturnResponse reject(Long returnId);

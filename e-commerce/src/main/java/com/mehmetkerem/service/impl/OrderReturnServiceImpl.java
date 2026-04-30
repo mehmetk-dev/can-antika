@@ -90,6 +90,11 @@ public class OrderReturnServiceImpl implements IOrderReturnService {
     }
 
     @Override
+    public long getPendingReturnCount() {
+        return orderReturnRepository.countByStatus(ReturnStatus.PENDING);
+    }
+
+    @Override
     @Transactional
     public OrderReturnResponse approve(Long returnId) {
         OrderReturn orderReturn = getById(returnId);

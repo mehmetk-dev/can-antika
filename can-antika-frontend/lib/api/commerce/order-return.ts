@@ -11,6 +11,9 @@ export const orderReturnApi = {
     getAllReturns: () =>
         api.get<OrderReturnResponse[]>("/v1/order/return/all"),
 
+    getPendingCount: () =>
+        api.get<{ count: number }>("/v1/order/return/count-pending"),
+
     approve: (returnId: number) =>
         api.put<OrderReturnResponse>(`/v1/order/return/${returnId}/approve`),
 

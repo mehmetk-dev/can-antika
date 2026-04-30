@@ -7,6 +7,8 @@ import com.mehmetkerem.model.SiteSettings;
 import com.mehmetkerem.repository.SiteSettingsRepository;
 import com.mehmetkerem.service.ISiteSettingsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ public class SiteSettingsService implements ISiteSettingsService {
     private final ISiteSettingsMapper mapper;
 
     @Override
+    @Cacheable(cacheNames = "siteSettings", key = "'single'")
     public SiteSettings get() {
         return repository.findAll().stream().findFirst()
                 .orElseGet(() -> repository.save(SiteSettings.builder().build()));
@@ -35,6 +38,7 @@ public class SiteSettingsService implements ISiteSettingsService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "siteSettings", key = "'single'")
     public SiteSettingsResponse updateSettings(SiteSettingsRequest request) {
         SiteSettings existing = get();
         mapper.applyRequest(existing, request);
