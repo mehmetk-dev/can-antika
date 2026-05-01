@@ -36,7 +36,7 @@ public class CacheConfig {
         GenericJackson2JsonRedisSerializer serializer = redisCacheSerializer();
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .prefixCacheNameWith("canantika:v2:")
+                .prefixCacheNameWith("canantika:v3:")
                 .entryTtl(Duration.ofMinutes(60))
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair
