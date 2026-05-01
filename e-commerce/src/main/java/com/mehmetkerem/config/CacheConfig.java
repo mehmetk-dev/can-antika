@@ -14,6 +14,7 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JacksonObjectReader;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 import java.time.Duration;
@@ -32,8 +33,7 @@ public class CacheConfig {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        GenericJackson2JsonRedisSerializer serializer =
-                new GenericJackson2JsonRedisSerializer(redisCacheObjectMapper());
+        GenericJackson2JsonRedisSerializer serializer = redisCacheSerializer();
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .prefixCacheNameWith("canantika:v2:")
@@ -46,6 +46,14 @@ public class CacheConfig {
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
                 .build();
+    }
+
+    static GenericJackson2JsonRedisSerializer redisCacheSerializer() {
+        return new GenericJackson2JsonRedisSerializer(
+                redisCacheObjectMapper(),
+                JacksonObjectReader.create(),
+                (mapper, source) -> mapper.writerFor(Object.class).writeValueAsBytes(source)
+        );
     }
 
     static ObjectMapper redisCacheObjectMapper() {
