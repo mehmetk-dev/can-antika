@@ -29,8 +29,10 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -52,6 +54,9 @@ public class SecurityConfig {
         @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
         private String allowedOrigins;
 
+        @Value("${app.frontend-url:}")
+        private String frontendUrl;
+
         @Value("${app.cors.require-https-on-prod:true}")
         private boolean requireHttpsOnProd;
 
@@ -60,10 +65,15 @@ public class SecurityConfig {
 
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
-                List<String> configuredOrigins = Arrays.stream(allowedOrigins.split(","))
+                Set<String> originSet = Arrays.stream(allowedOrigins.split(","))
                                 .map(String::trim)
                                 .filter(origin -> !origin.isBlank())
-                                .collect(Collectors.toList());
+                                .collect(Collectors.toCollection(LinkedHashSet::new));
+                addOrigin(originSet, frontendUrl);
+                addOrigin(originSet, "https://canantika.com");
+                addOrigin(originSet, "https://www.canantika.com");
+
+                List<String> configuredOrigins = List.copyOf(originSet);
 
                 if (isProductionProfileActive() && requireHttpsOnProd) {
                         configuredOrigins = configuredOrigins.stream()
@@ -102,6 +112,12 @@ public class SecurityConfig {
                 return lowered.startsWith("http://localhost")
                                 || lowered.startsWith("http://127.0.0.1")
                                 || lowered.startsWith("http://[::1]");
+        }
+
+        private void addOrigin(Set<String> origins, String origin) {
+                if (origin != null && !origin.isBlank()) {
+                        origins.add(origin.trim().replaceAll("/+$", ""));
+                }
         }
 
         @Bean
