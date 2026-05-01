@@ -17,7 +17,9 @@ import type { ProductResponse, ProductCardResponse } from "@/lib/types"
 
 const PurchaseDialog = dynamic(() => import("@/components/product/product-dialogs").then(m => ({ default: m.PurchaseDialog })))
 const ContactDialog = dynamic(() => import("@/components/product/product-dialogs").then(m => ({ default: m.ContactDialog })))
-const ProductReviews = dynamic(() => import("@/components/product/product-reviews").then(m => ({ default: m.ProductReviews })))
+const ProductReviews = dynamic(() => import("@/components/product/product-reviews").then(m => ({ default: m.ProductReviews })), {
+  loading: () => <div className="min-h-[280px]" />,
+})
 const RelatedProducts = dynamic(() => import("@/components/product/related-products").then(m => ({ default: m.RelatedProducts })))
 const WhatsAppButton = dynamic(() => import("@/components/product/whatsapp-button").then(m => ({ default: m.WhatsAppButton })))
 
@@ -292,7 +294,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
 
 
 
-              <TabsContent value="reviews" className="mt-0 outline-none pt-4">
+              <TabsContent value="reviews" className="mt-0 min-h-[360px] outline-none pt-4">
                 {activeTab === "reviews" ? <ProductReviews productId={product.id} /> : null}
               </TabsContent>
             </Tabs>
@@ -357,7 +359,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
 
               <AccordionItem value="reviews" className="border-border/40 border-b-0">
                 <AccordionTrigger className="font-serif text-lg tracking-wide hover:no-underline">Yorumlar</AccordionTrigger>
-                <AccordionContent>
+                <AccordionContent className="min-h-[320px]">
                   {activeTab === "reviews" ? <ProductReviews productId={product.id} /> : null}
                 </AccordionContent>
               </AccordionItem>

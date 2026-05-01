@@ -79,7 +79,8 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
     }
 
     return (
-        <div className="max-w-3xl space-y-8">
+        <div className="grid min-h-[280px] gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(280px,0.85fr)] lg:items-start lg:gap-14">
+            <div className="space-y-8">
             {/* Average */}
             <div className="flex items-center gap-6">
                 <div className="text-center">
@@ -143,12 +144,15 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
                     </p>
                 </div>
             )}
+            </div>
+
+            <div className="min-h-[180px]">
 
             {/* Review list */}
             {loading ? (
                 <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-[#d4af37]" /></div>
             ) : reviews.length === 0 ? (
-                <div className="py-12 text-center">
+                <div className="flex min-h-[180px] flex-col justify-center py-6 text-center lg:items-start lg:text-left">
                     <p className="font-serif text-2xl font-light text-[#5c4a3d] opacity-50 mb-3">Sessiz Sular</p>
                     <p className="font-light text-sm text-muted-foreground">Koleksiyonumuzdaki bu eser için ilk yorumu siz bırakın.</p>
                 </div>
@@ -179,6 +183,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
                     ))}
                 </div>
             )}
+            </div>
         </div>
     )
 }
