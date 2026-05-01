@@ -2,12 +2,9 @@ package com.mehmetkerem.config;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.mehmetkerem.dto.response.CategoryResponse;
-import com.mehmetkerem.dto.response.PeriodResponse;
-import com.mehmetkerem.model.BlogPost;
-import com.mehmetkerem.model.Product;
-import com.mehmetkerem.model.SiteSettings;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,8 +19,8 @@ import java.time.Duration;
 
 /**
  * Redis tabanlı cache konfigürasyonu.
- * DTO bazlı mix-in ile sadece cache'lenen tiplere @class eklenir,
- * koleksiyon kök tipine type info eklenmez (PROPERTY'nin liste hatasını önler).
+ * Sadece com.mehmetkerem.* paketindeki tiplere @class eklenir,
+ * java.util.* koleksiyon tipleri type info almaz — liste hatası önlenir.
  */
 @Configuration
 @EnableCaching
@@ -34,13 +31,14 @@ public class CacheConfig {
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-
-        // Sadece cache'lenen DTO/entity tiplerine @class ekle — global typing yok
-        mapper.addMixIn(CategoryResponse.class, CacheTypeMixin.class);
-        mapper.addMixIn(PeriodResponse.class, CacheTypeMixin.class);
-        mapper.addMixIn(BlogPost.class, CacheTypeMixin.class);
-        mapper.addMixIn(Product.class, CacheTypeMixin.class);
-        mapper.addMixIn(SiteSettings.class, CacheTypeMixin.class);
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.activateDefaultTyping(
+                BasicPolymorphicTypeValidator.builder()
+                        .allowIfBaseType("com.mehmetkerem.")
+                        .build(),
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY
+        );
 
         GenericJackson2JsonRedisSerializer serializer =
                 new GenericJackson2JsonRedisSerializer(mapper);
@@ -56,7 +54,4 @@ public class CacheConfig {
                 .cacheDefaults(config)
                 .build();
     }
-
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
-    private interface CacheTypeMixin {}
 }
