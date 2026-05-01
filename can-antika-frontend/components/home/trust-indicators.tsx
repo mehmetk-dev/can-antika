@@ -44,27 +44,6 @@ export function TrustIndicators() {
       title: "1982'den Beri",
       description: "40 yılı aşkın deneyim ve binlerce mutlu koleksiyoner.",
     },
-    {
-      icon: (
-        <svg viewBox="0 0 48 48" className="h-full w-full">
-          <circle cx="24" cy="24" r="18" stroke="currentColor" strokeWidth="1.5" fill="none" />
-          <path
-            d="M16,24 L22,30 L32,18"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-          />
-          <circle cx="24" cy="6" r="2" fill="currentColor" />
-          <circle cx="24" cy="42" r="2" fill="currentColor" />
-          <circle cx="6" cy="24" r="2" fill="currentColor" />
-          <circle cx="42" cy="24" r="2" fill="currentColor" />
-        </svg>
-      ),
-      title: "İade Garantisi",
-      description: "14 gün içinde koşulsuz iade garantisi.",
-    },
   ]
 
   return (
@@ -80,7 +59,7 @@ export function TrustIndicators() {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {indicators.map((indicator, i) => (
             <div key={indicator.title} className="group relative text-center">
               {/* Dekoratif çerçeve */}

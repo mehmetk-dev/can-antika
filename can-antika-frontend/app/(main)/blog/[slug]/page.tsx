@@ -92,14 +92,16 @@ export default async function BlogDetailPage({
 }
 
 async function BlogDetailResolver({ slug }: { slug: string }) {
-  const post = await fetchBlogPost(slug)
+  const [post, categoriesResult] = await Promise.all([
+    fetchBlogPost(slug),
+    fetchBlogCategories().catch(() => [] as BlogCategory[]),
+  ])
 
   if (!post) {
     notFound()
   }
 
-  // Fetch categories in parallel — non-blocking for main content
-  const categories = await fetchBlogCategories().then(c => Array.isArray(c) ? c : []).catch(() => [] as BlogCategory[])
+  const categories = Array.isArray(categoriesResult) ? categoriesResult : []
   const categoryName = categories.find((c) => c.id === post.categoryId)?.name || ""
 
   const formatDate = (dateStr: string) => {

@@ -35,7 +35,7 @@ public class CacheConfig {
                         .allowIfBaseType(Object.class)
                         .build(),
                 ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY
+                JsonTypeInfo.As.WRAPPER_OBJECT
         );
 
         GenericJackson2JsonRedisSerializer serializer =

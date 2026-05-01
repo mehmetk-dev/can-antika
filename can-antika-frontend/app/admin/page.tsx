@@ -17,7 +17,7 @@ import { CHART_RANGES } from "@/lib/constants"
 const RevenueChart = dynamic(() => import("@/components/dashboard/revenue-chart"), {
   ssr: false,
   loading: () => (
-    <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+    <div className="h-full flex items-center justify-center text-sm text-stone-400">
       <div className="flex flex-col items-center gap-2">
         <BarChart3 className="h-8 w-8 animate-pulse opacity-40" />
         <span>Grafik yükleniyor...</span>
@@ -31,18 +31,20 @@ const heroCards = [
     label: "Toplam Sipariş",
     key: "totalOrders" as const,
     icon: ShoppingCart,
+    gradient: "from-amber-50 to-orange-50",
     borderColor: "border-l-amber-500",
-    iconBg: "bg-amber-50",
-    iconColor: "text-amber-600",
+    iconBg: "bg-amber-100",
+    iconColor: "text-amber-700",
     format: (v: number | string) => String(v || "0"),
   },
   {
     label: "Toplam Ciro",
     key: "totalRevenue" as const,
     icon: TrendingUp,
+    gradient: "from-emerald-50 to-teal-50",
     borderColor: "border-l-emerald-500",
-    iconBg: "bg-emerald-50",
-    iconColor: "text-emerald-600",
+    iconBg: "bg-emerald-100",
+    iconColor: "text-emerald-700",
     format: (v: number | string) =>
       v ? `₺${Number(v).toLocaleString("tr-TR", { maximumFractionDigits: 0 })}` : "₺0",
   },
@@ -50,17 +52,19 @@ const heroCards = [
     label: "Toplam Üye",
     key: "totalCustomers" as const,
     icon: Users,
+    gradient: "from-sky-50 to-blue-50",
     borderColor: "border-l-sky-500",
-    iconBg: "bg-sky-50",
-    iconColor: "text-sky-600",
+    iconBg: "bg-sky-100",
+    iconColor: "text-sky-700",
     format: (v: number | string) => String(v || "0"),
   },
   {
     label: "Toplam Ürün",
     key: "totalProducts" as const,
     icon: Package,
-    borderColor: "border-l-stone-500",
-    iconBg: "bg-stone-100",
+    gradient: "from-stone-50 to-stone-100",
+    borderColor: "border-l-stone-400",
+    iconBg: "bg-stone-200",
     iconColor: "text-stone-600",
     format: (v: number | string) => String(v || "0"),
   },
@@ -87,19 +91,19 @@ export default function AdminDashboard() {
           return (
             <Card
               key={card.key}
-              className={`group relative overflow-hidden border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 border-l-4 ${card.borderColor} shadow-sm hover:shadow-md transition-shadow duration-300`}
+              className={`group relative overflow-hidden border border-stone-200 bg-gradient-to-br ${card.gradient} border-l-4 ${card.borderColor} shadow-sm hover:shadow-md transition-shadow duration-300`}
             >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className={`h-9 w-9 rounded-lg ${card.iconBg} dark:bg-stone-800 flex items-center justify-center`}>
-                    <Icon className={`h-4 w-4 ${card.iconColor} dark:text-stone-300`} />
+                  <div className={`h-9 w-9 rounded-lg ${card.iconBg} flex items-center justify-center`}>
+                    <Icon className={`h-4 w-4 ${card.iconColor}`} />
                   </div>
-                  <ArrowUpRight className="h-4 w-4 text-stone-300 dark:text-stone-600 group-hover:text-amber-500 transition-colors duration-300" />
+                  <ArrowUpRight className="h-4 w-4 text-stone-300 group-hover:text-amber-500 transition-colors duration-300" />
                 </div>
-                <p className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100 tabular-nums">
+                <p className="text-2xl font-bold tracking-tight text-stone-800 tabular-nums">
                   {card.format(value as number)}
                 </p>
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 tracking-wide uppercase font-medium">
+                <p className="text-xs text-stone-500 mt-1 tracking-wide uppercase font-medium">
                   {card.label}
                 </p>
               </CardContent>
@@ -115,7 +119,7 @@ export default function AdminDashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="gap-2 border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white hover:border-stone-400 dark:hover:border-stone-500 transition-all duration-200 whitespace-nowrap rounded-lg shadow-none"
+              className="gap-2 border-stone-300 text-stone-700 bg-white hover:bg-amber-50 hover:text-amber-800 hover:border-amber-300 transition-all duration-200 whitespace-nowrap rounded-lg shadow-none"
             >
               <Icon className="h-3.5 w-3.5" />
               {label}
@@ -130,13 +134,13 @@ export default function AdminDashboard() {
         <div className="lg:col-span-8 space-y-5">
 
           {/* Sipariş Raporları Chart */}
-          <Card className="shadow-sm border-stone-200 dark:border-stone-700 overflow-hidden bg-white dark:bg-stone-900">
-            <CardHeader className="py-3.5 px-5 border-b border-stone-200 dark:border-stone-700 flex flex-row items-center justify-between bg-stone-50 dark:bg-stone-800/50">
+          <Card className="shadow-sm border-stone-200 overflow-hidden bg-white">
+            <CardHeader className="py-3.5 px-5 border-b border-stone-200 flex flex-row items-center justify-between bg-stone-50">
               <div className="flex items-center gap-2.5">
-                <div className="h-7 w-7 rounded-md bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-                  <BarChart3 className="h-3.5 w-3.5 text-amber-700 dark:text-amber-400" />
+                <div className="h-7 w-7 rounded-md bg-amber-100 flex items-center justify-center">
+                  <BarChart3 className="h-3.5 w-3.5 text-amber-700" />
                 </div>
-                <CardTitle className="text-sm font-semibold tracking-tight text-stone-900 dark:text-stone-100">Sipariş Raporları</CardTitle>
+                <CardTitle className="text-sm font-semibold tracking-tight text-stone-800">Sipariş Raporları</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-5">
@@ -148,8 +152,8 @@ export default function AdminDashboard() {
                     size="sm"
                     className={`h-7 px-3 text-[11px] font-medium rounded-md transition-all duration-200 ${
                       chartRange === value
-                        ? "bg-stone-900 hover:bg-stone-800 text-white dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200 shadow-sm"
-                        : "text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800"
+                        ? "bg-stone-800 hover:bg-stone-700 text-white shadow-sm"
+                        : "text-stone-500 hover:text-stone-800 hover:bg-stone-100"
                     }`}
                     onClick={() => setChartRange(value)}
                   >
@@ -171,12 +175,12 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <RecentOrderCard recentOrders={recentOrders} />
 
-            <Card className="shadow-sm border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
-              <CardHeader className="py-3 px-5 border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50">
-                <CardTitle className="text-sm font-semibold tracking-tight text-stone-900 dark:text-stone-100">Kampanya Süresi Tanımlı Ürünler</CardTitle>
+            <Card className="shadow-sm border-stone-200 bg-white">
+              <CardHeader className="py-3 px-5 border-b border-stone-200 bg-stone-50">
+                <CardTitle className="text-sm font-semibold tracking-tight text-stone-800">Kampanya Süresi Tanımlı Ürünler</CardTitle>
               </CardHeader>
               <CardContent className="p-5">
-                <div className="text-center py-8 text-sm text-stone-500 dark:text-stone-400">
+                <div className="text-center py-8 text-sm text-stone-400">
                   <Package className="h-8 w-8 mx-auto mb-2 opacity-40" />
                   Henüz kampanya tanımlı ürün yok.
                 </div>
@@ -192,14 +196,14 @@ export default function AdminDashboard() {
           <RevenueSummary stats={stats} />
 
           {/* İşlem Günlükleri */}
-          <Card className="shadow-sm border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
-            <CardHeader className="py-3 px-5 border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50">
-              <CardTitle className="text-sm font-semibold tracking-tight text-stone-900 dark:text-stone-100">
-                İşlem Günlükleri <span className="text-stone-500 dark:text-stone-400 font-normal">· {formatDateTR(new Date(), "full")}</span>
+          <Card className="shadow-sm border-stone-200 bg-white">
+            <CardHeader className="py-3 px-5 border-b border-stone-200 bg-stone-50">
+              <CardTitle className="text-sm font-semibold tracking-tight text-stone-800">
+                İşlem Günlükleri <span className="text-stone-400 font-normal">· {formatDateTR(new Date(), "full")}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5">
-              <div className="text-center py-6 text-sm text-stone-500 dark:text-stone-400">
+              <div className="text-center py-6 text-sm text-stone-400">
                 Henüz işlem kaydı bulunmuyor.
               </div>
             </CardContent>

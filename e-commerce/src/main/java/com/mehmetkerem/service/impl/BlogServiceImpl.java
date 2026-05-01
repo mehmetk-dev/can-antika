@@ -23,7 +23,6 @@ public class BlogServiceImpl implements IBlogService {
     private final BlogCategoryRepository categoryRepository;
 
     @Override
-    @Cacheable(cacheNames = "blog:posts", key = "'published;p=' + #page + ';s=' + #size")
     public Page<BlogPost> getPublishedPosts(int page, int size) {
         return postRepository.findByPublishedTrueOrderByCreatedAtDesc(PageRequest.of(page, size));
     }

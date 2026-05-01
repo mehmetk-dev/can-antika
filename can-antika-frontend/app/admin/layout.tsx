@@ -20,7 +20,25 @@ export default function AdminLayout({
 
   return (
     <AuthGuard adminOnly>
-      <div className="min-h-screen bg-muted/30">
+      <div
+        className="min-h-screen"
+        style={{
+          colorScheme: "light",
+          // Force light mode CSS variables
+          // @ts-ignore - CSS custom props
+          "--background": "oklch(0.97 0.01 90)",
+          "--foreground": "oklch(0.25 0.02 150)",
+          "--card": "oklch(0.98 0.008 85)",
+          "--card-foreground": "oklch(0.25 0.02 150)",
+          "--popover": "oklch(0.98 0.008 85)",
+          "--popover-foreground": "oklch(0.25 0.02 150)",
+          "--muted": "oklch(0.92 0.01 145)",
+          "--muted-foreground": "oklch(0.45 0.04 145)",
+          "--border": "oklch(0.88 0.02 145)",
+          "--input": "oklch(0.92 0.01 145)",
+          backgroundColor: "#f8f6f1",
+        } as React.CSSProperties}
+      >
         <AdminSidebar className="hidden lg:flex" />
         <div className="lg:pl-64">
           <AdminHeader />
