@@ -32,7 +32,7 @@ async function fetchBlogPosts(): Promise<BlogPost[]> {
 async function fetchCategories(): Promise<CategoryResponse[]> {
     try {
         const data = await fetchApiDataWithFallback<CategoryResponse[]>(
-            "/v1/category",
+            "/v1/category/find-all",
             { revalidate: 300, timeoutMs: 3000 }
         )
         return data ?? []

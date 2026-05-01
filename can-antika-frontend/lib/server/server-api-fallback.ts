@@ -43,7 +43,7 @@ async function tryFetch<T>(
     if (!res.ok) return null
     const json = (await res.json()) as ApiEnvelope<T>
     return json?.data ?? null
-  })
+  }).catch(() => null)
 
   // Deadline: fetchPromise süre aşarsa null döner, arka plandaki fetch devam eder
   const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs))
