@@ -7,6 +7,7 @@ import com.mehmetkerem.exception.ExceptionMessages;
 import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.mapper.CategoryMapper;
 import com.mehmetkerem.model.Category;
+import com.mehmetkerem.model.Product;
 import com.mehmetkerem.repository.CategoryRepository;
 import com.mehmetkerem.repository.ProductRepository;
 import com.mehmetkerem.service.ICategoryService;
@@ -20,7 +21,9 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -95,9 +98,11 @@ public class CategoryServiceImpl implements ICategoryService {
     @Cacheable(cacheNames = "categories:list")
     public List<CategoryResponse> findAllCategories() {
         List<Category> categories = categoryRepository.findAllByOrderByDisplayOrderAscIdAsc();
-        return categories.stream()
+        List<CategoryResponse> responses = categories.stream()
                 .map(categoryMapper::toResponse)
                 .toList();
+        applyProductImageFallbacks(responses);
+        return responses;
     }
 
     @Override
@@ -143,5 +148,46 @@ public class CategoryServiceImpl implements ICategoryService {
         if (value == null) return null;
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private void applyProductImageFallbacks(List<CategoryResponse> responses) {
+        List<Long> categoryIdsMissingCover = responses.stream()
+                .filter(response -> normalizeOptional(response.getCoverImageUrl()) == null)
+                .map(CategoryResponse::getId)
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (categoryIdsMissingCover.isEmpty()) {
+            return;
+        }
+
+        Map<Long, String> fallbackImages = new LinkedHashMap<>();
+        for (Product product : productRepository.findTop500ByCategoryIdInOrderByCreatedAtDescIdDesc(categoryIdsMissingCover)) {
+            if (product.getCategoryId() == null || fallbackImages.containsKey(product.getCategoryId())) {
+                continue;
+            }
+            firstImage(product).ifPresent(imageUrl -> fallbackImages.put(product.getCategoryId(), imageUrl));
+        }
+
+        responses.forEach(response -> {
+            if (normalizeOptional(response.getCoverImageUrl()) != null) {
+                return;
+            }
+            String fallbackImage = fallbackImages.get(response.getId());
+            if (fallbackImage != null) {
+                response.setCoverImageUrl(fallbackImage);
+            }
+        });
+    }
+
+    private java.util.Optional<String> firstImage(Product product) {
+        if (product.getImageUrls() == null) {
+            return java.util.Optional.empty();
+        }
+
+        return product.getImageUrls().stream()
+                .map(this::normalizeOptional)
+                .filter(Objects::nonNull)
+                .findFirst();
     }
 }

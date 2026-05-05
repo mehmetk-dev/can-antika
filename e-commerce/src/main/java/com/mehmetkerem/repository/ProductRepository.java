@@ -21,6 +21,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     List<Product> findByCategoryId(Long categoryId);
     List<Product> findTop200ByCategoryId(Long categoryId);
+    List<Product> findTop500ByCategoryIdInOrderByCreatedAtDescIdDesc(List<Long> categoryIds);
 
     List<Product> findByPeriodId(Long periodId);
     List<Product> findTop500ByOrderByIdDesc();

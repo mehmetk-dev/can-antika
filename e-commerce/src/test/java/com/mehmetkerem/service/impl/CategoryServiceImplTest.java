@@ -6,6 +6,7 @@ import com.mehmetkerem.exception.BadRequestException;
 import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.mapper.CategoryMapper;
 import com.mehmetkerem.model.Category;
+import com.mehmetkerem.model.Product;
 import com.mehmetkerem.repository.CategoryRepository;
 import com.mehmetkerem.repository.ProductRepository;
 import com.mehmetkerem.service.IActivityLogService;
@@ -183,7 +184,7 @@ class CategoryServiceImplTest {
     @Test
     @DisplayName("findAllCategories - tum kategoriler listelenir")
     void findAllCategories_ShouldReturnAllCategories() {
-        when(categoryRepository.findAll()).thenReturn(List.of(category));
+        when(categoryRepository.findAllByOrderByDisplayOrderAscIdAsc()).thenReturn(List.of(category));
         when(categoryMapper.toResponse(category)).thenReturn(categoryResponse);
 
         List<CategoryResponse> result = categoryService.findAllCategories();
@@ -191,5 +192,22 @@ class CategoryServiceImplTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Antika", result.get(0).getName());
+    }
+
+    @Test
+    void findAllCategories_UsesLatestProductImageWhenCategoryCoverIsMissing() {
+        Product product = Product.builder()
+                .id(10L)
+                .categoryId(1L)
+                .imageUrls(List.of("https://example.com/product.jpg"))
+                .build();
+
+        when(categoryRepository.findAllByOrderByDisplayOrderAscIdAsc()).thenReturn(List.of(category));
+        when(categoryMapper.toResponse(category)).thenReturn(categoryResponse);
+        when(productRepository.findTop500ByCategoryIdInOrderByCreatedAtDescIdDesc(List.of(1L))).thenReturn(List.of(product));
+
+        List<CategoryResponse> result = categoryService.findAllCategories();
+
+        assertEquals("https://example.com/product.jpg", result.get(0).getCoverImageUrl());
     }
 }

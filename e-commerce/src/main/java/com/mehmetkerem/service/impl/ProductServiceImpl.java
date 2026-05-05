@@ -74,7 +74,7 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = { "products:list", "products:cards", "products:byId", "products:bySlug" }, allEntries = true)
+    @CacheEvict(cacheNames = { "products:list", "products:cards", "products:byId", "products:bySlug", "categories:list" }, allEntries = true)
     public ProductResponse saveProduct(ProductRequest request) {
         CategoryResponse categoryResponse = categoryService.getCategoryResponseById(request.getCategoryId());
         Product entity = persistNewProduct(request);
@@ -90,7 +90,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Transactional
-    @CacheEvict(cacheNames = { "products:list", "products:cards", "products:byId", "products:bySlug" }, allEntries = true)
+    @CacheEvict(cacheNames = { "products:list", "products:cards", "products:byId", "products:bySlug", "categories:list" }, allEntries = true)
     @Override
     public String deleteProduct(Long id) {
         Product product = getProductById(id);
@@ -139,7 +139,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    @CacheEvict(cacheNames = { "products:list", "products:cards", "products:byId", "products:bySlug" }, allEntries = true)
+    @CacheEvict(cacheNames = { "products:list", "products:cards", "products:byId", "products:bySlug", "categories:list" }, allEntries = true)
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = getProductById(id);
@@ -190,7 +190,7 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = { "products:list", "products:cards", "products:byId", "products:bySlug" }, allEntries = true)
+    @CacheEvict(cacheNames = { "products:list", "products:cards", "products:byId", "products:bySlug", "categories:list" }, allEntries = true)
     public List<Product> saveAllProducts(List<Product> products) {
         return productRepository.saveAll(products);
     }
@@ -519,7 +519,7 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = { "products:list", "products:cards", "products:byId", "products:bySlug" }, allEntries = true)
+    @CacheEvict(cacheNames = { "products:list", "products:cards", "products:byId", "products:bySlug", "categories:list" }, allEntries = true)
     public ProductImportResponse importProductsFromExcel(MultipartFile file) {
         ProductExcelParseResult parsed = productExcelParser.parse(file);
         List<String> errors = new java.util.ArrayList<>(parsed.errors());
