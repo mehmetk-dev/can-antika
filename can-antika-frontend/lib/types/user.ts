@@ -5,6 +5,7 @@ export interface UserResponse {
     id: number;
     name: string;
     email: string;
+    imageUrl?: string | null;
     role: Role;
     accountNonLocked?: boolean;
     addresses?: AddressResponse[];
