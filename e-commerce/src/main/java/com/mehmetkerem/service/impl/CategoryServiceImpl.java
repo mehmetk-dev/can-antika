@@ -85,7 +85,9 @@ public class CategoryServiceImpl implements ICategoryService {
     @Override
     @Cacheable(cacheNames = "categories:byId", key = "#id")
     public CategoryResponse getCategoryResponseById(Long id) {
-        return categoryMapper.toResponse(getCategoryById(id));
+        CategoryResponse response = categoryMapper.toResponse(getCategoryById(id));
+        applyProductImageFallbacks(List.of(response));
+        return response;
     }
 
     @Override
@@ -123,8 +125,12 @@ public class CategoryServiceImpl implements ICategoryService {
     @Override
     @Cacheable(cacheNames = "categories:byIds", key = "#ids.stream().sorted().toList().toString()")
     public Map<Long, CategoryResponse> getCategoryResponsesByIds(List<Long> ids) {
-        return categoryRepository.findAllById(ids).stream()
-                .collect(Collectors.toMap(Category::getId, categoryMapper::toResponse));
+        List<CategoryResponse> responses = categoryRepository.findAllById(ids).stream()
+                .map(categoryMapper::toResponse)
+                .toList();
+        applyProductImageFallbacks(responses);
+        return responses.stream()
+                .collect(Collectors.toMap(CategoryResponse::getId, r -> r));
     }
 
     @Override
@@ -162,7 +168,7 @@ public class CategoryServiceImpl implements ICategoryService {
         }
 
         Map<Long, String> fallbackImages = new LinkedHashMap<>();
-        for (Product product : productRepository.findTop500ByCategoryIdInOrderByCreatedAtDescIdDesc(categoryIdsMissingCover)) {
+        for (Product product : productRepository.findLatestProductPerCategory(categoryIdsMissingCover)) {
             if (product.getCategoryId() == null || fallbackImages.containsKey(product.getCategoryId())) {
                 continue;
             }

@@ -54,6 +54,7 @@ export async function CategoriesSection() {
       dynamicImage: cat.coverImageUrl ? resolveImageUrl(cat.coverImageUrl) : undefined,
     }))
     .filter((c) => c.count === null || c.count > 0)
+    .slice(0, 4)
 
   if (categories.length === 0) return null
 

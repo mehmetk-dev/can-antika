@@ -204,7 +204,7 @@ class CategoryServiceImplTest {
 
         when(categoryRepository.findAllByOrderByDisplayOrderAscIdAsc()).thenReturn(List.of(category));
         when(categoryMapper.toResponse(category)).thenReturn(categoryResponse);
-        when(productRepository.findTop500ByCategoryIdInOrderByCreatedAtDescIdDesc(List.of(1L))).thenReturn(List.of(product));
+        when(productRepository.findLatestProductPerCategory(List.of(1L))).thenReturn(List.of(product));
 
         List<CategoryResponse> result = categoryService.findAllCategories();
 

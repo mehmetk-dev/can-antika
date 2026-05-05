@@ -21,7 +21,15 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     List<Product> findByCategoryId(Long categoryId);
     List<Product> findTop200ByCategoryId(Long categoryId);
-    List<Product> findTop500ByCategoryIdInOrderByCreatedAtDescIdDesc(List<Long> categoryIds);
+
+    @Query(value = """
+            SELECT DISTINCT ON (p.category_id) p.*
+            FROM products p
+            WHERE p.category_id IN :categoryIds
+            AND p.deleted = false
+            ORDER BY p.category_id, p.created_at DESC, p.id DESC
+            """, nativeQuery = true)
+    List<Product> findLatestProductPerCategory(@Param("categoryIds") List<Long> categoryIds);
 
     List<Product> findByPeriodId(Long periodId);
     List<Product> findTop500ByOrderByIdDesc();
