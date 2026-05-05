@@ -20,6 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class AdminInitializer implements CommandLineRunner {
 
+    private static final String ADMIN_EMAIL = "admin@canantika.com";
+    private static final String ADMIN_IMAGE_URL =
+            "https://res.cloudinary.com/dqlbenxvc/image/upload/v1777986327/can-antika/2366010e-ba16-41be-ba1c-eafaff11ab6f.png";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -29,7 +33,13 @@ public class AdminInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (userRepository.existsByEmail("admin@canantika.com")) {
+        var existingAdmin = userRepository.findByEmail(ADMIN_EMAIL);
+        if (existingAdmin.isPresent()) {
+            User admin = existingAdmin.get();
+            if (!ADMIN_IMAGE_URL.equals(admin.getImageUrl())) {
+                admin.setImageUrl(ADMIN_IMAGE_URL);
+                userRepository.save(admin);
+            }
             return;
         }
         if (adminPassword == null || adminPassword.length() < 12
@@ -39,8 +49,9 @@ public class AdminInitializer implements CommandLineRunner {
         }
         log.info("Varsayılan Admin kullanıcısı oluşturuluyor...");
         User admin = User.builder()
-                .email("admin@canantika.com")
+                .email(ADMIN_EMAIL)
                 .name("Sistem Yöneticisi")
+                .imageUrl(ADMIN_IMAGE_URL)
                 .passwordHash(passwordEncoder.encode(adminPassword))
                 .role(Role.ADMIN)
                 .build();
