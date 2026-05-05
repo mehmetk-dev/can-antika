@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { Calendar, User, ArrowLeft, Loader2, Tag } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { blogApi } from "@/lib/api"
@@ -8,7 +8,6 @@ import Link from "next/link"
 import Image from "next/image"
 import type { BlogPost, BlogCategory } from "@/lib/types"
 import { formatDateTR } from "@/lib/utils"
-import DOMPurify from "dompurify"
 
 interface BlogDetailClientProps {
     initialPost: BlogPost | null
@@ -20,11 +19,29 @@ export function BlogDetailClient({ initialPost, slug, initialCategories = [] }: 
     const [post, setPost] = useState<BlogPost | null>(initialPost)
     const [categories, setCategories] = useState<BlogCategory[]>(initialCategories)
     const [loading, setLoading] = useState(!initialPost)
+    const [sanitizedContent, setSanitizedContent] = useState("")
     const postContent = post?.content
 
-    const sanitizedContent = useMemo(() => {
-        if (!postContent || postContent.trim().length === 0) return ""
-        return DOMPurify.sanitize(postContent)
+    useEffect(() => {
+        let cancelled = false
+
+        async function sanitizePostContent() {
+            if (!postContent || postContent.trim().length === 0) {
+                setSanitizedContent("")
+                return
+            }
+
+            const { default: DOMPurify } = await import("dompurify")
+            if (!cancelled) setSanitizedContent(DOMPurify.sanitize(postContent))
+        }
+
+        sanitizePostContent().catch(() => {
+            if (!cancelled) setSanitizedContent("")
+        })
+
+        return () => {
+            cancelled = true
+        }
     }, [postContent])
 
     useEffect(() => {

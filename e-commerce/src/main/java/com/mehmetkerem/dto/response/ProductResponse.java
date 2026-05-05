@@ -22,6 +22,7 @@ public class ProductResponse {
     private String description;
     private BigDecimal price;
     private Integer stock;
+    private Long categoryId;
     private CategoryResponse category;
     private PeriodResponse period;
     private List<String> imageUrls;

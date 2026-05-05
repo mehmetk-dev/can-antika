@@ -9,6 +9,15 @@ type FetchWithFallbackOptions = {
   timeoutMs?: number
 }
 
+type FetchAttempt<T> =
+  | { ok: true; data: T }
+  | { ok: false; reason: string }
+
+function debugApiFallbackLog(level: "info" | "warn", message: string) {
+  if (process.env.SERVER_API_FALLBACK_DEBUG !== "true") return
+  console[level](message)
+}
+
 export type ApiFetchTiming = {
   path: string
   durationMs: number
@@ -35,18 +44,24 @@ async function tryFetch<T>(
   path: string,
   revalidate: number,
   timeoutMs: number,
-): Promise<T | null> {
+): Promise<FetchAttempt<T>> {
   const fetchPromise = fetch(buildApiUrl(baseUrl, path), {
     next: { revalidate },
     // signal yok — Next.js Data Cache korunuyor
   }).then(async (res) => {
-    if (!res.ok) return null
+    if (!res.ok) return { ok: false, reason: `HTTP ${res.status}` } as const
     const json = (await res.json()) as ApiEnvelope<T>
-    return json?.data ?? null
-  }).catch(() => null)
+    if (json?.data == null) return { ok: false, reason: "empty data" } as const
+    return { ok: true, data: json.data } as const
+  }).catch((error) => ({
+    ok: false,
+    reason: error instanceof Error ? error.message : "request failed",
+  }) as const)
 
   // Deadline: fetchPromise süre aşarsa null döner, arka plandaki fetch devam eder
-  const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs))
+  const timeout = new Promise<FetchAttempt<T>>((resolve) => {
+    setTimeout(() => resolve({ ok: false, reason: `timeout ${timeoutMs}ms` }), timeoutMs)
+  })
   return Promise.race([fetchPromise, timeout])
 }
 
@@ -59,7 +74,7 @@ export async function fetchApiDataWithFallback<T>(
   const baseUrls = getServerApiUrlCandidates()
 
   if (baseUrls.length === 0) {
-    console.warn(`[server-api-fallback] No API URL candidates available for ${path}`)
+    debugApiFallbackLog("warn", `[server-api-fallback] No API URL candidates available for ${path}`)
     return null
   }
 
@@ -68,13 +83,13 @@ export async function fetchApiDataWithFallback<T>(
   // public API domain, where a 700ms cap can force unnecessary client refetches.
   if (lastWorkingBaseUrl) {
     try {
-      const result = await tryFetch<T>(lastWorkingBaseUrl, path, revalidate, timeoutMs)
-      if (result) {
+      const attempt = await tryFetch<T>(lastWorkingBaseUrl, path, revalidate, timeoutMs)
+      if (attempt.ok) {
         const dur = Math.round(performance.now() - start)
         if (dur > 200) {
-          console.info(`[server-api-fallback] ${path} → ${dur}ms (fast-path)`)
+          debugApiFallbackLog("info", `[server-api-fallback] ${path} → ${dur}ms (fast-path)`)
         }
-        return result
+        return attempt.data
       }
     } catch {
       lastWorkingBaseUrl = null
@@ -88,19 +103,22 @@ export async function fetchApiDataWithFallback<T>(
   try {
     const { result, baseUrl } = await Promise.any(
       candidates.map(async (baseUrl) => {
-        const result = await tryFetch<T>(baseUrl, path, revalidate, timeoutMs)
-        if (result === null) throw new Error("no data")
-        return { result, baseUrl }
+        const attempt = await tryFetch<T>(baseUrl, path, revalidate, timeoutMs)
+        if (!attempt.ok) throw new Error(`${baseUrl}: ${attempt.reason}`)
+        return { result: attempt.data, baseUrl }
       })
     )
     lastWorkingBaseUrl = baseUrl
     const dur = Math.round(performance.now() - start)
     if (dur > 200) {
-      console.info(`[server-api-fallback] ${path} → ${dur}ms (fallback)`)
+      debugApiFallbackLog("info", `[server-api-fallback] ${path} → ${dur}ms (fallback)`)
     }
     return result
-  } catch {
-    console.warn(`[server-api-fallback] All API candidates failed for ${path}`)
+  } catch (error) {
+    const reason = error instanceof AggregateError
+      ? error.errors.map((item) => item instanceof Error ? item.message : String(item)).join("; ")
+      : error instanceof Error ? error.message : String(error)
+    debugApiFallbackLog("warn", `[server-api-fallback] No API candidate returned data for ${path}: ${reason}`)
     return null
   }
 }

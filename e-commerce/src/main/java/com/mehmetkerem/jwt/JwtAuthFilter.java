@@ -35,7 +35,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 path.startsWith("/v1/period/") ||
                 path.startsWith("/v1/blog") ||
                 path.startsWith("/v1/faq") ||
-                path.startsWith("/v1/site-settings") ||
+                path.equals("/v1/site-settings") ||
                 path.startsWith("/v1/pages"))) {
             return true;
         }

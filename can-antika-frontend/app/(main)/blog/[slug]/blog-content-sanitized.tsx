@@ -1,12 +1,30 @@
 "use client"
 
-import { useMemo } from "react"
-import DOMPurify from "dompurify"
+import { useEffect, useState } from "react"
 
 export function BlogContentSanitized({ html }: { html: string }) {
-    const sanitized = useMemo(() => {
-        if (!html || html.trim().length === 0) return ""
-        return DOMPurify.sanitize(html)
+    const [sanitized, setSanitized] = useState("")
+
+    useEffect(() => {
+        let cancelled = false
+
+        async function sanitizeHtml() {
+            if (!html || html.trim().length === 0) {
+                setSanitized("")
+                return
+            }
+
+            const { default: DOMPurify } = await import("dompurify")
+            if (!cancelled) setSanitized(DOMPurify.sanitize(html))
+        }
+
+        sanitizeHtml().catch(() => {
+            if (!cancelled) setSanitized("")
+        })
+
+        return () => {
+            cancelled = true
+        }
     }, [html])
 
     if (!sanitized) {

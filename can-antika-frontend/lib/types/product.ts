@@ -19,6 +19,7 @@ export interface ProductResponse {
     description?: string;
     price: number;
     stock?: number;
+    categoryId?: number;
     category?: CategoryResponse;
     period?: PeriodResponse;
     imageUrls?: string[];

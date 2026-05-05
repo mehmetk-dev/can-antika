@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { Plus, MoreHorizontal, Pencil, Trash2, Eye, Loader2, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -17,6 +17,21 @@ import { ADMIN_PAGE_SIZE } from "@/lib/constants"
 import { resolveImageUrl } from "@/lib/product/image-url"
 import { getProductUrl } from "@/lib/product/product-url"
 
+const SORT_OPTIONS = [
+  { value: "createdAt:desc", label: "En yeni eklenen" },
+  { value: "createdAt:asc", label: "En eski eklenen" },
+  { value: "price:asc", label: "Fiyat artan" },
+  { value: "price:desc", label: "Fiyat azalan" },
+  { value: "stock:asc", label: "Stok artan" },
+  { value: "stock:desc", label: "Stok azalan" },
+  { value: "title:asc", label: "Ada göre A-Z" },
+] as const
+
+function parseSortOption(value: string) {
+  const [sortBy = "createdAt", direction = "desc"] = value.split(":")
+  return { sortBy, direction }
+}
+
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<ProductResponse[]>([])
   const [categories, setCategories] = useState<CategoryResponse[]>([])
@@ -25,8 +40,22 @@ export default function AdminProductsPage() {
   const [page, setPage] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
   const [categoryFilter, setCategoryFilter] = useState("all")
+  const [sortOption, setSortOption] = useState("createdAt:desc")
   const excelInputRef = useRef<HTMLInputElement>(null)
   const PAGE_SIZE = ADMIN_PAGE_SIZE
+  const categoriesById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category.name])),
+    [categories]
+  )
+  const productsWithCategoryFallback = useMemo(
+    () => products.map((product) => {
+      if (product.category || !product.categoryId) return product
+      const categoryName = categoriesById.get(product.categoryId)
+      if (!categoryName) return product
+      return { ...product, category: { id: product.categoryId, name: categoryName } }
+    }),
+    [categoriesById, products]
+  )
 
   useEffect(() => {
     categoryApi
@@ -42,7 +71,8 @@ export default function AdminProductsPage() {
   const loadProducts = useCallback(async () => {
     setIsLoading(true)
     try {
-      const params: Record<string, unknown> = { page, size: PAGE_SIZE }
+      const { sortBy, direction } = parseSortOption(sortOption)
+      const params: Record<string, unknown> = { page, size: PAGE_SIZE, sortBy, direction }
       if (categoryFilter !== "all") params.categoryId = Number(categoryFilter)
       const data = await productApi.search(params as Parameters<typeof productApi.search>[0])
       setProducts(data.items)
@@ -53,7 +83,7 @@ export default function AdminProductsPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [categoryFilter, page]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [categoryFilter, page, sortOption]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     void loadProducts()
@@ -142,6 +172,18 @@ export default function AdminProductsPage() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={sortOption} onValueChange={(v) => { setSortOption(v); setPage(0) }}>
+              <SelectTrigger className="w-full sm:w-44 bg-muted/50">
+                <SelectValue placeholder="Sıralama" />
+              </SelectTrigger>
+              <SelectContent>
+                {SORT_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -165,7 +207,7 @@ export default function AdminProductsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product) => (
+                {productsWithCategoryFallback.map((product) => (
                   <TableRow key={product.id} className="border-border">
                     <TableCell>
                       <div className="relative h-12 w-12 overflow-hidden rounded-md bg-muted">
