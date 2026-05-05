@@ -118,11 +118,25 @@ async function BlogDetailResolver({ slug }: { slug: string }) {
     author: post.author ? [{ "@type": "Person", name: post.author }] : [],
   }
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem" as const, position: 1, name: "Ana Sayfa", item: "https://canantika.com/" },
+      { "@type": "ListItem" as const, position: 2, name: "Blog", item: "https://canantika.com/blog" },
+      { "@type": "ListItem" as const, position: 3, name: post.title, item: `https://canantika.com/blog/${slug}` },
+    ],
+  }
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeSafeJsonLd(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeSafeJsonLd(breadcrumbJsonLd) }}
       />
       <div className="bg-background">
         <main>

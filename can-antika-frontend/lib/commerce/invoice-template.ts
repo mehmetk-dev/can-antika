@@ -14,6 +14,7 @@ interface InvoiceData {
     shippingAddressSummary: string
     items: InvoiceItem[]
     subtotal: number
+    shippingAmount?: number
     totalAmount: number
 }
 
@@ -59,7 +60,7 @@ tbody tr:last-child td{border-bottom:none}
 <div class="header"><div><h1>Can Antika</h1><p style="color:#a0a0b8;font-size:12px;letter-spacing:3px;margin-top:4px">EST. 1982 · İSTANBUL</p></div><div class="meta"><p>FATURA</p><p style="font-size:16px;color:#d4a574;font-weight:600">#${escapeHtml(invoice.invoiceNumber)}</p><p>${invoiceDate}</p></div></div>
 <div class="info"><div class="block"><h3>Müşteri</h3><p>${escapeHtml(invoice.customerName)}</p></div><div class="block" style="text-align:right"><h3>Teslimat Adresi</h3><p>${escapeHtml(invoice.shippingAddressSummary)}</p></div></div>
 <table><thead><tr><th>Ürün</th><th style="text-align:center">Adet</th><th style="text-align:right">Birim Fiyat</th><th style="text-align:right">Toplam</th></tr></thead><tbody>${itemRows}</tbody></table>
-<div class="totals"><div class="row"><span>Ara Toplam</span><span>₺${invoice.subtotal.toLocaleString("tr-TR")}</span></div><div class="row"><span>Kargo</span><span>Ücretsiz</span></div><div class="row grand"><span>Genel Toplam</span><span>₺${invoice.totalAmount.toLocaleString("tr-TR")}</span></div></div>
+<div class="totals"><div class="row"><span>Ara Toplam</span><span>₺${invoice.subtotal.toLocaleString("tr-TR")}</span></div><div class="row"><span>Kargo</span><span>${(invoice.shippingAmount ?? 0) > 0 ? `₺${(invoice.shippingAmount ?? 0).toLocaleString("tr-TR")}` : "Ücretsiz"}</span></div><div class="row grand"><span>Genel Toplam</span><span>₺${invoice.totalAmount.toLocaleString("tr-TR")}</span></div></div>
 <div class="footer">"Geçmişin izinde, geleceğe miras" · ${escapeHtml(store.address || "")} · ${escapeHtml(store.phone || "")}</div>
 </div></body></html>`
 }

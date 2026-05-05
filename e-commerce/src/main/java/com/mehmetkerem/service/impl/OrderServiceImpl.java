@@ -18,6 +18,7 @@ import com.mehmetkerem.model.*;
 import com.mehmetkerem.repository.OrderRepository;
 import com.mehmetkerem.service.IOrderService;
 import com.mehmetkerem.service.IActivityLogService;
+import com.mehmetkerem.service.order.ShippingFeeCalculator;
 import com.mehmetkerem.util.Messages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,6 +77,7 @@ public class OrderServiceImpl implements IOrderService {
     private final com.mehmetkerem.service.IOrderInvoiceService orderInvoiceService;
     private final com.mehmetkerem.service.IOrderTimelineService orderTimelineService;
     private final com.mehmetkerem.service.IOrderAuthorizationService orderAuthorizationService;
+    private final com.mehmetkerem.service.ISiteSettingsService siteSettingsService;
 
     private static final int STOCK_UPDATE_MAX_RETRIES = 3;
 
@@ -135,12 +137,17 @@ public class OrderServiceImpl implements IOrderService {
             finalTotal = couponService.applyCoupon(cart.getCouponCode(), rawTotal);
             couponService.consumeCoupon(cart.getCouponCode(), rawTotal, userId);
         }
+        BigDecimal shippingAmount = ShippingFeeCalculator.calculate(
+                finalTotal,
+                siteSettingsService.get().getShippingConfig());
+        finalTotal = finalTotal.add(shippingAmount);
 
         Order order = Order.builder()
                 .userId(userId)
                 .orderStatus(OrderStatus.PENDING)
                 .orderDate(LocalDateTime.now())
                 .totalAmount(finalTotal)
+                .shippingAmount(shippingAmount)
                 .shippingAddress(shippingAddress)
                 .paymentStatus(paymentStatus)
                 .orderItems(orderItems)

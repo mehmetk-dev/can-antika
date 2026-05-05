@@ -96,7 +96,7 @@ export function Footer({ className, settings }: FooterProps) {
   const mapHref = "https://maps.app.goo.gl/Sv4bqXDK7164WQGR9"
 
   return (
-    <footer className={cn("relative overflow-hidden border-t border-primary-foreground/10 bg-primary text-primary-foreground", className)}>
+    <footer data-nosnippet className={cn("relative overflow-hidden border-t border-primary-foreground/10 bg-primary text-primary-foreground", className)}>
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.22]"
         style={{

@@ -33,6 +33,8 @@ public class OrderResponse {
 
     private BigDecimal totalAmount;
 
+    private BigDecimal shippingAmount;
+
     private PaymentStatus paymentStatus;
 
     private String trackingNumber;

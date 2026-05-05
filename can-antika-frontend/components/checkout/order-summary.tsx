@@ -15,6 +15,7 @@ interface OrderSummaryProps {
     cartTotal: number
     itemCount: number
     coupon: CouponState
+    shippingAmount: number
     finalTotal: number
     isPlacing: boolean
     selectedAddressId: number | null
@@ -28,6 +29,7 @@ export function OrderSummary({
     cartTotal,
     itemCount,
     coupon,
+    shippingAmount,
     finalTotal,
     isPlacing,
     selectedAddressId,
@@ -120,7 +122,9 @@ export function OrderSummary({
                     )}
                     <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Kargo</span>
-                        <span className="text-foreground">Ücretsiz</span>
+                        <span className="text-foreground">
+                            {shippingAmount > 0 ? `₺${shippingAmount.toLocaleString("tr-TR")}` : "Ücretsiz"}
+                        </span>
                     </div>
                 </div>
 

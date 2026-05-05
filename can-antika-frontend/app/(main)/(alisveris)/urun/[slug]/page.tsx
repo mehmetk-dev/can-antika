@@ -4,7 +4,10 @@ import { cache, Suspense } from "react"
 import { ProductPageClient } from "./product-page-client"
 import ProductLoading from "./loading"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
+import { fetchSiteSettings } from "@/lib/server/site-settings"
 import { resolveImageUrl } from "@/lib/product/image-url"
+import { getProductUrl } from "@/lib/product/product-url"
+import { buildProductJsonLd } from "@/lib/product/product-json-ld"
 import type { ProductResponse } from "@/lib/types"
 
 function serializeSafeJsonLd(data: unknown): string {
@@ -117,6 +120,9 @@ export async function generateMetadata({
       title,
       description,
       keywords: [title, product.category?.name, "antika", "koleksiyon", "can antika"].filter(Boolean) as string[],
+      alternates: {
+        canonical: getProductUrl(product),
+      },
       openGraph: {
         title: `${title} | Can Antika`,
         description,
@@ -150,36 +156,36 @@ export default async function ProductPage({
   )
 }
 
+function buildProductBreadcrumbJsonLd(product: ProductResponse) {
+  const productUrl = `https://canantika.com${getProductUrl(product)}`
+  const items = [
+    { "@type": "ListItem" as const, position: 1, name: "Ana Sayfa", item: "https://canantika.com/" },
+    { "@type": "ListItem" as const, position: 2, name: "Ürünler", item: "https://canantika.com/urunler" },
+  ]
+  if (product.category?.name) {
+    items.push({
+      "@type": "ListItem" as const,
+      position: 3,
+      name: product.category.name,
+      item: `https://canantika.com/urunler?category=${encodeURIComponent(product.category.name)}`,
+    })
+    items.push({ "@type": "ListItem" as const, position: 4, name: product.title, item: productUrl })
+  } else {
+    items.push({ "@type": "ListItem" as const, position: 3, name: product.title, item: productUrl })
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items,
+  }
+}
+
 async function ProductResolver({ slug }: { slug: string }) {
   const product = await fetchProduct(slug)
-
-  const jsonLd = product
-    ? {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      name: product.title,
-      description: product.description ?? undefined,
-      image: product.imageUrls?.[0] ?? undefined,
-      offers: {
-        "@type": "Offer",
-        price: product.price,
-        priceCurrency: "TRY",
-        availability:
-          (product.stock ?? 0) > 0
-            ? "https://schema.org/InStock"
-            : "https://schema.org/OutOfStock",
-      },
-      ...(product.averageRating != null &&
-        product.reviewCount != null &&
-        product.reviewCount > 0 && {
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: product.averageRating,
-          reviewCount: product.reviewCount,
-        },
-      }),
-    }
-    : null
+  const settings = product ? await fetchSiteSettings() : null
+  const jsonLd = product ? buildProductJsonLd(product, settings ?? undefined) : null
+  const breadcrumbJsonLd = product ? buildProductBreadcrumbJsonLd(product) : null
 
   return (
     <>
@@ -187,6 +193,12 @@ async function ProductResolver({ slug }: { slug: string }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: serializeSafeJsonLd(jsonLd) }}
+        />
+      )}
+      {breadcrumbJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeSafeJsonLd(breadcrumbJsonLd) }}
         />
       )}
 

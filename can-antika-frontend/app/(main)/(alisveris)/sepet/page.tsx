@@ -9,13 +9,18 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getProductUrl } from "@/lib/product/product-url"
 import { useCart } from "@/hooks/useCart"
+import { useSiteSettings } from "@/lib/site-settings-context"
+import { calculateShippingAmount, formatShippingAmount } from "@/lib/commerce/shipping"
 
 function CartContent() {
     const router = useRouter()
+    const settings = useSiteSettings()
     const {
         items, cartTotal, itemCount, isLoading, isGuest,
         updatingItems, handleUpdateQuantity, handleRemoveItem, handleClearCart,
     } = useCart()
+    const shippingAmount = calculateShippingAmount(cartTotal, settings)
+    const finalTotal = cartTotal + shippingAmount
 
     if (isLoading) {
         return (
@@ -199,7 +204,7 @@ function CartContent() {
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Kargo</span>
-                            <span className="text-foreground">Ücretsiz</span>
+                            <span className="text-foreground">{formatShippingAmount(shippingAmount)}</span>
                         </div>
                     </div>
 
@@ -207,7 +212,7 @@ function CartContent() {
 
                     <div className="flex justify-between font-semibold">
                         <span className="text-foreground">Toplam</span>
-                        <span className="text-primary text-lg">₺{cartTotal.toLocaleString("tr-TR")}</span>
+                        <span className="text-primary text-lg">₺{finalTotal.toLocaleString("tr-TR")}</span>
                     </div>
 
                     {isGuest ? (

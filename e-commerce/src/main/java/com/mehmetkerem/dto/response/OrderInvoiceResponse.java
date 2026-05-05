@@ -21,6 +21,7 @@ public class OrderInvoiceResponse {
     private String shippingAddressSummary;
     private List<InvoiceItemLine> items;
     private BigDecimal subtotal;
+    private BigDecimal shippingAmount;
     private BigDecimal totalAmount;
     private String orderStatus;
 

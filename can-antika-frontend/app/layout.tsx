@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const metaTitle = s?.metaTitle || `${storeName} | Geçmişin Zarafeti`
   const metaDesc =
     s?.metaDescription ||
-    "Eşsiz antika eserler, uzman onayı ve güvenli teslimat ile sizlerleyiz. 1982'den beri kalite ve güven."
+    "1982'den beri İstanbul'un kalbinde eşsiz antika eserler, uzman onaylı koleksiyon parçaları ve güvenli teslimat hizmeti sunuyoruz."
   const keywords = s?.metaKeywords
     ? s.metaKeywords.split(",").map((k: string) => k.trim())
     : ["antika", "antika mağazası", "osmanlı antika", "istanbul antika", "can antika"]
@@ -61,6 +61,12 @@ export async function generateMetadata(): Promise<Metadata> {
       description: metaDesc,
       images: ["/og-image.jpg"],
     },
+    alternates: {
+      canonical: "/",
+      languages: {
+        "tr-TR": "/",
+      },
+    },
     robots: {
       index: true,
       follow: true,
@@ -78,6 +84,50 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+function serializeSafeJsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029")
+}
+
+function buildOrganizationJsonLd(s: Awaited<ReturnType<typeof fetchSiteSettings>>) {
+  const name = s?.storeName || "Can Antika"
+  const phone = s?.phone || ""
+  const email = s?.email || ""
+  const address = s?.address || ""
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name,
+    url: "https://canantika.com",
+    logo: "https://canantika.com/logo.png",
+    ...(phone || email
+      ? {
+          contactPoint: {
+            "@type": "ContactPoint",
+            ...(phone ? { telephone: phone, contactType: "customer service" } : {}),
+            ...(email ? { email } : {}),
+            availableLanguage: "Turkish",
+          },
+        }
+      : {}),
+    ...(address
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: address,
+            addressLocality: "İstanbul",
+            addressCountry: "TR",
+          },
+        }
+      : {}),
+  }
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -86,6 +136,7 @@ export default async function RootLayout({
   const s = await fetchSiteSettings()
   const gaId = sanitizeGoogleAnalyticsId(s?.googleAnalyticsId)
   const fbPixelId = sanitizeFacebookPixelId(s?.facebookPixelId)
+  const orgJsonLd = buildOrganizationJsonLd(s)
 
   return (
     <html lang="tr" suppressHydrationWarning>
@@ -95,6 +146,10 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL || "https://api.canantika.com"} />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL || "https://api.canantika.com"} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeSafeJsonLd(orgJsonLd) }}
+        />
         {gaId && (
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`} strategy="afterInteractive" />

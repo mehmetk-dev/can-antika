@@ -12,6 +12,7 @@ import com.mehmetkerem.exception.NotFoundException;
 import com.mehmetkerem.mapper.AddressMapper;
 import com.mehmetkerem.mapper.OrderMapper;
 import com.mehmetkerem.model.*;
+import com.mehmetkerem.model.config.ShippingConfig;
 import com.mehmetkerem.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -84,6 +85,9 @@ class OrderServiceImplTest {
 
     @Mock
     private com.mehmetkerem.service.IOrderAuthorizationService orderAuthorizationService;
+
+    @Mock
+    private com.mehmetkerem.service.ISiteSettingsService siteSettingsService;
 
     @InjectMocks
     private OrderServiceImpl orderService;
@@ -178,6 +182,10 @@ class OrderServiceImplTest {
         when(addressService.getAddressByIdAndUserId(ADDRESS_ID, USER_ID)).thenReturn(address);
         when(orderMapper.cartItemsToOrderItems(anyList(), anyMap())).thenReturn(List.of(mappedOrderItem));
         when(stockService.validateAndDeductStock(anyList())).thenReturn(List.of());
+        SiteSettings settings = SiteSettings.builder()
+                .shippingConfig(new ShippingConfig("3-5 iş günü", "1-2 iş günü", 500, 5, 50))
+                .build();
+        when(siteSettingsService.get()).thenReturn(settings);
 
         ProductResponse productResponse = ProductResponse.builder()
                 .id(PRODUCT_ID)
@@ -207,10 +215,11 @@ class OrderServiceImplTest {
                     .orderStatus(savedOrder.getOrderStatus())
                     .paymentStatus(savedOrder.getPaymentStatus())
                     .totalAmount(savedOrder.getTotalAmount())
+                    .shippingAmount(savedOrder.getShippingAmount())
                     .orderItems(new ArrayList<>())
                     .build();
         });
-        when(orderMapper.orderItemsToResponses(anyList())).thenReturn(List.of());
+        when(orderMapper.orderItemsToResponses(anyList(), anyMap())).thenReturn(List.of());
         doNothing().when(orderTimelineService).recordCreation(anyLong(), anyLong());
 
         // TransactionTemplate'in execute metodunun içeriği doğrudan çalıştırmasını
@@ -223,6 +232,8 @@ class OrderServiceImplTest {
         OrderResponse result = orderService.saveOrder(USER_ID, orderRequest);
 
         assertNotNull(result);
+        assertEquals(new BigDecimal("150"), result.getTotalAmount());
+        assertEquals(new BigDecimal("50"), result.getShippingAmount());
         verify(cartService).clearCart(USER_ID);
         verify(stockService).validateAndDeductStock(anyList());
         verify(orderRepository).save(any(Order.class));
@@ -309,7 +320,7 @@ class OrderServiceImplTest {
                 .totalAmount(order.getTotalAmount())
                 .orderItems(new ArrayList<>())
                 .build());
-        when(orderMapper.orderItemsToResponses(anyList())).thenReturn(List.of());
+        when(orderMapper.orderItemsToResponses(anyList(), anyMap())).thenReturn(List.of());
         doNothing().when(stockService).revertStockLevels(anyList());
 
         OrderResponse result = orderService.updateOrderStatus(1L, OrderStatus.CANCELLED);

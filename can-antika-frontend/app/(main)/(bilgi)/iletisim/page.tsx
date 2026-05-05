@@ -22,12 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const phone = s?.phone || ""
   const address = s?.address || ""
 
-  const description = [
-    `${storeName} ile iletişime geçin.`,
-    address || "İstanbul",
-    phone ? `Telefon: ${phone}.` : "",
-    "Antika sorularınız için bize ulaşın.",
-  ].filter(Boolean).join(" ")
+  const description = `${storeName} iletişim bilgileri ve mağaza konumumuz. Antika koleksiyonlarımız hakkında sorularınız için bize ulaşabilirsiniz.`
 
   return {
     title: "İletişim",
@@ -35,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: [`${storeName.toLowerCase()} iletişim`, "antikacı telefon", "istanbul antikacı"],
     openGraph: {
       title: `İletişim | ${storeName}`,
-      description: `${storeName} ile iletişime geçin. ${address || "İstanbul"}`,
+      description: `${storeName} iletişim bilgileri ve mağaza konumumuz.`,
       type: "website",
       locale: "tr_TR",
     },

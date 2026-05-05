@@ -16,9 +16,12 @@ import { AddressSelector } from "@/components/checkout/address-selector"
 import { PaymentMethodSelector } from "@/components/checkout/payment-method-selector"
 import { OrderSummary } from "@/components/checkout/order-summary"
 import { OrderConfirmation } from "@/components/checkout/order-confirmation"
+import { useSiteSettings } from "@/lib/site-settings-context"
+import { calculateShippingAmount } from "@/lib/commerce/shipping"
 
 function CheckoutContent() {
     const router = useRouter()
+    const settings = useSiteSettings()
     const {
         cart, setCart, addresses, selectedAddressId, setSelectedAddressId,
         note, setNote, isLoading, cartTotal, itemCount,
@@ -31,7 +34,9 @@ function CheckoutContent() {
     const [orderId, setOrderId] = useState<number | null>(null)
     const [termsAccepted, setTermsAccepted] = useState(false)
 
-    const finalTotal = Math.max(0, cartTotal - coupon.discount)
+    const payableSubtotal = Math.max(0, cartTotal - coupon.discount)
+    const shippingAmount = calculateShippingAmount(payableSubtotal, settings)
+    const finalTotal = payableSubtotal + shippingAmount
 
     const handlePlaceOrder = async () => {
         if (!termsAccepted) {
@@ -161,6 +166,7 @@ function CheckoutContent() {
                 cartTotal={cartTotal}
                 itemCount={itemCount}
                 coupon={coupon}
+                shippingAmount={shippingAmount}
                 finalTotal={finalTotal}
                 isPlacing={isPlacing}
                 selectedAddressId={selectedAddressId}

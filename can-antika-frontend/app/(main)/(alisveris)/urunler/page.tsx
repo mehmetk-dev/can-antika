@@ -7,27 +7,83 @@ import type { ProductCardResponse, CategoryResponse, PeriodResponse, CursorRespo
 
 export const revalidate = 0
 
-export const metadata: Metadata = {
-  title: "Antika Koleksiyon",
-  description:
-    "Osmanlı, Viktoryen, Art Deco ve 19. yüzyıl antikalarını keşfedin. Uzman onaylı, tek ve özgün antika eserler. Mobilya, porselen, saatler, halılar ve daha fazlası.",
-  keywords: [
-    "antika",
-    "antika mobilya",
-    "osmanlı antika",
-    "viktoryen antika",
-    "art deco",
-    "antika porselen",
-    "antika saat",
-    "antika halı",
-    "istanbul antikacı",
-  ],
-  openGraph: {
-    title: "Antika Koleksiyon | Can Antika",
-    description: "Eşsiz antika eserleri keşfedin. Uzman onaylı, tek ve özgün parçalar.",
-    type: "website",
-    locale: "tr_TR",
-  },
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}): Promise<Metadata> {
+  const params = await searchParams
+  const categoryParam = typeof params.category === "string" ? params.category : undefined
+  const periodParam = typeof params.period === "string" ? params.period : undefined
+  const searchQuery = typeof params.q === "string" ? params.q : undefined
+
+  if (searchQuery) {
+    return {
+      title: `${searchQuery} - Arama Sonuçları`,
+      description: `"${searchQuery}" ile ilgili antika ürünlerimizi keşfedin. Can Antika koleksiyonunda benzersiz parçalar sizi bekliyor.`,
+      alternates: { canonical: `/urunler?q=${encodeURIComponent(searchQuery)}` },
+      openGraph: {
+        title: `${searchQuery} - Arama Sonuçları | Can Antika`,
+        description: `"${searchQuery}" ile ilgili antika ürünlerimizi keşfedin.`,
+        type: "website",
+        locale: "tr_TR",
+      },
+    }
+  }
+
+  if (categoryParam) {
+    const decodedCategory = decodeURIComponent(categoryParam)
+    return {
+      title: `${decodedCategory} Antika Koleksiyonu`,
+      description: `${decodedCategory} kategorisindeki eşsiz antika eserlerimizi inceleyin. Uzman onaylı, tek ve özgün parçalar.`,
+      alternates: { canonical: `/urunler?category=${encodeURIComponent(categoryParam)}` },
+      openGraph: {
+        title: `${decodedCategory} Antika Koleksiyonu | Can Antika`,
+        description: `${decodedCategory} kategorisindeki eşsiz antika eserlerimizi inceleyin.`,
+        type: "website",
+        locale: "tr_TR",
+      },
+    }
+  }
+
+  if (periodParam) {
+    const decodedPeriod = decodeURIComponent(periodParam)
+    return {
+      title: `${decodedPeriod} Dönemi Antikaları`,
+      description: `${decodedPeriod} dönemine ait özgün antika eserler. Tarihi değeri yüksek, uzman onaylı koleksiyon parçaları.`,
+      alternates: { canonical: `/urunler?period=${encodeURIComponent(periodParam)}` },
+      openGraph: {
+        title: `${decodedPeriod} Dönemi Antikaları | Can Antika`,
+        description: `${decodedPeriod} dönemine ait özgün antika eserler.`,
+        type: "website",
+        locale: "tr_TR",
+      },
+    }
+  }
+
+  return {
+    title: "Antika Koleksiyon",
+    description:
+      "Osmanlı, Viktoryen, Art Deco ve 19. yüzyıl antikalarını keşfedin. Uzman onaylı, tek ve özgün antika eserler. Mobilya, porselen, saatler, halılar ve daha fazlası.",
+    keywords: [
+      "antika",
+      "antika mobilya",
+      "osmanlı antika",
+      "viktoryen antika",
+      "art deco",
+      "antika porselen",
+      "antika saat",
+      "antika halı",
+      "istanbul antikacı",
+    ],
+    alternates: { canonical: "/urunler" },
+    openGraph: {
+      title: "Antika Koleksiyon | Can Antika",
+      description: "Eşsiz antika eserleri keşfedin. Uzman onaylı, tek ve özgün parçalar.",
+      type: "website",
+      locale: "tr_TR",
+    },
+  }
 }
 
 // Cache'li endpoint kullan — /v1/product search yerine listing (Redis cache'li)

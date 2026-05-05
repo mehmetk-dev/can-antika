@@ -22,6 +22,7 @@ export interface OrderResponse {
     orderItems: OrderItemResponse[];
     shippingAddress?: AddressResponse;
     totalAmount: number;
+    shippingAmount?: number;
     paymentStatus?: PaymentStatus;
     trackingNumber?: string;
     carrierName?: string;
@@ -56,6 +57,7 @@ export interface OrderInvoiceResponse {
     shippingAddressSummary: string;
     items: InvoiceItemLine[];
     subtotal: number;
+    shippingAmount?: number;
     totalAmount: number;
     orderStatus: string;
 }

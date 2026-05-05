@@ -13,6 +13,7 @@ import type { OrderResponse, OrderReturnResponse } from "@/lib/types"
 import { toast } from "sonner"
 import { useSiteSettings } from "@/lib/site-settings-context"
 import { generateInvoiceHtml } from "@/lib/commerce/invoice-template"
+import { formatShippingAmount } from "@/lib/commerce/shipping"
 import { TrackingInfoCard } from "@/components/order/tracking-info-card"
 import { ReturnRequestDialog } from "@/components/order/return-request-dialog"
 import { CancelOrderButton } from "@/components/order/cancel-order-button"
@@ -70,6 +71,8 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
     const status = getOrderStatus(order.orderStatus)
     const returnStatus = orderReturn ? getReturnStatus(orderReturn.status) : null
     const hasActiveReturn = orderReturn?.status === "PENDING" || orderReturn?.status === "APPROVED"
+    const shippingAmount = order.shippingAmount ?? 0
+    const subtotalAmount = Math.max(order.totalAmount - shippingAmount, 0)
 
     const handleInvoice = async () => {
         try {
@@ -174,11 +177,13 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
                         <CardContent className="space-y-3">
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Ara Toplam</span>
-                                <span className="text-foreground">₺{order.totalAmount.toLocaleString("tr-TR")}</span>
+                                <span className="text-foreground">₺{subtotalAmount.toLocaleString("tr-TR")}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Kargo</span>
-                                <span className="text-green-600">Ücretsiz</span>
+                                <span className={shippingAmount > 0 ? "text-foreground" : "text-green-600"}>
+                                    {formatShippingAmount(shippingAmount)}
+                                </span>
                             </div>
                             <Separator />
                             <div className="flex justify-between font-medium">

@@ -37,6 +37,10 @@ public class OrderInvoiceService implements IOrderInvoiceService {
                         .lineTotal(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                         .build())
                 .toList();
+        BigDecimal subtotal = lines.stream()
+                .map(OrderInvoiceResponse.InvoiceItemLine::getLineTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal shippingAmount = order.getShippingAmount() == null ? BigDecimal.ZERO : order.getShippingAmount();
 
         return OrderInvoiceResponse.builder()
                 .invoiceNumber("INV-" + order.getId())
@@ -45,7 +49,8 @@ public class OrderInvoiceService implements IOrderInvoiceService {
                 .customerName(user.getName())
                 .shippingAddressSummary(addressSummary)
                 .items(lines)
-                .subtotal(order.getTotalAmount())
+                .subtotal(subtotal)
+                .shippingAmount(shippingAmount)
                 .totalAmount(order.getTotalAmount())
                 .orderStatus(order.getOrderStatus().name())
                 .build();
