@@ -109,7 +109,7 @@ export function FeaturedStory() {
             <div className="mt-8 space-y-4 font-serif text-lg leading-relaxed text-amber-800/80">
               <p>
                 <span className="float-left mr-2 font-serif text-5xl font-bold leading-none text-amber-600">1</span>982
-                yılında Kapalıçarşı’da başlayan bu eşsiz yolculuğumuz, bugün Beyoğlu'ndaki tarihi mağazamızda
+                yılında Kapalıçarşı’da başlayan bu eşsiz yolculuğumuz, bugün Beyoğlu&apos;ndaki tarihi mağazamızda
                 Türkiye’nin en saygın antika merkezlerinden biri olarak devam ediyor.
               </p>
               <p className="text-base">

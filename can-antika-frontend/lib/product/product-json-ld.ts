@@ -2,6 +2,7 @@ import type { ProductResponse } from "../types"
 
 const SITE_URL = "https://canantika.com"
 const RETURN_POLICY_URL = `${SITE_URL}/iade`
+const DEFAULT_CLOUDINARY_BASE = "https://res.cloudinary.com/dqlbenxvc/image/upload/can-antika"
 
 interface ProductJsonLdSettings {
   storeName?: string | null
@@ -43,7 +44,7 @@ interface ProductJsonLd {
   "@type": "Product"
   name: string
   description?: string
-  image?: string
+  image?: string | string[]
   sku: string
   mpn: string
   identifierExists: false
@@ -100,6 +101,19 @@ function calculateProductShippingAmount(product: ProductResponse, settings: Prod
   return Math.max(settings.expressShippingFee ?? 0, 0)
 }
 
+function resolveStructuredImageUrl(raw: string): string {
+  const value = raw.trim()
+  if (!value) return `${SITE_URL}/placeholder.svg`
+  if (/^https?:\/\//i.test(value)) return value
+  if (value.startsWith("/")) return new URL(value, SITE_URL).toString()
+
+  const base = (process.env.NEXT_PUBLIC_CLOUDINARY_BASE || DEFAULT_CLOUDINARY_BASE).replace(/\/$/, "")
+  const url = `${base}/${encodeURI(value.replace(/^\/+/, ""))}`
+  return url.includes("/upload/") && !url.includes("/f_auto") && !url.includes("/q_auto")
+    ? url.replace("/upload/", "/upload/f_auto,q_auto/")
+    : url
+}
+
 export function buildProductJsonLd(
   product: ProductResponse,
   settings: ProductJsonLdSettings = {},
@@ -111,13 +125,17 @@ export function buildProductJsonLd(
     averageRating != null &&
     Number.isFinite(averageRating) &&
     reviewCount > 0
+  const imageUrls = product.imageUrls
+    ?.filter((url) => url.trim())
+    .slice(0, 3)
+    .map(resolveStructuredImageUrl)
 
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.title,
-    description: product.description ?? undefined,
-    image: product.imageUrls?.[0] ?? undefined,
+    description: product.description ? product.description.slice(0, 5000) : undefined,
+    ...(imageUrls && imageUrls.length > 0 ? { image: imageUrls } : {}),
     sku: `CAN-${product.id.toString().padStart(4, "0")}`,
     mpn: `CAN-${product.id.toString().padStart(4, "0")}`,
     identifierExists: false,

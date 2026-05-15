@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { cache, Suspense } from "react"
 
+export const revalidate = 60
+
 import { ProductPageClient } from "./product-page-client"
 import ProductLoading from "./loading"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
@@ -56,15 +58,15 @@ function slugToTitle(slug: string): string {
 async function fetchProductBySlug(slug: string) {
   const safeSlug = encodeURIComponent(slug)
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/slug/${safeSlug}`, {
-    revalidate: 0,
-    timeoutMs: 4000,
+    revalidate: 60,
+    timeoutMs: 8000,
   })
 }
 
 async function fetchProductById(id: number) {
   return fetchApiDataWithFallback<ProductResponse>(`/v1/product/${id}`, {
-    revalidate: 0,
-    timeoutMs: 4000,
+    revalidate: 60,
+    timeoutMs: 8000,
   })
 }
 

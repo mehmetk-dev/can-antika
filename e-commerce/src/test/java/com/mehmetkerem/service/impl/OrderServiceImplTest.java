@@ -310,7 +310,6 @@ class OrderServiceImplTest {
                 .build();
         order.setOrderItems(List.of(orderItem));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(userService.getUserResponseById(USER_ID)).thenReturn(new UserResponse());
         when(addressMapper.toResponse(any())).thenReturn(new AddressResponse());
         when(orderMapper.toResponse(any(Order.class))).thenReturn(OrderResponse.builder()

@@ -32,8 +32,38 @@ test("builds truthful merchant product JSON-LD without fake review data", () => 
   assert.equal(jsonLd.offers.shippingDetails.shippingRate.value, 50)
   assert.equal(jsonLd.offers.shippingDetails.deliveryTime.transitTime.maxValue, 5)
   assert.equal(jsonLd.offers.hasMerchantReturnPolicy.merchantReturnDays, 14)
+  assert.deepEqual(jsonLd.image, ["https://cdn.example.com/tabak.jpg"])
   assert.equal("aggregateRating" in jsonLd, false)
   assert.equal("review" in jsonLd, false)
+})
+
+test("normalizes product JSON-LD images to absolute URLs", () => {
+  const jsonLd = buildProductJsonLd({
+    id: 18,
+    title: "Antika Vazo",
+    slug: "antika-vazo-18",
+    price: 900,
+    stock: 1,
+    imageUrls: ["/images/vazo.jpg", "urunler/vazo-detay.jpg"],
+  })
+
+  assert.deepEqual(jsonLd.image, [
+    "https://canantika.com/images/vazo.jpg",
+    "https://res.cloudinary.com/dqlbenxvc/image/upload/f_auto,q_auto/can-antika/urunler/vazo-detay.jpg",
+  ])
+})
+
+test("omits product JSON-LD image when no usable image URL exists", () => {
+  const jsonLd = buildProductJsonLd({
+    id: 19,
+    title: "Antika Ayna",
+    slug: "antika-ayna-19",
+    price: 1100,
+    stock: 1,
+    imageUrls: ["", "   "],
+  })
+
+  assert.equal("image" in jsonLd, false)
 })
 
 test("includes aggregate rating only when the product has real reviews", () => {

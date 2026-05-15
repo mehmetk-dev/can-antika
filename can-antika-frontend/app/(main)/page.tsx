@@ -18,7 +18,7 @@ function SectionSkeleton({ height = "h-64" }: { height?: string }) {
 const fetchSiteSettings = cache(async () => {
   return fetchApiDataWithFallback<SiteSettingsResponse>("/v1/site-settings", {
     revalidate: 300,
-    timeoutMs: 1200,
+    timeoutMs: 4000,
   })
 })
 

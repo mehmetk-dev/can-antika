@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.security.core.Authentication;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -64,6 +65,7 @@ class RestAuthControllerTest {
                 .refreshToken("refresh")
                 .user(new com.mehmetkerem.dto.response.UserResponse())
                 .build();
+        ReflectionTestUtils.setField(controller, "includeTokensInResponse", true);
     }
 
     @Test

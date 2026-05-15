@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Grid3X3, LayoutGrid, Loader2, SlidersHorizontal } from "lucide-react"
 import { FilterSidebar } from "@/components/catalog/filter-sidebar"
 import { ProductCard } from "@/components/catalog/product-card"
@@ -9,6 +11,12 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { useCatalogFilters } from "@/hooks/useCatalogFilters"
+import {
+  areCatalogFiltersUrlBacked,
+  buildCatalogPageUrl,
+  parseCatalogSortParam,
+  type CatalogSortKey,
+} from "@/lib/catalog/catalog-url"
 import type { ProductCardResponse, CategoryResponse, PeriodResponse } from "@/lib/types"
 
 type ViewMode = "grid" | "large"
@@ -19,6 +27,8 @@ interface CatalogClientProps {
   initialFetchCompleted?: boolean
   initialCategories?: CategoryResponse[]
   initialPeriods?: PeriodResponse[]
+  initialPage?: number
+  initialSortBy?: CatalogSortKey
   ssrCategoryId?: string
   ssrPeriodId?: string
 }
@@ -29,6 +39,8 @@ export function CatalogClient({
   initialFetchCompleted,
   initialCategories = [],
   initialPeriods = [],
+  initialPage = 0,
+  initialSortBy = "newest",
   ssrCategoryId,
   ssrPeriodId,
 }: CatalogClientProps) {
@@ -36,9 +48,33 @@ export function CatalogClient({
     products, categories, periods, totalCount, isLoading,
     page, totalPages, selectedFilters, sortBy, activeFilterCount,
     handleFilterChange, handleCustomPriceChange, handleClearFilters, handleSortChange, handlePageChange,
-  } = useCatalogFilters({ initialProducts, initialTotalCount, initialFetchCompleted, initialCategories, initialPeriods, ssrCategoryId, ssrPeriodId })
+  } = useCatalogFilters({ initialProducts, initialTotalCount, initialFetchCompleted, initialCategories, initialPeriods, initialPage, initialSortBy, ssrCategoryId, ssrPeriodId })
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const filtersAreUrlBacked = areCatalogFiltersUrlBacked(selectedFilters, {
+    categoryId: ssrCategoryId,
+    periodId: ssrPeriodId,
+  })
+  const previousPage = page === 0 ? 0 : page - 1
+  const nextPage = page >= totalPages - 1 ? page : page + 1
+
+  const handleSortSelectChange = (value: string) => {
+    const nextSort = parseCatalogSortParam(value)
+    handleSortChange(nextSort)
+
+    if (!filtersAreUrlBacked) return
+
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("page")
+    if (nextSort === "newest") {
+      params.delete("sort")
+    } else {
+      params.set("sort", nextSort)
+    }
+    router.replace(params.toString() ? `/urunler?${params}` : "/urunler", { scroll: false })
+  }
 
   return (
     <div className="bg-background">
@@ -130,7 +166,7 @@ export function CatalogClient({
               </div>
 
               <div className="flex items-center gap-3">
-                <Select value={sortBy} onValueChange={handleSortChange}>
+                <Select value={sortBy} onValueChange={handleSortSelectChange}>
                   <SelectTrigger className="w-52 bg-transparent border-primary/20 hover:border-primary/40" aria-label="Sıralama seçin">
                     <SelectValue placeholder="Sıralama" />
                   </SelectTrigger>
@@ -187,27 +223,49 @@ export function CatalogClient({
 
                   {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 mt-8">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={page === 0}
-                        onClick={() => handlePageChange(page - 1)}
-                        className="border-primary/30"
-                      >
-                        Önceki
-                      </Button>
+                      {filtersAreUrlBacked ? (
+                        <Link
+                          href={buildCatalogPageUrl(searchParams, previousPage)}
+                          className={`inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-primary/30 ${page === 0 ? "pointer-events-none opacity-50" : "hover:bg-accent hover:text-accent-foreground"}`}
+                          aria-disabled={page === 0}
+                          tabIndex={page === 0 ? -1 : undefined}
+                        >
+                          Önceki
+                        </Link>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={page === 0}
+                          onClick={() => handlePageChange(previousPage)}
+                          className="border-primary/30"
+                        >
+                          Önceki
+                        </Button>
+                      )}
                       <span className="text-sm text-muted-foreground px-3">
                         {page + 1} / {totalPages}
                       </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={page >= totalPages - 1}
-                        onClick={() => handlePageChange(page + 1)}
-                        className="border-primary/30"
-                      >
-                        Sonraki
-                      </Button>
+                      {filtersAreUrlBacked ? (
+                        <Link
+                          href={buildCatalogPageUrl(searchParams, nextPage)}
+                          className={`inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-primary/30 ${page >= totalPages - 1 ? "pointer-events-none opacity-50" : "hover:bg-accent hover:text-accent-foreground"}`}
+                          aria-disabled={page >= totalPages - 1}
+                          tabIndex={page >= totalPages - 1 ? -1 : undefined}
+                        >
+                          Sonraki
+                        </Link>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={page >= totalPages - 1}
+                          onClick={() => handlePageChange(nextPage)}
+                          className="border-primary/30"
+                        >
+                          Sonraki
+                        </Button>
+                      )}
                     </div>
                   )}
                 </>

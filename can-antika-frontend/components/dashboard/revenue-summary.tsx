@@ -1,6 +1,5 @@
 "use client"
 
-import { useMemo } from "react"
 import { TrendingUp, TrendingDown, Calendar, DollarSign } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDateTR } from "@/lib/utils"
@@ -18,26 +17,12 @@ export default function RevenueSummary({ stats }: RevenueSummaryProps) {
     const today = new Date()
     const todayStr = today.toISOString().split("T")[0]
 
-    const todayRevenue = useMemo(() => {
-        if (!stats?.dailyStats?.length) return 0
-        const todayEntry = stats.dailyStats.find(d => d.date === todayStr)
-        return todayEntry?.revenue ?? 0
-    }, [stats?.dailyStats, todayStr])
-
-    const currentMonthRevenue = useMemo(() => {
-        if (!stats?.monthlyTrends?.length) return 0
-        const currentMonth = todayStr.substring(0, 7)
-        const entry = stats.monthlyTrends.find(m => m.month === currentMonth)
-        return entry?.revenue ?? 0
-    }, [stats?.monthlyTrends, todayStr])
-
-    const previousMonthRevenue = useMemo(() => {
-        if (!stats?.monthlyTrends?.length || stats.monthlyTrends.length < 2) return 0
-        const prevDate = new Date(today.getFullYear(), today.getMonth() - 1, 1)
-        const prevMonthStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}`
-        const entry = stats.monthlyTrends.find(m => m.month === prevMonthStr)
-        return entry?.revenue ?? 0
-    }, [stats?.monthlyTrends, today])
+    const todayRevenue = stats?.dailyStats?.find(d => d.date === todayStr)?.revenue ?? 0
+    const currentMonth = todayStr.substring(0, 7)
+    const currentMonthRevenue = stats?.monthlyTrends?.find(m => m.month === currentMonth)?.revenue ?? 0
+    const prevDate = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+    const prevMonthStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}`
+    const previousMonthRevenue = stats?.monthlyTrends?.find(m => m.month === prevMonthStr)?.revenue ?? 0
 
     const monthOverMonth = currentMonthRevenue > 0 && previousMonthRevenue > 0
         ? ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue * 100)

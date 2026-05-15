@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { getServerApiUrlCandidates } from "@/lib/server/server-api-url";
 
 const MAINTENANCE_CACHE_TTL_MS = 300_000;
-const MAINTENANCE_TIMEOUT_MS = 1500;
+const MAINTENANCE_TIMEOUT_MS = 3000;
 let maintenanceModeCache: { value: boolean; expiresAt: number } | null = null;
 
 async function fetchMaintenanceModeFromBase(apiBase: string): Promise<boolean> {

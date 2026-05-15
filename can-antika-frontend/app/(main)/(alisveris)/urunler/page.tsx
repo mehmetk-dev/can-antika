@@ -3,9 +3,8 @@ import { cache } from "react"
 
 import { CatalogClient } from "./catalog-client"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
+import { CATALOG_SORT_MAP, parseCatalogPageParam, parseCatalogSortParam, type CatalogSortKey } from "@/lib/catalog/catalog-url"
 import type { ProductCardResponse, CategoryResponse, PeriodResponse, CursorResponse } from "@/lib/types"
-
-export const revalidate = 0
 
 export async function generateMetadata({
   searchParams,
@@ -87,34 +86,41 @@ export async function generateMetadata({
 }
 
 // Cache'li endpoint kullan — /v1/product search yerine listing (Redis cache'li)
-const fetchInitialProducts = cache(async (filters?: { categoryId?: number; periodId?: number; title?: string }) => {
+const fetchInitialProducts = cache(async (filters?: { categoryId?: number; periodId?: number; title?: string; page?: number; sortKey?: CatalogSortKey }) => {
+  const sort = CATALOG_SORT_MAP[filters?.sortKey ?? "newest"]
+  const params = new URLSearchParams({
+    page: Math.max(0, filters?.page ?? 0).toString(),
+    size: "20",
+    sortBy: sort.sortBy,
+    direction: sort.direction,
+  })
+
   if (filters && (filters.categoryId || filters.periodId || filters.title)) {
-    const params = new URLSearchParams({ page: "0", size: "20", sortBy: "createdAt", direction: "desc" })
     if (filters.categoryId) params.set("categoryId", filters.categoryId.toString())
     if (filters.periodId) params.set("periodId", filters.periodId.toString())
     if (filters.title) params.set("title", filters.title)
     return fetchApiDataWithFallback<CursorResponse<ProductCardResponse>>(`/v1/product/search/cards?${params}`, {
-      revalidate: 0,
-      timeoutMs: 800,
+      revalidate: 60,
+      timeoutMs: 5000,
     })
   }
-  return fetchApiDataWithFallback<CursorResponse<ProductCardResponse>>("/v1/product/cards?page=0&size=20&sortBy=createdAt&direction=desc", {
-    revalidate: 0,
-    timeoutMs: 800,
+  return fetchApiDataWithFallback<CursorResponse<ProductCardResponse>>(`/v1/product/cards?${params}`, {
+    revalidate: 60,
+    timeoutMs: 5000,
   })
 })
 
 const fetchCategories = cache(async () => {
   return fetchApiDataWithFallback<CategoryResponse[]>("/v1/category/find-all", {
     revalidate: 300,
-    timeoutMs: 600,
+    timeoutMs: 3000,
   })
 })
 
 const fetchPeriods = cache(async () => {
   return fetchApiDataWithFallback<PeriodResponse[]>("/v1/period/find-all", {
     revalidate: 300,
-    timeoutMs: 600,
+    timeoutMs: 3000,
   })
 })
 
@@ -127,6 +133,8 @@ export default async function CatalogPage({
   const categoryParam = typeof params.category === "string" ? params.category : undefined
   const periodParam = typeof params.period === "string" ? params.period : undefined
   const searchQuery = typeof params.q === "string" ? params.q : undefined
+  const page = parseCatalogPageParam(params.page)
+  const sortKey = parseCatalogSortParam(params.sort)
   const hasFilters = !!(categoryParam || periodParam || searchQuery)
 
   if (hasFilters) {
@@ -158,7 +166,7 @@ export default async function CatalogPage({
     }
 
     const productsResult = await fetchInitialProducts(
-      { categoryId: ssrCategoryId, periodId: ssrPeriodId, title: searchQuery }
+      { categoryId: ssrCategoryId, periodId: ssrPeriodId, title: searchQuery, page, sortKey }
     ).then(
       (value) => ({ status: "fulfilled" as const, value }),
       () => ({ status: "rejected" as const, value: null }),
@@ -175,6 +183,8 @@ export default async function CatalogPage({
         initialFetchCompleted={productsResult.status === "fulfilled" && Boolean(productsResult.value)}
         initialCategories={initialCategories}
         initialPeriods={initialPeriods}
+        initialPage={page}
+        initialSortBy={sortKey}
         ssrCategoryId={ssrCategoryId?.toString()}
         ssrPeriodId={ssrPeriodId?.toString()}
       />
@@ -185,7 +195,7 @@ export default async function CatalogPage({
   const [categoriesResult, periodsResult, productsResult] = await Promise.allSettled([
     fetchCategories(),
     fetchPeriods(),
-    fetchInitialProducts(),
+    fetchInitialProducts({ page, sortKey }),
   ])
 
   const initialCategories = categoriesResult.status === "fulfilled" && Array.isArray(categoriesResult.value)
@@ -205,6 +215,8 @@ export default async function CatalogPage({
       initialFetchCompleted={productsValue !== null}
       initialCategories={initialCategories}
       initialPeriods={initialPeriods}
+      initialPage={page}
+      initialSortBy={sortKey}
       ssrCategoryId={undefined}
       ssrPeriodId={undefined}
     />

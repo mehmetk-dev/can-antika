@@ -22,9 +22,10 @@ class EnumsTest {
         assertEquals(OrderStatus.PENDING, OrderStatus.valueOf("PENDING"));
         assertEquals(OrderStatus.SHIPPED, OrderStatus.valueOf("SHIPPED"));
         assertEquals(OrderStatus.DELIVERED, OrderStatus.valueOf("DELIVERED"));
+        assertEquals(OrderStatus.RETURNED, OrderStatus.valueOf("RETURNED"));
         assertEquals(OrderStatus.CANCELLED, OrderStatus.valueOf("CANCELLED"));
         assertEquals(OrderStatus.PAID, OrderStatus.valueOf("PAID"));
-        assertEquals(5, OrderStatus.values().length);
+        assertEquals(6, OrderStatus.values().length);
     }
 
     @Test

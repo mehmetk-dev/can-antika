@@ -252,7 +252,6 @@ public class OrderServiceImpl implements IOrderService {
         }
 
         order.setOrderStatus(newStatus);
-        orderRepository.save(order);
         log.info("Sipariş durumu güncellendi: {} -> {}", oldStatus, newStatus);
 
         Long currentUserId = com.mehmetkerem.util.SecurityUtils.getCurrentUserId();
@@ -280,7 +279,6 @@ public class OrderServiceImpl implements IOrderService {
     public void updatePaymentStatus(Long orderId, com.mehmetkerem.enums.PaymentStatus newStatus) {
         Order order = getOrderById(orderId);
         order.setPaymentStatus(newStatus);
-        orderRepository.save(order);
     }
 
     @Override

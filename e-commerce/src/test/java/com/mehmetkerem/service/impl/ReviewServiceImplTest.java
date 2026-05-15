@@ -17,8 +17,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -172,9 +175,11 @@ class ReviewServiceImplTest {
     @Test
     @DisplayName("findAllReviews - tüm yorumlar listelenir")
     void findAllReviews_ShouldReturnAllReviews() {
-        when(reviewRepository.findAll()).thenReturn(List.of(review));
-        when(userService.getUserResponseById(USER_ID)).thenReturn(new UserResponse());
-        when(productService.getProductResponseById(PRODUCT_ID)).thenReturn(new ProductResponse());
+        ProductResponse productResponse = new ProductResponse();
+        productResponse.setId(PRODUCT_ID);
+        when(reviewRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(review)));
+        when(userService.getUserResponsesByIds(List.of(USER_ID))).thenReturn(Map.of(USER_ID, new UserResponse()));
+        when(productService.getProductResponsesByIds(List.of(PRODUCT_ID))).thenReturn(List.of(productResponse));
         when(reviewMapper.toResponseWithDetails(eq(review), any(), any())).thenReturn(reviewResponse);
 
         List<ReviewResponse> result = reviewService.findAllReviews();

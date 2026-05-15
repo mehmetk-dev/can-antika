@@ -67,7 +67,7 @@ export default function AboutPage() {
                         <Award className="h-6 w-6 text-accent" />
                       </div>
                       <div>
-                        <p className="font-serif text-2xl font-bold text-primary-foreground">1982'den Beri</p>
+                        <p className="font-serif text-2xl font-bold text-primary-foreground">1982&apos;den Beri</p>
                         <p className="text-xs uppercase tracking-widest text-primary-foreground/60">Sektörel Birikim</p>
                       </div>
                     </div>

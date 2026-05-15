@@ -1,20 +1,38 @@
 import type { MetadataRoute } from "next"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import { getProductUrl } from "@/lib/product/product-url"
-import type { ProductResponse, CursorResponse, CategoryResponse, BlogPost } from "@/lib/types"
+import { resolveImageUrl } from "@/lib/product/image-url"
+import type { ProductResponse, CursorResponse, BlogPost } from "@/lib/types"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://canantika.com"
 
-async function fetchProducts(): Promise<ProductResponse[]> {
-    try {
-        const data = await fetchApiDataWithFallback<CursorResponse<ProductResponse>>(
-            "/v1/product?page=0&size=100&sortBy=createdAt&direction=desc",
-            { revalidate: 300, timeoutMs: 5000 }
-        )
-        return data?.items ?? []
-    } catch {
-        return []
+function resolveSitemapImageUrl(raw: string): string {
+    const imageUrl = resolveImageUrl(raw)
+    return /^https?:\/\//i.test(imageUrl) ? imageUrl : new URL(imageUrl, SITE_URL).toString()
+}
+
+async function fetchAllProducts(): Promise<ProductResponse[]> {
+    const allProducts: ProductResponse[] = []
+    let page = 0
+    const size = 100
+    const maxPages = 20
+
+    while (page < maxPages) {
+        try {
+            const data = await fetchApiDataWithFallback<CursorResponse<ProductResponse>>(
+                `/v1/product?page=${page}&size=${size}&sortBy=createdAt&direction=desc`,
+                { revalidate: 300, timeoutMs: 8000 }
+            )
+            const items = data?.items ?? []
+            if (items.length === 0) break
+            allProducts.push(...items)
+            if (items.length < size) break
+            page++
+        } catch {
+            break
+        }
     }
+    return allProducts
 }
 
 async function fetchBlogPosts(): Promise<BlogPost[]> {
@@ -29,26 +47,12 @@ async function fetchBlogPosts(): Promise<BlogPost[]> {
     }
 }
 
-async function fetchCategories(): Promise<CategoryResponse[]> {
-    try {
-        const data = await fetchApiDataWithFallback<CategoryResponse[]>(
-            "/v1/category/find-all",
-            { revalidate: 300, timeoutMs: 3000 }
-        )
-        return data ?? []
-    } catch {
-        return []
-    }
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const [products, blogPosts, categories] = await Promise.all([
-        fetchProducts(),
+    const [products, blogPosts] = await Promise.all([
+        fetchAllProducts(),
         fetchBlogPosts(),
-        fetchCategories(),
     ])
 
-    // Statik sayfalar
     const staticPages: MetadataRoute.Sitemap = [
         {
             url: SITE_URL,
@@ -124,15 +128,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
     ]
 
-    // Ürün sayfaları
     const productPages: MetadataRoute.Sitemap = products.map((product) => ({
         url: `${SITE_URL}${getProductUrl(product)}`,
-        lastModified: new Date(), // ProductResponse doesn't have updatedAt in current types
+        lastModified: new Date(),
         changeFrequency: "weekly" as const,
         priority: 0.8,
+        images: product.imageUrls?.length
+            ? product.imageUrls.slice(0, 3).map((url) => resolveSitemapImageUrl(url))
+            : undefined,
     }))
 
-    // Blog yazıları
     const blogPages: MetadataRoute.Sitemap = blogPosts.map((post) => ({
         url: `${SITE_URL}/blog/${post.slug || post.id}`,
         lastModified: post.createdAt ? new Date(post.createdAt) : new Date(),
@@ -140,13 +145,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
     }))
 
-    // Kategori sayfaları
-    const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
-        url: `${SITE_URL}/urunler?category=${encodeURIComponent(cat.name)}`,
-        lastModified: new Date(),
-        changeFrequency: "weekly" as const,
-        priority: 0.6,
-    }))
-
-    return [...staticPages, ...productPages, ...blogPages, ...categoryPages]
+    return [...staticPages, ...productPages, ...blogPages]
 }

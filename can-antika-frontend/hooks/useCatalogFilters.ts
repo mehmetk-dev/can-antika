@@ -4,19 +4,12 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { productApi, categoryApi, periodApi } from "@/lib/api"
+import { CATALOG_SORT_MAP, type CatalogSortKey } from "@/lib/catalog/catalog-url"
 import { priceRanges } from "@/lib/product/products"
 import type { ProductCardResponse, CategoryResponse, CursorResponse, PeriodResponse } from "@/lib/types"
 import { CATALOG_PAGE_SIZE } from "@/lib/constants"
 
 const PAGE_SIZE = CATALOG_PAGE_SIZE
-
-const SORT_MAP: Record<string, { sortBy: string; direction: string }> = {
-    newest: { sortBy: "createdAt", direction: "desc" },
-    oldest: { sortBy: "createdAt", direction: "asc" },
-    "price-asc": { sortBy: "price", direction: "asc" },
-    "price-desc": { sortBy: "price", direction: "desc" },
-    name: { sortBy: "title", direction: "asc" },
-}
 
 interface UseCatalogFiltersOptions {
     initialProducts?: ProductCardResponse[]
@@ -24,6 +17,8 @@ interface UseCatalogFiltersOptions {
     initialFetchCompleted?: boolean
     initialCategories?: CategoryResponse[]
     initialPeriods?: PeriodResponse[]
+    initialPage?: number
+    initialSortBy?: CatalogSortKey
     ssrCategoryId?: string
     ssrPeriodId?: string
 }
@@ -34,6 +29,8 @@ export function useCatalogFilters({
     initialFetchCompleted = initialProducts.length > 0,
     initialCategories = [],
     initialPeriods = [],
+    initialPage = 0,
+    initialSortBy = "newest",
     ssrCategoryId,
     ssrPeriodId,
 }: UseCatalogFiltersOptions) {
@@ -50,7 +47,7 @@ export function useCatalogFilters({
     const [periods, setPeriods] = useState<PeriodResponse[]>(initialPeriods)
     const [totalCount, setTotalCount] = useState(initialTotalCount)
     const [isLoading, setIsLoading] = useState(!hasInitialResult)
-    const [page, setPage] = useState(0)
+    const [page, setPage] = useState(initialPage)
 
     const [userInteracted, setUserInteracted] = useState(false)
     // Filter state — initialize from SSR-resolved IDs when available
@@ -61,7 +58,16 @@ export function useCatalogFilters({
         customMinPrice: "",
         customMaxPrice: "",
     })
-    const [sortBy, setSortBy] = useState("newest")
+    const [sortBy, setSortBy] = useState<CatalogSortKey>(initialSortBy)
+
+    useEffect(() => {
+        setProducts(initialProducts)
+        setTotalCount(initialTotalCount)
+        setIsLoading(!initialFetchCompleted)
+        setPage(initialPage)
+        setSortBy(initialSortBy)
+        setUserInteracted(false)
+    }, [initialProducts, initialTotalCount, initialFetchCompleted, initialPage, initialSortBy])
 
     // Resolve URL category param
     useEffect(() => {
@@ -122,11 +128,6 @@ export function useCatalogFilters({
             .catch((e) => console.error("Dönem yükleme hatası:", e))
     }, [periodParam, initialPeriods, ssrPeriodId])
 
-    // Reset page when search or category changes
-    useEffect(() => {
-        setPage(0)
-    }, [searchQuery, categoryParam, periodParam])
-
     // Refs for stable fetch callback
     const filtersRef = useRef(selectedFilters)
     filtersRef.current = selectedFilters
@@ -145,7 +146,7 @@ export function useCatalogFilters({
         const currentSortBy = sortByRef.current
         const currentPage = pageRef.current
         const currentSearch = searchQueryRef.current
-        const sort = SORT_MAP[currentSortBy] || SORT_MAP.newest
+        const sort = CATALOG_SORT_MAP[currentSortBy] || CATALOG_SORT_MAP.newest
 
         let minPrice: number | undefined
         let maxPrice: number | undefined
@@ -264,7 +265,7 @@ export function useCatalogFilters({
         setFetchTrigger((c) => c + 1)
     }
 
-    const handleSortChange = (v: string) => {
+    const handleSortChange = (v: CatalogSortKey) => {
         setSortBy(v)
         setPage(0)
         setUserInteracted(true)

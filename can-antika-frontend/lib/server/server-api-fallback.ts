@@ -69,7 +69,7 @@ export async function fetchApiDataWithFallback<T>(
   path: string,
   options: FetchWithFallbackOptions = {}
 ): Promise<T | null> {
-  const { revalidate = 60, timeoutMs = 1200 } = options
+  const { revalidate = 60, timeoutMs = 5000 } = options
   const start = performance.now()
   const baseUrls = getServerApiUrlCandidates()
 
