@@ -11,6 +11,9 @@ import { FeaturedStory } from "@/components/home/featured-story"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { SiteSettingsResponse } from "@/lib/types"
 
+const HOME_META_DESCRIPTION =
+  "Can Antika, Beyoğlu Avrupa Pasajı'nda antika ve koleksiyon ürünleri sunar. Ürünleri, fiyatları, teslimat ve iade koşullarını siteden inceleyebilirsiniz."
+
 function SectionSkeleton({ height = "h-64" }: { height?: string }) {
   return <div className={`${height} w-full animate-pulse bg-muted/30 rounded-lg`} />
 }
@@ -23,11 +26,7 @@ const fetchSiteSettings = cache(async () => {
 })
 
 export async function generateMetadata(): Promise<Metadata> {
-  const s = await fetchSiteSettings()
-  const storeDesc = s?.storeDescription || "1982'den beri İstanbul'un en güvenilir antika mağazası."
-  const metaDesc = s?.metaDescription || storeDesc
-
-  return { description: metaDesc }
+  return { description: HOME_META_DESCRIPTION }
 }
 
 export default async function HomePage() {

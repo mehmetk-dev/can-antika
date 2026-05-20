@@ -142,7 +142,7 @@ export function MobileMenu({ isOpen, onOpenChange, navigation, isAuthenticated }
                     <p className="text-center text-xs text-muted-foreground">
                         <span className="font-serif italic">&quot;Geçmişin izinde, geleceğe miras&quot;</span>
                     </p>
-                    <p className="mt-1 text-center text-[10px] text-muted-foreground/60">Çukurcuma, Beyoğlu - İstanbul</p>
+                    <p className="mt-1 text-center text-[10px] text-muted-foreground/60">Avrupa Pasajı, Beyoğlu / İstanbul</p>
                 </div>
             </SheetContent>
         </Sheet>

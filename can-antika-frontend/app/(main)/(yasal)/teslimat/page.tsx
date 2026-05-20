@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BusinessInfo } from "@/components/legal/business-info";
+import { BusinessInfo, LEGAL_BUSINESS_INFO } from "@/components/legal/business-info";
 
 export const metadata: Metadata = {
   title: "Teslimat / Kargo Politikası",
@@ -115,7 +115,7 @@ export default function ShippingPolicyPage() {
             </p>
             <p className="leading-7">Mağaza Adresi:</p>
             <ul className="list-disc space-y-1 pl-6 leading-7">
-              <li>Hüseyinağa Mahallesi, Meşrutiyet Caddesi, Avrupa Pasajı No: 7, Beyoğlu / İstanbul</li>
+              <li>{LEGAL_BUSINESS_INFO.address}</li>
             </ul>
 
           </section>

@@ -9,19 +9,20 @@ import {
 } from "react";
 import type { SiteSettingsResponse } from "./types";
 import { siteSettingsApi } from "./api";
+import { LEGAL_BUSINESS_INFO } from "@/components/legal/business-info";
 
 const DEFAULTS: SiteSettingsResponse = {
     storeName: "Can Antika",
     businessType: "Antika Eşya Satışı",
     storeDescription: "1982'den beri İstanbul'da en kaliteli antika eşyaları sunuyoruz.",
-    companyName: "Mesut Can (Şahıs İşletmesi)",
-    taxId: "",
-    taxOffice: "",
-    phone: "+90 (212) 555-0123",
+    companyName: LEGAL_BUSINESS_INFO.companyName,
+    taxId: LEGAL_BUSINESS_INFO.taxId,
+    taxOffice: LEGAL_BUSINESS_INFO.taxOffice,
+    phone: LEGAL_BUSINESS_INFO.phone,
     email: "destek@canantika.com",
     website: "www.canantika.com",
-    address: "Çukurcuma Caddesi No: 45, Beyoğlu, İstanbul",
-    whatsapp: "+90 (212) 555-0123",
+    address: LEGAL_BUSINESS_INFO.address,
+    whatsapp: LEGAL_BUSINESS_INFO.phone,
     weekdayHours: "10:00 - 18:00",
     saturdayHours: "11:00 - 17:00",
     standardDelivery: "3-5 iş günü",
@@ -35,13 +36,13 @@ const DEFAULTS: SiteSettingsResponse = {
     youtube: "",
     tiktok: "",
     metaTitle: "Can Antika - Premium Antika Eşya Satışı İstanbul",
-    metaDescription: "1982'den beri İstanbul'da en kaliteli antika eşyaları. Osmanlı, Viktoryen ve sanat eserleri.",
+    metaDescription: "Can Antika, Beyoğlu Avrupa Pasajı'nda antika ve koleksiyon ürünleri sunar. Ürünleri, fiyatları, teslimat ve iade koşullarını siteden inceleyebilirsiniz.",
     metaKeywords: "antika, antika eşya, osmanlı, istanbul, koleksiyon",
     googleAnalyticsId: "",
     facebookPixelId: "",
     customHeadScripts: "",
     footerAbout: "1982'den beri İstanbul'un kalbinde, geçmişin eşsiz güzelliklerini geleceğe taşıyoruz.",
-    footerCopyright: "© 2024 Can Antika. Tüm hakları saklıdır.",
+    footerCopyright: "© 2026 Can Antika. Tüm hakları saklıdır.",
     maintenanceMode: false,
     maintenanceMessage: "Sitemiz şu anda bakım modundadır. Kısa süre içinde tekrar hizmetinizde olacağız.",
     smtpHost: "",

@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { LEGAL_BUSINESS_INFO } from "@/components/legal/business-info"
 import { cn, sanitizeExternalUrl } from "@/lib/utils"
 import type { SiteSettingsResponse } from "@/lib/types"
 
@@ -21,6 +22,9 @@ const footerLinks = {
     { name: "Mesafeli Satış Sözleşmesi", href: "/mesafeli-satis-sozlesmesi" },
   ],
 }
+
+const paymentBadges = ["Visa", "Mastercard", "Troy"]
+const trustBadges = ["SSL/TLS Güvenli Bağlantı", "3D Secure", "PayTR Güvenli Ödeme"]
 
 function SocialIcon({ type }: { type: "facebook" | "instagram" | "twitter" | "youtube" | "tiktok" }) {
   if (type === "facebook") {
@@ -94,6 +98,10 @@ export function Footer({ className, settings }: FooterProps) {
   const phoneHref = settings.phone ? `tel:${settings.phone.replace(/\s+/g, "")}` : ""
   const mailHref = settings.email ? `mailto:${settings.email}` : ""
   const mapHref = "https://maps.app.goo.gl/Sv4bqXDK7164WQGR9"
+  const legalCompanyName = LEGAL_BUSINESS_INFO.companyName
+  const legalTaxId = LEGAL_BUSINESS_INFO.taxId
+  const legalTaxOffice = LEGAL_BUSINESS_INFO.taxOffice
+  const legalAddress = LEGAL_BUSINESS_INFO.address
 
   return (
     <footer data-nosnippet className={cn("relative overflow-hidden border-t border-primary-foreground/10 bg-primary text-primary-foreground", className)}>
@@ -155,6 +163,14 @@ export function Footer({ className, settings }: FooterProps) {
               ) : null}
             </div>
 
+            <div className="mt-6 space-y-1.5 text-xs leading-5 text-primary-foreground/60">
+              <p className="font-medium text-primary-foreground/75">Yasal İşletme Bilgileri</p>
+              <p>{legalCompanyName}</p>
+              <p>VKN: {legalTaxId} / Vergi Dairesi: {legalTaxOffice}</p>
+              <p>Faaliyet: {LEGAL_BUSINESS_INFO.activityCode} - {LEGAL_BUSINESS_INFO.businessType}</p>
+              <p>{legalAddress}</p>
+            </div>
+
             {socialLinks.length > 0 && (
               <div className="mt-6 flex flex-wrap gap-2">
                 {socialLinks.map((social) => (
@@ -199,8 +215,20 @@ export function Footer({ className, settings }: FooterProps) {
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-4">
+        <div className="mt-6 flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
           <p className="text-sm text-primary-foreground/60">© 2026 Can Antika</p>
+          <div className="flex flex-wrap gap-2 lg:justify-center">
+            {paymentBadges.map((badge) => (
+              <span key={badge} className="rounded border border-primary-foreground/20 px-2 py-1 text-xs font-medium text-primary-foreground/70">
+                {badge}
+              </span>
+            ))}
+            {trustBadges.map((badge) => (
+              <span key={badge} className="rounded border border-accent/30 bg-accent/10 px-2 py-1 text-xs font-medium text-accent">
+                {badge}
+              </span>
+            ))}
+          </div>
           <p className="text-sm text-primary-foreground/50">
             Dijital altyapı ve geliştirme:{" "}
             <a

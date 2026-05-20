@@ -14,6 +14,8 @@ const _cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel", display:
 
 const GA_ID_PATTERN = /^(G-[A-Z0-9]+|GTM-[A-Z0-9]+|UA-\d+-\d+)$/i
 const FB_PIXEL_ID_PATTERN = /^\d{5,20}$/
+const DEFAULT_SITE_DESCRIPTION =
+  "Can Antika, Beyoğlu Avrupa Pasajı'nda antika ve koleksiyon ürünleri sunar. Ürünleri, fiyatları, teslimat ve iade koşullarını siteden inceleyebilirsiniz."
 
 function sanitizeGoogleAnalyticsId(value?: string | null): string {
   const normalized = (value || "").trim()
@@ -30,9 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const storeName = s?.storeName || "Can Antika"
   const metaTitle = s?.metaTitle || `${storeName} | Geçmişin Zarafeti`
-  const metaDesc =
-    s?.metaDescription ||
-    "1982'den beri İstanbul'un kalbinde eşsiz antika eserler, uzman onaylı koleksiyon parçaları ve güvenli teslimat hizmeti sunuyoruz."
+  const metaDesc = DEFAULT_SITE_DESCRIPTION
   const keywords = s?.metaKeywords
     ? s.metaKeywords.split(",").map((k: string) => k.trim())
     : ["antika", "antika mağazası", "osmanlı antika", "istanbul antika", "can antika"]
@@ -76,8 +76,8 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: [
         { url: "/favicon.ico", sizes: "any" },
-        { url: "/icon.png", type: "image/png" },
-        { url: "/icon.svg", type: "image/svg+xml" },
+        { url: "/icon.png", sizes: "192x192", type: "image/png" },
+        { url: "/web-app-manifest-512x512.png", sizes: "512x512", type: "image/png" },
       ],
       apple: "/apple-icon.png",
     },

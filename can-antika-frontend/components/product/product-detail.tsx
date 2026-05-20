@@ -28,6 +28,15 @@ interface ProductDetailProps {
   relatedProducts?: ProductCardResponse[]
 }
 
+const attributeLabels: Record<string, string> = {
+  material: "Materyal",
+  conditiondetails: "Kondisyon Detayı",
+}
+
+function getAttributeLabel(key: string): string {
+  return attributeLabels[key.toLowerCase()] ?? key
+}
+
 export function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {
   const [activeTab, setActiveTab] = useState("details")
   const handleTabChange = useCallback((tab: string) => {
@@ -129,7 +138,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                 {condition && (
                   <div className="flex items-center gap-2">
                     <span className="text-[#d4af37]">✧</span>
-                    <span className="font-light">Kondisyon: <span className="capitalize">{condition}</span></span>
+                    <span className="font-light">Kondisyon: <span>{condition}</span></span>
                   </div>
                 )}
                 {dimensions && (
@@ -152,7 +161,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
             {!isSold && (
               <div className="mt-8 flex items-center gap-6">
                 {maxStock > 1 && (
-                  <QuantitySelector max={maxStock} value={quantity} onChange={setQuantity} disabled={addedToCart} />
+                  <QuantitySelector max={maxStock} value={quantity} onChange={setQuantity} />
                 )}
                 <div className="flex items-center gap-2 text-sm">
                   <div className={`h-1.5 w-1.5 rounded-full ${maxStock > 5 ? "bg-emerald-500/80" : maxStock > 0 ? "bg-amber-500/80" : "bg-red-500/80"}`} />
@@ -275,10 +284,10 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                   {otherAttributes.map(({ key, value }) => (
                     <div key={key} className="flex justify-between items-end border-b border-border/40 py-2.5">
                       <span className="text-[11px] font-semibold uppercase tracking-widest text-[#5c4a3d]/80">
-                        {key.toLowerCase() === 'material' ? 'Materyal' : key}
+                        {getAttributeLabel(key)}
                       </span>
                       <div className="flex-grow mx-4 border-b border-dotted border-[#5c4a3d]/20 mb-1" />
-                      <span className="font-serif text-sm font-medium text-foreground text-right capitalize">{value}</span>
+                      <span className="font-serif text-sm font-medium text-foreground text-right">{value}</span>
                     </div>
                   ))}
                 </div>
@@ -336,10 +345,10 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                     {otherAttributes.map(({ key, value }) => (
                       <div key={key} className="flex justify-between items-end border-b border-border/40 py-2">
                         <span className="text-[11px] font-semibold uppercase tracking-widest text-[#5c4a3d]/80">
-                          {key.toLowerCase() === 'material' ? 'Materyal' : key}
+                          {getAttributeLabel(key)}
                         </span>
                         <div className="flex-grow mx-2 border-b border-dotted border-[#5c4a3d]/20 mb-1" />
-                        <span className="font-serif text-sm font-medium text-foreground text-right capitalize">{value}</span>
+                        <span className="font-serif text-sm font-medium text-foreground text-right">{value}</span>
                       </div>
                     ))}
                   </div>
