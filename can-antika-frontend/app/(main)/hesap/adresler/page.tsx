@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { useAddresses } from "@/hooks/useAddresses"
 import type { AddressResponse, AddressRequest } from "@/lib/types"
+import { normalizeAddressSearch } from "@/lib/geo/address-search"
 import { getTurkiyeAddressUnits, type TurkiyeAddressUnit } from "@/lib/geo/turkiye-address"
 import { toast } from "sonner"
 
@@ -54,10 +55,13 @@ function AddressesContent() {
   const selectedProvince = provinces.find((province) => String(province.id) === selectedProvinceId)
   const selectedDistrict = districts.find((district) => String(district.id) === selectedDistrictId)
   const selectedNeighborhood = neighborhoods.find((neighborhood) => String(neighborhood.id) === selectedNeighborhoodId)
-  const filteredProvinces = provinces.filter((province) => province.name.toLocaleLowerCase("tr").includes(provinceSearch.trim().toLocaleLowerCase("tr")))
-  const filteredDistricts = districts.filter((district) => district.name.toLocaleLowerCase("tr").includes(districtSearch.trim().toLocaleLowerCase("tr")))
+  const normalizedProvinceSearch = normalizeAddressSearch(provinceSearch)
+  const normalizedDistrictSearch = normalizeAddressSearch(districtSearch)
+  const normalizedNeighborhoodSearch = normalizeAddressSearch(neighborhoodSearch)
+  const filteredProvinces = provinces.filter((province) => normalizeAddressSearch(province.name).includes(normalizedProvinceSearch))
+  const filteredDistricts = districts.filter((district) => normalizeAddressSearch(district.name).includes(normalizedDistrictSearch))
   const filteredNeighborhoods = neighborhoods.filter((neighborhood) =>
-    neighborhood.name.toLocaleLowerCase("tr").includes(neighborhoodSearch.trim().toLocaleLowerCase("tr")),
+    normalizeAddressSearch(neighborhood.name).includes(normalizedNeighborhoodSearch),
   )
 
   useEffect(() => {

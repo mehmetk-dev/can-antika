@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { normalizeAddressSearch } from "@/lib/geo/address-search"
 import { TURKIYE_PROVINCES } from "@/lib/geo/turkiye-provinces"
 
 const TURKIYE_API_BASE_URL = "https://api.turkiyeapi.dev/v1"
@@ -14,6 +15,7 @@ interface TurkiyeApiUnit {
 
 interface TurkiyeApiResponse {
   data?: TurkiyeApiUnit[]
+  error?: string
 }
 
 const addressCache = new Map<string, { expiresAt: number; items: TurkiyeApiUnit[] }>()
@@ -22,14 +24,10 @@ function isRouteKind(value: string): value is RouteKind {
   return value === "provinces" || value === "districts" || value === "neighborhoods"
 }
 
-function normalizeSearch(value: string) {
-  return value.trim().toLocaleLowerCase("tr")
-}
-
 function filterUnits(items: TurkiyeApiUnit[], query: string) {
-  const normalizedQuery = normalizeSearch(query)
+  const normalizedQuery = normalizeAddressSearch(query)
   if (!normalizedQuery) return items
-  return items.filter((item) => item.name?.toLocaleLowerCase("tr").includes(normalizedQuery))
+  return items.filter((item) => item.name && normalizeAddressSearch(item.name).includes(normalizedQuery))
 }
 
 function normalizeUnits(items: TurkiyeApiUnit[]) {
@@ -43,7 +41,7 @@ function normalizeUnits(items: TurkiyeApiUnit[]) {
     .sort((a, b) => a.name.localeCompare(b.name, "tr"))
 }
 
-async function fetchTurkiyeUnits(resource: string, params: URLSearchParams) {
+async function fetchTurkiyeUnits(resource: string, params: URLSearchParams, options: { emptyWhenMissing?: boolean } = {}) {
   const url = new URL(`${TURKIYE_API_BASE_URL}/${resource}`)
   params.forEach((value, key) => url.searchParams.set(key, value))
   const cacheKey = url.toString()
@@ -57,12 +55,16 @@ async function fetchTurkiyeUnits(resource: string, params: URLSearchParams) {
     headers: { Accept: "application/json" },
     next: { revalidate: CACHE_SECONDS },
   })
+  const body = (await response.json()) as TurkiyeApiResponse
 
   if (!response.ok) {
+    if (options.emptyWhenMissing && typeof body.error === "string" && body.error.includes("No ")) {
+      addressCache.set(cacheKey, { expiresAt: Date.now() + CACHE_SECONDS * 1000, items: [] })
+      return []
+    }
     throw new Error(`Turkiye API ${resource} request failed: ${response.status}`)
   }
 
-  const body = (await response.json()) as TurkiyeApiResponse
   const items = Array.isArray(body.data) ? body.data : []
   addressCache.set(cacheKey, { expiresAt: Date.now() + CACHE_SECONDS * 1000, items })
   return items
@@ -77,7 +79,7 @@ export async function GET(request: Request, context: { params: Promise<{ kind: s
 
   const incoming = new URL(request.url).searchParams
   const params = new URLSearchParams()
-  params.set("fields", "id,name,postalCode")
+  params.set("fields", "id,name")
   params.set("limit", "1000")
   params.set("sort", "name")
 
@@ -107,7 +109,7 @@ export async function GET(request: Request, context: { params: Promise<{ kind: s
     if (kind === "neighborhoods") {
       const [neighborhoods, villages] = await Promise.all([
         fetchTurkiyeUnits("neighborhoods", params),
-        fetchTurkiyeUnits("villages", params),
+        fetchTurkiyeUnits("villages", params, { emptyWhenMissing: true }),
       ])
 
       return NextResponse.json(normalizeUnits(filterUnits([...neighborhoods, ...villages], query)))
