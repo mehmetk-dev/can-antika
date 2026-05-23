@@ -211,7 +211,7 @@ function OrderDetailContent({ orderId }: { orderId: number }) {
                                 <p className="font-medium text-foreground">{order.shippingAddress.title}</p>
                                 <p className="mt-1 text-sm text-muted-foreground">{order.shippingAddress.addressLine}</p>
                                 <p className="text-sm text-muted-foreground">
-                                    {order.shippingAddress.district}, {order.shippingAddress.city} {order.shippingAddress.postalCode}
+                                    {[order.shippingAddress.neighborhood, order.shippingAddress.district, order.shippingAddress.city].filter(Boolean).join(", ")} {order.shippingAddress.postalCode}
                                 </p>
                             </CardContent>
                         </Card>

@@ -4,6 +4,7 @@ export interface AddressResponse {
     country: string;
     city: string;
     district: string;
+    neighborhood?: string | null;
     phone?: string | null;
     postalCode: string;
     addressLine: string;
@@ -14,6 +15,7 @@ export interface AddressRequest {
     country: string;
     city: string;
     district: string;
+    neighborhood: string;
     phone: string;
     postalCode: string;
     addressLine: string;

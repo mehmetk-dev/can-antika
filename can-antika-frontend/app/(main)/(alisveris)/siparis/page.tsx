@@ -54,6 +54,7 @@ function CheckoutContent() {
             !selectedAddress.country?.trim() ||
             !selectedAddress.city?.trim() ||
             !selectedAddress.district?.trim() ||
+            !selectedAddress.neighborhood?.trim() ||
             !selectedAddress.phone?.trim() ||
             !selectedAddress.postalCode?.trim() ||
             !selectedAddress.addressLine?.trim()

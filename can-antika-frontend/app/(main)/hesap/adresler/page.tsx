@@ -1,13 +1,14 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Plus, Pencil, Trash2, MapPin, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { useAddresses } from "@/hooks/useAddresses"
 import type { AddressResponse, AddressRequest } from "@/lib/types"
+import { getTurkiyeAddressUnits, type TurkiyeAddressUnit } from "@/lib/geo/turkiye-address"
 import { toast } from "sonner"
 
 const TURKISH_PHONE_PATTERN = /^(?:(?:\+?90|0)[\s-]?)?(?:\(?[2345]\d{2}\)?)[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}$/
@@ -26,10 +28,85 @@ function isValidTurkishPhone(value: string): boolean {
   return TURKISH_PHONE_PATTERN.test(value.trim())
 }
 
+function findUnitByName(items: TurkiyeAddressUnit[], name?: string | null) {
+  const normalizedName = name?.trim().toLocaleLowerCase("tr")
+  if (!normalizedName) return undefined
+  return items.find((item) => item.name.toLocaleLowerCase("tr") === normalizedName)
+}
+
 function AddressesContent() {
   const { addresses, isLoading, isSaving, saveAddress, deleteAddress } = useAddresses()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingAddress, setEditingAddress] = useState<AddressResponse | null>(null)
+  const [provinces, setProvinces] = useState<TurkiyeAddressUnit[]>([])
+  const [districts, setDistricts] = useState<TurkiyeAddressUnit[]>([])
+  const [neighborhoods, setNeighborhoods] = useState<TurkiyeAddressUnit[]>([])
+  const [isLoadingProvinces, setIsLoadingProvinces] = useState(true)
+  const [isLoadingDistricts, setIsLoadingDistricts] = useState(false)
+  const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false)
+  const [selectedProvinceId, setSelectedProvinceId] = useState("")
+  const [selectedDistrictId, setSelectedDistrictId] = useState("")
+  const [selectedNeighborhoodId, setSelectedNeighborhoodId] = useState("")
+
+  const selectedProvince = provinces.find((province) => String(province.id) === selectedProvinceId)
+  const selectedDistrict = districts.find((district) => String(district.id) === selectedDistrictId)
+  const selectedNeighborhood = neighborhoods.find((neighborhood) => String(neighborhood.id) === selectedNeighborhoodId)
+
+  useEffect(() => {
+    if (!isDialogOpen || provinces.length > 0) return
+
+    getTurkiyeAddressUnits("provinces")
+      .then((items) => {
+        setProvinces(items)
+        if (editingAddress?.city) {
+          const province = findUnitByName(items, editingAddress.city)
+          if (province) {
+            setIsLoadingDistricts(true)
+            setSelectedProvinceId(String(province.id))
+          }
+        }
+      })
+      .catch(() => toast.error("İl listesi alınamadı"))
+      .finally(() => setIsLoadingProvinces(false))
+  }, [isDialogOpen, provinces.length, editingAddress?.city])
+
+  useEffect(() => {
+    if (!selectedProvinceId) return
+
+    getTurkiyeAddressUnits("districts", { provinceId: selectedProvinceId })
+      .then((items) => {
+        setDistricts(items)
+        if (editingAddress?.district) {
+          const district = findUnitByName(items, editingAddress.district)
+          setSelectedDistrictId(district ? String(district.id) : "")
+        }
+      })
+      .catch(() => toast.error("İlçe listesi alınamadı"))
+      .finally(() => setIsLoadingDistricts(false))
+  }, [selectedProvinceId, editingAddress?.district])
+
+  useEffect(() => {
+    if (!selectedDistrictId) return
+
+    getTurkiyeAddressUnits("neighborhoods", { districtId: selectedDistrictId })
+      .then((items) => {
+        setNeighborhoods(items)
+        if (editingAddress?.neighborhood) {
+          const neighborhood = findUnitByName(items, editingAddress.neighborhood)
+          setSelectedNeighborhoodId(neighborhood ? String(neighborhood.id) : "")
+        }
+      })
+      .catch(() => toast.error("Mahalle/Köy listesi alınamadı"))
+      .finally(() => setIsLoadingNeighborhoods(false))
+  }, [selectedDistrictId, editingAddress?.neighborhood])
+
+  const resetAddressSelection = () => {
+    setSelectedProvinceId("")
+    setSelectedDistrictId("")
+    setSelectedNeighborhoodId("")
+    setDistricts([])
+    setNeighborhoods([])
+  }
 
   const handleSaveAddress = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -42,11 +119,17 @@ function AddressesContent() {
     const data: AddressRequest = {
       title: formData.get("title") as string,
       country: (formData.get("country") as string) || "Türkiye",
-      city: formData.get("city") as string,
-      district: formData.get("district") as string,
+      city: selectedProvince?.name || "",
+      district: selectedDistrict?.name || "",
+      neighborhood: selectedNeighborhood?.name || "",
       phone,
       postalCode: formData.get("postalCode") as string,
       addressLine: formData.get("addressLine") as string,
+    }
+
+    if (!data.city || !data.district || !data.neighborhood) {
+      toast.error("İl, ilçe ve mahalle/köy seçin")
+      return
     }
 
     const success = await saveAddress(data, editingAddress?.id)
@@ -77,9 +160,30 @@ function AddressesContent() {
           <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground">Adreslerim</h1>
           <p className="mt-2 text-muted-foreground">Kayıtlı teslimat adreslerinizi yönetin</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={(open) => {
+            setIsDialogOpen(open)
+            if (open && provinces.length === 0) {
+              setIsLoadingProvinces(true)
+            }
+            if (!open) {
+              setEditingAddress(null)
+              resetAddressSelection()
+            }
+          }}
+        >
           <DialogTrigger asChild>
-            <Button className="gap-2 bg-primary text-primary-foreground" onClick={() => setEditingAddress(null)}>
+            <Button
+              className="gap-2 bg-primary text-primary-foreground"
+              onClick={() => {
+                setEditingAddress(null)
+                resetAddressSelection()
+                if (provinces.length === 0) {
+                  setIsLoadingProvinces(true)
+                }
+              }}
+            >
               <Plus className="h-4 w-4" />
               Yeni Adres
             </Button>
@@ -92,6 +196,9 @@ function AddressesContent() {
               <DialogDescription>Teslimat adresinizi girin</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSaveAddress} className="mt-4 space-y-4">
+              <input type="hidden" name="city" value={selectedProvince?.name || ""} readOnly />
+              <input type="hidden" name="district" value={selectedDistrict?.name || ""} readOnly />
+              <input type="hidden" name="neighborhood" value={selectedNeighborhood?.name || ""} readOnly />
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="title">Adres Başlığı</Label>
@@ -143,24 +250,56 @@ function AddressesContent() {
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="city">İl</Label>
-                  <Input
-                    id="city"
-                    name="city"
-                    defaultValue={editingAddress?.city}
+                  <Label>İl</Label>
+                  <Select
+                    value={selectedProvinceId}
+                    onValueChange={(value) => {
+                      setSelectedProvinceId(value)
+                      setSelectedDistrictId("")
+                      setSelectedNeighborhoodId("")
+                      setDistricts([])
+                      setNeighborhoods([])
+                      setIsLoadingDistricts(true)
+                    }}
+                    disabled={isLoadingProvinces}
                     required
-                    className="bg-muted/50"
-                  />
+                  >
+                    <SelectTrigger className="w-full bg-muted/50">
+                      <SelectValue placeholder={isLoadingProvinces ? "Yükleniyor..." : "İl seçin"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {provinces.map((province) => (
+                        <SelectItem key={province.id} value={String(province.id)}>
+                          {province.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="district">İlçe</Label>
-                  <Input
-                    id="district"
-                    name="district"
-                    defaultValue={editingAddress?.district}
+                  <Label>İlçe</Label>
+                  <Select
+                    value={selectedDistrictId}
+                    onValueChange={(value) => {
+                      setSelectedDistrictId(value)
+                      setSelectedNeighborhoodId("")
+                      setNeighborhoods([])
+                      setIsLoadingNeighborhoods(true)
+                    }}
+                    disabled={!selectedProvinceId || isLoadingDistricts}
                     required
-                    className="bg-muted/50"
-                  />
+                  >
+                    <SelectTrigger className="w-full bg-muted/50">
+                      <SelectValue placeholder={isLoadingDistricts ? "Yükleniyor..." : "İlçe seçin"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {districts.map((district) => (
+                        <SelectItem key={district.id} value={String(district.id)}>
+                          {district.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="postalCode">Posta Kodu</Label>
@@ -172,6 +311,31 @@ function AddressesContent() {
                     className="bg-muted/50"
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Mahalle / Köy</Label>
+                <Select
+                  value={selectedNeighborhoodId}
+                  onValueChange={(value) => {
+                    setSelectedNeighborhoodId(value)
+                    const unit = neighborhoods.find((item) => String(item.id) === value)
+                    const postalInput = document.getElementById("postalCode") as HTMLInputElement | null
+                    if (unit?.postalCode && postalInput) postalInput.value = unit.postalCode
+                  }}
+                  disabled={!selectedDistrictId || isLoadingNeighborhoods}
+                  required
+                >
+                  <SelectTrigger className="w-full bg-muted/50">
+                    <SelectValue placeholder={isLoadingNeighborhoods ? "Yükleniyor..." : "Mahalle/Köy seçin"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {neighborhoods.map((neighborhood) => (
+                      <SelectItem key={neighborhood.id} value={String(neighborhood.id)}>
+                        {neighborhood.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex gap-3 pt-2">
                 <Button
@@ -207,7 +371,17 @@ function AddressesContent() {
                       size="icon"
                       className="h-8 w-8"
                       onClick={() => {
+                        resetAddressSelection()
                         setEditingAddress(address)
+                        if (provinces.length > 0) {
+                          const province = findUnitByName(provinces, address.city)
+                          if (province) {
+                            setIsLoadingDistricts(true)
+                            setSelectedProvinceId(String(province.id))
+                          }
+                        } else {
+                          setIsLoadingProvinces(true)
+                        }
                         setIsDialogOpen(true)
                       }}
                     >
@@ -226,7 +400,7 @@ function AddressesContent() {
                 <div className="mt-3 space-y-1 text-sm text-muted-foreground">
                   <p>{address.addressLine}</p>
                   <p>
-                    {address.district}, {address.city} {address.postalCode}
+                    {[address.neighborhood, address.district, address.city].filter(Boolean).join(", ")} {address.postalCode}
                   </p>
                   <p>Telefon: {address.phone || "Eklenmemiş"}</p>
                   <p>{address.country}</p>

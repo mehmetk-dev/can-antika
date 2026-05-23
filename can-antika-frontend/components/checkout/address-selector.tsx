@@ -45,7 +45,7 @@ export function AddressSelector({ addresses, selectedAddressId, onSelect }: Addr
                                 <p className="font-medium text-foreground">{addr.title}</p>
                                 <p className="mt-1 text-sm text-muted-foreground">{addr.addressLine}</p>
                                 <p className="text-sm text-muted-foreground">
-                                    {addr.district}, {addr.city} {addr.postalCode}
+                                    {[addr.neighborhood, addr.district, addr.city].filter(Boolean).join(", ")} {addr.postalCode}
                                 </p>
                                 <p className="text-sm text-muted-foreground">Telefon: {addr.phone || "Eklenmemiş"}</p>
                             </button>

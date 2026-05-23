@@ -44,7 +44,7 @@ function LegalTextBox({ title, href, items, children }: { title: string; href: s
 export function LegalDocumentsPanel({ selectedAddress, cartTotal, shippingAmount, finalTotal }: LegalDocumentsPanelProps) {
     const today = new Intl.DateTimeFormat("tr-TR").format(new Date())
     const addressText = selectedAddress
-        ? `${selectedAddress.addressLine}, ${selectedAddress.district}, ${selectedAddress.city} ${selectedAddress.postalCode}`
+        ? `${selectedAddress.addressLine}, ${[selectedAddress.neighborhood, selectedAddress.district, selectedAddress.city].filter(Boolean).join(", ")} ${selectedAddress.postalCode}`
         : "Sipariş için seçilecek teslimat adresi"
 
     return (

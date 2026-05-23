@@ -19,6 +19,9 @@ public class AddressRequest {
     @NotNull(message = "İlçe bilgisi boş olamaz.")
     private String district;
 
+    @NotNull(message = "Mahalle bilgisi boş olamaz.")
+    private String neighborhood;
+
     @NotNull(message = "Telefon numarası boş olamaz.")
     @Pattern(regexp = "^(?:(?:\\+?90|0)[\\s-]?)?(?:\\(?[2345]\\d{2}\\)?)[\\s-]?\\d{3}[\\s-]?\\d{2}[\\s-]?\\d{2}$", message = "Telefon numarası geçersiz.")
     private String phone;

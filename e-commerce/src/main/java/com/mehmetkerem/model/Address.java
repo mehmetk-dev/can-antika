@@ -28,6 +28,9 @@ public class Address {
 
     private String district;
 
+    @Column(length = 120)
+    private String neighborhood;
+
     @Column(length = 20)
     private String phone;
 
