@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { TURKIYE_PROVINCES } from "@/lib/geo/turkiye-provinces"
 
 const TURKIYE_API_BASE_URL = "https://api.turkiyeapi.dev/v1"
 const CACHE_SECONDS = 60 * 60 * 24
@@ -15,8 +16,20 @@ interface TurkiyeApiResponse {
   data?: TurkiyeApiUnit[]
 }
 
+const addressCache = new Map<string, { expiresAt: number; items: TurkiyeApiUnit[] }>()
+
 function isRouteKind(value: string): value is RouteKind {
   return value === "provinces" || value === "districts" || value === "neighborhoods"
+}
+
+function normalizeSearch(value: string) {
+  return value.trim().toLocaleLowerCase("tr")
+}
+
+function filterUnits(items: TurkiyeApiUnit[], query: string) {
+  const normalizedQuery = normalizeSearch(query)
+  if (!normalizedQuery) return items
+  return items.filter((item) => item.name?.toLocaleLowerCase("tr").includes(normalizedQuery))
 }
 
 function normalizeUnits(items: TurkiyeApiUnit[]) {
@@ -33,6 +46,12 @@ function normalizeUnits(items: TurkiyeApiUnit[]) {
 async function fetchTurkiyeUnits(resource: string, params: URLSearchParams) {
   const url = new URL(`${TURKIYE_API_BASE_URL}/${resource}`)
   params.forEach((value, key) => url.searchParams.set(key, value))
+  const cacheKey = url.toString()
+  const cached = addressCache.get(cacheKey)
+
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.items
+  }
 
   const response = await fetch(url, {
     headers: { Accept: "application/json" },
@@ -44,7 +63,9 @@ async function fetchTurkiyeUnits(resource: string, params: URLSearchParams) {
   }
 
   const body = (await response.json()) as TurkiyeApiResponse
-  return Array.isArray(body.data) ? body.data : []
+  const items = Array.isArray(body.data) ? body.data : []
+  addressCache.set(cacheKey, { expiresAt: Date.now() + CACHE_SECONDS * 1000, items })
+  return items
 }
 
 export async function GET(request: Request, context: { params: Promise<{ kind: string }> }) {
@@ -62,6 +83,11 @@ export async function GET(request: Request, context: { params: Promise<{ kind: s
 
   const provinceId = incoming.get("provinceId")
   const districtId = incoming.get("districtId")
+  const query = incoming.get("q") || ""
+
+  if (kind === "provinces") {
+    return NextResponse.json(normalizeUnits(filterUnits(TURKIYE_PROVINCES, query)))
+  }
 
   if (kind === "districts") {
     if (!provinceId) {
@@ -84,11 +110,11 @@ export async function GET(request: Request, context: { params: Promise<{ kind: s
         fetchTurkiyeUnits("villages", params),
       ])
 
-      return NextResponse.json(normalizeUnits([...neighborhoods, ...villages]))
+      return NextResponse.json(normalizeUnits(filterUnits([...neighborhoods, ...villages], query)))
     }
 
     const units = await fetchTurkiyeUnits(kind, params)
-    return NextResponse.json(normalizeUnits(units))
+    return NextResponse.json(normalizeUnits(filterUnits(units, query)))
   } catch {
     return NextResponse.json({ message: "Adres verisi alınamadı" }, { status: 502 })
   }

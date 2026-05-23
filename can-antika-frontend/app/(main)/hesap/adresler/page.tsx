@@ -47,10 +47,18 @@ function AddressesContent() {
   const [selectedProvinceId, setSelectedProvinceId] = useState("")
   const [selectedDistrictId, setSelectedDistrictId] = useState("")
   const [selectedNeighborhoodId, setSelectedNeighborhoodId] = useState("")
+  const [provinceSearch, setProvinceSearch] = useState("")
+  const [districtSearch, setDistrictSearch] = useState("")
+  const [neighborhoodSearch, setNeighborhoodSearch] = useState("")
 
   const selectedProvince = provinces.find((province) => String(province.id) === selectedProvinceId)
   const selectedDistrict = districts.find((district) => String(district.id) === selectedDistrictId)
   const selectedNeighborhood = neighborhoods.find((neighborhood) => String(neighborhood.id) === selectedNeighborhoodId)
+  const filteredProvinces = provinces.filter((province) => province.name.toLocaleLowerCase("tr").includes(provinceSearch.trim().toLocaleLowerCase("tr")))
+  const filteredDistricts = districts.filter((district) => district.name.toLocaleLowerCase("tr").includes(districtSearch.trim().toLocaleLowerCase("tr")))
+  const filteredNeighborhoods = neighborhoods.filter((neighborhood) =>
+    neighborhood.name.toLocaleLowerCase("tr").includes(neighborhoodSearch.trim().toLocaleLowerCase("tr")),
+  )
 
   useEffect(() => {
     if (!isDialogOpen || provinces.length > 0) return
@@ -106,6 +114,9 @@ function AddressesContent() {
     setSelectedNeighborhoodId("")
     setDistricts([])
     setNeighborhoods([])
+    setProvinceSearch("")
+    setDistrictSearch("")
+    setNeighborhoodSearch("")
   }
 
   const handleSaveAddress = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -251,6 +262,13 @@ function AddressesContent() {
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
                   <Label>İl</Label>
+                  <Input
+                    value={provinceSearch}
+                    onChange={(event) => setProvinceSearch(event.target.value)}
+                    placeholder="İl ara"
+                    disabled={isLoadingProvinces}
+                    className="bg-muted/50"
+                  />
                   <Select
                     value={selectedProvinceId}
                     onValueChange={(value) => {
@@ -259,6 +277,8 @@ function AddressesContent() {
                       setSelectedNeighborhoodId("")
                       setDistricts([])
                       setNeighborhoods([])
+                      setDistrictSearch("")
+                      setNeighborhoodSearch("")
                       setIsLoadingDistricts(true)
                     }}
                     disabled={isLoadingProvinces}
@@ -268,7 +288,7 @@ function AddressesContent() {
                       <SelectValue placeholder={isLoadingProvinces ? "Yükleniyor..." : "İl seçin"} />
                     </SelectTrigger>
                     <SelectContent>
-                      {provinces.map((province) => (
+                      {filteredProvinces.map((province) => (
                         <SelectItem key={province.id} value={String(province.id)}>
                           {province.name}
                         </SelectItem>
@@ -278,12 +298,20 @@ function AddressesContent() {
                 </div>
                 <div className="space-y-2">
                   <Label>İlçe</Label>
+                  <Input
+                    value={districtSearch}
+                    onChange={(event) => setDistrictSearch(event.target.value)}
+                    placeholder="İlçe ara"
+                    disabled={!selectedProvinceId || isLoadingDistricts}
+                    className="bg-muted/50"
+                  />
                   <Select
                     value={selectedDistrictId}
                     onValueChange={(value) => {
                       setSelectedDistrictId(value)
                       setSelectedNeighborhoodId("")
                       setNeighborhoods([])
+                      setNeighborhoodSearch("")
                       setIsLoadingNeighborhoods(true)
                     }}
                     disabled={!selectedProvinceId || isLoadingDistricts}
@@ -293,7 +321,7 @@ function AddressesContent() {
                       <SelectValue placeholder={isLoadingDistricts ? "Yükleniyor..." : "İlçe seçin"} />
                     </SelectTrigger>
                     <SelectContent>
-                      {districts.map((district) => (
+                      {filteredDistricts.map((district) => (
                         <SelectItem key={district.id} value={String(district.id)}>
                           {district.name}
                         </SelectItem>
@@ -314,6 +342,13 @@ function AddressesContent() {
               </div>
               <div className="space-y-2">
                 <Label>Mahalle / Köy</Label>
+                <Input
+                  value={neighborhoodSearch}
+                  onChange={(event) => setNeighborhoodSearch(event.target.value)}
+                  placeholder="Mahalle veya köy ara"
+                  disabled={!selectedDistrictId || isLoadingNeighborhoods}
+                  className="bg-muted/50"
+                />
                 <Select
                   value={selectedNeighborhoodId}
                   onValueChange={(value) => {
@@ -329,7 +364,7 @@ function AddressesContent() {
                     <SelectValue placeholder={isLoadingNeighborhoods ? "Yükleniyor..." : "Mahalle/Köy seçin"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {neighborhoods.map((neighborhood) => (
+                    {filteredNeighborhoods.map((neighborhood) => (
                       <SelectItem key={neighborhood.id} value={String(neighborhood.id)}>
                         {neighborhood.name}
                       </SelectItem>

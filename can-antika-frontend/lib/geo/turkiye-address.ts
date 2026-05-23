@@ -9,6 +9,7 @@ export interface TurkiyeAddressUnit {
 interface TurkiyeAddressParams {
   provinceId?: string | number
   districtId?: string | number
+  q?: string
 }
 
 export async function getTurkiyeAddressUnits(kind: TurkiyeAddressKind, params: TurkiyeAddressParams = {}) {
@@ -20,6 +21,10 @@ export async function getTurkiyeAddressUnits(kind: TurkiyeAddressKind, params: T
 
   if (params.districtId) {
     url.searchParams.set("districtId", String(params.districtId))
+  }
+
+  if (params.q?.trim()) {
+    url.searchParams.set("q", params.q.trim())
   }
 
   const response = await fetch(url, { headers: { Accept: "application/json" } })
