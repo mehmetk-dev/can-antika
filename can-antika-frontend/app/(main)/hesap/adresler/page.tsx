@@ -2,13 +2,12 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { Plus, Pencil, Trash2, MapPin, Loader2 } from "lucide-react"
+import { Check, ChevronDown, Plus, Pencil, Trash2, MapPin, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -35,6 +34,90 @@ function findUnitByName(items: TurkiyeAddressUnit[], name?: string | null) {
   return items.find((item) => item.name.toLocaleLowerCase("tr") === normalizedName)
 }
 
+function comboboxOptions(items: TurkiyeAddressUnit[], query: string) {
+  const normalizedQuery = normalizeAddressSearch(query)
+  if (!normalizedQuery) return items
+  return items.filter((item) => normalizeAddressSearch(item.name).includes(normalizedQuery))
+}
+
+interface AddressComboboxProps {
+  label: string
+  value: string
+  searchValue: string
+  options: TurkiyeAddressUnit[]
+  selectedOption?: TurkiyeAddressUnit
+  placeholder: string
+  emptyText: string
+  loading?: boolean
+  disabled?: boolean
+  onSearchChange: (value: string) => void
+  onSelect: (value: string) => void
+}
+
+function AddressCombobox({
+  label,
+  value,
+  searchValue,
+  options,
+  selectedOption,
+  placeholder,
+  emptyText,
+  loading = false,
+  disabled = false,
+  onSearchChange,
+  onSelect,
+}: AddressComboboxProps) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <div className="relative space-y-2">
+      <Label className="text-[13px] font-semibold text-stone-800">{label}</Label>
+      <div className="relative">
+        <Input
+          role="combobox"
+          aria-expanded={isOpen}
+          value={searchValue}
+          onFocus={() => setIsOpen(true)}
+          onBlur={() => window.setTimeout(() => setIsOpen(false), 120)}
+          onChange={(event) => {
+            onSearchChange(event.target.value)
+            setIsOpen(true)
+          }}
+          placeholder={loading ? "Yükleniyor..." : placeholder}
+          disabled={disabled || loading}
+          className="h-11 rounded-md border-stone-300 bg-stone-50/80 pr-10 text-stone-900 shadow-inner shadow-stone-200/40 placeholder:text-stone-400 focus-visible:border-primary/60 focus-visible:ring-primary/15"
+        />
+        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500" />
+      </div>
+      {isOpen && !disabled && !loading && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-y-auto rounded-md border border-primary/20 bg-stone-50 p-1 shadow-xl shadow-stone-950/10">
+          {options.length > 0 ? (
+            options.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm text-stone-800 transition-colors hover:bg-primary/10 focus:bg-primary/10 focus:outline-none"
+                onMouseDown={(event) => {
+                  event.preventDefault()
+                  onSelect(String(option.id))
+                  setIsOpen(false)
+                }}
+              >
+                <span>{option.name}</span>
+                {value === String(option.id) || selectedOption?.id === option.id ? (
+                  <Check className="h-4 w-4 text-primary" />
+                ) : null}
+              </button>
+            ))
+          ) : (
+            <div className="px-3 py-2 text-sm text-stone-500">{emptyText}</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function AddressesContent() {
   const { addresses, isLoading, isSaving, saveAddress, deleteAddress } = useAddresses()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -55,14 +138,9 @@ function AddressesContent() {
   const selectedProvince = provinces.find((province) => String(province.id) === selectedProvinceId)
   const selectedDistrict = districts.find((district) => String(district.id) === selectedDistrictId)
   const selectedNeighborhood = neighborhoods.find((neighborhood) => String(neighborhood.id) === selectedNeighborhoodId)
-  const normalizedProvinceSearch = normalizeAddressSearch(provinceSearch)
-  const normalizedDistrictSearch = normalizeAddressSearch(districtSearch)
-  const normalizedNeighborhoodSearch = normalizeAddressSearch(neighborhoodSearch)
-  const filteredProvinces = provinces.filter((province) => normalizeAddressSearch(province.name).includes(normalizedProvinceSearch))
-  const filteredDistricts = districts.filter((district) => normalizeAddressSearch(district.name).includes(normalizedDistrictSearch))
-  const filteredNeighborhoods = neighborhoods.filter((neighborhood) =>
-    normalizeAddressSearch(neighborhood.name).includes(normalizedNeighborhoodSearch),
-  )
+  const filteredProvinces = comboboxOptions(provinces, provinceSearch)
+  const filteredDistricts = comboboxOptions(districts, districtSearch)
+  const filteredNeighborhoods = comboboxOptions(neighborhoods, neighborhoodSearch)
 
   useEffect(() => {
     if (!isDialogOpen || provinces.length > 0) return
@@ -75,6 +153,7 @@ function AddressesContent() {
           if (province) {
             setIsLoadingDistricts(true)
             setSelectedProvinceId(String(province.id))
+            setProvinceSearch(province.name)
           }
         }
       })
@@ -91,6 +170,7 @@ function AddressesContent() {
         if (editingAddress?.district) {
           const district = findUnitByName(items, editingAddress.district)
           setSelectedDistrictId(district ? String(district.id) : "")
+          setDistrictSearch(district?.name || "")
         }
       })
       .catch(() => toast.error("İlçe listesi alınamadı"))
@@ -106,6 +186,7 @@ function AddressesContent() {
         if (editingAddress?.neighborhood) {
           const neighborhood = findUnitByName(items, editingAddress.neighborhood)
           setSelectedNeighborhoodId(neighborhood ? String(neighborhood.id) : "")
+          setNeighborhoodSearch(neighborhood?.name || "")
         }
       })
       .catch(() => toast.error("Mahalle/Köy listesi alınamadı"))
@@ -203,42 +284,42 @@ function AddressesContent() {
               Yeni Adres
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg bg-background">
-            <DialogHeader>
-              <DialogTitle className="font-serif">
+          <DialogContent className="max-h-[92vh] overflow-y-auto border border-primary/20 bg-[#f8f3ea] p-0 text-stone-900 shadow-2xl shadow-stone-950/20 sm:max-w-2xl">
+            <DialogHeader className="border-b border-primary/15 bg-[#efe5d5] px-6 py-5">
+              <DialogTitle className="font-serif text-2xl text-stone-950">
                 {editingAddress ? "Adresi Düzenle" : "Yeni Adres Ekle"}
               </DialogTitle>
-              <DialogDescription>Teslimat adresinizi girin</DialogDescription>
+              <DialogDescription className="text-stone-600">Teslimat adresinizi eksiksiz girin</DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSaveAddress} className="mt-4 space-y-4">
+            <form onSubmit={handleSaveAddress} className="space-y-5 px-6 py-5">
               <input type="hidden" name="city" value={selectedProvince?.name || ""} readOnly />
               <input type="hidden" name="district" value={selectedDistrict?.name || ""} readOnly />
               <input type="hidden" name="neighborhood" value={selectedNeighborhood?.name || ""} readOnly />
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Adres Başlığı</Label>
+                  <Label htmlFor="title" className="text-[13px] font-semibold text-stone-800">Adres Başlığı</Label>
                   <Input
                     id="title"
                     name="title"
                     placeholder="Örn: Ev, İş"
                     defaultValue={editingAddress?.title}
                     required
-                    className="bg-muted/50"
+                    className="h-11 border-stone-300 bg-stone-50/80 text-stone-900 shadow-inner shadow-stone-200/40 focus-visible:border-primary/60 focus-visible:ring-primary/15"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="country">Ülke</Label>
+                  <Label htmlFor="country" className="text-[13px] font-semibold text-stone-800">Ülke</Label>
                   <Input
                     id="country"
                     name="country"
                     defaultValue={editingAddress?.country || "Türkiye"}
                     required
-                    className="bg-muted/50"
+                    className="h-11 border-stone-300 bg-stone-50/80 text-stone-900 shadow-inner shadow-stone-200/40 focus-visible:border-primary/60 focus-visible:ring-primary/15"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Telefon</Label>
+                <Label htmlFor="phone" className="text-[13px] font-semibold text-stone-800">Telefon</Label>
                 <Input
                   id="phone"
                   name="phone"
@@ -249,33 +330,43 @@ function AddressesContent() {
                   maxLength={20}
                   pattern="(?:(?:\+?90|0)[\s-]?)?(?:\(?[2345]\d{2}\)?)[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}"
                   title="Geçerli bir telefon numarası girin: 05XX XXX XX XX"
-                  className="bg-muted/50"
+                  className="h-11 border-stone-300 bg-stone-50/80 text-stone-900 shadow-inner shadow-stone-200/40 focus-visible:border-primary/60 focus-visible:ring-primary/15"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="addressLine">Adres</Label>
+                <Label htmlFor="addressLine" className="text-[13px] font-semibold text-stone-800">Adres satırı</Label>
                 <Textarea
                   id="addressLine"
                   name="addressLine"
                   rows={2}
                   defaultValue={editingAddress?.addressLine}
                   required
-                  className="bg-muted/50"
+                  className="min-h-24 border-stone-300 bg-stone-50/80 text-stone-900 shadow-inner shadow-stone-200/40 focus-visible:border-primary/60 focus-visible:ring-primary/15"
                 />
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-2">
-                  <Label>İl</Label>
-                  <Input
-                    value={provinceSearch}
-                    onChange={(event) => setProvinceSearch(event.target.value)}
-                    placeholder="İl ara"
-                    disabled={isLoadingProvinces}
-                    className="bg-muted/50"
-                  />
-                  <Select
-                    value={selectedProvinceId}
-                    onValueChange={(value) => {
+                <AddressCombobox
+                  label="İl"
+                  value={selectedProvinceId}
+                  searchValue={provinceSearch}
+                  options={filteredProvinces}
+                  selectedOption={selectedProvince}
+                  placeholder="İl seçin veya yazın"
+                  emptyText="İl bulunamadı"
+                  loading={isLoadingProvinces}
+                  onSearchChange={(value) => {
+                    setProvinceSearch(value)
+                    setSelectedProvinceId("")
+                    setSelectedDistrictId("")
+                    setSelectedNeighborhoodId("")
+                    setDistrictSearch("")
+                    setNeighborhoodSearch("")
+                    setDistricts([])
+                    setNeighborhoods([])
+                  }}
+                  onSelect={(value) => {
+                      const unit = provinces.find((province) => String(province.id) === value)
+                      setProvinceSearch(unit?.name || "")
                       setSelectedProvinceId(value)
                       setSelectedDistrictId("")
                       setSelectedNeighborhoodId("")
@@ -285,107 +376,77 @@ function AddressesContent() {
                       setNeighborhoodSearch("")
                       setIsLoadingDistricts(true)
                     }}
-                    disabled={isLoadingProvinces}
-                    required
-                  >
-                    <SelectTrigger className="w-full bg-muted/50">
-                      <SelectValue placeholder={isLoadingProvinces ? "Yükleniyor..." : "İl seçin"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredProvinces.map((province) => (
-                        <SelectItem key={province.id} value={String(province.id)}>
-                          {province.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>İlçe</Label>
-                  <Input
-                    value={districtSearch}
-                    onChange={(event) => setDistrictSearch(event.target.value)}
-                    placeholder="İlçe ara"
-                    disabled={!selectedProvinceId || isLoadingDistricts}
-                    className="bg-muted/50"
-                  />
-                  <Select
-                    value={selectedDistrictId}
-                    onValueChange={(value) => {
+                />
+                <AddressCombobox
+                  label="İlçe"
+                  value={selectedDistrictId}
+                  searchValue={districtSearch}
+                  options={filteredDistricts}
+                  selectedOption={selectedDistrict}
+                  placeholder="İlçe seçin veya yazın"
+                  emptyText={selectedProvinceId ? "İlçe bulunamadı" : "Önce il seçin"}
+                  loading={isLoadingDistricts}
+                  disabled={!selectedProvinceId}
+                  onSearchChange={(value) => {
+                    setDistrictSearch(value)
+                    setSelectedDistrictId("")
+                    setSelectedNeighborhoodId("")
+                    setNeighborhoodSearch("")
+                    setNeighborhoods([])
+                  }}
+                  onSelect={(value) => {
+                      const unit = districts.find((district) => String(district.id) === value)
+                      setDistrictSearch(unit?.name || "")
                       setSelectedDistrictId(value)
                       setSelectedNeighborhoodId("")
                       setNeighborhoods([])
                       setNeighborhoodSearch("")
                       setIsLoadingNeighborhoods(true)
                     }}
-                    disabled={!selectedProvinceId || isLoadingDistricts}
-                    required
-                  >
-                    <SelectTrigger className="w-full bg-muted/50">
-                      <SelectValue placeholder={isLoadingDistricts ? "Yükleniyor..." : "İlçe seçin"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredDistricts.map((district) => (
-                        <SelectItem key={district.id} value={String(district.id)}>
-                          {district.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                />
                 <div className="space-y-2">
-                  <Label htmlFor="postalCode">Posta Kodu</Label>
+                  <Label htmlFor="postalCode" className="text-[13px] font-semibold text-stone-800">Posta Kodu</Label>
                   <Input
                     id="postalCode"
                     name="postalCode"
                     defaultValue={editingAddress?.postalCode}
                     required
-                    className="bg-muted/50"
+                    className="h-11 border-stone-300 bg-stone-50/80 text-stone-900 shadow-inner shadow-stone-200/40 focus-visible:border-primary/60 focus-visible:ring-primary/15"
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Mahalle / Köy</Label>
-                <Input
-                  value={neighborhoodSearch}
-                  onChange={(event) => setNeighborhoodSearch(event.target.value)}
-                  placeholder="Mahalle veya köy ara"
-                  disabled={!selectedDistrictId || isLoadingNeighborhoods}
-                  className="bg-muted/50"
-                />
-                <Select
-                  value={selectedNeighborhoodId}
-                  onValueChange={(value) => {
-                    setSelectedNeighborhoodId(value)
+              <AddressCombobox
+                label="Mahalle / Köy"
+                value={selectedNeighborhoodId}
+                searchValue={neighborhoodSearch}
+                options={filteredNeighborhoods}
+                selectedOption={selectedNeighborhood}
+                placeholder="Mahalle/Köy seçin veya yazın"
+                emptyText={selectedDistrictId ? "Mahalle/Köy bulunamadı" : "Önce ilçe seçin"}
+                loading={isLoadingNeighborhoods}
+                disabled={!selectedDistrictId}
+                onSearchChange={(value) => {
+                  setNeighborhoodSearch(value)
+                  setSelectedNeighborhoodId("")
+                }}
+                onSelect={(value) => {
                     const unit = neighborhoods.find((item) => String(item.id) === value)
+                    setNeighborhoodSearch(unit?.name || "")
+                    setSelectedNeighborhoodId(value)
                     const postalInput = document.getElementById("postalCode") as HTMLInputElement | null
                     if (unit?.postalCode && postalInput) postalInput.value = unit.postalCode
                   }}
-                  disabled={!selectedDistrictId || isLoadingNeighborhoods}
-                  required
-                >
-                  <SelectTrigger className="w-full bg-muted/50">
-                    <SelectValue placeholder={isLoadingNeighborhoods ? "Yükleniyor..." : "Mahalle/Köy seçin"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredNeighborhoods.map((neighborhood) => (
-                      <SelectItem key={neighborhood.id} value={String(neighborhood.id)}>
-                        {neighborhood.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex gap-3 pt-2">
+              />
+              <div className="flex gap-3 border-t border-primary/15 pt-5">
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 bg-transparent"
+                  className="flex-1 border-stone-300 bg-stone-50 text-stone-800 hover:bg-stone-100"
                   onClick={() => setIsDialogOpen(false)}
                 >
                   İptal
                 </Button>
-                <Button type="submit" className="flex-1 bg-primary text-primary-foreground" disabled={isSaving}>
+                <Button type="submit" className="flex-1 bg-primary text-primary-foreground shadow-md shadow-primary/20" disabled={isSaving}>
                   {isSaving ? "Kaydediliyor..." : "Kaydet"}
                 </Button>
               </div>
