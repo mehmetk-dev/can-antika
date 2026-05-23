@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import type React from "react"
 import { useEffect, useState } from "react"
@@ -84,10 +84,6 @@ export default function AdminLoginPage() {
         <div className="mb-10 text-center">
           <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/20 to-amber-700/20 backdrop-blur-sm">
             <Shield className="h-8 w-8 text-amber-500" />
-          </div>
-          <div className="mb-2 flex items-center justify-center gap-2">
-            <Store className="h-5 w-5 text-amber-500/70" />
-            <span className="font-serif text-2xl font-semibold text-white">Can Antika</span>
           </div>
           <p className="text-sm font-medium uppercase tracking-[0.25em] text-zinc-500">Yönetim Paneli</p>
         </div>

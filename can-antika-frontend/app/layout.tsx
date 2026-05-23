@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Playfair_Display, Cinzel } from "next/font/google"
+import { Inter, Playfair_Display, Cinzel, Cormorant_Garamond, Italiana, Pinyon_Script } from "next/font/google"
 
 import { ConsentManagedTracking } from "@/components/legal/consent-managed-tracking"
 import { Providers } from "./providers"
@@ -11,12 +11,14 @@ import { fetchSiteSettings } from "@/lib/server/site-settings"
 const _inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap", preload: true })
 const _playfair = Playfair_Display({ subsets: ["latin", "latin-ext"], variable: "--font-playfair", display: "swap", preload: false })
 const _cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel", display: "swap" })
+const _cormorant = Cormorant_Garamond({ subsets: ["latin", "latin-ext"], variable: "--font-cormorant", weight: ["400", "500", "600", "700"], display: "swap" })
+const _italiana = Italiana({ subsets: ["latin"], variable: "--font-italiana", weight: ["400"], display: "swap" })
+const _pinyon = Pinyon_Script({ subsets: ["latin"], variable: "--font-pinyon", weight: ["400"], display: "swap" })
 
 const GA_ID_PATTERN = /^(G-[A-Z0-9]+|GTM-[A-Z0-9]+|UA-\d+-\d+)$/i
 const FB_PIXEL_ID_PATTERN = /^\d{5,20}$/
 const DEFAULT_SITE_DESCRIPTION =
   "Can Antika, Beyoğlu Avrupa Pasajı'nda antika ve koleksiyon ürünleri sunar. Ürünleri, fiyatları, teslimat ve iade koşullarını siteden inceleyebilirsiniz."
-
 function sanitizeGoogleAnalyticsId(value?: string | null): string {
   const normalized = (value || "").trim()
   return GA_ID_PATTERN.test(normalized) ? normalized : ""
@@ -151,7 +153,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: serializeSafeJsonLd(orgJsonLd) }}
         />
       </head>
-      <body className={`${_inter.variable} ${_playfair.variable} ${_cinzel.variable} font-sans antialiased`}>
+      <body className={`${_inter.variable} ${_playfair.variable} ${_cinzel.variable} ${_cormorant.variable} ${_italiana.variable} ${_pinyon.variable} font-sans antialiased`}>
         <ConsentManagedTracking googleAnalyticsId={gaId} facebookPixelId={fbPixelId} />
         <Providers initialSiteSettings={s}>{children}</Providers>
       </body>

@@ -71,7 +71,7 @@ export default function AuthPage() {
           <div className="absolute inset-12 border border-accent/20 rounded-lg" />
 
           <div className="relative z-10 flex flex-col justify-between p-12 w-full">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 hidden">
               <div className="w-12 h-12 rounded-full border-2 border-accent/50 flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-accent" />
               </div>
@@ -95,7 +95,7 @@ export default function AuthPage() {
             </div>
 
             <div className="flex items-center justify-between text-primary-foreground/60 text-sm">
-              <span>Est. 1990</span>
+              <span>Est. 1982</span>
               <span>Beyoğlu, İstanbul</span>
             </div>
           </div>
@@ -105,7 +105,7 @@ export default function AuthPage() {
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:px-16 xl:px-24 bg-gradient-to-b from-background to-muted/20 overflow-y-auto">
           <div className="mx-auto w-full max-w-md">
             {/* Mobile Logo */}
-            <div className="lg:hidden flex items-center gap-2 mb-8">
+            <div className="hidden items-center gap-2 mb-8">
               <div className="w-10 h-10 rounded-full border-2 border-primary flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-primary" />
               </div>

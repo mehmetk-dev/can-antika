@@ -44,10 +44,10 @@ export function MobileMenu({ isOpen, onOpenChange, navigation, isAuthenticated }
                 {/* Header with logo */}
                 <div className="mobile-menu-header relative shrink-0 border-b border-primary/10 px-6 py-8 z-[2]">
                     <div className="text-center">
-                        <span className="font-serif text-2xl font-semibold tracking-tight text-primary">Can Antika</span>
+                        <span className="font-pinyon text-5.5xl font-normal tracking-wide text-primary select-none leading-none pt-1">Can Antika</span>
                         <div className="mt-2 flex items-center justify-center gap-2">
                             <span className="h-px w-8 bg-gradient-to-r from-transparent to-primary/40" />
-                            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Est. 1990</span>
+                            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Est. 1982</span>
                             <span className="h-px w-8 bg-gradient-to-l from-transparent to-primary/40" />
                         </div>
                     </div>

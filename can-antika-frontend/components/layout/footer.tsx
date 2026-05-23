@@ -9,7 +9,7 @@ const footerLinks = {
     { name: "Ürünler", href: "/urunler" },
     { name: "Hakkımızda", href: "/hakkimizda" },
     { name: "Blog", href: "/blog" },
-    { name: "SSS", href: "/sss" },
+    { name: "Sıkça Sorulanlar", href: "/sss" },
     { name: "İletişim", href: "/iletisim" },
     { name: "Teslimat / Kargo", href: "/teslimat" },
     { name: "İade / İptal / Cayma", href: "/iade" },
@@ -129,8 +129,10 @@ export function Footer({ className, settings }: FooterProps) {
           className="grid gap-10 border-b border-primary-foreground/10 pb-10 md:grid-cols-2 xl:gap-8 xl:grid-cols-3"
         >
           <div>
-            <Link href="/" className="inline-block">
-              <h2 className="font-serif text-3xl font-semibold tracking-tight text-primary-foreground">{settings.storeName || "Can Antika"}</h2>
+            <Link href="/" className="inline-block group py-1">
+              <h2 className="font-pinyon text-5xl font-normal tracking-wide text-primary-foreground transition-colors duration-300 group-hover:text-accent select-none leading-none pt-1">
+                {settings.storeName || "Can Antika"}
+              </h2>
             </Link>
             <div className="mt-2 flex items-center gap-2">
               <span className="h-px w-8 bg-gradient-to-r from-accent/60 to-transparent" />
