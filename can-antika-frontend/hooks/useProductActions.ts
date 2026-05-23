@@ -54,6 +54,9 @@ export function useProductActions(product: ProductResponse, maxStock: number): P
     }, [isAuthenticated, product.id])
 
 const handleAddToCart = useCallback(async () => {
+        if (addingToCart || addedToCart) {
+            return
+        }
         if (quantity < 1 || quantity > maxStock) {
             toast.error(`Lütfen 1 ile ${maxStock} arasında bir miktar seçin`)
             return
@@ -84,7 +87,7 @@ const handleAddToCart = useCallback(async () => {
         } finally {
             setAddingToCart(false)
         }
-    }, [quantity, maxStock, isAuthenticated, product])
+    }, [addingToCart, addedToCart, quantity, maxStock, isAuthenticated, product])
 
     const handleAddToWishlist = useCallback(async () => {
         if (!isAuthenticated) {

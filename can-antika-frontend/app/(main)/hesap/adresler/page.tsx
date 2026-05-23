@@ -18,6 +18,13 @@ import {
 } from "@/components/ui/dialog"
 import { useAddresses } from "@/hooks/useAddresses"
 import type { AddressResponse, AddressRequest } from "@/lib/types"
+import { toast } from "sonner"
+
+const TURKISH_PHONE_PATTERN = /^(?:(?:\+?90|0)[\s-]?)?(?:\(?[2345]\d{2}\)?)[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}$/
+
+function isValidTurkishPhone(value: string): boolean {
+  return TURKISH_PHONE_PATTERN.test(value.trim())
+}
 
 function AddressesContent() {
   const { addresses, isLoading, isSaving, saveAddress, deleteAddress } = useAddresses()
@@ -27,11 +34,17 @@ function AddressesContent() {
   const handleSaveAddress = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+    const phone = (formData.get("phone") ?? "").toString().trim()
+    if (!isValidTurkishPhone(phone)) {
+      toast.error("Geçerli bir telefon numarası girin")
+      return
+    }
     const data: AddressRequest = {
       title: formData.get("title") as string,
       country: (formData.get("country") as string) || "Türkiye",
       city: formData.get("city") as string,
       district: formData.get("district") as string,
+      phone,
       postalCode: formData.get("postalCode") as string,
       addressLine: formData.get("addressLine") as string,
     }
@@ -101,6 +114,21 @@ function AddressesContent() {
                     className="bg-muted/50"
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Telefon</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  placeholder="05XX XXX XX XX"
+                  defaultValue={editingAddress?.phone || ""}
+                  required
+                  maxLength={20}
+                  pattern="(?:(?:\+?90|0)[\s-]?)?(?:\(?[2345]\d{2}\)?)[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}"
+                  title="Geçerli bir telefon numarası girin: 05XX XXX XX XX"
+                  className="bg-muted/50"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="addressLine">Adres</Label>
@@ -200,6 +228,7 @@ function AddressesContent() {
                   <p>
                     {address.district}, {address.city} {address.postalCode}
                   </p>
+                  <p>Telefon: {address.phone || "Eklenmemiş"}</p>
                   <p>{address.country}</p>
                 </div>
               </CardContent>

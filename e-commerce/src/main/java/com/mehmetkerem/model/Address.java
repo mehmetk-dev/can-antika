@@ -28,6 +28,9 @@ public class Address {
 
     private String district;
 
+    @Column(length = 20)
+    private String phone;
+
     @Column(name = "address_line")
     private String addressLine;
 

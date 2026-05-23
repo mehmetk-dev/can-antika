@@ -2,24 +2,29 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/lib/auth/auth-context"
 import { authApi } from "@/lib/api"
+import type { UserResponse } from "@/lib/types"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 
-export default function DashboardPage() {
-  const { user, refreshUser } = useAuth()
-  const nameParts = user?.name?.split(" ") || [""]
-  const [formData, setFormData] = useState({
+function getProfileFormData(user: UserResponse | null) {
+  const nameParts = user?.name?.trim().split(/\s+/).filter(Boolean) || [""]
+  return {
     firstName: nameParts[0] || "",
     lastName: nameParts.slice(1).join(" ") || "",
     email: user?.email || "",
-  })
+  }
+}
+
+export default function DashboardPage() {
+  const { user, refreshUser } = useAuth()
+  const [formData, setFormData] = useState(() => getProfileFormData(user))
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -28,6 +33,10 @@ export default function DashboardPage() {
   const [isChangingPassword, setIsChangingPassword] = useState(false)
 
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
+
+  useEffect(() => {
+    setFormData(getProfileFormData(user))
+  }, [user])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

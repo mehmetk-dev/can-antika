@@ -17,6 +17,8 @@ public class AddressResponse {
 
     private String district;
 
+    private String phone;
+
     private String postalCode;
 
     private String addressLine;

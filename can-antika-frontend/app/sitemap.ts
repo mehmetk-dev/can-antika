@@ -126,6 +126,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: "yearly",
             priority: 0.3,
         },
+        {
+            url: `${SITE_URL}/on-bilgilendirme-formu`,
+            changeFrequency: "yearly",
+            priority: 0.3,
+        },
     ]
 
     const productPages: MetadataRoute.Sitemap = products.map((product) => ({

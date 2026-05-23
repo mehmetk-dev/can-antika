@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthProvider } from "@/lib/auth/auth-context";
+import { CookieConsentBanner } from "@/components/legal/cookie-consent-banner";
 import { WebVitalsReporter } from "@/components/layout/web-vitals-reporter";
 import { SiteSettingsProvider } from "@/lib/site-settings-context";
 import type { SiteSettingsResponse } from "@/lib/types";
@@ -30,6 +31,7 @@ export function Providers({
                         },
                     }}
                 />
+                <CookieConsentBanner />
                 <WebVitalsReporter />
             </AuthProvider>
         </SiteSettingsProvider>

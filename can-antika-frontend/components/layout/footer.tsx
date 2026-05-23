@@ -1,6 +1,6 @@
 import Link from "next/link"
+import Image from "next/image"
 
-import { LEGAL_BUSINESS_INFO } from "@/components/legal/business-info"
 import { cn, sanitizeExternalUrl } from "@/lib/utils"
 import type { SiteSettingsResponse } from "@/lib/types"
 
@@ -19,12 +19,10 @@ const footerLinks = {
     { name: "Gizlilik Politikası", href: "/gizlilik" },
     { name: "Çerez Politikası", href: "/cerezler" },
     { name: "Kullanım Koşulları", href: "/kullanim-kosullari" },
+    { name: "Ön Bilgilendirme Formu", href: "/on-bilgilendirme-formu" },
     { name: "Mesafeli Satış Sözleşmesi", href: "/mesafeli-satis-sozlesmesi" },
   ],
 }
-
-const paymentBadges = ["Visa", "Mastercard", "Troy"]
-const trustBadges = ["SSL/TLS Güvenli Bağlantı", "3D Secure", "PayTR Güvenli Ödeme"]
 
 function SocialIcon({ type }: { type: "facebook" | "instagram" | "twitter" | "youtube" | "tiktok" }) {
   if (type === "facebook") {
@@ -68,6 +66,13 @@ function SocialIcon({ type }: { type: "facebook" | "instagram" | "twitter" | "yo
   )
 }
 
+const paymentLogos = [
+  { name: "Visa", src: "/payment-logos/visa.svg" },
+  { name: "Mastercard", src: "/payment-logos/mastercard.svg" },
+  { name: "Troy", src: "/payment-logos/troy.svg" },
+  { name: "SSL/TLS Güvenli Bağlantı", src: "/payment-logos/ssl.svg" },
+]
+
 function CornerOrnament({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 120 120" fill="none" aria-hidden="true">
@@ -98,10 +103,6 @@ export function Footer({ className, settings }: FooterProps) {
   const phoneHref = settings.phone ? `tel:${settings.phone.replace(/\s+/g, "")}` : ""
   const mailHref = settings.email ? `mailto:${settings.email}` : ""
   const mapHref = "https://maps.app.goo.gl/Sv4bqXDK7164WQGR9"
-  const legalCompanyName = LEGAL_BUSINESS_INFO.companyName
-  const legalTaxId = LEGAL_BUSINESS_INFO.taxId
-  const legalTaxOffice = LEGAL_BUSINESS_INFO.taxOffice
-  const legalAddress = LEGAL_BUSINESS_INFO.address
 
   return (
     <footer data-nosnippet className={cn("relative overflow-hidden border-t border-primary-foreground/10 bg-primary text-primary-foreground", className)}>
@@ -163,14 +164,6 @@ export function Footer({ className, settings }: FooterProps) {
               ) : null}
             </div>
 
-            <div className="mt-6 space-y-1.5 text-xs leading-5 text-primary-foreground/60">
-              <p className="font-medium text-primary-foreground/75">Yasal İşletme Bilgileri</p>
-              <p>{legalCompanyName}</p>
-              <p>VKN: {legalTaxId} / Vergi Dairesi: {legalTaxOffice}</p>
-              <p>Faaliyet: {LEGAL_BUSINESS_INFO.activityCode} - {LEGAL_BUSINESS_INFO.businessType}</p>
-              <p>{legalAddress}</p>
-            </div>
-
             {socialLinks.length > 0 && (
               <div className="mt-6 flex flex-wrap gap-2">
                 {socialLinks.map((social) => (
@@ -217,15 +210,10 @@ export function Footer({ className, settings }: FooterProps) {
 
         <div className="mt-6 flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
           <p className="text-sm text-primary-foreground/60">© 2026 Can Antika</p>
-          <div className="flex flex-wrap gap-2 lg:justify-center">
-            {paymentBadges.map((badge) => (
-              <span key={badge} className="rounded border border-primary-foreground/20 px-2 py-1 text-xs font-medium text-primary-foreground/70">
-                {badge}
-              </span>
-            ))}
-            {trustBadges.map((badge) => (
-              <span key={badge} className="rounded border border-accent/30 bg-accent/10 px-2 py-1 text-xs font-medium text-accent">
-                {badge}
+          <div className="flex flex-wrap gap-2 lg:justify-center" aria-label="Desteklenen ödeme ve güvenlik bilgileri">
+            {paymentLogos.map((logo) => (
+              <span key={logo.name} className="inline-flex h-10 w-[104px] items-center justify-center rounded-md border border-primary-foreground/15 bg-white px-2 shadow-sm">
+                <Image src={logo.src} alt={logo.name} width={92} height={30} className="h-7 w-[92px] object-contain" unoptimized />
               </span>
             ))}
           </div>

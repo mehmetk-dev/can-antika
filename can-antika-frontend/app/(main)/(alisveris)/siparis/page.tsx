@@ -16,6 +16,7 @@ import { AddressSelector } from "@/components/checkout/address-selector"
 import { PaymentMethodSelector } from "@/components/checkout/payment-method-selector"
 import { OrderSummary } from "@/components/checkout/order-summary"
 import { OrderConfirmation } from "@/components/checkout/order-confirmation"
+import { LegalDocumentsPanel } from "@/components/checkout/legal-documents-panel"
 import { useSiteSettings } from "@/lib/site-settings-context"
 import { calculateShippingAmount } from "@/lib/commerce/shipping"
 
@@ -37,26 +38,27 @@ function CheckoutContent() {
     const payableSubtotal = Math.max(0, cartTotal - coupon.discount)
     const shippingAmount = calculateShippingAmount(payableSubtotal, settings)
     const finalTotal = payableSubtotal + shippingAmount
+    const selectedAddress = addresses.find((address) => address.id === selectedAddressId) ?? null
 
     const handlePlaceOrder = async () => {
         if (!termsAccepted) {
-            toast.error("Lütfen mesafeli satış sözleşmesini onaylayın")
+            toast.error("Lütfen ön bilgilendirme formunu ve mesafeli satış sözleşmesini onaylayın")
             return
         }
         if (!selectedAddressId) {
             toast.error("Lütfen teslimat adresi seçin")
             return
         }
-        const selectedAddress = addresses.find((address) => address.id === selectedAddressId)
         const hasIncompleteAddress = !selectedAddress ||
             !selectedAddress.title?.trim() ||
             !selectedAddress.country?.trim() ||
             !selectedAddress.city?.trim() ||
             !selectedAddress.district?.trim() ||
+            !selectedAddress.phone?.trim() ||
             !selectedAddress.postalCode?.trim() ||
             !selectedAddress.addressLine?.trim()
         if (hasIncompleteAddress) {
-            toast.error("Teslimat adresiniz eksik. Lütfen adres bilgilerinizi güncelleyin.")
+            toast.error("Teslimat adresiniz eksik. Lütfen adres ve telefon bilgilerinizi güncelleyin.")
             return
         }
 
@@ -142,6 +144,13 @@ function CheckoutContent() {
                 <PaymentMethodSelector
                     paymentMethod={paymentMethod}
                     onSelect={setPaymentMethod}
+                />
+
+                <LegalDocumentsPanel
+                    selectedAddress={selectedAddress}
+                    cartTotal={cartTotal}
+                    shippingAmount={shippingAmount}
+                    finalTotal={finalTotal}
                 />
 
                 {/* Sipariş Notu */}

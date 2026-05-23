@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BusinessInfo } from "@/components/legal/business-info";
+import { CookieConsentSettingsButton } from "@/components/legal/cookie-consent-banner";
 
 export const metadata: Metadata = {
   title: "Çerez Politikası",
@@ -71,6 +72,9 @@ export default function CookiePolicyPage() {
           <section className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold">8. Çerezleri Nasıl Kontrol Edebilirsiniz?</h2>
             <p className="leading-7">Çerez tercihlerinizi site üzerindeki çerez ayarları bağlantısından veya tarayıcı ayarlarınızdan yönetebilirsiniz. Tarayıcı düzeyinde tüm çerezlerin kapatılması bazı işlevleri etkileyebilir.</p>
+            <div className="pt-2">
+              <CookieConsentSettingsButton />
+            </div>
           </section>
 
           <section className="mt-8 space-y-3">

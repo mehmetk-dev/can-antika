@@ -1,22 +1,10 @@
+import { LEGAL_BUSINESS_INFO } from "@/lib/legal/business-info"
+
 interface BusinessInfoProps {
   variant?: "full" | "contact" | "phone-only"
 }
 
-export const LEGAL_BUSINESS_INFO = {
-  ownerName: "Mesut Can",
-  companyName: "Mesut Can (Şahıs İşletmesi)",
-  brandName: "Can Antika",
-  businessType: "Antika Perakende Ticareti",
-  activityCode: "477901",
-  taxType: "Yıllık Gelir Vergisi",
-  taxOffice: "Beyoğlu",
-  taxId: "62857430140",
-  startDate: "01.03.2021",
-  website: "www.canantika.com",
-  address: "Hüseyinağa Mah. Meşrutiyet Cad. Avrupa Pasajı No: 8 İç Kapı No: 7 Beyoğlu / İstanbul",
-  phone: "+90 507 687 92 15",
-  email: "destek@canantika.com",
-}
+export { LEGAL_BUSINESS_INFO }
 
 export function BusinessInfo({ variant = "full" }: BusinessInfoProps) {
   if (variant === "phone-only") {

@@ -161,7 +161,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
             {!isSold && (
               <div className="mt-8 flex items-center gap-6">
                 {maxStock > 1 && (
-                  <QuantitySelector max={maxStock} value={quantity} onChange={setQuantity} />
+                  <QuantitySelector max={maxStock} value={quantity} onChange={setQuantity} disabled={addingToCart || addedToCart} />
                 )}
                 <div className="flex items-center gap-2 text-sm">
                   <div className={`h-1.5 w-1.5 rounded-full ${maxStock > 5 ? "bg-emerald-500/80" : maxStock > 0 ? "bg-amber-500/80" : "bg-red-500/80"}`} />
@@ -183,7 +183,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                   <Button
                     className="h-14 w-full gap-2 rounded-none bg-[#4a3424] px-4 py-2 text-center text-white font-sans tracking-widest hover:bg-[#362519] transition-all uppercase text-sm"
                     onClick={handleAddToCart}
-                    disabled={addingToCart}
+                    disabled={addingToCart || addedToCart}
                   >
                     {addedToCart ? <Check className="h-5 w-5" /> : <ShoppingBag className="h-5 w-5" />}
                     {addingToCart ? "Ekleniyor..." : addedToCart ? "Sepete Eklendi" : "Sepete Ekle"}

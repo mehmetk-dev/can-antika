@@ -47,6 +47,7 @@ export function AddressSelector({ addresses, selectedAddressId, onSelect }: Addr
                                 <p className="text-sm text-muted-foreground">
                                     {addr.district}, {addr.city} {addr.postalCode}
                                 </p>
+                                <p className="text-sm text-muted-foreground">Telefon: {addr.phone || "Eklenmemiş"}</p>
                             </button>
                         ))}
                     </div>

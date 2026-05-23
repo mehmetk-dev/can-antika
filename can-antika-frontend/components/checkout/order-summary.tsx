@@ -143,10 +143,15 @@ export function OrderSummary({
                         className="mt-0.5"
                     />
                     <label htmlFor="checkout-legal-approval" className="text-xs leading-relaxed text-muted-foreground">
+                        Aşağıdaki sözleşme ve formları, özellikle{" "}
+                        <Link href="/on-bilgilendirme-formu" className="font-medium text-foreground underline-offset-4 hover:underline" target="_blank">
+                            Ön Bilgilendirme Formu
+                        </Link>
+                        {" "}ve{" "}
                         <Link href="/mesafeli-satis-sozlesmesi" className="font-medium text-foreground underline-offset-4 hover:underline" target="_blank">
                             Mesafeli Satış Sözleşmesi
-                        </Link>{" "}
-                        ve ön bilgilendirme koşullarını okudum, kabul ediyorum.
+                        </Link>
+                        {" "}metinlerini okudum, kabul ediyorum.
                     </label>
                 </div>
 
