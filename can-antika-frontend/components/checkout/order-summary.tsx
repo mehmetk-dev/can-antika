@@ -62,7 +62,7 @@ export function OrderSummary({
                                 <p className="text-xs font-serif font-semibold text-foreground/90 truncate">{item.product.title}</p>
                                 <p className="text-xxs text-muted-foreground/80 font-sans mt-0.5">{item.quantity} adet</p>
                             </div>
-                            <p className="text-xs font-serif font-medium text-foreground whitespace-nowrap pl-2">
+                            <p className="text-xs font-sans font-semibold text-foreground whitespace-nowrap pl-2">
                                 ₺{item.total.toLocaleString("tr-TR")}
                             </p>
                         </div>
@@ -116,17 +116,17 @@ export function OrderSummary({
                 <div className="space-y-2.5">
                     <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground font-sans">Ara Toplam ({itemCount} ürün)</span>
-                        <span className="text-foreground font-serif">₺{cartTotal.toLocaleString("tr-TR")}</span>
+                        <span className="text-foreground font-sans font-semibold">₺{cartTotal.toLocaleString("tr-TR")}</span>
                     </div>
                     {coupon.discount > 0 && (
                         <div className="flex justify-between text-xs animate-in slide-in-from-top-1 duration-200">
                             <span className="text-primary font-sans font-medium">Kupon İndirimi</span>
-                            <span className="text-primary font-serif font-medium">-₺{coupon.discount.toLocaleString("tr-TR")}</span>
+                            <span className="text-primary font-sans font-semibold">-₺{coupon.discount.toLocaleString("tr-TR")}</span>
                         </div>
                     )}
                     <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground font-sans">Kargo</span>
-                        <span className="text-foreground font-serif">
+                        <span className="text-foreground font-sans font-semibold">
                             {shippingAmount > 0 ? `₺${shippingAmount.toLocaleString("tr-TR")}` : "Ücretsiz"}
                         </span>
                     </div>
@@ -136,7 +136,7 @@ export function OrderSummary({
 
                 <div className="flex justify-between items-baseline">
                     <span className="text-sm font-serif font-bold text-foreground uppercase tracking-wide">TOPLAM</span>
-                    <span className="text-primary font-serif font-bold text-xl">₺{finalTotal.toLocaleString("tr-TR")}</span>
+                    <span className="text-primary font-sans font-bold text-xl">₺{finalTotal.toLocaleString("tr-TR")}</span>
                 </div>
 
                 <div className="mt-5 flex items-start gap-3 rounded-[2px] border border-primary/10 bg-amber-50/[0.04] p-3.5">
