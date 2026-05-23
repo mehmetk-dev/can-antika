@@ -284,7 +284,7 @@ function AddressesContent() {
               Yeni Adres
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[92vh] overflow-y-auto border border-primary/20 bg-[#f8f3ea] p-0 text-stone-900 shadow-2xl shadow-stone-950/20 sm:max-w-2xl">
+          <DialogContent className="max-h-[92vh] overflow-y-auto [scrollbar-gutter:stable] border border-primary/20 bg-[#f8f3ea] p-0 text-stone-900 shadow-2xl shadow-stone-950/20 sm:max-w-2xl">
             <DialogHeader className="border-b border-primary/15 bg-[#efe5d5] px-6 py-5">
               <DialogTitle className="font-serif text-2xl text-stone-950">
                 {editingAddress ? "Adresi Düzenle" : "Yeni Adres Ekle"}
