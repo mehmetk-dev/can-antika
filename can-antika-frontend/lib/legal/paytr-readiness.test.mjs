@@ -30,11 +30,11 @@ test("checkout renders scrollable legal documents before payment approval", () =
   const returnPolicyPage = read("app/(main)/(yasal)/iade/page.tsx")
   const sharedDocuments = read("lib/legal/legal-documents.ts")
 
-  assert.match(legalPanel, /Sözleşmeler ve Formlar/)
+  assert.match(legalPanel, /SÖZLEŞMELER VE FORMLAR/)
   assert.match(legalPanel, /Ön Bilgilendirme Formu/)
   assert.match(legalPanel, /Mesafeli Satış Sözleşmesi/)
   assert.match(legalPanel, /Cayma Hakkı/)
-  assert.match(legalPanel, /max-h-36 overflow-y-auto/)
+  assert.match(legalPanel, /max-h-40 overflow-y-auto/)
   assert.ok(existsSync(join(root, "lib/legal/legal-documents.ts")))
   assert.ok(existsSync(join(root, "components/legal/legal-document-content.tsx")))
   assert.match(sharedDocuments, /PRE_INFORMATION_SECTIONS/)
@@ -71,6 +71,15 @@ test("footer does not advertise inactive PayTR or 3D Secure integrations", () =>
   assert.match(footer, /paymentLogos/)
   assert.match(footer, /next\/image/)
   assert.match(footer, /unoptimized/)
+})
+
+test("checkout hides credit card until PayTR credentials are available", () => {
+  const checkout = read("app/(main)/(alisveris)/siparis/page.tsx")
+  const selector = read("components/checkout/payment-method-selector.tsx")
+
+  assert.match(checkout, /useState<"CREDIT_CARD" \| "EFT" \| "CASH_ON_DELIVERY">\("EFT"\)/)
+  assert.doesNotMatch(selector, /value: "CREDIT_CARD" as const, label:/)
+  assert.doesNotMatch(selector, /\["CREDIT_CARD" as const\]/)
 })
 
 test("cookie settings are reopened from the cookie policy page, not a permanent corner button", () => {

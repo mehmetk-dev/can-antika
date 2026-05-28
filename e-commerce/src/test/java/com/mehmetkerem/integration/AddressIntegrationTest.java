@@ -83,6 +83,8 @@ public class AddressIntegrationTest {
         req.setCountry("Turkey");
         req.setCity("Istanbul");
         req.setDistrict("Besiktas");
+        req.setNeighborhood("Sinanpasa");
+        req.setPhone("+905321112233");
         req.setAddressLine("Carsi");
         req.setPostalCode("34340");
 

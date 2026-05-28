@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { AuthGuard } from "@/components/auth/auth-guard"
-import { cartApi, orderApi } from "@/lib/api"
+import { cartApi, orderApi, paymentApi } from "@/lib/api"
 import { toast } from "sonner"
 import { useCheckoutData } from "@/hooks/useCheckoutData"
 import { useCoupon } from "@/hooks/useCoupon"
@@ -29,10 +29,11 @@ function CheckoutContent() {
     } = useCheckoutData()
 
     const coupon = useCoupon(cart, setCart)
-    const [paymentMethod, setPaymentMethod] = useState<"CREDIT_CARD" | "EFT" | "CASH_ON_DELIVERY">("CREDIT_CARD")
+    const [paymentMethod, setPaymentMethod] = useState<"CREDIT_CARD" | "EFT" | "CASH_ON_DELIVERY">("EFT")
     const [isPlacing, setIsPlacing] = useState(false)
     const [orderPlaced, setOrderPlaced] = useState(false)
     const [orderId, setOrderId] = useState<number | null>(null)
+    const [paytrIframeUrl, setPaytrIframeUrl] = useState<string | null>(null)
     const [termsAccepted, setTermsAccepted] = useState(false)
 
     const payableSubtotal = Math.max(0, cartTotal - coupon.discount)
@@ -98,8 +99,14 @@ function CheckoutContent() {
             })
             // Sipariş sonrası sepet badge'ini sıfırla
             if (typeof window !== "undefined") window.dispatchEvent(new Event("cart-updated"))
-            setOrderPlaced(true)
             setOrderId(order.id)
+            if (paymentMethod === "CREDIT_CARD") {
+                const paytr = await paymentApi.initializePaytr(order.id)
+                setPaytrIframeUrl(paytr.iframeUrl)
+                toast.success("Güvenli ödeme formu hazırlandı.")
+                return
+            }
+            setOrderPlaced(true)
             toast.success("Siparişiniz başarıyla oluşturuldu!")
         } catch {
             toast.error("Sipariş oluşturulurken hata oluştu")
@@ -113,6 +120,25 @@ function CheckoutContent() {
             <div className="flex flex-col items-center justify-center py-32">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 <p className="mt-4 text-muted-foreground font-serif italic text-sm">Sipariş verileri yükleniyor...</p>
+            </div>
+        )
+    }
+
+    if (paytrIframeUrl && orderId) {
+        return (
+            <div className="space-y-5">
+                <div className="rounded-[2px] border border-primary/10 bg-card/40 p-4">
+                    <p className="font-cinzel text-base tracking-wider text-primary">GÜVENLİ KART ÖDEMESİ</p>
+                    <p className="mt-1 text-xs text-muted-foreground font-sans">
+                        Sipariş numaranız #{orderId}. Ödeme sonucu PayTR tarafından otomatik olarak bildirilecektir.
+                    </p>
+                </div>
+                <iframe
+                    src={paytrIframeUrl}
+                    title={`PayTR Ödeme Formu - Sipariş #${orderId}`}
+                    className="h-[760px] w-full rounded-[2px] border border-primary/15 bg-background"
+                    allow="payment *"
+                />
             </div>
         )
     }

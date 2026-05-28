@@ -134,6 +134,8 @@ public class SecurityDetailedIntegrationTest {
         addrReq.setCountry("Tr");
         addrReq.setCity("Is");
         addrReq.setDistrict("Ka");
+        addrReq.setNeighborhood("Secret Mahalle");
+        addrReq.setPhone("+905321112233");
         addrReq.setPostalCode("123");
         addrReq.setAddressLine("Hidden");
         MvcResult addrRes = mockMvc.perform(post("/v1/address/save")

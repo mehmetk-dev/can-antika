@@ -157,6 +157,8 @@ public class OrderIntegrationTest {
                 addrReq.setCountry("Turkey");
                 addrReq.setCity("Istanbul");
                 addrReq.setDistrict("Kadikoy");
+                addrReq.setNeighborhood("Caferaga");
+                addrReq.setPhone("+905321112233");
                 addrReq.setPostalCode("34710");
                 addrReq.setAddressLine("Test sokak no 5");
 

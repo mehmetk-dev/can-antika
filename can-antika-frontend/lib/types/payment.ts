@@ -13,6 +13,13 @@ export interface PaymentResponse {
     createdAt: string;
 }
 
+export interface PaytrInitializeResponse {
+    orderId: number;
+    merchantOid: string;
+    iframeToken: string;
+    iframeUrl: string;
+}
+
 export interface BankTransferResponse {
     id: number;
     orderId: number;

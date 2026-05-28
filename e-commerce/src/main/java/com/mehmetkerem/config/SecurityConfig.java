@@ -142,6 +142,7 @@ public class SecurityConfig {
                                                                         "/v1/auth/forgot-password",
                                                                         "/v1/auth/reset-password",
                                                                         "/v1/auth/logout",
+                                                                        "/v1/payment/paytr/callback",
                                                                         "/v1/contact",
                                                                         "/v1/newsletter/subscribe",
                                                                         "/v1/newsletter/unsubscribe",
@@ -187,6 +188,7 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.GET, "/v1/coupons/{code}").permitAll()
                                                 // Public POST endpoints
                                                 .requestMatchers(HttpMethod.POST, "/v1/contact").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/v1/payment/paytr/callback").permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/v1/newsletter/subscribe").permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/v1/newsletter/unsubscribe").permitAll()
                                                 // Swagger — disabled in prod, no permitAll needed

@@ -60,9 +60,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        String path = request.getRequestURI();
+        if ("/v1/payment/paytr/callback".equals(path)) {
+            return true;
+        }
         // Sadece actuator health endpoint'ini skip et
         if (!"GET".equals(request.getMethod())) return false;
-        String path = request.getRequestURI();
         return path.startsWith("/actuator/");
     }
 

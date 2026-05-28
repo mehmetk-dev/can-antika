@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { CreditCard, Banknote, Truck, Copy, Check } from "lucide-react"
+import { Banknote, Truck, Copy, Check } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSiteSettings } from "@/lib/site-settings-context"
 import { toast } from "sonner"
@@ -22,21 +22,19 @@ export function PaymentMethodSelector({ paymentMethod, onSelect }: PaymentMethod
     const [copied, setCopied] = useState(false)
 
     const paymentOptions = [
-        ...(settings.creditCardEnabled ? [{ value: "CREDIT_CARD" as const, label: "Kredi Kartı", icon: CreditCard, desc: "Visa, Mastercard" }] : []),
         ...(settings.bankTransferEnabled ? [{ value: "EFT" as const, label: "Havale / EFT", icon: Banknote, desc: "Banka transferi" }] : []),
         ...(settings.cashOnDeliveryEnabled ? [{ value: "CASH_ON_DELIVERY" as const, label: "Kapıda Ödeme", icon: Truck, desc: "Teslimat sırasında" }] : []),
     ]
 
     useEffect(() => {
         const availableMethods: PaymentMethod[] = [
-            ...(settings.creditCardEnabled ? ["CREDIT_CARD" as const] : []),
             ...(settings.bankTransferEnabled ? ["EFT" as const] : []),
             ...(settings.cashOnDeliveryEnabled ? ["CASH_ON_DELIVERY" as const] : []),
         ]
         if (availableMethods.length > 0 && !availableMethods.includes(paymentMethod)) {
             onSelect(availableMethods[0])
         }
-    }, [paymentMethod, onSelect, settings.creditCardEnabled, settings.bankTransferEnabled, settings.cashOnDeliveryEnabled])
+    }, [paymentMethod, onSelect, settings.bankTransferEnabled, settings.cashOnDeliveryEnabled])
 
     const handleCopyIban = () => {
         if (!bankTransferInfo.iban) return
@@ -50,12 +48,12 @@ export function PaymentMethodSelector({ paymentMethod, onSelect }: PaymentMethod
         <Card className="bg-card/40 backdrop-blur-sm border-primary/10 rounded-[2px] shadow-[0_4px_24px_rgba(123,64,25,0.02)] transition-all duration-300">
             <CardHeader className="border-b border-primary/5 pb-4">
                 <CardTitle className="font-cinzel text-lg tracking-wider text-primary flex items-center gap-2.5">
-                    <CreditCard className="h-4.5 w-4.5 text-primary/70" />
+                    <Banknote className="h-4.5 w-4.5 text-primary/70" />
                     ÖDEME YÖNTEMİ
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2">
                     {paymentOptions.map((opt) => {
                         const isSelected = paymentMethod === opt.value
                         return (

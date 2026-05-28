@@ -120,6 +120,8 @@ public class PurchaseDetailedIntegrationTest {
         addrReq.setCountry("Turkey");
         addrReq.setCity("Istanbul");
         addrReq.setDistrict("Kadikoy");
+        addrReq.setNeighborhood("Caferaga");
+        addrReq.setPhone("+905321112233");
         addrReq.setPostalCode("34710");
         addrReq.setAddressLine("Test st 123");
         MvcResult addrRes = mockMvc.perform(post("/v1/address/save")

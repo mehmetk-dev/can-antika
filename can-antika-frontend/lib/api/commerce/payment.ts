@@ -1,5 +1,5 @@
 import { api } from "../../api-client";
-import type { PaymentResponse, PaymentMethod } from "../../types";
+import type { PaymentResponse, PaymentMethod, PaytrInitializeResponse } from "../../types";
 
 function buildIdempotencyKey(orderId: number, paymentMethod: PaymentMethod, providedKey?: string): string {
     if (providedKey && providedKey.trim().length > 0) {
@@ -15,6 +15,11 @@ function buildIdempotencyKey(orderId: number, paymentMethod: PaymentMethod, prov
 }
 
 export const paymentApi = {
+    initializePaytr: (orderId: number) =>
+        api.post<PaytrInitializeResponse>("/v1/payment/paytr/initialize", {
+            params: { orderId },
+        }),
+
     processPayment: (orderId: number, amount: number, paymentMethod: PaymentMethod, idempotencyKey?: string) =>
         api.post<PaymentResponse>("/v1/payment/process", {
             params: { orderId, amount, paymentMethod },
