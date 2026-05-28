@@ -47,6 +47,9 @@ export const guestCart = {
         const items = readCart()
         const existing = items.find(i => i.product.id === product.id)
         if (existing) {
+            if (existing.quantity >= maxAllowed) {
+                throw new Error("Bu ürün zaten sepetinizde.")
+            }
             existing.quantity = Math.min(existing.quantity + quantity, maxAllowed)
         } else {
             items.push({ product, quantity: Math.min(quantity, maxAllowed) })

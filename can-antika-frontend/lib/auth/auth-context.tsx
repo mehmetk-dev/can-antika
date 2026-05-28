@@ -70,7 +70,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = useCallback(async (data: LoginRequest) => {
         // Backend cookie set eder, response body sadece user döner
         const user = await authApi.login(data);
-        setUser(user);
         markAuthSessionActive();
 
         // Guest sepetindeki ürünleri backend'e senkronize et
@@ -83,6 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 toast.error("Sepetiniz hesaba aktarılırken hata oluştu. Misafir sepetiniz korunuyor.");
             }
         }
+
+        setUser(user);
+        if (typeof window !== "undefined") window.dispatchEvent(new Event("cart-updated"));
 
         return user;
     }, []);
@@ -103,6 +105,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const refreshUser = useCallback(async () => {
         try {
             const freshUser = await authApi.getProfile();
+            const guestItems = guestCart.toSyncPayload();
+            if (guestItems.length > 0) {
+                try {
+                    await cartApi.syncCart(guestItems);
+                    guestCart.clear();
+                } catch {
+                    toast.error("Sepetiniz hesaba aktarÄ±lÄ±rken hata oluÅŸtu. Misafir sepetiniz korunuyor.");
+                }
+            }
             setUser(freshUser);
             markAuthSessionActive();
             return freshUser;
