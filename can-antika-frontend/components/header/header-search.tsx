@@ -39,19 +39,19 @@ export function HeaderSearch({ isSearchOpen, setIsSearchOpen }: HeaderSearchProp
     }
 
     return (
-        <div className="absolute inset-x-0 top-0 h-full flex items-center px-4 bg-background/95 backdrop-blur z-50 sm:static sm:inset-auto sm:h-auto sm:px-0 sm:bg-transparent sm:z-auto gap-2">
-            <div className="relative flex-1 sm:flex-none">
+        <div className="absolute inset-x-0 top-full z-50 flex items-center gap-2 border-t border-primary/10 bg-background/95 px-4 py-3 shadow-[0_12px_30px_rgba(32,25,18,0.08)] backdrop-blur sm:px-6 lg:px-8">
+            <div className="relative mx-auto max-w-2xl flex-1">
                 <Input
                     type="search"
                     placeholder="Antika ara..."
-                    className="w-full sm:w-64 bg-muted/50"
+                    className="h-11 w-full rounded-[2px] border-primary/15 bg-muted/35"
                     autoFocus
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                 />
                 {searchResults.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 z-50 rounded-md border bg-background shadow-lg overflow-hidden w-full">
+                    <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-hidden rounded-[2px] border border-primary/10 bg-background shadow-xl">
                         {searchResults.map((p) => (
                             <Link
                                 key={p.id}

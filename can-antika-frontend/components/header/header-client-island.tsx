@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth/auth-context"
 import { useCartWishlistCounts } from "@/hooks/useCartWishlistCounts"
 import { MobileMenu } from "@/components/header/mobile-menu"
@@ -13,11 +13,17 @@ interface HeaderClientIslandProps {
 }
 
 export function HeaderClientIsland({ navigation }: HeaderClientIslandProps) {
-    const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const { isAuthenticated, isAdmin, user, logout } = useAuth()
     const { cartCount, wishlistCount } = useCartWishlistCounts(isAuthenticated)
     const router = useRouter()
+    const pathname = usePathname()
+    const [searchState, setSearchState] = useState({ isOpen: false, pathname })
+    const isSearchOpen = searchState.isOpen && searchState.pathname === pathname
+
+    const setIsSearchOpen = (open: boolean) => {
+        setSearchState({ isOpen: open, pathname })
+    }
 
     const handleLogout = () => {
         logout()
