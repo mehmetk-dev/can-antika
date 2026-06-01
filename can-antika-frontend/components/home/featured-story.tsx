@@ -76,7 +76,7 @@ export function FeaturedStory() {
             {/* Vintage etiket */}
             <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 transform">
               <div className="rounded-sm border border-amber-400 bg-amber-50 px-6 py-2 shadow-lg">
-                <p className="font-serif text-sm font-medium text-amber-800">Est. 1982</p>
+                <p className="font-serif text-sm font-medium text-amber-800">1982 Aile Tecrübesi</p>
               </div>
             </div>
           </div>
@@ -108,9 +108,8 @@ export function FeaturedStory() {
 
             <div className="mt-8 space-y-4 font-serif text-lg leading-relaxed text-amber-800/80">
               <p>
-                <span className="float-left mr-2 font-serif text-5xl font-bold leading-none text-amber-600">1</span>982
-                yılında Kapalıçarşı’da başlayan bu eşsiz yolculuğumuz, bugün Beyoğlu&apos;ndaki tarihi mağazamızda
-                Türkiye’nin en saygın antika merkezlerinden biri olarak devam ediyor.
+                1982 yılında Orhan Can&apos;ın Kapalıçarşı’da başlattığı aile tecrübesi, bugün Can Antika çatısı altında
+                Beyoğlu&apos;ndaki tarihi mağazamızda seçkin antika ve koleksiyon ürünleriyle devam ediyor.
               </p>
               <p className="text-base">
                 Bizim için antikacılık sadece bir ticaret değil; geçmişle bugün arasında kurulan bir bağdır.

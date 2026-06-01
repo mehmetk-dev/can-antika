@@ -59,7 +59,7 @@ export function HeroSection() {
             <div className="relative">
               <div className="absolute inset-0 animate-pulse rounded-full border border-[#d1a46e]/35" />
               <p className="rounded-full border border-[#d1a46e]/55 bg-[#7b4019]/35 px-4 py-1.5 font-serif text-xs uppercase tracking-[0.3em] text-[#f1d3ab]">
-                1982&apos;den Beri
+                1982&apos;den Gelen Aile Tecrübesiyle
               </p>
             </div>
             <div className="h-px w-12 bg-gradient-to-l from-transparent to-[#d1a46e]/70" />
@@ -80,7 +80,7 @@ export function HeroSection() {
           </div>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-[#ead9c2]/85 text-pretty">
-            Her biri eşsiz hikayeler barındıran, uzman değerlendirmesinden geçmiş nadide antika eserler.
+            Can Antika çatısı altında seçkin antika ve koleksiyon ürünleri.
             <span className="italic text-[#e8c59a]"> Zamansız güzelliği keşfedin.</span>
           </p>
 

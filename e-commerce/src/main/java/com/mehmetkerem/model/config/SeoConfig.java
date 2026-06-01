@@ -17,7 +17,7 @@ public class SeoConfig {
     private String metaTitle = "Can Antika - Premium Antika Eşya Satışı İstanbul";
 
     @Column(length = 500)
-    private String metaDescription = "1982'den beri İstanbul'da en kaliteli antika eşyaları.";
+    private String metaDescription = "1982'den gelen aile tecrübesiyle Can Antika çatısı altında seçkin antika ve koleksiyon ürünleri.";
 
     private String metaKeywords = "antika, koleksiyon, osmanlı, vintage";
 
@@ -29,7 +29,7 @@ public class SeoConfig {
     private String customHeadScripts = "";
 
     @Column(length = 1000)
-    private String footerAbout = "Can Antika, 1982'den beri İstanbul'un kalbinde nadide antika eşyalar sunmaktadır.";
+    private String footerAbout = "Can Antika, 1982'den gelen aile tecrübesiyle seçkin antika ve koleksiyon ürünleri sunmaktadır.";
 
     private String footerCopyright = "© 2024 Can Antika. Tüm hakları saklıdır.";
 }

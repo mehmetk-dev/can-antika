@@ -14,7 +14,7 @@ import { LEGAL_BUSINESS_INFO } from "@/components/legal/business-info";
 const DEFAULTS: SiteSettingsResponse = {
     storeName: "Can Antika",
     businessType: "Antika Eşya Satışı",
-    storeDescription: "1982'den beri İstanbul'da en kaliteli antika eşyaları sunuyoruz.",
+    storeDescription: "1982'den gelen aile tecrübesiyle Can Antika çatısı altında seçkin antika ve koleksiyon ürünleri sunuyoruz.",
     companyName: LEGAL_BUSINESS_INFO.companyName,
     taxId: LEGAL_BUSINESS_INFO.taxId,
     taxOffice: LEGAL_BUSINESS_INFO.taxOffice,
@@ -41,7 +41,7 @@ const DEFAULTS: SiteSettingsResponse = {
     googleAnalyticsId: "",
     facebookPixelId: "",
     customHeadScripts: "",
-    footerAbout: "1982'den beri İstanbul'un kalbinde, geçmişin eşsiz güzelliklerini geleceğe taşıyoruz.",
+    footerAbout: "1982'den gelen aile tecrübesiyle Can Antika çatısı altında geçmişin eşsiz güzelliklerini geleceğe taşıyoruz.",
     footerCopyright: "© 2026 Can Antika. Tüm hakları saklıdır.",
     maintenanceMode: false,
     maintenanceMessage: "Sitemiz şu anda bakım modundadır. Kısa süre içinde tekrar hizmetinizde olacağız.",

@@ -95,7 +95,7 @@ export default function AuthPage() {
             </div>
 
             <div className="flex items-center justify-between text-primary-foreground/60 text-sm">
-              <span>Est. 1982</span>
+              <span>Aile Tecrübesi</span>
               <span>Beyoğlu, İstanbul</span>
             </div>
           </div>

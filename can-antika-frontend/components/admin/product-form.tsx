@@ -100,6 +100,7 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                 condition: formData.get("condition") as string,
                 conditionDetails: formData.get("conditionDetails") as string,
                 provenance: formData.get("story") as string,
+                authenticityNote: formData.get("authenticityNote") as string,
             },
         }
 
@@ -159,13 +160,13 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="story">Hikâye / Köken</Label>
+                                <Label htmlFor="story">Hikâye / Köken / Menşei</Label>
                                 <Textarea
                                     id="story"
                                     name="story"
                                     rows={4}
                                     defaultValue={(product?.attributes?.provenance as string) || ""}
-                                    placeholder={!isEdit ? "Eserin tarihçesi ve köken bilgisi..." : undefined} maxLength={5000} className="bg-muted/50"
+                                    placeholder={!isEdit ? "Ürünün kökeni, dönem bilgisi, edinim hikayesi veya uzman notu..." : undefined} maxLength={5000} className="bg-muted/50"
                                 />
                             </div>
                         </CardContent>
@@ -286,13 +287,24 @@ export function ProductForm({ product, onSubmit, title, subtitle }: ProductFormP
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="conditionDetails">Durum Detayları</Label>
+                                <Label htmlFor="conditionDetails">Kondisyon / Restorasyon Notu</Label>
                                 <Textarea
                                     id="conditionDetails"
                                     name="conditionDetails"
                                     rows={3}
                                     defaultValue={(product?.attributes?.conditionDetails as string) || ""}
-                                    placeholder="Aşınma, restorasyon vb. detaylar..."
+                                    placeholder="Aşınma, patina, eksik parça, onarım veya restorasyon bilgisi..."
+                                    className="bg-muted/50"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="authenticityNote">Orijinallik ve Belge Notu</Label>
+                                <Textarea
+                                    id="authenticityNote"
+                                    name="authenticityNote"
+                                    rows={3}
+                                    defaultValue={(product?.attributes?.authenticityNote as string) || ""}
+                                    placeholder="Uzman değerlendirmesi, belge durumu, fatura ile satış, talep halinde paylaşılacak bilgiler..."
                                     className="bg-muted/50"
                                 />
                             </div>

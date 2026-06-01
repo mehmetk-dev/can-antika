@@ -67,10 +67,10 @@ function SocialIcon({ type }: { type: "facebook" | "instagram" | "twitter" | "yo
 }
 
 const paymentLogos = [
-  { name: "Visa", src: "/payment-logos/visa.svg" },
-  { name: "Mastercard", src: "/payment-logos/mastercard.svg" },
-  { name: "Troy", src: "/payment-logos/troy.svg" },
-  { name: "SSL/TLS Güvenli Bağlantı", src: "/payment-logos/ssl.svg" },
+  { name: "Visa", src: "/payment-logos/visa.svg", width: 58, height: 20, className: "h-4 w-auto" },
+  { name: "Mastercard", src: "/payment-logos/mastercard.svg", width: 60, height: 22, className: "h-5 w-auto" },
+  { name: "Troy", src: "/payment-logos/troy.svg", width: 62, height: 24, className: "h-5 w-auto" },
+  { name: "SSL/TLS Güvenli Bağlantı", src: "/payment-logos/ssl.svg", width: 64, height: 22, className: "h-5 w-auto" },
 ]
 
 function CornerOrnament({ className }: { className?: string }) {
@@ -212,10 +212,10 @@ export function Footer({ className, settings }: FooterProps) {
 
         <div className="mt-6 flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
           <p className="text-sm text-primary-foreground/60">© 2026 Can Antika</p>
-          <div className="flex flex-wrap gap-2 lg:justify-center" aria-label="Desteklenen ödeme ve güvenlik bilgileri">
+          <div className="flex flex-wrap gap-1.5 lg:justify-center" aria-label="Desteklenen ödeme ve güvenlik bilgileri">
             {paymentLogos.map((logo) => (
-              <span key={logo.name} className="inline-flex h-10 w-[104px] items-center justify-center rounded-md border border-primary-foreground/15 bg-white px-2 shadow-sm">
-                <Image src={logo.src} alt={logo.name} width={92} height={30} className="h-7 w-[92px] object-contain" unoptimized />
+              <span key={logo.name} className="inline-flex h-9 w-[76px] items-center justify-center rounded-md border border-primary-foreground/15 bg-white px-1.5 shadow-sm">
+                <Image src={logo.src} alt={logo.name} width={logo.width} height={logo.height} className={cn("object-contain", logo.className)} unoptimized />
               </span>
             ))}
           </div>

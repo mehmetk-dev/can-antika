@@ -47,7 +47,7 @@ export function MobileMenu({ isOpen, onOpenChange, navigation, isAuthenticated }
                         <span className="font-pinyon text-5.5xl font-normal tracking-wide text-primary select-none leading-none pt-1">Can Antika</span>
                         <div className="mt-2 flex items-center justify-center gap-2">
                             <span className="h-px w-8 bg-gradient-to-r from-transparent to-primary/40" />
-                            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Est. 1982</span>
+                            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Aile Tecrübesi</span>
                             <span className="h-px w-8 bg-gradient-to-l from-transparent to-primary/40" />
                         </div>
                     </div>
@@ -142,7 +142,7 @@ export function MobileMenu({ isOpen, onOpenChange, navigation, isAuthenticated }
                     <p className="text-center text-xs text-muted-foreground">
                         <span className="font-serif italic">&quot;Geçmişin izinde, geleceğe miras&quot;</span>
                     </p>
-                    <p className="mt-1 text-center text-[10px] text-muted-foreground/60">Avrupa Pasajı, Beyoğlu / İstanbul</p>
+                    <p className="mt-1 text-center text-[10px] text-muted-foreground/60">Hüseyinağa Mah. Meşrutiyet Cad. Avrupa Pasajı No: 8 İç Kapı No: 7 Beyoğlu / İstanbul</p>
                 </div>
             </SheetContent>
         </Sheet>

@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -216,6 +217,36 @@ class CartServiceImplTest {
 
         assertNotNull(result);
         assertEquals(USER_ID, result.getUserId());
+    }
+
+    @Test
+    @DisplayName("getCartResponseByUserId - satılmış ürün response'tan temizlenir")
+    void getCartResponseByUserId_WhenProductSold_ShouldRemoveItemFromResponse() {
+        CartItem item = CartItem.builder()
+                .productId(PRODUCT_ID)
+                .quantity(1)
+                .price(new BigDecimal("100"))
+                .build();
+        cart.getItems().add(item);
+        cart.setCouponCode("INDIRIM");
+
+        ProductResponse soldProduct = ProductResponse.builder()
+                .id(PRODUCT_ID)
+                .title("Antika Saat")
+                .price(new BigDecimal("100"))
+                .stock(0)
+                .attributes(new HashMap<>(java.util.Map.of("status", "sold")))
+                .build();
+
+        when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.of(cart));
+        when(productService.getProductResponsesByIds(List.of(PRODUCT_ID))).thenReturn(List.of(soldProduct));
+
+        CartResponse result = cartService.getCartResponseByUserId(USER_ID);
+
+        assertNotNull(result);
+        assertTrue(result.getItems().isEmpty());
+        assertTrue(cart.getItems().isEmpty());
+        assertNull(result.getCouponCode());
     }
 
     @Test

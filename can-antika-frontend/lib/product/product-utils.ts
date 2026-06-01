@@ -46,8 +46,11 @@ export function getProductAttributes(product: ProductResponse) {
   return {
     era: resolvePeriodLabel(product),
     condition: asText((product.attributes as Record<string, unknown> | undefined)?.condition),
+    conditionDetails: asText((product.attributes as Record<string, unknown> | undefined)?.conditionDetails),
     dimensions: asText((product.attributes as Record<string, unknown> | undefined)?.dimensions),
+    material: asText((product.attributes as Record<string, unknown> | undefined)?.material),
     provenance: asText((product.attributes as Record<string, unknown> | undefined)?.provenance),
+    authenticityNote: asText((product.attributes as Record<string, unknown> | undefined)?.authenticityNote),
     status: rawStatus || inferredStatus,
   }
 }

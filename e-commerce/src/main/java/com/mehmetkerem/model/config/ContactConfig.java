@@ -21,7 +21,7 @@ public class ContactConfig {
     private String website = "www.canantika.com";
 
     @Column(length = 500)
-    private String address = "Çukurcuma Caddesi No: 45, Beyoğlu, İstanbul";
+    private String address = "Hüseyinağa Mah. Meşrutiyet Cad. Avrupa Pasajı No: 8 İç Kapı No: 7 Beyoğlu / İstanbul";
 
     private String whatsapp = "+90 (212) 555-0123";
 

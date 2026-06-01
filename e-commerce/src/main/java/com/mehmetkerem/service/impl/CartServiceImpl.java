@@ -293,8 +293,8 @@ public class CartServiceImpl implements ICartService {
                 .collect(Collectors.toMap(ProductResponse::getId, p -> p));
 
         List<Long> unavailableProductIds = cartItems.stream()
+                .filter(cartItem -> !isCartItemAvailable(cartItem, productMap.get(cartItem.getProductId())))
                 .map(CartItem::getProductId)
-                .filter(productId -> !productMap.containsKey(productId))
                 .toList();
         if (!unavailableProductIds.isEmpty()) {
             log.warn("Sepetten erisilemeyen urunler temizleniyor. UserId: {}, ProductIds: {}",
@@ -311,5 +311,25 @@ public class CartServiceImpl implements ICartService {
                     return cartItemMapper.toResponseWithProduct(cartItem, product);
                 })
                 .collect(Collectors.toList());
+    }
+
+    private boolean isCartItemAvailable(CartItem cartItem, ProductResponse product) {
+        if (product == null || cartItem == null || cartItem.getQuantity() <= 0) {
+            return false;
+        }
+        int stock = product.getStock() == null ? 0 : product.getStock();
+        return stock >= cartItem.getQuantity() && isSellable(product.getAttributes());
+    }
+
+    private boolean isSellable(Map<String, Object> attributes) {
+        if (attributes == null || attributes.isEmpty()) {
+            return true;
+        }
+        Object rawStatus = attributes.get("status");
+        if (rawStatus == null) {
+            return true;
+        }
+        String normalizedStatus = rawStatus.toString().trim().toLowerCase(Locale.ROOT);
+        return !"sold".equals(normalizedStatus) && !"reserved".equals(normalizedStatus);
     }
 }

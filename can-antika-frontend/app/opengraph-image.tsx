@@ -32,7 +32,7 @@ export default function Image() {
           Geçmişin Zarafeti
         </div>
         <div style={{ fontSize: 20, color: "#aaaaaa", marginTop: 24 }}>
-          1982&apos;den beri İstanbul&apos;un kalbinde eşsiz antika eserler
+          1982&apos;den gelen aile tecrübesiyle seçkin antika eserler
         </div>
       </div>
     ),

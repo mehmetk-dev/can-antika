@@ -37,6 +37,62 @@ function getAttributeLabel(key: string): string {
   return attributeLabels[key.toLowerCase()] ?? key
 }
 
+function TrustInfoPanel({
+  provenance,
+  era,
+  material,
+  condition,
+  conditionDetails,
+  authenticityNote,
+}: {
+  provenance: string
+  era: string
+  material: string
+  condition: string
+  conditionDetails: string
+  authenticityNote: string
+}) {
+  const rows = [
+    { label: "Menşei / Köken", value: provenance || "Köken ve edinim bilgisi satış öncesinde talep halinde paylaşılır." },
+    { label: "Tahmini Dönem", value: era ? (eraLabels[era] || era) : "Dönem bilgisi uzman değerlendirmesine göre paylaşılır." },
+    { label: "Malzeme", value: material || "Malzeme bilgisi ürün incelemesiyle teyit edilir." },
+    { label: "Kondisyon", value: condition || "Kondisyon bilgisi görseller ve satış öncesi değerlendirme üzerinden paylaşılır." },
+    { label: "Restorasyon / Onarım", value: conditionDetails || "Belirtilmiş restorasyon veya onarım notu bulunmuyor." },
+    {
+      label: "Orijinallik ve Belge",
+      value: authenticityNote || "Bu ürün Can Antika uzman değerlendirmesiyle satışa sunulmuştur. Ek belge ve değerlendirme talepleri için satış öncesinde bizimle iletişime geçebilirsiniz.",
+    },
+    { label: "Fatura ile Satış", value: "Evet, satış fatura ile yapılır." },
+  ]
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
+      <div className="rounded-lg border border-[#d4af37]/25 bg-[#fffaf0] p-5 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#d4af37]/35 bg-white text-[#7b4019]">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+          <div>
+            <h3 className="font-serif text-lg font-semibold text-foreground">Güven ve Ürün Bilgileri</h3>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              Antika ve koleksiyon ürünlerinde açıklamalar; görsel inceleme, ürün kondisyonu ve uzman değerlendirmesi esas alınarak hazırlanır.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-border/50 bg-card">
+        {rows.map((row) => (
+          <div key={row.label} className="grid gap-1 border-b border-border/40 px-4 py-3 last:border-b-0 sm:grid-cols-[170px_1fr] sm:gap-4">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-[#5c4a3d]/80">{row.label}</span>
+            <span className="font-serif text-sm leading-relaxed text-foreground">{row.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {
   const [activeTab, setActiveTab] = useState("details")
   const handleTabChange = useCallback((tab: string) => {
@@ -48,14 +104,14 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
   }, [])
 
   const maxStock = useMemo(() => Math.max(product.stock ?? 0, 0), [product.stock])
-  const { era, condition, dimensions, provenance, status } = useMemo(() => getProductAttributes(product), [product])
+  const { era, condition, conditionDetails, dimensions, material, provenance, authenticityNote, status } = useMemo(() => getProductAttributes(product), [product])
   const outOfStock = maxStock <= 0
   const isSold = status === "sold" || outOfStock
   const productImages = useMemo(() => product.imageUrls?.length ? product.imageUrls : ["/placeholder.svg"], [product.imageUrls])
 
   const otherAttributes = useMemo(() => {
     if (!product.attributes || typeof product.attributes !== 'object') return []
-    const excludedKeys = ['status', 'condition', 'dimensions', 'provenance', 'era', 'period', 'periodName', 'period_name', 'donem', 'dönem']
+    const excludedKeys = ['status', 'condition', 'conditionDetails', 'dimensions', 'material', 'provenance', 'authenticityNote', 'era', 'period', 'periodName', 'period_name', 'donem', 'dönem']
     return Object.entries(product.attributes)
       .filter(([key, value]) => !excludedKeys.includes(key) && (typeof value === 'string' || typeof value === 'number') && String(value).trim() !== '')
       .map(([key, value]) => ({ key, value: String(value) }))
@@ -242,7 +298,7 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
                   value="provenance"
                   className="relative rounded-none border-b-2 border-transparent bg-transparent pb-3 pt-2 font-serif text-sm tracking-wide text-muted-foreground transition-none data-[state=active]:border-[#d4af37] data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
                 >
-                  Hikaye & Köken
+                  Köken ve Güven Bilgileri
                 </TabsTrigger>
 
                 <TabsTrigger
@@ -294,11 +350,14 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
               </TabsContent>
 
               <TabsContent value="provenance" className="mt-0 outline-none">
-                <div className="max-w-3xl prose prose-p:font-light prose-p:leading-loose prose-p:text-muted-foreground font-serif">
-                  <p>
-                    {provenance || "Bu eser hakkında detaylı hikaye ve köken bilgisi henüz eklenmedi. Uzman ekibimizle iletişime geçerek eserin tarihçesi ve kökeni hakkında geniş kapsamlı bilgi alabilirsiniz."}
-                  </p>
-                </div>
+                <TrustInfoPanel
+                  provenance={provenance}
+                  era={era}
+                  material={material}
+                  condition={condition}
+                  conditionDetails={conditionDetails}
+                  authenticityNote={authenticityNote}
+                />
               </TabsContent>
 
 
@@ -356,11 +415,16 @@ export function ProductDetail({ product, relatedProducts = [] }: ProductDetailPr
               </AccordionItem>
 
               <AccordionItem value="provenance" className="border-border/40">
-                <AccordionTrigger className="font-serif text-lg tracking-wide hover:no-underline">Hikaye & Köken</AccordionTrigger>
+                <AccordionTrigger className="font-serif text-lg tracking-wide hover:no-underline">Köken ve Güven Bilgileri</AccordionTrigger>
                 <AccordionContent>
-                  <p className="font-serif leading-relaxed text-muted-foreground">
-                    {provenance || "Bu eser hakkında detaylı hikaye ve köken bilgisi henüz eklenmedi. Uzman ekibimizle iletişime geçerek eserin tarihçesi ve kökeni hakkında geniş kapsamlı bilgi alabilirsiniz."}
-                  </p>
+                  <TrustInfoPanel
+                    provenance={provenance}
+                    era={era}
+                    material={material}
+                    condition={condition}
+                    conditionDetails={conditionDetails}
+                    authenticityNote={authenticityNote}
+                  />
                 </AccordionContent>
               </AccordionItem>
 

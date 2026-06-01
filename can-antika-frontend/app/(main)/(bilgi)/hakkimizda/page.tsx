@@ -5,9 +5,9 @@ import { PageHero } from "@/components/layout/page-hero"
 import { Award, Crown, Gem, GlassWater, History, Key, Landmark, Quote, Shield, Sparkles, Star, Utensils } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Hakkımızda - Can Antika | Mesut Can",
+  title: "Hakkımızda",
   description:
-    "1982'den günümüze uzanan bir antika tutkusu. Orhan Can'ın Kapalıçarşı'da attığı temellerden, Mesut Can'ın Beyoğlu'ndaki modern vizyonuna uzanan hikayemiz.",
+    "1982'den gelen aile tecrübesiyle şekillenen bir antika tutkusu. Orhan Can'ın Kapalıçarşı'da attığı temellerden, Mesut Can'ın Beyoğlu'ndaki modern vizyonuna uzanan hikayemiz.",
   keywords: ["can antika", "hakkımızda", "mesut can", "orhan can", "antikacı istanbul", "beyoğlu antikacı", "koleksiyon uzmanı"],
   openGraph: {
     title: "Hakkımızda | Can Antika",
@@ -37,7 +37,7 @@ export default function AboutPage() {
           imageAlt="Can Antika Koleksiyon"
           eyebrow="Bir Aile Geleneği"
           title="Hikâyemiz"
-          description="1982'den bugüne, kuşaktan kuşağa aktarılan bir tutku"
+          description="1982'den gelen aile tecrübesiyle, kuşaktan kuşağa aktarılan bir tutku"
           priority
         />
 
@@ -67,7 +67,7 @@ export default function AboutPage() {
                         <Award className="h-6 w-6 text-accent" />
                       </div>
                       <div>
-                        <p className="font-serif text-2xl font-bold text-primary-foreground">1982&apos;den Beri</p>
+                        <p className="font-serif text-2xl font-bold text-primary-foreground">1982 Aile Tecrübesi</p>
                         <p className="text-xs uppercase tracking-widest text-primary-foreground/60">Sektörel Birikim</p>
                       </div>
                     </div>
@@ -88,10 +88,7 @@ export default function AboutPage() {
 
                 <div className="mt-10 space-y-8 text-lg leading-relaxed text-muted-foreground">
                   <p>
-                    <span className="float-left mr-4 mt-4 translate-y-1 font-cinzel text-[5.2rem] font-bold leading-[0.8] text-primary transition-colors hover:text-accent select-none drop-shadow-md">
-                      A
-                    </span>
-                    ntika ile tanışmam ailemden miras kalan bir tutkunun doğal bir devamı oldu. Babam Orhan Can, 1982 yılında Kapalıçarşı’da Rus, Avrupa ve Osmanlı dönemlerine ait seçkin antika eserlerin alım satımına başlayarak bu yolculuğun temelini attı.
+                    Antika ile tanışmam ailemden miras kalan bir tutkunun doğal bir devamı oldu. Babam Orhan Can, 1982 yılında Kapalıçarşı’da Rus, Avrupa ve Osmanlı dönemlerine ait seçkin antika eserlerin alım satımına başlayarak bu yolculuğun temelini attı.
                   </p>
                   
                   <p>
