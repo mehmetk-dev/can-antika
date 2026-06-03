@@ -13,6 +13,7 @@ import type { SiteSettingsResponse } from "@/lib/types"
 
 const HOME_META_DESCRIPTION =
   "Can Antika, Beyoğlu Avrupa Pasajı'nda antika ve koleksiyon ürünleri sunar. Ürünleri, fiyatları, teslimat ve iade koşullarını siteden inceleyebilirsiniz."
+const HOME_META_TITLE = "Can Antika | İstanbul Antika ve Koleksiyon Mağazası"
 
 function SectionSkeleton({ height = "h-64" }: { height?: string }) {
   return <div className={`${height} w-full animate-pulse bg-muted/30 rounded-lg`} />
@@ -26,7 +27,18 @@ const fetchSiteSettings = cache(async () => {
 })
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { description: HOME_META_DESCRIPTION }
+  return {
+    title: { absolute: HOME_META_TITLE },
+    description: HOME_META_DESCRIPTION,
+    openGraph: {
+      title: HOME_META_TITLE,
+      description: HOME_META_DESCRIPTION,
+    },
+    twitter: {
+      title: HOME_META_TITLE,
+      description: HOME_META_DESCRIPTION,
+    },
+  }
 }
 
 export default async function HomePage() {

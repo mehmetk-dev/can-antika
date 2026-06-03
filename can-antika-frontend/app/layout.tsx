@@ -17,8 +17,21 @@ const _pinyon = Pinyon_Script({ subsets: ["latin"], variable: "--font-pinyon", w
 
 const GA_ID_PATTERN = /^(G-[A-Z0-9]+|GTM-[A-Z0-9]+|UA-\d+-\d+)$/i
 const FB_PIXEL_ID_PATTERN = /^\d{5,20}$/
+const DEFAULT_SITE_TITLE = "Can Antika | İstanbul Antika ve Koleksiyon Mağazası"
 const DEFAULT_SITE_DESCRIPTION =
   "Can Antika, Beyoğlu Avrupa Pasajı'nda antika ve koleksiyon ürünleri sunar. Ürünleri, fiyatları, teslimat ve iade koşullarını siteden inceleyebilirsiniz."
+const SEO_TITLE_MAX_LENGTH = 70
+const SEO_TITLE_BLOCKLIST = /(@|\+?\d[\d\s()/-]{7,}|destek@|hüseyinağa|meşrutiyet|avrupa pasajı|premium antika eşya satışı|1982'den beri)/i
+
+function normalizeSeoTitle(value?: string | null): string {
+  const title = (value || "").trim()
+  if (!title || title.length > SEO_TITLE_MAX_LENGTH || SEO_TITLE_BLOCKLIST.test(title)) {
+    return DEFAULT_SITE_TITLE
+  }
+
+  return title
+}
+
 function sanitizeGoogleAnalyticsId(value?: string | null): string {
   const normalized = (value || "").trim()
   return GA_ID_PATTERN.test(normalized) ? normalized : ""
@@ -33,7 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const s = await fetchSiteSettings()
 
   const storeName = s?.storeName || "Can Antika"
-  const metaTitle = s?.metaTitle || `${storeName} | Geçmişin Zarafeti`
+  const metaTitle = normalizeSeoTitle(s?.metaTitle)
   const metaDesc = DEFAULT_SITE_DESCRIPTION
   const keywords = s?.metaKeywords
     ? s.metaKeywords.split(",").map((k: string) => k.trim())

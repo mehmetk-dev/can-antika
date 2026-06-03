@@ -1,5 +1,6 @@
 package com.mehmetkerem.dto.request;
 
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,7 +34,9 @@ public class SiteSettingsRequest {
     private String twitter;
     private String youtube;
     private String tiktok;
+    @Size(max = 70, message = "Meta başlık en fazla 70 karakter olabilir")
     private String metaTitle;
+    @Size(max = 160, message = "Meta açıklama en fazla 160 karakter olabilir")
     private String metaDescription;
     private String metaKeywords;
     private String googleAnalyticsId;

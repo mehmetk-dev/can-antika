@@ -14,10 +14,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SeoConfig {
 
-    private String metaTitle = "Can Antika - Premium Antika Eşya Satışı İstanbul";
+    private String metaTitle = "Can Antika | İstanbul Antika ve Koleksiyon Mağazası";
 
     @Column(length = 500)
-    private String metaDescription = "1982'den gelen aile tecrübesiyle Can Antika çatısı altında seçkin antika ve koleksiyon ürünleri.";
+    private String metaDescription = "Can Antika, Beyoğlu Avrupa Pasajı'nda antika ve koleksiyon ürünleri sunar. Ürünleri, fiyatları, teslimat ve iade koşullarını siteden inceleyebilirsiniz.";
 
     private String metaKeywords = "antika, koleksiyon, osmanlı, vintage";
 

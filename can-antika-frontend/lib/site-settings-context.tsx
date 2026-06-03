@@ -35,7 +35,7 @@ const DEFAULTS: SiteSettingsResponse = {
     twitter: "",
     youtube: "",
     tiktok: "",
-    metaTitle: "Can Antika - Premium Antika Eşya Satışı İstanbul",
+    metaTitle: "Can Antika | İstanbul Antika ve Koleksiyon Mağazası",
     metaDescription: "Can Antika, Beyoğlu Avrupa Pasajı'nda antika ve koleksiyon ürünleri sunar. Ürünleri, fiyatları, teslimat ve iade koşullarını siteden inceleyebilirsiniz.",
     metaKeywords: "antika, antika eşya, osmanlı, istanbul, koleksiyon",
     googleAnalyticsId: "",

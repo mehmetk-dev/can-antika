@@ -12,9 +12,10 @@ interface FieldProps {
     placeholder?: string
     disabled?: boolean
     hint?: string
+    maxLength?: number
 }
 
-export function Field({ label, value, onChange, type = "text", placeholder, disabled, hint }: FieldProps) {
+export function Field({ label, value, onChange, type = "text", placeholder, disabled, hint, maxLength }: FieldProps) {
     return (
         <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -31,6 +32,7 @@ export function Field({ label, value, onChange, type = "text", placeholder, disa
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
                 disabled={disabled}
+                maxLength={maxLength}
                 className={cn(
                     "bg-muted/30 border-border/60 focus-visible:ring-[#14452F]/30",
                     disabled && "opacity-60 cursor-not-allowed bg-muted/60"
@@ -50,9 +52,10 @@ interface TextareaFieldProps {
     rows?: number
     placeholder?: string
     className?: string
+    maxLength?: number
 }
 
-export function TextareaField({ label, value, onChange, rows = 3, placeholder, className }: TextareaFieldProps) {
+export function TextareaField({ label, value, onChange, rows = 3, placeholder, className, maxLength }: TextareaFieldProps) {
     return (
         <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{label}</label>
@@ -61,6 +64,7 @@ export function TextareaField({ label, value, onChange, rows = 3, placeholder, c
                 value={(value as string) ?? ""}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
+                maxLength={maxLength}
                 className={cn("bg-muted/30 border-border/60 focus-visible:ring-[#14452F]/30", className)}
             />
         </div>
