@@ -63,10 +63,12 @@ export function FeaturedStory() {
 
             <div className="aspect-[4/5] overflow-hidden rounded-sm">
               <Image
-                src="/antique-still-life.png"
+                src="/antique-still-life-640.jpg"
                 alt="Antika değerlendirme"
                 fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                loading="lazy"
+                decoding="async"
+                sizes="(max-width: 640px) 92vw, (max-width: 1024px) 86vw, 540px"
                 className="object-cover"
               />
               {/* Sepia efekti */}

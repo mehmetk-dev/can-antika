@@ -49,7 +49,7 @@ test("normalizes product JSON-LD images to absolute URLs", () => {
 
   assert.deepEqual(jsonLd.image, [
     "https://canantika.com/images/vazo.jpg",
-    "https://res.cloudinary.com/dqlbenxvc/image/upload/f_auto,q_auto/can-antika/urunler/vazo-detay.jpg",
+    "https://res.cloudinary.com/dqlbenxvc/image/upload/f_auto,q_auto,c_limit,w_1200/can-antika/urunler/vazo-detay.jpg",
   ])
 })
 

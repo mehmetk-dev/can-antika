@@ -158,11 +158,8 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
 
       {images.length > 1 && (
         <div
-          className="grid w-full gap-2 transition-opacity duration-300"
-          style={{
-            gridTemplateColumns: `repeat(${images.length}, minmax(0, 1fr))`,
-            opacity: mainLoaded ? 1 : 0,
-          }}
+          className="flex w-full gap-3 overflow-x-auto pb-1 transition-opacity duration-300"
+          style={{ opacity: mainLoaded ? 1 : 0 }}
         >
           {images.map((image, index) => {
             const thumbUrl = resolveImageUrl(image)
@@ -171,7 +168,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                 key={`thumb-${image}-${index}`}
                 onClick={() => handleThumbnailClick(index)}
                 onMouseEnter={() => handleThumbnailEnter(image)}
-                className={`relative aspect-square w-full overflow-hidden rounded-md transition-all ${selectedIndex === index
+                className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-md transition-all sm:h-24 sm:w-24 ${selectedIndex === index
                   ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
                   : "opacity-70 hover:opacity-100"
                   }`}
@@ -182,7 +179,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                   fill
                   loading="lazy"
                   decoding="async"
-                  sizes="(max-width: 640px) 15vw, 10vw"
+                  sizes="96px"
                   className="object-contain p-1 object-center"
                   onError={(e) => {
                     e.currentTarget.src = "/placeholder.svg"

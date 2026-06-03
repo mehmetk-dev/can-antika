@@ -109,7 +109,7 @@ export function NewArrivalsUI({ products }: { products: ProductCardResponse[] })
                         <svg className="h-2 w-2 text-amber-700 sm:h-3 sm:w-3" viewBox="0 0 12 12">
                           <polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9 3,11 3.5,7.5 1,5 4.5,4.5" fill="currentColor" />
                         </svg>
-                        <span className="font-serif text-[9px] font-medium text-amber-800 sm:text-xs">Tek Ürün</span>
+                        <span className="font-serif text-[9px] font-medium text-amber-800 sm:text-xs">Nadir Antika</span>
                       </div>
                     ) : (
                       <div className="rounded-sm border border-stone-400 bg-stone-100 px-1.5 py-0.5 sm:px-2.5 sm:py-1">

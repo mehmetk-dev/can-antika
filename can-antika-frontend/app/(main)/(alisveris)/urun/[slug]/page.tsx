@@ -7,9 +7,10 @@ import { ProductPageClient } from "./product-page-client"
 import ProductLoading from "./loading"
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import { fetchSiteSettings } from "@/lib/server/site-settings"
-import { resolveImageUrl } from "@/lib/product/image-url"
+import { resolveImageUrl, toCloudinaryResponsiveUrl } from "@/lib/product/image-url"
 import { getProductUrl } from "@/lib/product/product-url"
 import { buildProductJsonLd } from "@/lib/product/product-json-ld"
+import { getProductAttributes, resolvePeriodLabel } from "@/lib/product/product-utils"
 import type { ProductResponse } from "@/lib/types"
 
 function serializeSafeJsonLd(data: unknown): string {
@@ -70,6 +71,40 @@ async function fetchProductById(id: number) {
   })
 }
 
+function limitSeoText(text: string, maxLength = 158): string {
+  const normalized = text.replace(/\s+/g, " ").trim()
+  if (normalized.length <= maxLength) return normalized
+
+  const truncated = normalized.slice(0, maxLength - 1)
+  const lastSpace = truncated.lastIndexOf(" ")
+  return `${truncated.slice(0, lastSpace > 80 ? lastSpace : truncated.length).trim()}.`
+}
+
+function buildProductMetaDescription(product: ProductResponse): string {
+  const category = product.category?.name
+  const period = resolvePeriodLabel(product)
+  const { condition, dimensions } = getProductAttributes(product)
+  const inStock = (product.stock ?? 0) > 0
+  const parts = [
+    `${product.title}, Can Antika koleksiyonunda${category ? ` ${category} kategorisinde` : ""} seçkin antika parça.`,
+    period ? `Dönem: ${period}.` : "",
+    condition ? `Kondisyon: ${condition}.` : "",
+    dimensions ? `Ölçüler: ${dimensions}.` : "",
+    inStock ? "Stokta mevcut." : "Satıldı.",
+    Number.isFinite(product.price) && product.price > 0 ? `Fiyat: ₺${product.price.toLocaleString("tr-TR")}.` : "",
+  ]
+
+  return limitSeoText(parts.filter(Boolean).join(" "))
+}
+
+function resolveProductSeoImageUrl(raw?: string | null): string | undefined {
+  if (!raw) return undefined
+  const imageUrl = resolveImageUrl(raw)
+  if (imageUrl === "/placeholder.svg") return undefined
+
+  return toCloudinaryResponsiveUrl(imageUrl, 1200, "auto")
+}
+
 const fetchProduct = cache(async (slug: string) => {
   // 1. Tamamen numerik slug (ör: "76")
   const numericId = parseNumericProductId(slug)
@@ -113,10 +148,8 @@ export async function generateMetadata({
 
   if (product) {
     const title = product.title
-    const description = product.description
-      ? product.description.slice(0, 160)
-      : `${title} - Can Antika koleksiyonundan antika eser.`
-    const imageUrl = product.imageUrls?.[0] ? resolveImageUrl(product.imageUrls[0]) : undefined
+    const description = buildProductMetaDescription(product)
+    const imageUrl = resolveProductSeoImageUrl(product.imageUrls?.[0])
 
     return {
       title,
@@ -130,7 +163,15 @@ export async function generateMetadata({
         description,
         type: "website",
         locale: "tr_TR",
-        ...(imageUrl && imageUrl !== "/placeholder.svg" && { images: [imageUrl] }),
+        ...(imageUrl && {
+          images: [{ url: imageUrl, width: 1200, height: 1200, alt: title }],
+        }),
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${title} | Can Antika`,
+        description,
+        ...(imageUrl && { images: [imageUrl] }),
       },
     }
   }

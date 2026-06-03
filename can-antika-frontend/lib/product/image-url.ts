@@ -1,4 +1,5 @@
 const DEFAULT_CLOUDINARY_BASE = "https://res.cloudinary.com/dqlbenxvc/image/upload/can-antika"
+const DEFAULT_RESOLVED_IMAGE_WIDTH = 640
 
 export function resolveImageUrl(raw?: string | null): string {
   const value = (raw || "").trim()
@@ -13,12 +14,9 @@ export function resolveImageUrl(raw?: string | null): string {
     url = `${base}/${encodeURI(normalizedPath)}`
   }
 
-  // Cloudinary URL'si ise f_auto,q_auto optimizasyonlarını enjekte et
+  // Cloudinary URL'si ise genişlik sınırlı responsive fallback üret
   if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
-    // Halihazırda optimizasyon eklenmemişse ekle
-    if (!url.includes("/f_auto") && !url.includes("/q_auto")) {
-      url = url.replace("/upload/", "/upload/f_auto,q_auto/")
-    }
+    url = toCloudinaryResponsiveUrl(url, DEFAULT_RESOLVED_IMAGE_WIDTH, "auto:eco")
   }
 
   return url

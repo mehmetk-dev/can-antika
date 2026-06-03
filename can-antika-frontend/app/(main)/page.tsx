@@ -7,12 +7,13 @@ import { NewArrivals } from "@/components/home/new-arrivals"
 import { CategoriesSection } from "@/components/home/categories-section"
 import { TrustIndicators } from "@/components/home/trust-indicators"
 import { FeaturedStory } from "@/components/home/featured-story"
+import { SeoContentSection } from "@/components/home/seo-content-section"
 
 import { fetchApiDataWithFallback } from "@/lib/server/server-api-fallback"
 import type { SiteSettingsResponse } from "@/lib/types"
 
 const HOME_META_DESCRIPTION =
-  "Can Antika, Beyoğlu Avrupa Pasajı'nda antika ve koleksiyon ürünleri sunar. Ürünleri, fiyatları, teslimat ve iade koşullarını siteden inceleyebilirsiniz."
+  "Can Antika, Beyoğlu Avrupa Pasajı'nda seçkin antika ve koleksiyon ürünleri sunan İstanbul antika mağazasıdır."
 const HOME_META_TITLE = "Can Antika | İstanbul Antika ve Koleksiyon Mağazası"
 
 function SectionSkeleton({ height = "h-64" }: { height?: string }) {
@@ -30,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { absolute: HOME_META_TITLE },
     description: HOME_META_DESCRIPTION,
+    keywords: ["antika", "antika ve koleksiyon", "İstanbul antika", "seçkin antika", "antika mağazası", "Can Antika"],
     openGraph: {
       title: HOME_META_TITLE,
       description: HOME_META_DESCRIPTION,
@@ -63,6 +65,7 @@ export default async function HomePage() {
         <Suspense fallback={<SectionSkeleton />}>
           <FeaturedStory />
         </Suspense>
+        <SeoContentSection />
       </main>
     </div>
   )

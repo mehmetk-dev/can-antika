@@ -3,6 +3,7 @@ import type { ProductResponse } from "../types"
 const SITE_URL = "https://canantika.com"
 const RETURN_POLICY_URL = `${SITE_URL}/iade`
 const DEFAULT_CLOUDINARY_BASE = "https://res.cloudinary.com/dqlbenxvc/image/upload/can-antika"
+const STRUCTURED_IMAGE_WIDTH = 1200
 
 interface ProductJsonLdSettings {
   storeName?: string | null
@@ -104,14 +105,30 @@ function calculateProductShippingAmount(product: ProductResponse, settings: Prod
 function resolveStructuredImageUrl(raw: string): string {
   const value = raw.trim()
   if (!value) return `${SITE_URL}/placeholder.svg`
-  if (/^https?:\/\//i.test(value)) return value
+  if (/^https?:\/\//i.test(value)) return normalizeCloudinaryStructuredImage(value)
   if (value.startsWith("/")) return new URL(value, SITE_URL).toString()
 
   const base = (process.env.NEXT_PUBLIC_CLOUDINARY_BASE || DEFAULT_CLOUDINARY_BASE).replace(/\/$/, "")
   const url = `${base}/${encodeURI(value.replace(/^\/+/, ""))}`
-  return url.includes("/upload/") && !url.includes("/f_auto") && !url.includes("/q_auto")
-    ? url.replace("/upload/", "/upload/f_auto,q_auto/")
-    : url
+  return normalizeCloudinaryStructuredImage(url)
+}
+
+function normalizeCloudinaryStructuredImage(url: string): string {
+  if (!url.includes("res.cloudinary.com") || !url.includes("/upload/")) return url
+
+  const uploadMarker = "/upload/"
+  const uploadIndex = url.indexOf(uploadMarker)
+  const prefix = url.slice(0, uploadIndex + uploadMarker.length)
+  const suffix = url.slice(uploadIndex + uploadMarker.length)
+  const firstSlashIndex = suffix.indexOf("/")
+  const firstSegment = firstSlashIndex === -1 ? suffix : suffix.slice(0, firstSlashIndex)
+  const remainingPath = firstSlashIndex === -1 ? "" : suffix.slice(firstSlashIndex + 1)
+  const looksLikeTransform =
+    firstSegment.includes(",") ||
+    /^(?:f_|q_|c_|w_|h_|dpr_|g_|ar_|e_|l_|fl_)/.test(firstSegment)
+  const transform = `f_auto,q_auto,c_limit,w_${STRUCTURED_IMAGE_WIDTH}`
+
+  return looksLikeTransform ? `${prefix}${transform}/${remainingPath}` : `${prefix}${transform}/${suffix}`
 }
 
 export function buildProductJsonLd(

@@ -8,6 +8,7 @@ import Link from "next/link"
 import Image from "next/image"
 import type { BlogPost, BlogCategory } from "@/lib/types"
 import { formatDateTR } from "@/lib/utils"
+import { prepareBlogContentHtml } from "./blog-content-sanitized"
 
 interface BlogDetailClientProps {
     initialPost: BlogPost | null
@@ -32,7 +33,7 @@ export function BlogDetailClient({ initialPost, slug, initialCategories = [] }: 
             }
 
             const { default: DOMPurify } = await import("dompurify")
-            if (!cancelled) setSanitizedContent(DOMPurify.sanitize(postContent))
+            if (!cancelled) setSanitizedContent(DOMPurify.sanitize(prepareBlogContentHtml(postContent)))
         }
 
         sanitizePostContent().catch(() => {
