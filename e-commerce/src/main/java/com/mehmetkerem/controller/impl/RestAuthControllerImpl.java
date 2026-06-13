@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -42,6 +43,13 @@ public class RestAuthControllerImpl implements IRestAuthController {
             return ResultHelper.success(registerResponse);
         }
         return ResultHelper.success(Map.of("message", "Kayit basariyla tamamlandi."));
+    }
+
+    @GetMapping("/csrf")
+    public ResultData<Map<String, String>> csrfToken(CsrfToken csrfToken) {
+        return ResultHelper.success(Map.of(
+                "token", csrfToken.getToken(),
+                "headerName", csrfToken.getHeaderName()));
     }
 
     @Override

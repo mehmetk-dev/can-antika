@@ -130,7 +130,8 @@ public class ReportServiceImpl implements IReportService {
     @Override
     public Page<AbandonedCartResponse> abandonedCarts(int page, int size, int hoursThreshold) {
         LocalDateTime cutoff = LocalDateTime.now().minusHours(hoursThreshold);
-        Page<Cart> carts = cartRepository.findAbandonedCarts(cutoff, PageRequest.of(page, size));
+        Page<Cart> carts = cartRepository.findAbandonedCarts(
+                cutoff, com.mehmetkerem.util.PageRequestUtils.of(page, size));
 
         // Batch fetch users and products for all carts in the page
         Set<Long> userIds = carts.stream().map(Cart::getUserId).collect(Collectors.toSet());

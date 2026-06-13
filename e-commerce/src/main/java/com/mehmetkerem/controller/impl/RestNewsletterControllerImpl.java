@@ -1,6 +1,7 @@
 package com.mehmetkerem.controller.impl;
 
 import com.mehmetkerem.controller.IRestNewsletterController;
+import com.mehmetkerem.dto.request.NewsletterSubscriptionRequest;
 import com.mehmetkerem.dto.response.CursorResponse;
 import com.mehmetkerem.dto.response.NewsletterSubscriberResponse;
 import com.mehmetkerem.model.NewsletterSubscriber;
@@ -8,6 +9,7 @@ import com.mehmetkerem.service.INewsletterService;
 import com.mehmetkerem.util.ResultData;
 import com.mehmetkerem.util.ResultHelper;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -29,24 +31,15 @@ public class RestNewsletterControllerImpl implements IRestNewsletterController {
 
     @Override
     @PostMapping("/subscribe")
-    public ResultData<Map<String, String>> subscribe(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        String name = body.getOrDefault("name", "");
-        if (email == null || email.isBlank()) {
-            return new ResultData<>(false, "E-posta adresi zorunludur", "400", null);
-        }
-        newsletterService.subscribe(email, name);
+    public ResultData<Map<String, String>> subscribe(@Valid @RequestBody NewsletterSubscriptionRequest body) {
+        newsletterService.subscribe(body.getEmail(), body.getName());
         return ResultHelper.success(Map.of("message", "Başarıyla abone oldunuz"));
     }
 
     @Override
     @PostMapping("/unsubscribe")
-    public ResultData<Map<String, String>> unsubscribe(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        if (email == null || email.isBlank()) {
-            return new ResultData<>(false, "E-posta adresi zorunludur", "400", null);
-        }
-        newsletterService.unsubscribe(email);
+    public ResultData<Map<String, String>> unsubscribe(@Valid @RequestBody NewsletterSubscriptionRequest body) {
+        newsletterService.unsubscribe(body.getEmail());
         return ResultHelper.success(Map.of("message", "Abonelikten çıktınız"));
     }
 
@@ -80,4 +73,3 @@ public class RestNewsletterControllerImpl implements IRestNewsletterController {
         return ResultHelper.success(Map.of("message", "Abone silindi"));
     }
 }
-

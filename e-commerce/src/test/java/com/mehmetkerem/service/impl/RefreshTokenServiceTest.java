@@ -5,6 +5,8 @@ import com.mehmetkerem.exception.UnauthorizedException;
 import com.mehmetkerem.model.RefreshToken;
 import com.mehmetkerem.model.User;
 import com.mehmetkerem.repository.RefreshTokenRepository;
+import com.mehmetkerem.repository.RefreshTokenReplayRepository;
+import com.mehmetkerem.security.TokenHashing;
 import com.mehmetkerem.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +33,9 @@ class RefreshTokenServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private RefreshTokenReplayRepository refreshTokenReplayRepository;
 
     @InjectMocks
     private RefreshTokenService refreshTokenService;
@@ -81,6 +86,8 @@ class RefreshTokenServiceTest {
 
         assertNotNull(result);
         assertNotNull(result.getToken());
+        assertNotEquals(result.getToken(), result.getTokenHash());
+        assertEquals(64, result.getTokenHash().length());
         assertTrue(result.getExpiryDate().isAfter(Instant.now()));
         verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
@@ -124,7 +131,8 @@ class RefreshTokenServiceTest {
     @Test
     @DisplayName("findByToken - token bulunur")
     void findByToken_WhenExists_ShouldReturnOptionalWithToken() {
-        when(refreshTokenRepository.findByToken("valid-token-123")).thenReturn(Optional.of(validToken));
+        when(refreshTokenRepository.findByTokenHash(TokenHashing.sha256("valid-token-123")))
+                .thenReturn(Optional.of(validToken));
 
         Optional<RefreshToken> result = refreshTokenService.findByToken("valid-token-123");
 

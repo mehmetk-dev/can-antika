@@ -64,8 +64,8 @@ public class RestSupportTicketControllerImpl implements IRestSupportTicketContro
             @RequestParam(required = false) com.mehmetkerem.enums.TicketStatus status,
             @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page,
             @org.springframework.web.bind.annotation.RequestParam(defaultValue = "10") int size) {
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size,
-                Sort.by(Sort.Direction.DESC, "createdAt"));
+        org.springframework.data.domain.Pageable pageable = com.mehmetkerem.util.PageRequestUtils.of(
+                page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         return ResultHelper.cursor(supportTicketService.getAllTicketsForAdmin(status, pageable));
     }
 

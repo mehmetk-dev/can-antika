@@ -22,7 +22,7 @@ public class RateLimitConfig {
     private long globalWindowMinutes = 1;
 
     /** Redis erişilemezse fail-open/fail-closed davranışı. */
-    private boolean failOpenOnRedisError = true;
+    private boolean failOpenOnRedisError = false;
 
     /** Endpoint bazlı özel limitler. Sıra önemli, ilk eşleşen bucket uygulanır. */
     private List<BucketConfig> buckets = new ArrayList<>();
@@ -118,6 +118,40 @@ public class RateLimitConfig {
             catalogPeriod.setWindowMinutes(1);
             catalogPeriod.setMessage("Çok fazla dönem sorgulaması. Lütfen biraz bekleyin.");
             buckets.add(catalogPeriod);
+            return;
+        }
+
+        ensureSecurityBucket("auth-forgot-password", "/v1/auth/forgot-password", 3, true,
+                "Çok fazla şifre sıfırlama isteği. Lütfen biraz bekleyin.");
+        ensureSecurityBucket("auth-reset-password", "/v1/auth/reset-password", 5, false,
+                "Çok fazla şifre sıfırlama denemesi. Lütfen biraz bekleyin.");
+    }
+
+    private void ensureSecurityBucket(String name, String path, int maxRequests, boolean userScoped, String message) {
+        boolean exists = buckets.stream().anyMatch(bucket -> name.equals(bucket.getName()));
+        if (exists) {
+            return;
+        }
+
+        BucketConfig bucket = new BucketConfig();
+        bucket.setName(name);
+        bucket.setPathPrefix(path);
+        bucket.setMaxRequests(maxRequests);
+        bucket.setWindowMinutes(1);
+        bucket.setUserScoped(userScoped);
+        bucket.setMessage(message);
+
+        int catchAllIndex = -1;
+        for (int i = 0; i < buckets.size(); i++) {
+            if ("/v1/".equals(buckets.get(i).getPathPrefix())) {
+                catchAllIndex = i;
+                break;
+            }
+        }
+        if (catchAllIndex >= 0) {
+            buckets.add(catchAllIndex, bucket);
+        } else {
+            buckets.add(bucket);
         }
     }
 }

@@ -62,7 +62,8 @@ public class OrderReturnServiceImpl implements IOrderReturnService {
                     "Yeni İade Talebi - Sipariş #" + request.getOrderId(),
                     "<p><strong>Sipariş ID:</strong> " + request.getOrderId() + "</p>"
                             + "<p><strong>Kullanıcı ID:</strong> " + userId + "</p>"
-                            + "<p><strong>Sebep:</strong> " + request.getReason() + "</p>");
+                            + "<p><strong>Sebep:</strong> "
+                            + org.springframework.web.util.HtmlUtils.htmlEscape(request.getReason()) + "</p>");
             inAppNotificationService.createForAdmins(
                     "Yeni İade Talebi: Sipariş #" + request.getOrderId(),
                     request.getReason(),

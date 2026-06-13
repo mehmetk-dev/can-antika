@@ -87,8 +87,7 @@ public class RestProductControllerImpl implements IRestProductController {
             @RequestParam(defaultValue = "desc") String direction) {
 
         Sort sort = resolveProductSort(sortBy, direction);
-        int cappedSize = Math.min(Math.max(size, 1), 100);
-        Pageable pageable = PageRequest.of(page, cappedSize, sort);
+        Pageable pageable = com.mehmetkerem.util.PageRequestUtils.of(page, size, sort);
         CursorResponse<ProductCardResponse> cursorResult = productService.searchProductCards(
                 title,
                 categoryId,
@@ -119,8 +118,7 @@ public class RestProductControllerImpl implements IRestProductController {
             @RequestParam(defaultValue = "desc") String direction) {
 
         Sort sort = resolveProductSort(sortBy, direction);
-        int cappedSize = Math.min(Math.max(size, 1), 100);
-        Pageable pageable = PageRequest.of(page, cappedSize, sort);
+        Pageable pageable = com.mehmetkerem.util.PageRequestUtils.of(page, size, sort);
         CursorResponse<ProductResponse> cursorResult = productService.searchProducts(
                 title,
                 categoryId,

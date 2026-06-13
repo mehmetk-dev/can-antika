@@ -46,6 +46,7 @@ class RestCouponControllerTest {
         couponRequest = new CouponRequest();
         couponRequest.setCode("INDIRIM10");
         couponRequest.setDiscountAmount(new BigDecimal("10"));
+        couponRequest.setDiscountType("FIXED");
         couponRequest.setMinCartAmount(new BigDecimal("100"));
         couponRequest.setExpirationDate(LocalDateTime.now().plusDays(7));
     }

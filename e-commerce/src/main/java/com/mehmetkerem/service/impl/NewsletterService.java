@@ -15,32 +15,35 @@ public class NewsletterService implements com.mehmetkerem.service.INewsletterSer
     private final NewsletterRepository repository;
 
     public NewsletterSubscriber subscribe(String email, String name) {
-        var existing = repository.findByEmail(email);
+        String normalizedEmail = email.trim().toLowerCase(java.util.Locale.ROOT);
+        String normalizedName = name == null ? "" : name.trim();
+        var existing = repository.findByEmail(normalizedEmail);
         if (existing.isPresent()) {
             var sub = existing.get();
             sub.setActive(true);
-            if (name != null && !name.isBlank()) sub.setName(name);
+            if (!normalizedName.isBlank()) sub.setName(normalizedName);
             return repository.save(sub);
         }
         return repository.save(NewsletterSubscriber.builder()
-                .email(email)
-                .name(name)
+                .email(normalizedEmail)
+                .name(normalizedName)
                 .build());
     }
 
     public void unsubscribe(String email) {
-        repository.findByEmail(email).ifPresent(sub -> {
+        repository.findByEmail(email.trim().toLowerCase(java.util.Locale.ROOT)).ifPresent(sub -> {
             sub.setActive(false);
             repository.save(sub);
         });
     }
 
     public Page<NewsletterSubscriber> getAll(int page, int size) {
-        return repository.findAll(PageRequest.of(page, size, Sort.by("subscribedAt").descending()));
+        return repository.findAll(com.mehmetkerem.util.PageRequestUtils.of(
+                page, size, Sort.by("subscribedAt").descending()));
     }
 
     public Page<NewsletterSubscriber> getActive(int page, int size) {
-        return repository.findByActiveTrue(PageRequest.of(page, size));
+        return repository.findByActiveTrue(com.mehmetkerem.util.PageRequestUtils.of(page, size));
     }
 
     public long getActiveCount() {

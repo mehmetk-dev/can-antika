@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 @Repository
 public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, Long> {
 
-    Optional<PasswordResetToken> findByToken(String token);
+    Optional<PasswordResetToken> findByTokenHash(String tokenHash);
 
     Optional<PasswordResetToken> findByUser(User user);
 

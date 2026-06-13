@@ -62,8 +62,7 @@ public class RestOrderControllerImpl implements IRestOrderController {
             @RequestParam(defaultValue = "orderDate") String sortBy,
             @RequestParam(defaultValue = "desc") String direction) {
         Sort sort = resolveOrderSort(sortBy, direction);
-        int cappedSize = Math.min(Math.max(size, 1), 100);
-        Pageable pageable = PageRequest.of(page, cappedSize, sort);
+        Pageable pageable = com.mehmetkerem.util.PageRequestUtils.of(page, size, sort);
         return ResultHelper.cursor(orderService.getAllOrders(pageable));
     }
 
@@ -87,8 +86,7 @@ public class RestOrderControllerImpl implements IRestOrderController {
             @RequestParam(defaultValue = "orderDate") String sortBy,
             @RequestParam(defaultValue = "desc") String direction) {
         Sort sort = resolveOrderSort(sortBy, direction);
-        int cappedSize = Math.min(Math.max(size, 1), 100);
-        Pageable pageable = PageRequest.of(page, cappedSize, sort);
+        Pageable pageable = com.mehmetkerem.util.PageRequestUtils.of(page, size, sort);
         return ResultHelper.cursor(orderService.searchOrders(status, paymentStatus, userId, from, to, q, pageable));
     }
 
@@ -100,8 +98,7 @@ public class RestOrderControllerImpl implements IRestOrderController {
             @RequestParam(defaultValue = "orderDate") String sortBy,
             @RequestParam(defaultValue = "desc") String direction) {
         Sort sort = resolveOrderSort(sortBy, direction);
-        int cappedSize = Math.min(Math.max(size, 1), 100);
-        Pageable pageable = PageRequest.of(page, cappedSize, sort);
+        Pageable pageable = com.mehmetkerem.util.PageRequestUtils.of(page, size, sort);
         return ResultHelper.cursor(orderService.getOrdersByUserId(requireCurrentUserId(), pageable));
     }
 

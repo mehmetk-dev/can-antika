@@ -9,6 +9,7 @@ import com.mehmetkerem.util.ResultData;
 import com.mehmetkerem.util.ResultHelper;
 import com.mehmetkerem.util.SecurityUtils;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,11 +46,14 @@ public class RestReviewControllerImpl implements IRestReviewController {
     }
 
     @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('ADMIN')")
     @Override
     public ResultData<CursorResponse<ReviewResponse>> findAllReviewsPaged(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResultHelper.success(reviewService.findAllReviewsPaged(page, size));
+        return ResultHelper.success(reviewService.findAllReviewsPaged(
+                com.mehmetkerem.util.PageRequestUtils.normalizePage(page),
+                com.mehmetkerem.util.PageRequestUtils.normalizeSize(size)));
     }
 
     @PutMapping("/{id}")

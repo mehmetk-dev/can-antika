@@ -12,6 +12,7 @@ import com.mehmetkerem.model.User;
 import com.mehmetkerem.repository.UserRepository;
 import com.mehmetkerem.service.IUserService;
 import com.mehmetkerem.service.IAddressService;
+import com.mehmetkerem.service.IRefreshTokenService;
 import com.mehmetkerem.util.Messages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,19 +25,23 @@ import java.util.List;
 
 import com.mehmetkerem.model.PasswordResetToken;
 import com.mehmetkerem.repository.PasswordResetTokenRepository;
+import com.mehmetkerem.security.TokenHashing;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
 
-    private static final int PASSWORD_RESET_TOKEN_EXPIRY_HOURS = 24;
-
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final IAddressService addressService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final IRefreshTokenService refreshTokenService;
+
+    @Value("${app.security.password-reset-token-expiry-minutes:30}")
+    private int passwordResetTokenExpiryMinutes;
 
     private User createUser(UserRequest request) {
         return userMapper.toEntity(request);
@@ -161,16 +166,18 @@ public class UserServiceImpl implements IUserService {
         passwordResetTokenRepository.findByUser(user).ifPresent(passwordResetTokenRepository::delete);
 
         PasswordResetToken myToken = PasswordResetToken.builder()
-                .token(token)
+                .tokenHash(TokenHashing.sha256(token))
                 .user(user)
-                .expiryDate(LocalDateTime.now().plusHours(PASSWORD_RESET_TOKEN_EXPIRY_HOURS))
+                .expiryDate(LocalDateTime.now().plusMinutes(passwordResetTokenExpiryMinutes))
                 .build();
         passwordResetTokenRepository.save(myToken);
     }
 
     @Override
     public String validatePasswordResetToken(String token) {
-        final PasswordResetToken passToken = passwordResetTokenRepository.findByToken(token).orElse(null);
+        final PasswordResetToken passToken = passwordResetTokenRepository
+                .findByTokenHash(TokenHashing.sha256(token))
+                .orElse(null);
 
         return !isTokenFound(passToken) ? "invalidToken"
                 : isTokenExpired(passToken) ? "expired"
@@ -198,6 +205,7 @@ public class UserServiceImpl implements IUserService {
         user.setActive(false);
         user.setDeactivatedAt(LocalDateTime.now());
         userRepository.save(user);
+        refreshTokenService.deleteByUserId(userId);
     }
 
     @Transactional
@@ -219,6 +227,7 @@ public class UserServiceImpl implements IUserService {
         }
         user.setBanned(true);
         userRepository.save(user);
+        refreshTokenService.deleteByUserId(userId);
     }
 
     @Transactional

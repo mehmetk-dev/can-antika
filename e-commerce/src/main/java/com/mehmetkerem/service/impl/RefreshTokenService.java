@@ -9,18 +9,15 @@ import com.mehmetkerem.model.User;
 import com.mehmetkerem.repository.RefreshTokenReplayRepository;
 import com.mehmetkerem.repository.RefreshTokenRepository;
 import com.mehmetkerem.repository.UserRepository;
+import com.mehmetkerem.security.TokenHashing;
 import com.mehmetkerem.service.IRefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.Instant;
-import java.util.HexFormat;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +32,14 @@ public class RefreshTokenService implements IRefreshTokenService {
 
     @Override
     public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenRepository.findByToken(token);
+        if (token == null || token.isBlank()) {
+            return Optional.empty();
+        }
+        return refreshTokenRepository.findByTokenHash(TokenHashing.sha256(token))
+                .map(storedToken -> {
+                    storedToken.setToken(token);
+                    return storedToken;
+                });
     }
 
     @Override
@@ -58,9 +62,12 @@ public class RefreshTokenService implements IRefreshTokenService {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
-        refreshToken.setToken(UUID.randomUUID().toString());
+        String rawToken = TokenHashing.generateToken();
+        refreshToken.setTokenHash(TokenHashing.sha256(rawToken));
 
-        return refreshTokenRepository.save(refreshToken);
+        RefreshToken savedToken = refreshTokenRepository.save(refreshToken);
+        savedToken.setToken(rawToken);
+        return savedToken;
     }
 
     @Override
@@ -111,9 +118,7 @@ public class RefreshTokenService implements IRefreshTokenService {
 
     private String hashToken(String rawToken) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(rawToken.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hash);
+            return TokenHashing.sha256(rawToken);
         } catch (Exception ex) {
             throw new BadRequestException("Token islenemedi.");
         }

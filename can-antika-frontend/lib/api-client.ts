@@ -4,8 +4,8 @@ import { clearAuthSessionFlag, hasAuthSessionFlag } from "./auth/auth-session";
 const ENV_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").trim();
 const REQUEST_TIMEOUT_MS = 8000;
 const REFRESH_TIMEOUT_MS = 5000;
-const CSRF_COOKIE_NAME = "XSRF-TOKEN";
 const CSRF_HEADER_NAME = "X-XSRF-TOKEN";
+let csrfTokenValue: string | null = null;
 
 // ======================== Core Fetch ========================
 
@@ -156,31 +156,39 @@ function buildUrl(baseUrl: string, path: string, params?: Record<string, string 
     return url.toString();
 }
 
-function readCookie(name: string): string | null {
-    if (typeof document === "undefined") return null;
-
-    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${escapedName}=([^;]*)`));
-    if (!match) return null;
-
-    try {
-        return decodeURIComponent(match[1]);
-    } catch {
-        return match[1];
-    }
-}
-
 function attachCsrfHeader(headers: Record<string, string>, method: HttpMethod): void {
     if (CSRF_SAFE_METHODS.has(method)) {
         return;
     }
 
-    const csrfToken = readCookie(CSRF_COOKIE_NAME);
+    const csrfToken = csrfTokenValue;
     if (!csrfToken) {
         return;
     }
 
     headers[CSRF_HEADER_NAME] = csrfToken;
+}
+
+async function ensureCsrfToken(baseUrl: string): Promise<void> {
+    if (typeof window === "undefined" || csrfTokenValue) {
+        return;
+    }
+
+    const response = await fetchWithTimeout(`${baseUrl}/v1/auth/csrf`, {
+        method: "GET",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+    }, REFRESH_TIMEOUT_MS);
+
+    if (!response.ok) {
+        throw new Error("Guvenlik dogrulamasi baslatilamadi.");
+    }
+
+    const result = await response.json() as ResultData<{ token?: string }>;
+    csrfTokenValue = result.data?.token || null;
+    if (!csrfTokenValue) {
+        throw new Error("Guvenlik dogrulama anahtari alinamadi.");
+    }
 }
 
 let isRefreshing = false;
@@ -259,9 +267,12 @@ async function tryRefreshToken(baseUrl: string): Promise<boolean> {
     isRefreshing = true;
     refreshPromise = (async () => {
         try {
+            await ensureCsrfToken(baseUrl);
+            const headers: Record<string, string> = { "Content-Type": "application/json" };
+            attachCsrfHeader(headers, "POST");
             const res = await fetchWithTimeout(`${baseUrl}/v1/auth/refresh-token`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers,
                 credentials: "include", // Cookie'den refresh token gÃ¶nderilir
                 body: JSON.stringify({}), // Body boÅŸ - backend cookie'den okur
             }, REFRESH_TIMEOUT_MS);
@@ -291,6 +302,9 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
     for (const baseUrl of baseUrls) {
         try {
             const url = buildUrl(baseUrl, path, params);
+            if (!CSRF_SAFE_METHODS.has(method)) {
+                await ensureCsrfToken(baseUrl);
+            }
             const init = buildFetchInit(method, body, extraHeaders);
             let res = await fetchWithTimeout(url, init, effectiveTimeoutMs);
 

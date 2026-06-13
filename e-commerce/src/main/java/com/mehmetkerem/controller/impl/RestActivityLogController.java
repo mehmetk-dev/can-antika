@@ -44,8 +44,7 @@ public class RestActivityLogController implements IRestActivityLogController {
             @RequestParam(defaultValue = "desc") String direction) {
 
         Sort sort = resolveLogSort(sortBy, direction);
-        int cappedSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
-        Pageable pageable = PageRequest.of(page, cappedSize, sort);
+        Pageable pageable = com.mehmetkerem.util.PageRequestUtils.of(page, size, sort);
 
         return ResultHelper.cursor(activityLogService.getAllLogs(pageable));
     }
@@ -57,7 +56,7 @@ public class RestActivityLogController implements IRestActivityLogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        Pageable pageable = PageRequest.of(page, Math.min(Math.max(size, 1), MAX_PAGE_SIZE));
+        Pageable pageable = com.mehmetkerem.util.PageRequestUtils.of(page, size);
         return ResultHelper.cursor(activityLogService.getLogsByUserId(userId, pageable));
     }
 
@@ -68,7 +67,7 @@ public class RestActivityLogController implements IRestActivityLogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        Pageable pageable = PageRequest.of(page, Math.min(Math.max(size, 1), MAX_PAGE_SIZE));
+        Pageable pageable = com.mehmetkerem.util.PageRequestUtils.of(page, size);
         return ResultHelper.cursor(activityLogService.getLogsByType(type, pageable));
     }
 
@@ -84,8 +83,8 @@ public class RestActivityLogController implements IRestActivityLogController {
 
         LocalDateTime fromDate = from != null ? LocalDateTime.parse(from) : null;
         LocalDateTime toDate = to != null ? LocalDateTime.parse(to) : null;
-        Pageable pageable = PageRequest.of(page, Math.min(Math.max(size, 1), MAX_PAGE_SIZE),
-                Sort.by("createdAt").descending());
+        Pageable pageable = com.mehmetkerem.util.PageRequestUtils.of(
+                page, size, Sort.by("createdAt").descending());
 
         return ResultHelper.cursor(activityLogService.searchLogs(userId, type, fromDate, toDate, pageable));
     }

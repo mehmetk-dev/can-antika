@@ -173,4 +173,25 @@ class AuthServiceTest {
         verify(refreshTokenService).detectReplayAndRevokeIfNeeded("old-refresh");
         verify(refreshTokenService).markTokenAsRotated(oldToken);
     }
+
+    @Test
+    void refreshToken_WhenUserIsBanned_ShouldRevokeAndReject() {
+        TokenRefreshRequest request = new TokenRefreshRequest();
+        request.setRefreshToken("old-refresh");
+
+        User user = User.builder()
+                .id(7L)
+                .email("blocked@test.com")
+                .role(Role.USER)
+                .banned(true)
+                .build();
+        RefreshToken oldToken = RefreshToken.builder().token("old-refresh").user(user).build();
+
+        when(refreshTokenService.findByToken("old-refresh")).thenReturn(Optional.of(oldToken));
+        when(refreshTokenService.verifyExpiration(oldToken)).thenReturn(oldToken);
+
+        assertThrows(UnauthorizedException.class, () -> authService.refreshToken(request));
+        verify(refreshTokenService).deleteByUserId(7L);
+        verify(jwtService, never()).generateToken(any());
+    }
 }

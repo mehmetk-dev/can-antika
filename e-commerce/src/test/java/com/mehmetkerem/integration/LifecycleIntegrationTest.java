@@ -126,6 +126,7 @@ public class LifecycleIntegrationTest {
         CouponRequest couponRequest = CouponRequest.builder()
                 .code("SAVE20")
                 .discountAmount(new BigDecimal("20"))
+                .discountType("FIXED")
                 .minCartAmount(new BigDecimal("100"))
                 .expirationDate(java.time.LocalDateTime.now().plusDays(7))
                 .active(true)

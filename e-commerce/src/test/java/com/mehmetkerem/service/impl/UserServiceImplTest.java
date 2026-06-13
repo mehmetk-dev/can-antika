@@ -8,6 +8,7 @@ import com.mehmetkerem.mapper.UserMapper;
 import com.mehmetkerem.model.User;
 import com.mehmetkerem.repository.UserRepository;
 import com.mehmetkerem.service.IAddressService;
+import com.mehmetkerem.service.IRefreshTokenService;
 import com.mehmetkerem.enums.Role;
 import com.mehmetkerem.repository.PasswordResetTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +48,9 @@ class UserServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private IRefreshTokenService refreshTokenService;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -187,5 +191,27 @@ class UserServiceImplTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(1L, result.get(0).getId());
+    }
+
+    @Test
+    void banUser_ShouldRevokeRefreshTokens() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        userService.banUser(1L);
+
+        assertTrue(user.isBanned());
+        verify(userRepository).save(user);
+        verify(refreshTokenService).deleteByUserId(1L);
+    }
+
+    @Test
+    void deactivateAccount_ShouldRevokeRefreshTokens() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        userService.deactivateAccount(1L);
+
+        assertFalse(user.isActive());
+        verify(userRepository).save(user);
+        verify(refreshTokenService).deleteByUserId(1L);
     }
 }

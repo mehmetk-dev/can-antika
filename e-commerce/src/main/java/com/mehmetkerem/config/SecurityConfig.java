@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -60,7 +61,7 @@ public class SecurityConfig {
         @Value("${app.cors.require-https-on-prod:true}")
         private boolean requireHttpsOnProd;
 
-        @Value("${app.security.csrf.enabled:false}")
+        @Value("${app.security.csrf.enabled:true}")
         private boolean csrfEnabled;
 
         @Bean
@@ -138,10 +139,8 @@ public class SecurityConfig {
                                                         .ignoringRequestMatchers(
                                                                         "/v1/auth/login",
                                                                         "/v1/auth/register",
-                                                                        "/v1/auth/refresh-token",
                                                                         "/v1/auth/forgot-password",
                                                                         "/v1/auth/reset-password",
-                                                                        "/v1/auth/logout",
                                                                         "/v1/payment/paytr/callback",
                                                                         "/v1/contact",
                                                                         "/v1/newsletter/subscribe",
@@ -168,7 +167,8 @@ public class SecurityConfig {
                                                 // Auth endpoints
                                                 .requestMatchers("/v1/auth/login", "/v1/auth/register",
                                                                 "/v1/auth/refresh-token", "/v1/auth/forgot-password",
-                                                                "/v1/auth/reset-password", "/v1/auth/logout")
+                                                                "/v1/auth/reset-password", "/v1/auth/logout",
+                                                                "/v1/auth/csrf")
                                                 .permitAll()
                                                 // Public GET endpoints
                                                 .requestMatchers(HttpMethod.GET, "/v1/product/**").permitAll()
@@ -212,6 +212,20 @@ public class SecurityConfig {
                                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                                 .build();
+        }
+
+        @Bean
+        public FilterRegistrationBean<JwtAuthFilter> jwtAuthFilterRegistration(JwtAuthFilter filter) {
+                FilterRegistrationBean<JwtAuthFilter> registration = new FilterRegistrationBean<>(filter);
+                registration.setEnabled(false);
+                return registration;
+        }
+
+        @Bean
+        public FilterRegistrationBean<RateLimitFilter> rateLimitFilterRegistration(RateLimitFilter filter) {
+                FilterRegistrationBean<RateLimitFilter> registration = new FilterRegistrationBean<>(filter);
+                registration.setEnabled(false);
+                return registration;
         }
 
         @Bean

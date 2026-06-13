@@ -33,9 +33,11 @@ public class BankTransferServiceImpl implements IBankTransferService {
     @Override
     public Page<BankTransfer> getAll(int page, int size, String status) {
         if (status != null && !status.isBlank()) {
-            return repository.findByStatusOrderByCreatedAtDesc(status, PageRequest.of(page, size));
+            return repository.findByStatusOrderByCreatedAtDesc(
+                    status, com.mehmetkerem.util.PageRequestUtils.of(page, size));
         }
-        return repository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size));
+        return repository.findAllByOrderByCreatedAtDesc(
+                com.mehmetkerem.util.PageRequestUtils.of(page, size));
     }
 
     @Override
@@ -59,4 +61,3 @@ public class BankTransferServiceImpl implements IBankTransferService {
         return repository.save(existing);
     }
 }
-

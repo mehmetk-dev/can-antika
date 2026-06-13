@@ -244,7 +244,8 @@ public class ProductServiceImpl implements IProductService {
     @Override
     @Cacheable(cacheNames = "products:list", key = "#root.target.buildListCacheKey(#page, #size, #sortBy, #direction)")
     public CursorResponse<ProductResponse> getAllProducts(int page, int size, String sortBy, String direction) {
-        PageRequest pageable = PageRequest.of(page, size, productSortResolver.resolve(sortBy, direction));
+        PageRequest pageable = com.mehmetkerem.util.PageRequestUtils.of(
+                page, size, productSortResolver.resolve(sortBy, direction));
 
         return toCursorWithRelations(productRepository.findAll(pageable));
     }
@@ -268,7 +269,8 @@ public class ProductServiceImpl implements IProductService {
     @Override
     @Cacheable(cacheNames = "products:cards", key = "#root.target.buildCardListCacheKey(#page, #size, #sortBy, #direction)")
     public CursorResponse<ProductCardResponse> getProductCards(int page, int size, String sortBy, String direction) {
-        PageRequest pageable = PageRequest.of(page, size, productSortResolver.resolve(sortBy, direction));
+        PageRequest pageable = com.mehmetkerem.util.PageRequestUtils.of(
+                page, size, productSortResolver.resolve(sortBy, direction));
 
         return toCardCursorWithRelations(productRepository.findAll(pageable));
     }

@@ -11,6 +11,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,8 +46,6 @@ class RateLimitFilterTest {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/v1/auth/login");
         request.setContentType("application/json");
         request.setContent("{\"email\":\"test@example.com\",\"password\":\"x\"}".getBytes());
-        request.addHeader("X-RateLimit-Subject", "test@example.com");
-
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
@@ -54,5 +53,31 @@ class RateLimitFilterTest {
 
         assertEquals(429, response.getStatus());
         assertEquals("{\"message\":\"too many\"}", response.getContentAsString());
+    }
+
+    @Test
+    void configAddsPasswordSecurityBucketsBeforeCatchAll() {
+        RateLimitConfig config = new RateLimitConfig();
+        RateLimitConfig.BucketConfig catchAll = new RateLimitConfig.BucketConfig();
+        catchAll.setName("api");
+        catchAll.setPathPrefix("/v1/");
+        config.setBuckets(new java.util.ArrayList<>(List.of(catchAll)));
+
+        config.initDefaults();
+
+        int forgotIndex = indexOf(config, "auth-forgot-password");
+        int resetIndex = indexOf(config, "auth-reset-password");
+        int catchAllIndex = indexOf(config, "api");
+        assertTrue(forgotIndex >= 0 && forgotIndex < catchAllIndex);
+        assertTrue(resetIndex >= 0 && resetIndex < catchAllIndex);
+    }
+
+    private int indexOf(RateLimitConfig config, String name) {
+        for (int i = 0; i < config.getBuckets().size(); i++) {
+            if (name.equals(config.getBuckets().get(i).getName())) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

@@ -16,6 +16,7 @@ import com.mehmetkerem.model.User;
 import com.mehmetkerem.repository.PasswordResetTokenRepository;
 import com.mehmetkerem.repository.UserRepository;
 import com.mehmetkerem.service.IUserService;
+import com.mehmetkerem.security.TokenHashing;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import com.mehmetkerem.enums.AuthProvider;
@@ -27,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -108,8 +108,13 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
                 .map(existingToken -> {
-                    refreshTokenService.markTokenAsRotated(existingToken);
                     User user = existingToken.getUser();
+                    if (!user.isEnabled() || !user.isAccountNonLocked()) {
+                        refreshTokenService.deleteByUserId(user.getId());
+                        throw new com.mehmetkerem.exception.UnauthorizedException(
+                                "Hesap aktif degil. Lutfen destek ile iletisime gecin.");
+                    }
+                    refreshTokenService.markTokenAsRotated(existingToken);
                     String token = jwtService.generateToken(user);
                     RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);
                     return LoginResponse.builder()
@@ -127,7 +132,7 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
     public void forgotPassword(String email) {
         String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
         userRepository.findByEmail(normalizedEmail).ifPresent(user -> {
-            String token = UUID.randomUUID().toString();
+            String token = TokenHashing.generateToken();
             userService.createPasswordResetTokenForUser(user, token);
 
             String link = frontendUrl.replaceAll("/$", "") + "/reset-password?token=" + token;
@@ -144,7 +149,8 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
             throw new BadRequestException("Geçersiz veya süresi dolmuş token: " + validationResult);
         }
 
-        PasswordResetToken passToken = passwordResetTokenRepository.findByToken(request.getToken())
+        PasswordResetToken passToken = passwordResetTokenRepository
+                .findByTokenHash(TokenHashing.sha256(request.getToken()))
                 .orElseThrow(() -> new BadRequestException("Token bulunamadı"));
 
         User user = passToken.getUser();

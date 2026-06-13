@@ -49,7 +49,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private static final String RATE_LIMIT_PREFIX = "rate_limit:";
     private static final String JSON_CACHE_ATTRIBUTE = "rateLimit.cachedJsonBody";
-    private static final String SUBJECT_HEADER = "X-RateLimit-Subject";
     private static final Set<String> BODY_SCOPED_ENDPOINTS = Set.of("/v1/auth/login", "/v1/contact");
 
     private static final RedisScript<Long> INCR_WITH_WINDOW_SCRIPT = new DefaultRedisScript<>(
@@ -151,11 +150,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     private String resolveSubject(HttpServletRequest request, String path) {
-        String headerSubject = normalizeSubject(request.getHeader(SUBJECT_HEADER));
-        if (headerSubject != null) {
-            return headerSubject;
-        }
-
         if (path.startsWith("/v1/auth/refresh-token")) {
             String token = extractRefreshTokenFromCookie(request);
             if (token != null) {
@@ -193,6 +187,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
             }
         }
 
+        String accessToken = extractCookie(request, CookieUtil.ACCESS_TOKEN_COOKIE);
+        if (accessToken != null) {
+            return accessToken;
+        }
+
         if (request.getUserPrincipal() != null) {
             return normalizeSubject(request.getUserPrincipal().getName());
         }
@@ -201,13 +200,17 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     private String extractRefreshTokenFromCookie(HttpServletRequest request) {
+        return extractCookie(request, CookieUtil.REFRESH_TOKEN_COOKIE);
+    }
+
+    private String extractCookie(HttpServletRequest request, String cookieName) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
             return null;
         }
 
         for (Cookie cookie : cookies) {
-            if (CookieUtil.REFRESH_TOKEN_COOKIE.equals(cookie.getName())) {
+            if (cookieName.equals(cookie.getName())) {
                 return normalizeSubject(cookie.getValue());
             }
         }
@@ -310,17 +313,18 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
 
         if (isTrustedProxy(remoteAddr)) {
-            String xForwardedFor = request.getHeader("X-Forwarded-For");
-            if (xForwardedFor != null && !xForwardedFor.isBlank()) {
-                String firstForwarded = normalizeIp(xForwardedFor.split(",")[0]);
-                if (firstForwarded != null) {
-                    return firstForwarded;
-                }
-            }
-
             String xRealIp = normalizeIp(request.getHeader("X-Real-IP"));
             if (xRealIp != null) {
                 return xRealIp;
+            }
+
+            String xForwardedFor = request.getHeader("X-Forwarded-For");
+            if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+                String[] forwardedAddresses = xForwardedFor.split(",");
+                String lastForwarded = normalizeIp(forwardedAddresses[forwardedAddresses.length - 1]);
+                if (lastForwarded != null) {
+                    return lastForwarded;
+                }
             }
         }
 

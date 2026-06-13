@@ -68,11 +68,15 @@ public class ReviewServiceImpl implements IReviewService {
         // Admin bildirimleri
         try {
             ProductResponse product = productService.getProductResponseById(request.getProductId());
-            String productName = product != null ? product.getTitle() : "Bilinmeyen Ürün";
+            String productName = product != null && product.getTitle() != null && !product.getTitle().isBlank()
+                    ? product.getTitle()
+                    : "Bilinmeyen Ürün";
             notificationService.sendAdminNotification(
                     "Yeni Yorum - " + productName,
-                    "<p><strong>Ürün:</strong> " + productName + "</p>"
-                            + "<p><strong>Yorum:</strong> " + savedReview.getComment() + "</p>"
+                    "<p><strong>Ürün:</strong> "
+                            + org.springframework.web.util.HtmlUtils.htmlEscape(productName) + "</p>"
+                            + "<p><strong>Yorum:</strong> "
+                            + org.springframework.web.util.HtmlUtils.htmlEscape(savedReview.getComment()) + "</p>"
                             + "<p><strong>Puan:</strong> " + savedReview.getRating() + "/5</p>");
             inAppNotificationService.createForAdmins(
                     "Yeni Yorum: " + productName,
@@ -166,7 +170,8 @@ public class ReviewServiceImpl implements IReviewService {
 
     @Override
     public CursorResponse<ReviewResponse> findAllReviewsPaged(int page, int size) {
-        Page<Review> reviewPage = reviewRepository.findAll(PageRequest.of(page, size));
+        Page<Review> reviewPage = reviewRepository.findAll(
+                com.mehmetkerem.util.PageRequestUtils.of(page, size));
         if (reviewPage.isEmpty()) {
             return ResultHelper.toCursor(new org.springframework.data.domain.PageImpl<>(
                     List.<ReviewResponse>of(),

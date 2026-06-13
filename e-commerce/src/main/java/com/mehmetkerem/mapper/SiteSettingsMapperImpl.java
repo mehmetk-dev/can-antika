@@ -215,12 +215,12 @@ public class SiteSettingsMapperImpl implements ISiteSettingsMapper {
         if (r.getSmtpHost() != null) c.setSmtpHost(r.getSmtpHost());
         if (r.getSmtpPort() != null) c.setSmtpPort(r.getSmtpPort());
         if (r.getSmtpUsername() != null) c.setSmtpUsername(r.getSmtpUsername());
-        if (r.getSmtpPassword() != null) c.setSmtpPassword(r.getSmtpPassword());
+        if (isSecretUpdate(r.getSmtpPassword())) c.setSmtpPassword(r.getSmtpPassword());
         if (r.getSmtpFromEmail() != null) c.setSmtpFromEmail(r.getSmtpFromEmail());
         if (r.getSmtpFromName() != null) c.setSmtpFromName(r.getSmtpFromName());
         if (r.getSmsProvider() != null) c.setSmsProvider(r.getSmsProvider());
-        if (r.getSmsApiKey() != null) c.setSmsApiKey(r.getSmsApiKey());
-        if (r.getSmsApiSecret() != null) c.setSmsApiSecret(r.getSmsApiSecret());
+        if (isSecretUpdate(r.getSmsApiKey())) c.setSmsApiKey(r.getSmsApiKey());
+        if (isSecretUpdate(r.getSmsApiSecret())) c.setSmsApiSecret(r.getSmsApiSecret());
         if (r.getSmsSenderName() != null) c.setSmsSenderName(r.getSmsSenderName());
         if (r.getSmsEnabled() != null) c.setSmsEnabled(r.getSmsEnabled());
     }
@@ -229,8 +229,8 @@ public class SiteSettingsMapperImpl implements ISiteSettingsMapper {
         if (r.getCurrency() != null) c.setCurrency(r.getCurrency());
         if (r.getCurrencySymbol() != null) c.setCurrencySymbol(r.getCurrencySymbol());
         if (r.getPaymentProvider() != null) c.setPaymentProvider(r.getPaymentProvider());
-        if (r.getPaymentApiKey() != null) c.setPaymentApiKey(r.getPaymentApiKey());
-        if (r.getPaymentSecretKey() != null) c.setPaymentSecretKey(r.getPaymentSecretKey());
+        if (isSecretUpdate(r.getPaymentApiKey())) c.setPaymentApiKey(r.getPaymentApiKey());
+        if (isSecretUpdate(r.getPaymentSecretKey())) c.setPaymentSecretKey(r.getPaymentSecretKey());
         if (r.getPaymentMerchantId() != null) c.setPaymentMerchantId(r.getPaymentMerchantId());
         if (r.getPaymentTestMode() != null) c.setPaymentTestMode(r.getPaymentTestMode());
         if (r.getCreditCardEnabled() != null) c.setCreditCardEnabled(r.getCreditCardEnabled());
@@ -242,5 +242,9 @@ public class SiteSettingsMapperImpl implements ISiteSettingsMapper {
         if (value == null || value.isBlank()) return value;
         if (value.length() <= 4) return "****";
         return "****" + value.substring(value.length() - 4);
+    }
+
+    private static boolean isSecretUpdate(String value) {
+        return value != null && !value.isBlank() && !value.startsWith("****");
     }
 }

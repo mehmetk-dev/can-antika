@@ -24,6 +24,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -168,5 +169,12 @@ public class ReviewIntegrationTest {
                                 .andExpect(jsonPath("$.status", is(true)))
                                 .andExpect(jsonPath("$.data.comment", is("Harika bir antika!")))
                                 .andExpect(jsonPath("$.data.rating").value(5.0));
+        }
+
+        @Test
+        void shouldRejectNormalUserFromAdminReviewList() throws Exception {
+                mockMvc.perform(get("/v1/review/admin/all")
+                                .header("Authorization", "Bearer " + userToken))
+                                .andExpect(status().isForbidden());
         }
 }

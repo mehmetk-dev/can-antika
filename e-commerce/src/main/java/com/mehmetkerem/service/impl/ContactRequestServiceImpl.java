@@ -43,7 +43,8 @@ public class ContactRequestServiceImpl implements IContactRequestService {
 
     @Override
     public Page<ContactRequest> getAll(int page, int size) {
-        return repository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size));
+        return repository.findAllByOrderByCreatedAtDesc(
+                com.mehmetkerem.util.PageRequestUtils.of(page, size));
     }
 
     @Override

@@ -24,12 +24,13 @@ public class BlogServiceImpl implements IBlogService {
 
     @Override
     public Page<BlogPost> getPublishedPosts(int page, int size) {
-        return postRepository.findByPublishedTrueOrderByCreatedAtDesc(PageRequest.of(page, size));
+        return postRepository.findByPublishedTrueOrderByCreatedAtDesc(
+                com.mehmetkerem.util.PageRequestUtils.of(page, size));
     }
 
     @Override
     public Page<BlogPost> getAllPosts(int page, int size) {
-        return postRepository.findAll(PageRequest.of(page, size));
+        return postRepository.findAll(com.mehmetkerem.util.PageRequestUtils.of(page, size));
     }
 
     @Override
