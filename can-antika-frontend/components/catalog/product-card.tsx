@@ -3,10 +3,9 @@
 import { memo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Heart } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { ProductFavoriteButton } from "@/components/catalog/product-favorite-button"
 import { resolveImageUrl } from "@/lib/product/image-url"
 import { getProductUrl } from "@/lib/product/product-url"
 import { eraLabels, getProductAttributes } from "@/lib/product/product-utils"
@@ -36,7 +35,6 @@ export const ProductCard = memo(function ProductCard({ product, isPriority = fal
           src={imageErrored ? "/placeholder.svg" : imageUrl}
           alt={product.title}
           fill
-          priority={isPriority}
           loading={isPriority ? "eager" : "lazy"}
           fetchPriority={isPriority ? "high" : "auto"}
           decoding="async"
@@ -47,15 +45,10 @@ export const ProductCard = memo(function ProductCard({ product, isPriority = fal
 
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-2 top-2 h-9 w-9 rounded-full bg-background/80 text-foreground opacity-0 backdrop-blur transition-opacity hover:bg-background group-hover:opacity-100"
-          onClick={(e) => e.preventDefault()}
-        >
-          <Heart className="h-4 w-4" />
-          <span className="sr-only">Favorilere ekle</span>
-        </Button>
+        <ProductFavoriteButton
+          productId={product.id}
+          className="absolute right-2 top-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+        />
 
         <div className="absolute left-3 top-3">
           {!isSold ? (

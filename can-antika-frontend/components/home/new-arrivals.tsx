@@ -3,6 +3,7 @@ import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { ProductFavoriteButton } from "@/components/catalog/product-favorite-button"
 import { resolveImageUrl } from "@/lib/product/image-url"
 import { getProductUrl } from "@/lib/product/product-url"
 import { resolvePeriodLabel } from "@/lib/product/product-utils"
@@ -87,6 +88,10 @@ export function NewArrivalsUI({ products }: { products: ProductCardResponse[] })
                   <div className="absolute right-2 top-2 h-6 w-6 border-r-2 border-t-2 border-amber-400/60" />
                   <div className="absolute bottom-2 left-2 h-6 w-6 border-b-2 border-l-2 border-amber-400/60" />
                   <div className="absolute bottom-2 right-2 h-6 w-6 border-b-2 border-r-2 border-amber-400/60" />
+                  <ProductFavoriteButton
+                    productId={item.id}
+                    className="absolute right-5 top-5 z-20 border border-amber-300 bg-amber-50/90 text-amber-800 hover:bg-amber-100"
+                  />
 
                   <div className="aspect-[4/5] overflow-hidden p-3">
                     <div className="relative h-full w-full overflow-hidden rounded-sm">
