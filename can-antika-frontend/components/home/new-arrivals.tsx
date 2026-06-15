@@ -82,63 +82,66 @@ export function NewArrivalsUI({ products }: { products: ProductCardResponse[] })
             const isSold = (item.stock ?? 0) <= 0
 
             return (
-              <Link key={item.id} href={getProductUrl(item)} prefetch={false} className="group relative">
-                <div className="relative overflow-hidden rounded-sm border-2 border-amber-300/50 bg-white shadow-lg transition-all duration-300 group-hover:border-amber-500 group-hover:shadow-xl group-hover:shadow-amber-200/50">
-                  <div className="absolute left-2 top-2 h-6 w-6 border-l-2 border-t-2 border-amber-400/60" />
-                  <div className="absolute right-2 top-2 h-6 w-6 border-r-2 border-t-2 border-amber-400/60" />
-                  <div className="absolute bottom-2 left-2 h-6 w-6 border-b-2 border-l-2 border-amber-400/60" />
-                  <div className="absolute bottom-2 right-2 h-6 w-6 border-b-2 border-r-2 border-amber-400/60" />
-                  <ProductFavoriteButton
-                    productId={item.id}
-                    className="absolute right-5 top-5 z-20 border border-amber-300 bg-amber-50/90 text-amber-800 hover:bg-amber-100"
-                  />
+              <div key={item.id} className="group relative">
+                <Link href={getProductUrl(item)} prefetch={false}>
+                  <div className="relative overflow-hidden rounded-sm border-2 border-amber-300/50 bg-white shadow-lg transition-all duration-300 group-hover:border-amber-500 group-hover:shadow-xl group-hover:shadow-amber-200/50">
+                    <div className="absolute left-2 top-2 h-6 w-6 border-l-2 border-t-2 border-amber-400/60" />
+                    <div className="absolute right-2 top-2 h-6 w-6 border-r-2 border-t-2 border-amber-400/60" />
+                    <div className="absolute bottom-2 left-2 h-6 w-6 border-b-2 border-l-2 border-amber-400/60" />
+                    <div className="absolute bottom-2 right-2 h-6 w-6 border-b-2 border-r-2 border-amber-400/60" />
 
-                  <div className="aspect-[4/5] overflow-hidden p-3">
-                    <div className="relative h-full w-full overflow-hidden rounded-sm">
-                      <Image
-                        src={imageUrl}
-                        alt={item.title}
-                        fill
-                        loading="lazy"
-                        decoding="async"
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-amber-900/40 via-transparent to-amber-50/10 mix-blend-multiply" />
-                    </div>
-                  </div>
-
-                  <div className="absolute left-5 top-5">
-                    {!isSold ? (
-                      <div className="flex items-center gap-1 rounded-sm border border-amber-600 bg-amber-50 px-1.5 py-0.5 shadow-sm sm:gap-1.5 sm:px-2.5 sm:py-1">
-                        <svg className="h-2 w-2 text-amber-700 sm:h-3 sm:w-3" viewBox="0 0 12 12">
-                          <polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9 3,11 3.5,7.5 1,5 4.5,4.5" fill="currentColor" />
-                        </svg>
-                        <span className="font-serif text-[9px] font-medium text-amber-800 sm:text-xs">Nadir Antika</span>
+                    <div className="aspect-[4/5] overflow-hidden p-3">
+                      <div className="relative h-full w-full overflow-hidden rounded-sm">
+                        <Image
+                          src={imageUrl}
+                          alt={item.title}
+                          fill
+                          loading="lazy"
+                          decoding="async"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-amber-900/40 via-transparent to-amber-50/10 mix-blend-multiply" />
                       </div>
-                    ) : (
-                      <div className="rounded-sm border border-stone-400 bg-stone-100 px-1.5 py-0.5 sm:px-2.5 sm:py-1">
-                        <span className="font-serif text-[9px] font-medium text-stone-600 sm:text-xs">Satıldı</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex h-full flex-col justify-between border-t border-amber-200/50 bg-gradient-to-b from-amber-50/80 to-white p-3 sm:p-4">
-                    <div>
-                      {era && <p className="font-serif text-[9px] uppercase tracking-[0.2em] text-amber-600 sm:text-xs">{era}</p>}
-                      <h3 className="mt-1 line-clamp-2 font-serif text-xs font-medium text-amber-950 sm:mt-1.5 sm:line-clamp-1 sm:text-lg">{item.title}</h3>
                     </div>
-                    <div className="mt-2 flex items-center justify-between sm:mt-3">
-                      <p className="font-serif text-sm font-bold text-amber-800 sm:text-xl">
-                        {isSold ? <span className="text-stone-400 line-through">₺{item.price.toLocaleString("tr-TR")}</span> : `₺${item.price.toLocaleString("tr-TR")}`}
-                      </p>
-                      <div className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full border border-amber-300 bg-amber-50 text-amber-700 transition-colors group-hover:bg-amber-600 group-hover:text-white sm:flex">
-                        <ArrowRight className="h-4 w-4" />
+
+                    <div className="absolute left-5 top-5">
+                      {!isSold ? (
+                        <div className="flex items-center gap-1 rounded-sm border border-amber-600 bg-amber-50 px-1.5 py-0.5 shadow-sm sm:gap-1.5 sm:px-2.5 sm:py-1">
+                          <svg className="h-2 w-2 text-amber-700 sm:h-3 sm:w-3" viewBox="0 0 12 12">
+                            <polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9 3,11 3.5,7.5 1,5 4.5,4.5" fill="currentColor" />
+                          </svg>
+                          <span className="font-serif text-[9px] font-medium text-amber-800 sm:text-xs">Nadir Antika</span>
+                        </div>
+                      ) : (
+                        <div className="rounded-sm border border-stone-400 bg-stone-100 px-1.5 py-0.5 sm:px-2.5 sm:py-1">
+                          <span className="font-serif text-[9px] font-medium text-stone-600 sm:text-xs">Satıldı</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex h-full flex-col justify-between border-t border-amber-200/50 bg-gradient-to-b from-amber-50/80 to-white p-3 sm:p-4">
+                      <div>
+                        {era && <p className="font-serif text-[9px] uppercase tracking-[0.2em] text-amber-600 sm:text-xs">{era}</p>}
+                        <h3 className="mt-1 line-clamp-2 font-serif text-xs font-medium text-amber-950 sm:mt-1.5 sm:line-clamp-1 sm:text-lg">{item.title}</h3>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between sm:mt-3">
+                        <p className="font-serif text-sm font-bold text-amber-800 sm:text-xl">
+                          {isSold ? <span className="text-stone-400 line-through">₺{item.price.toLocaleString("tr-TR")}</span> : `₺${item.price.toLocaleString("tr-TR")}`}
+                        </p>
+                        <div className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full border border-amber-300 bg-amber-50 text-amber-700 transition-colors group-hover:bg-amber-600 group-hover:text-white sm:flex">
+                          <ArrowRight className="h-4 w-4" />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+
+                <ProductFavoriteButton
+                  productId={item.id}
+                  className="absolute right-5 top-5 z-20 border border-amber-300 bg-amber-50/90 text-amber-800 hover:bg-amber-100"
+                />
+              </div>
             )
           })}
         </div>
