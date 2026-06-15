@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Playfair_Display, Cinzel, Cormorant_Garamond, Italiana, Pinyon_Script } from "next/font/google"
+import { Inter, Playfair_Display, Cinzel, Cormorant_Garamond, Italiana, Pinyon_Script, Monsieur_La_Doulaise, Tangerine, Alex_Brush, Great_Vibes } from "next/font/google"
 
 import { ConsentManagedTracking } from "@/components/legal/consent-managed-tracking"
 import { Providers } from "./providers"
@@ -14,6 +14,10 @@ const _cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel", display:
 const _cormorant = Cormorant_Garamond({ subsets: ["latin", "latin-ext"], variable: "--font-cormorant", weight: ["400", "500", "600", "700"], display: "swap" })
 const _italiana = Italiana({ subsets: ["latin"], variable: "--font-italiana", weight: ["400"], display: "swap" })
 const _pinyon = Pinyon_Script({ subsets: ["latin"], variable: "--font-pinyon", weight: ["400"], display: "swap" })
+const _monsieur = Monsieur_La_Doulaise({ subsets: ["latin"], variable: "--font-monsieur", weight: ["400"], display: "swap" })
+const _tangerine = Tangerine({ subsets: ["latin"], variable: "--font-tangerine", weight: ["400", "700"], display: "swap" })
+const _alexBrush = Alex_Brush({ subsets: ["latin", "latin-ext"], variable: "--font-alex", weight: ["400"], display: "swap" })
+const _greatVibes = Great_Vibes({ subsets: ["latin", "latin-ext"], variable: "--font-vibes", weight: ["400"], display: "swap" })
 
 const GA_ID_PATTERN = /^(G-[A-Z0-9]+|GTM-[A-Z0-9]+|UA-\d+-\d+)$/i
 const FB_PIXEL_ID_PATTERN = /^\d{5,20}$/
@@ -166,7 +170,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: serializeSafeJsonLd(orgJsonLd) }}
         />
       </head>
-      <body className={`${_inter.variable} ${_playfair.variable} ${_cinzel.variable} ${_cormorant.variable} ${_italiana.variable} ${_pinyon.variable} font-sans antialiased`}>
+      <body className={`${_inter.variable} ${_playfair.variable} ${_cinzel.variable} ${_cormorant.variable} ${_italiana.variable} ${_pinyon.variable} ${_monsieur.variable} ${_tangerine.variable} ${_alexBrush.variable} ${_greatVibes.variable} font-sans antialiased`}>
         <ConsentManagedTracking googleAnalyticsId={gaId} facebookPixelId={fbPixelId} />
         <Providers initialSiteSettings={s}>{children}</Providers>
       </body>

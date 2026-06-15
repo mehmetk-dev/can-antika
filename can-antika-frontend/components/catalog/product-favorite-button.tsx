@@ -67,8 +67,8 @@ export function ProductFavoriteButton({ productId, className }: ProductFavoriteB
       aria-label={isAdded ? "Ürün favorilerde" : "Favorilere ekle"}
       aria-pressed={isAdded}
       className={cn(
-        "h-9 w-9 rounded-full bg-background/80 text-foreground backdrop-blur transition-colors hover:bg-background",
-        isAdded && "text-red-600",
+        "h-9 w-9 rounded-full bg-transparent sm:bg-background/80 text-primary sm:text-foreground sm:backdrop-blur transition-colors hover:bg-transparent sm:hover:bg-background",
+        isAdded && "text-red-600 hover:text-red-600",
         className
       )}
       onClick={handleClick}
@@ -76,7 +76,7 @@ export function ProductFavoriteButton({ productId, className }: ProductFavoriteB
       {isAdding ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
-        <Heart className={cn("h-4 w-4", isAdded && "fill-current")} />
+        <Heart className={cn("h-4.5 w-4.5 sm:h-4 sm:w-4 transition-all drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]", isAdded && "fill-current")} />
       )}
     </Button>
   )

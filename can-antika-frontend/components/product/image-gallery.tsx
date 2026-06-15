@@ -157,10 +157,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
       </Dialog>
 
       {images.length > 1 && (
-        <div
-          className="flex w-full gap-3 overflow-x-auto pb-1 transition-opacity duration-300"
-          style={{ opacity: mainLoaded ? 1 : 0 }}
-        >
+        <div className={`flex w-full gap-3 overflow-x-auto pb-1 ${images.length < 5 ? "justify-center" : "justify-start"}`}>
           {images.map((image, index) => {
             const thumbUrl = resolveImageUrl(image)
             return (
@@ -169,7 +166,7 @@ export function ImageGallery({ images, productName }: ImageGalleryProps) {
                 onClick={() => handleThumbnailClick(index)}
                 onMouseEnter={() => handleThumbnailEnter(image)}
                 className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-md transition-all sm:h-24 sm:w-24 ${selectedIndex === index
-                  ? "ring-2 ring-primary ring-offset-1 ring-offset-background"
+                  ? "ring-2 ring-inset ring-primary"
                   : "opacity-70 hover:opacity-100"
                   }`}
               >

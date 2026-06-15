@@ -32,7 +32,7 @@ export function Header({ sticky = true, className }: HeaderProps) {
 
           {/* Logo — server rendered */}
           <Link href="/" className="flex items-center gap-2 group py-1">
-            <span className="font-pinyon text-5xl font-normal tracking-wide text-primary lg:text-6.5xl transition-colors duration-300 group-hover:text-accent select-none leading-none pt-1">
+            <span className="font-logo text-5xl font-normal tracking-wide text-primary lg:text-6.5xl transition-colors duration-300 group-hover:text-accent select-none leading-none pt-1">
               Can Antika
             </span>
           </Link>
@@ -49,7 +49,7 @@ export function Header({ sticky = true, className }: HeaderProps) {
                 <Link
                   href={item.href}
                   prefetch={item.prefetch}
-                  className="relative font-italiana text-[13px] font-semibold uppercase tracking-[0.16em] text-foreground/80 hover:text-primary transition-all duration-300 py-2 px-1 group"
+                  className="relative font-cormorant text-sm font-bold uppercase tracking-[0.12em] text-foreground/80 hover:text-primary transition-all duration-300 py-2 px-1 group"
                 >
                   {item.name}
                   <span className="absolute bottom-1 left-1/2 w-0 h-[1.5px] bg-primary transition-all duration-300 group-hover:w-full group-hover:left-0" />

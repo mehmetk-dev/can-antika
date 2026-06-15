@@ -70,6 +70,8 @@ services:
       - JPA_DDL_AUTO=update
       - FLYWAY_ENABLED=false
       - MANAGEMENT_HEALTH_MAIL_ENABLED=false
+      - SPRING_PROFILES_ACTIVE=dev
+      - APP_SEED_DEV_DATA_ENABLED=true
     ports:
       - "8080:8080"
     depends_on:
@@ -87,12 +89,11 @@ services:
 
   # --- FRONTEND (Dev Mode) ---
   frontend:
-    image: node:20-alpine
+    image: node:20-slim
     container_name: can-antika-frontend-local
     working_dir: /app
     volumes:
       - ./can-antika-frontend:/app
-      - frontend_node_modules_local:/app/node_modules
     ports:
       - "3000:3000"
     environment:
@@ -100,7 +101,7 @@ services:
       - NEXT_PUBLIC_API_URL=http://localhost:8080
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
-    command: sh -c "corepack enable && corepack prepare pnpm@10.32.1 --activate && pnpm install && pnpm dev -H 0.0.0.0"
+    command: npx next dev --webpack -H 0.0.0.0
     depends_on:
       backend:
         condition: service_healthy
