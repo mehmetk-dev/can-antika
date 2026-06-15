@@ -161,6 +161,7 @@ class RestAuthControllerTest {
         when(request.getCookies()).thenReturn(new Cookie[] {
                 new Cookie(CookieUtil.REFRESH_TOKEN_COOKIE, "refresh-token")
         });
+        when(authService.logoutByRefreshToken("refresh-token")).thenReturn(true);
 
         ResultData<String> result = controller.logout(request, response, null);
 
@@ -170,14 +171,29 @@ class RestAuthControllerTest {
     }
 
     @Test
+    @DisplayName("logout - eski token yeni oturum cookie'lerini temizlemez")
+    void logout_WithStaleRefreshToken_ShouldNotClearCookies() {
+        when(request.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(CookieUtil.REFRESH_TOKEN_COOKIE, "stale-token")
+        });
+        when(authService.logoutByRefreshToken("stale-token")).thenReturn(false);
+
+        ResultData<String> result = controller.logout(request, response, null);
+
+        assertTrue(result.isStatus());
+        verify(cookieUtil, never()).clearTokenCookies(response);
+    }
+
+    @Test
     @DisplayName("logout - servis hatasında bile tarayıcı cookie'lerini temizler")
     void logout_WhenRevocationFails_ShouldStillClearCookies() {
-        User user = User.builder().id(1L).build();
-        Authentication auth = mock(Authentication.class);
-        when(auth.getPrincipal()).thenReturn(user);
-        doThrow(new RuntimeException("db unavailable")).when(authService).logout(1L);
+        when(request.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(CookieUtil.REFRESH_TOKEN_COOKIE, "refresh-token")
+        });
+        doThrow(new RuntimeException("db unavailable")).when(authService)
+                .logoutByRefreshToken("refresh-token");
 
-        assertThrows(RuntimeException.class, () -> controller.logout(request, response, auth));
+        assertThrows(RuntimeException.class, () -> controller.logout(request, response, null));
 
         verify(cookieUtil).clearTokenCookies(response);
     }

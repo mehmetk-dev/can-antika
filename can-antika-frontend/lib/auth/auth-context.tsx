@@ -11,7 +11,12 @@ import {
 import type { UserResponse, LoginRequest, RegisterRequest, ChangePasswordRequest } from "../types";
 import { authApi, cartApi } from "../api";
 import { guestCart } from "../commerce/guest-cart";
-import { clearAuthSessionFlag, hasAuthSessionFlag, markAuthSessionActive } from "./auth-session";
+import {
+    AUTH_SESSION_INVALIDATED_EVENT,
+    clearAuthSessionFlag,
+    hasAuthSessionFlag,
+    markAuthSessionActive,
+} from "./auth-session";
 import { toast } from "sonner";
 
 interface AuthContextType {
@@ -22,7 +27,7 @@ interface AuthContextType {
     login: (data: LoginRequest) => Promise<UserResponse>;
     register: (data: RegisterRequest) => Promise<void>;
     changePassword: (data: ChangePasswordRequest) => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
     refreshUser: () => Promise<UserResponse | null>;
 }
 
@@ -33,6 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Always start as loading so server and client render the same initial state
     // (hasAuthSessionFlag uses localStorage which is unavailable on the server)
     const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const handleSessionInvalidated = () => setUser(null);
+        window.addEventListener(AUTH_SESSION_INVALIDATED_EVENT, handleSessionInvalidated);
+        return () => window.removeEventListener(AUTH_SESSION_INVALIDATED_EVENT, handleSessionInvalidated);
+    }, []);
 
     // Sayfa yüklendiğinde cookie ile backend'e doğrulat
     // HttpOnly cookie olduğu için JS'den kontrol edemiyoruz, sessizce deneriz
@@ -100,11 +111,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         guestCart.clear();
     }, []);
 
-    const logout = useCallback(() => {
-        void authApi.logout().catch(() => {
+    const logout = useCallback(async () => {
+        try {
+            await authApi.logout();
+        } catch {
             // Backend logout başarısız olsa bile local cleanup devam eder
-        });
-        clearLocalSession();
+        } finally {
+            clearLocalSession();
+        }
     }, [clearLocalSession]);
 
     const changePassword = useCallback(async (data: ChangePasswordRequest) => {
@@ -121,7 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     await cartApi.syncCart(guestItems);
                     guestCart.clear();
                 } catch {
-                    toast.error("Sepetiniz hesaba aktarÄ±lÄ±rken hata oluÅŸtu. Misafir sepetiniz korunuyor.");
+                    toast.error("Sepetiniz hesaba aktarılırken hata oluştu. Misafir sepetiniz korunuyor.");
                 }
             }
             setUser(freshUser);

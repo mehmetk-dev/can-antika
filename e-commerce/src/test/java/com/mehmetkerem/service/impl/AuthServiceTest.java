@@ -198,22 +198,22 @@ class AuthServiceTest {
     @Test
     @DisplayName("logout - refresh token ile kullanıcı oturumunu iptal eder")
     void logoutByRefreshToken_WhenTokenExists_ShouldRevokeUserSessions() {
-        User user = User.builder().id(9L).email("logout@test.com").build();
-        RefreshToken refreshToken = RefreshToken.builder().token("refresh-token").user(user).build();
-        when(refreshTokenService.findByToken("refresh-token")).thenReturn(Optional.of(refreshToken));
+        when(refreshTokenService.deleteByToken("refresh-token")).thenReturn(true);
 
-        authService.logoutByRefreshToken("refresh-token");
+        boolean revoked = authService.logoutByRefreshToken("refresh-token");
 
-        verify(refreshTokenService).deleteByUserId(9L);
+        assertTrue(revoked);
+        verify(refreshTokenService).deleteByToken("refresh-token");
     }
 
     @Test
     @DisplayName("logout - geçersiz refresh token idempotent kalır")
     void logoutByRefreshToken_WhenTokenMissing_ShouldDoNothing() {
-        when(refreshTokenService.findByToken("missing-token")).thenReturn(Optional.empty());
+        when(refreshTokenService.deleteByToken("missing-token")).thenReturn(false);
 
-        authService.logoutByRefreshToken("missing-token");
+        boolean revoked = authService.logoutByRefreshToken("missing-token");
 
-        verify(refreshTokenService, never()).deleteByUserId(any());
+        assertFalse(revoked);
+        verify(refreshTokenService).deleteByToken("missing-token");
     }
 }

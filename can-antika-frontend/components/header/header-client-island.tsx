@@ -25,8 +25,8 @@ export function HeaderClientIsland({ navigation }: HeaderClientIslandProps) {
         setSearchState({ isOpen: open, pathname })
     }
 
-    const handleLogout = () => {
-        logout()
+    const handleLogout = async () => {
+        await logout()
         router.push("/")
     }
 

@@ -1,5 +1,5 @@
 import type { ResultData } from "./types";
-import { clearAuthSessionFlag, hasAuthSessionFlag } from "./auth/auth-session";
+import { hasAuthSessionFlag, invalidateAuthSession } from "./auth/auth-session";
 
 const ENV_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").trim();
 const REQUEST_TIMEOUT_MS = 8000;
@@ -278,7 +278,7 @@ async function tryRefreshToken(baseUrl: string): Promise<boolean> {
             }, REFRESH_TIMEOUT_MS);
 
             if (res.status === 401 || res.status === 400) {
-                clearAuthSessionFlag();
+                invalidateAuthSession();
             }
             return res.ok;
         } catch {
@@ -315,7 +315,7 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
                 if (refreshed) {
                     res = await fetchWithTimeout(url, init, effectiveTimeoutMs);
                 } else {
-                    throw new Error("Oturum sÃ¼resi doldu. LÃ¼tfen tekrar giriÅŸ yapÄ±n.");
+                    throw new Error("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
                 }
             }
 
@@ -329,11 +329,11 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
                     // ignore parse error
                 }
                 if (res.status === 403) {
-                    errorMessage = "Bu islem icin yetkiniz bulunmuyor.";
+                    errorMessage = "Bu işlem için yetkiniz bulunmuyor.";
                 } else if (res.status === 429) {
-                    errorMessage = "Cok fazla deneme yaptiniz. Lutfen biraz bekleyip tekrar deneyin.";
+                    errorMessage = "Çok fazla deneme yaptınız. Lütfen biraz bekleyip tekrar deneyin.";
                 } else if (!noAuth && res.status === 401 && !hasSession) {
-                    errorMessage = "Bu islem icin giris yapmaniz gerekiyor.";
+                    errorMessage = "Bu işlem için giriş yapmanız gerekiyor.";
                 }
                 if (correlationId && res.status >= 500) {
                     errorMessage = `${errorMessage} (Ref: ${correlationId})`;
@@ -344,12 +344,12 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
             const result: ResultData<T> = await res.json();
 
             if (!result.status) {
-                throw new Error(result.message || "Ä°ÅŸlem baÅŸarÄ±sÄ±z");
+                throw new Error(result.message || "İşlem başarısız");
             }
 
             return result.data;
         } catch (error: any) {
-            lastError = error instanceof Error ? error : new Error("Ä°stek baÅŸarÄ±sÄ±z");
+            lastError = error instanceof Error ? error : new Error("İstek başarısız");
 
             // Only continue for networking errors (down server, etc.)
             const isNetworkError = isNetworkLikeError(error);
@@ -362,7 +362,7 @@ async function request<T>(method: HttpMethod, path: string, options: RequestOpti
         }
     }
 
-    throw lastError ?? new Error("API baÄŸlantÄ±sÄ± kurulamadÄ±");
+    throw lastError ?? new Error("API bağlantısı kurulamadı");
 }
 
 // ======================== Convenience Methods ========================

@@ -21,8 +21,8 @@ export function DashboardSidebar() {
   const router = useRouter()
   const { logout, isAdmin } = useAuth()
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     router.push("/")
   }
 

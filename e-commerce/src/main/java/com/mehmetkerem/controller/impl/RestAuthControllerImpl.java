@@ -105,15 +105,20 @@ public class RestAuthControllerImpl implements IRestAuthController {
     @PostMapping("/logout")
     public ResultData<String> logout(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) {
+        String refreshToken = extractRefreshTokenFromCookie(request);
+        boolean clearCookies = refreshToken == null;
         try {
-            if (authentication != null && authentication.getPrincipal() instanceof User user) {
-                authService.logout(user.getId());
-            } else {
-                authService.logoutByRefreshToken(extractRefreshTokenFromCookie(request));
+            if (refreshToken != null) {
+                clearCookies = authService.logoutByRefreshToken(refreshToken);
             }
             return ResultHelper.success("Çıkış yapıldı.");
+        } catch (RuntimeException exception) {
+            clearCookies = true;
+            throw exception;
         } finally {
-            cookieUtil.clearTokenCookies(response);
+            if (clearCookies) {
+                cookieUtil.clearTokenCookies(response);
+            }
         }
     }
 

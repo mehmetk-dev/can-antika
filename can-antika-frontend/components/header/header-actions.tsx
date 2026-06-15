@@ -12,7 +12,7 @@ interface HeaderActionsProps {
     userName?: string
     cartCount: number
     wishlistCount: number
-    onLogout: () => void
+    onLogout: () => Promise<void>
 }
 
 export function HeaderActions({

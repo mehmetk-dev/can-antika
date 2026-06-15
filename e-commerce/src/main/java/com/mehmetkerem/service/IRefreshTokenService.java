@@ -18,5 +18,7 @@ public interface IRefreshTokenService {
 
     void detectReplayAndRevokeIfNeeded(String rawToken);
 
+    boolean deleteByToken(String rawToken);
+
     int deleteByUserId(Long userId);
 }

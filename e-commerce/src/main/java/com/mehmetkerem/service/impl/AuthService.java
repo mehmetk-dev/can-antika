@@ -180,21 +180,12 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
         refreshTokenService.deleteByUserId(user.getId());
     }
 
-    @Override
-    public void logout(Long userId) {
-        refreshTokenService.deleteByUserId(userId);
-    }
-
     @Transactional
     @Override
-    public void logoutByRefreshToken(String refreshToken) {
+    public boolean logoutByRefreshToken(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
-            return;
+            return false;
         }
-
-        refreshTokenService.findByToken(refreshToken)
-                .map(RefreshToken::getUser)
-                .map(User::getId)
-                .ifPresent(refreshTokenService::deleteByUserId);
+        return refreshTokenService.deleteByToken(refreshToken);
     }
 }

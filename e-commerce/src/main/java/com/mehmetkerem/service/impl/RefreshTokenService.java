@@ -111,6 +111,15 @@ public class RefreshTokenService implements IRefreshTokenService {
 
     @Override
     @Transactional
+    public boolean deleteByToken(String rawToken) {
+        if (rawToken == null || rawToken.isBlank()) {
+            return false;
+        }
+        return refreshTokenRepository.deleteByTokenHash(TokenHashing.sha256(rawToken)) > 0;
+    }
+
+    @Override
+    @Transactional
     public int deleteByUserId(Long userId) {
         return refreshTokenRepository.deleteByUser(userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Kullanici bulunamadi: " + userId)));

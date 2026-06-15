@@ -118,6 +118,36 @@ class CsrfIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void staleLogoutMustNotInvalidateNewLoginSession() throws Exception {
+        String email = "stale-logout@test.com";
+        createUser(email, "password123");
+        MvcResult oldLogin = login(email, "password123");
+        Cookie oldAccessCookie = requiredCookie(oldLogin, CookieUtil.ACCESS_TOKEN_COOKIE);
+        Cookie oldRefreshCookie = requiredCookie(oldLogin, CookieUtil.REFRESH_TOKEN_COOKIE);
+
+        MvcResult newLogin = login(email, "password123");
+        Cookie newRefreshCookie = requiredCookie(newLogin, CookieUtil.REFRESH_TOKEN_COOKIE);
+        CsrfCredentials csrf = csrfCredentials();
+
+        MvcResult staleLogout = mockMvc.perform(post("/v1/auth/logout")
+                        .cookie(oldAccessCookie, oldRefreshCookie, csrf.cookie())
+                        .header("X-XSRF-TOKEN", csrf.token()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertEquals(null, staleLogout.getResponse().getCookie(CookieUtil.ACCESS_TOKEN_COOKIE));
+        assertEquals(null, staleLogout.getResponse().getCookie(CookieUtil.REFRESH_TOKEN_COOKIE));
+        assertEquals(null, staleLogout.getResponse().getCookie("XSRF-TOKEN"));
+
+        mockMvc.perform(post("/v1/auth/refresh-token")
+                        .cookie(newRefreshCookie, csrf.cookie())
+                        .header("X-XSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk());
+    }
+
     private void createUser(String email, String password) {
         userRepository.save(User.builder()
                 .email(email)

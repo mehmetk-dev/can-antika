@@ -1,4 +1,5 @@
 const AUTH_SESSION_KEY = "can_antika_auth_session";
+export const AUTH_SESSION_INVALIDATED_EVENT = "auth-session-invalidated";
 
 function canUseStorage(): boolean {
     return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -28,5 +29,12 @@ export function clearAuthSessionFlag(): void {
         window.localStorage.removeItem(AUTH_SESSION_KEY);
     } catch {
         // ignore storage errors
+    }
+}
+
+export function invalidateAuthSession(): void {
+    clearAuthSessionFlag();
+    if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event(AUTH_SESSION_INVALIDATED_EVENT));
     }
 }

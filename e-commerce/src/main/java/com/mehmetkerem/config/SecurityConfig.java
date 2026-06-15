@@ -19,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -136,6 +137,8 @@ public class SecurityConfig {
                                         csrfTokenRepository.setCookiePath("/");
 
                                         csrf.csrfTokenRepository(csrfTokenRepository)
+                                                        .sessionAuthenticationStrategy(
+                                                                        new NullAuthenticatedSessionStrategy())
                                                         .ignoringRequestMatchers(
                                                                         "/v1/auth/login",
                                                                         "/v1/auth/register",

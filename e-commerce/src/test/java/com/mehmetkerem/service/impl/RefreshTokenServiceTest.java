@@ -141,6 +141,32 @@ class RefreshTokenServiceTest {
     }
 
     @Test
+    @DisplayName("deleteByToken - yalnızca verilen token hashini siler")
+    void deleteByToken_WhenTokenExists_ShouldDeleteExactToken() {
+        String tokenHash = TokenHashing.sha256("valid-token-123");
+        when(refreshTokenRepository.deleteByTokenHash(tokenHash)).thenReturn(1);
+
+        boolean deleted = refreshTokenService.deleteByToken("valid-token-123");
+
+        assertTrue(deleted);
+        verify(refreshTokenRepository).deleteByTokenHash(tokenHash);
+        verify(refreshTokenRepository, never()).deleteByUser(any());
+    }
+
+    @Test
+    @DisplayName("deleteByToken - eski token bulunamazsa yeni oturuma dokunmaz")
+    void deleteByToken_WhenTokenIsStale_ShouldDoNothing() {
+        String tokenHash = TokenHashing.sha256("stale-token");
+        when(refreshTokenRepository.deleteByTokenHash(tokenHash)).thenReturn(0);
+
+        boolean deleted = refreshTokenService.deleteByToken("stale-token");
+
+        assertFalse(deleted);
+        verify(refreshTokenRepository).deleteByTokenHash(tokenHash);
+        verify(refreshTokenRepository, never()).deleteByUser(any());
+    }
+
+    @Test
     @DisplayName("deleteByUserId - kullanıcı tokenları silinir")
     void deleteByUserId_WhenUserExists_ShouldDeleteTokens() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
