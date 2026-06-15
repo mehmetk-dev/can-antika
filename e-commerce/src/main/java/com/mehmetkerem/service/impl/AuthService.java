@@ -184,4 +184,17 @@ public class AuthService implements com.mehmetkerem.service.IAuthService {
     public void logout(Long userId) {
         refreshTokenService.deleteByUserId(userId);
     }
+
+    @Transactional
+    @Override
+    public void logoutByRefreshToken(String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return;
+        }
+
+        refreshTokenService.findByToken(refreshToken)
+                .map(RefreshToken::getUser)
+                .map(User::getId)
+                .ifPresent(refreshTokenService::deleteByUserId);
+    }
 }

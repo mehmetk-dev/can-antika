@@ -22,12 +22,14 @@ public interface IRestAuthController {
 
     ResultData<String> resetPassword(PasswordResetRequest request);
 
-    ResultData<String> changePassword(ChangePasswordRequest request, Authentication authentication);
+    ResultData<String> changePassword(ChangePasswordRequest request, Authentication authentication,
+            HttpServletResponse response);
 
     ResultData<UserResponse> updateProfile(ProfileUpdateRequest request,
             Authentication authentication);
 
     ResultData<UserResponse> me(Authentication authentication);
 
-    ResultData<String> logout(HttpServletResponse response, Authentication authentication);
+    ResultData<String> logout(HttpServletRequest request, HttpServletResponse response,
+            Authentication authentication);
 }

@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.security.core.Authentication;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -146,10 +147,38 @@ class RestAuthControllerTest {
         req.setOldPassword("old");
         req.setNewPassword("new");
 
-        ResultData<String> result = controller.changePassword(req, auth);
+        ResultData<String> result = controller.changePassword(req, auth, response);
 
         assertTrue(result.isStatus());
         assertTrue(result.getData().contains("güncellendi"));
         verify(authService).changePassword(eq(1L), eq("old"), eq("new"));
+        verify(cookieUtil).clearTokenCookies(response);
+    }
+
+    @Test
+    @DisplayName("logout - access token yoksa refresh cookie ile oturumu iptal eder")
+    void logout_WithoutAuthentication_ShouldRevokeRefreshToken() {
+        when(request.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(CookieUtil.REFRESH_TOKEN_COOKIE, "refresh-token")
+        });
+
+        ResultData<String> result = controller.logout(request, response, null);
+
+        assertTrue(result.isStatus());
+        verify(authService).logoutByRefreshToken("refresh-token");
+        verify(cookieUtil).clearTokenCookies(response);
+    }
+
+    @Test
+    @DisplayName("logout - servis hatasında bile tarayıcı cookie'lerini temizler")
+    void logout_WhenRevocationFails_ShouldStillClearCookies() {
+        User user = User.builder().id(1L).build();
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(user);
+        doThrow(new RuntimeException("db unavailable")).when(authService).logout(1L);
+
+        assertThrows(RuntimeException.class, () -> controller.logout(request, response, auth));
+
+        verify(cookieUtil).clearTokenCookies(response);
     }
 }

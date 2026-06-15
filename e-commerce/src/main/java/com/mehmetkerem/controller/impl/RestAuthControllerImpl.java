@@ -103,13 +103,18 @@ public class RestAuthControllerImpl implements IRestAuthController {
 
     @Override
     @PostMapping("/logout")
-    public ResultData<String> logout(HttpServletResponse response, Authentication authentication) {
-        cookieUtil.clearTokenCookies(response);
-        if (authentication != null && authentication.getPrincipal() instanceof User) {
-            User user = (User) authentication.getPrincipal();
-            authService.logout(user.getId());
+    public ResultData<String> logout(HttpServletRequest request, HttpServletResponse response,
+            Authentication authentication) {
+        try {
+            if (authentication != null && authentication.getPrincipal() instanceof User user) {
+                authService.logout(user.getId());
+            } else {
+                authService.logoutByRefreshToken(extractRefreshTokenFromCookie(request));
+            }
+            return ResultHelper.success("Çıkış yapıldı.");
+        } finally {
+            cookieUtil.clearTokenCookies(response);
         }
-        return ResultHelper.success("Çıkış yapıldı.");
     }
 
     @Override
@@ -129,9 +134,10 @@ public class RestAuthControllerImpl implements IRestAuthController {
     @Override
     @PostMapping("/change-password")
     public ResultData<String> changePassword(@RequestBody @Valid ChangePasswordRequest request,
-            Authentication authentication) {
+            Authentication authentication, HttpServletResponse response) {
         User user = (User) authentication.getPrincipal();
         authService.changePassword(user.getId(), request.getOldPassword(), request.getNewPassword());
+        cookieUtil.clearTokenCookies(response);
         return ResultHelper.success("Şifreniz güncellendi.");
     }
 

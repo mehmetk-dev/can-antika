@@ -22,4 +22,6 @@ public interface IAuthService {
     void changePassword(Long userId, String oldPassword, String newPassword);
 
     void logout(Long userId);
+
+    void logoutByRefreshToken(String refreshToken);
 }

@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,7 +24,8 @@ function getProfileFormData(user: UserResponse | null) {
 }
 
 export default function DashboardPage() {
-  const { user, refreshUser } = useAuth()
+  const router = useRouter()
+  const { user, refreshUser, changePassword } = useAuth()
   const [formData, setFormData] = useState(() => getProfileFormData(user))
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -80,12 +82,13 @@ export default function DashboardPage() {
     }
     setIsChangingPassword(true)
     try {
-      await authApi.changePassword({
+      await changePassword({
         oldPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       })
-      toast.success("Şifre güncellendi")
+      toast.success("Şifre güncellendi. Lütfen yeniden giriş yapın.")
       setPasswordData({ currentPassword: "", newPassword: "", confirmNewPassword: "" })
+      router.replace("/giris")
     } catch {
       toast.error("Şifre güncellenemedi")
     } finally {

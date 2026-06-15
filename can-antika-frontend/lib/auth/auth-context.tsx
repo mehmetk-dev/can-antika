@@ -8,7 +8,7 @@ import {
     useCallback,
     type ReactNode,
 } from "react";
-import type { UserResponse, LoginRequest, RegisterRequest } from "../types";
+import type { UserResponse, LoginRequest, RegisterRequest, ChangePasswordRequest } from "../types";
 import { authApi, cartApi } from "../api";
 import { guestCart } from "../commerce/guest-cart";
 import { clearAuthSessionFlag, hasAuthSessionFlag, markAuthSessionActive } from "./auth-session";
@@ -21,6 +21,7 @@ interface AuthContextType {
     isLoading: boolean;
     login: (data: LoginRequest) => Promise<UserResponse>;
     register: (data: RegisterRequest) => Promise<void>;
+    changePassword: (data: ChangePasswordRequest) => Promise<void>;
     logout: () => void;
     refreshUser: () => Promise<UserResponse | null>;
 }
@@ -93,14 +94,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await authApi.register(data);
     }, []);
 
-    const logout = useCallback(() => {
-        authApi.logout().catch(() => {
-            // Backend logout başarısız olsa bile local cleanup devam eder
-        });
+    const clearLocalSession = useCallback(() => {
         clearAuthSessionFlag();
         setUser(null);
         guestCart.clear();
     }, []);
+
+    const logout = useCallback(() => {
+        void authApi.logout().catch(() => {
+            // Backend logout başarısız olsa bile local cleanup devam eder
+        });
+        clearLocalSession();
+    }, [clearLocalSession]);
+
+    const changePassword = useCallback(async (data: ChangePasswordRequest) => {
+        await authApi.changePassword(data);
+        clearLocalSession();
+    }, [clearLocalSession]);
 
     const refreshUser = useCallback(async () => {
         try {
@@ -132,6 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         login,
         register,
+        changePassword,
         logout,
         refreshUser,
     };

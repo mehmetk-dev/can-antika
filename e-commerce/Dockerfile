@@ -14,6 +14,8 @@ RUN addgroup --system --gid 1001 appgroup && \
 
 COPY --from=build --chown=appuser:appgroup /app/target/*.jar app.jar
 
+RUN mkdir -p /app/logs && chown appuser:appgroup /app/logs
+
 USER appuser
 EXPOSE 8080
 
